@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GAEB xmlns="http://www.gaeb.de/GAEB_DA_XML/DA83/3.2"><GAEBInfo><Version>3.2</Version></GAEBInfo>
+<PrjInfo><NamePrj>H1</NamePrj><LblPrj>Hörsaal H1</LblPrj><Cur>EUR</Cur></PrjInfo>
+<Award><DP>83</DP><BoQ ID="b1"><BoQInfo><Name>LV</Name></BoQInfo><BoQBody>
+<BoQCtgy ID="c01" RNoPart="01"><LblTx><p><span>Baustelleneinrichtung und Reinigung</span></p></LblTx><BoQBody><Itemlist>
+<Item ID="i010010" RNoPart="0010"><Qty>1.000</Qty><QU>psch</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Baustelle einrichten, vorhalten und räumen</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i010020" RNoPart="0020"><Qty>304.220</Qty><QU>m²</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Bauendreinigung Hörsaal und Nebenräume</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+</Itemlist></BoQBody></BoQCtgy>
+<BoQCtgy ID="c02" RNoPart="02"><LblTx><p><span>Rohbau – Wände</span></p></LblTx><BoQBody><Itemlist>
+<Item ID="i020010" RNoPart="0010"><Qty>442.630</Qty><QU>m²</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Stahlbeton-Außenwand d = 30 cm, C30/37, inkl. Schalung, Sichtbeton SB2 innen</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i020020" RNoPart="0020"><Qty>11.950</Qty><QU>t</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Betonstahl B500B, liefern, schneiden, biegen, verlegen</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i020030" RNoPart="0030"><Qty>113.570</Qty><QU>m²</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>KS-Innenwand d = 17,5 cm, nichttragend, MG IIa</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+</Itemlist></BoQBody></BoQCtgy>
+<BoQCtgy ID="c03" RNoPart="03"><LblTx><p><span>Podest und Stufenanlage</span></p></LblTx><BoQBody><Itemlist>
+<Item ID="i030010" RNoPart="0010"><Qty>54.000</Qty><QU>m²</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Podest Hörsaal h = 0,30 m, Unterkonstruktion Systemboden, Nutzlast 5 kN/m²</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i030020" RNoPart="0020"><Qty>2.000</Qty><QU>St</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Podesttreppe 3 Stufen, Breite 1,00 m</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i030030" RNoPart="0030"><Qty>162.000</Qty><QU>m²</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Stufenanlage Gestühl aus StB-Fertigteilen, 10 Reihen, Auftritt 0,90 m, Steigung 0,15 m</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i030040" RNoPart="0040"><Qty>80.000</Qty><QU>St</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Gangstufe 15/45 cm in den Seitengängen und Mittelgängen</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i030050" RNoPart="0050"><Qty>96.000</Qty><QU>m</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Stufenkantenprofil mit Trittschutz, kontrastierend/nachleuchtend</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+</Itemlist></BoQBody></BoQCtgy>
+<BoQCtgy ID="c04" RNoPart="04"><LblTx><p><span>Fenster und Türen</span></p></LblTx><BoQBody><Itemlist>
+<Item ID="i040010" RNoPart="0010"><Qty>5.000</Qty><QU>St</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Fensterelement Aluminium 1,76 × 2,26 m, Uw ≤ 1,1 W/m²K (F1–F4)</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i040020" RNoPart="0020"><Qty>1.000</Qty><QU>St</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Fenster 2,01 × 1,51 m (F5, Vorbereitung)</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i040040" RNoPart="0040"><Qty>4.000</Qty><QU>St</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Motorische Verdunkelung für F1–F4, in Mediensteuerung eingebunden</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i040050" RNoPart="0050"><Qty>2.000</Qty><QU>St</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Fluchttür 2-flügelig 1,76 × 2,26 m, Panikbeschlag EN 1125, Obentürschließer (T1, T2)</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i040060" RNoPart="0060"><Qty>1.000</Qty><QU>St</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Außentür Notausgang 1,26 × 2,26 m, Panikbeschlag, wärmegedämmt (T3)</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i040070" RNoPart="0070"><Qty>1.000</Qty><QU>St</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Innentür 1,01 × 2,13 m, Stahlzarge (T4, Vorbereitung)</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i040080" RNoPart="0080"><Qty>1.000</Qty><QU>St</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Innentür T30-RS 1,01 × 2,13 m, Stahlzarge (T5, Technik/Regie)</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i040090" RNoPart="0090"><Qty>1.000</Qty><QU>St</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Innentür 1,26 × 2,13 m, Stahlzarge (T6, Lager)</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+</Itemlist></BoQBody></BoQCtgy>
+<BoQCtgy ID="c05" RNoPart="05"><LblTx><p><span>Bodenarbeiten</span></p></LblTx><BoQBody><Itemlist>
+<Item ID="i050010" RNoPart="0010"><Qty>39.500</Qty><QU>m²</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Zementestrich CT-C25-F4 auf Trittschalldämmung, d = 65 mm</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i050020" RNoPart="0020"><Qty>12.720</Qty><QU>m²</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Doppelboden, Rastermaß 60 × 60 cm, Technik/Regie</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i050030" RNoPart="0030"><Qty>252.000</Qty><QU>m²</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Linoleum 2,5 mm, Hörsaal (Podest, Stufenanlage, Verkehrsflächen)</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i050040" RNoPart="0040"><Qty>17.980</Qty><QU>m²</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Linoleum 2,5 mm, Vorbereitung</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i050050" RNoPart="0050"><Qty>21.520</Qty><QU>m²</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Bodenbeschichtung Epoxidharz, Lager</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i050060" RNoPart="0060"><Qty>102.910</Qty><QU>m</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Sockelleiste</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+</Itemlist></BoQBody></BoQCtgy>
+<BoQCtgy ID="c06" RNoPart="06"><LblTx><p><span>Akustik, Decken, Maler</span></p></LblTx><BoQBody><Itemlist>
+<Item ID="i060010" RNoPart="0010"><Qty>46.040</Qty><QU>m²</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Akustik-Wandabsorber Rückwand Hörsaal, Höhe 3,00 m</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i060020" RNoPart="0020"><Qty>252.000</Qty><QU>m²</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Akustikdecke abgehängt, αw ≥ 0,90, Hörsaal</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i060030" RNoPart="0030"><Qty>52.220</Qty><QU>m²</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>GK-Decke abgehängt, Nebenräume</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i060040" RNoPart="0040"><Qty>263.240</Qty><QU>m²</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Dispersionsanstrich Wände Hörsaal, Q3</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i060050" RNoPart="0050"><Qty>144.300</Qty><QU>m²</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Dispersionsanstrich Wände Nebenräume, Q2</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i060060" RNoPart="0060"><Qty>52.220</Qty><QU>m²</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Dispersionsanstrich Decken Nebenräume</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+</Itemlist></BoQBody></BoQCtgy>
+<BoQCtgy ID="c07" RNoPart="07"><LblTx><p><span>Gestühl und Ausstattung</span></p></LblTx><BoQBody><Itemlist>
+<Item ID="i070010" RNoPart="0010"><Qty>240.000</Qty><QU>St</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Hörsaal-Klappsitz, Sitzbreite 55 cm, an Stufen befestigt, mit Reihen- und Platznummer</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i070020" RNoPart="0020"><Qty>132.000</Qty><QU>m</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Klapptischanlage durchgehend, mit Schreibfläche</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i070030" RNoPart="0030"><Qty>4.000</Qty><QU>St</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Rollstuhlplatz 0,90 × 1,30 m mit Begleitsitz, Kennzeichnung</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i070040" RNoPart="0040"><Qty>1.000</Qty><QU>St</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Schiebetafelanlage 3-teilig, Gesamtbreite 8,60 m, vertikal verschiebbar, emailliert</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i070050" RNoPart="0050"><Qty>1.000</Qty><QU>St</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Dozenten-/Medienpult, barrierefrei, höhenverstellbar</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i070060" RNoPart="0060"><Qty>1.000</Qty><QU>St</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Rednerpult</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i070070" RNoPart="0070"><Qty>1.000</Qty><QU>St</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Hochschrank Vorbereitung, L ≈ 2,20 m</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i070080" RNoPart="0080"><Qty>2.000</Qty><QU>St</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Schwerlastregal Lager</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i070090" RNoPart="0090"><Qty>1.000</Qty><QU>St</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Regietisch Ton/Licht/Aufzeichnung</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+</Itemlist></BoQBody></BoQCtgy>
+<BoQCtgy ID="c08" RNoPart="08"><LblTx><p><span>Medientechnik</span></p></LblTx><BoQBody><Itemlist>
+<Item ID="i080010" RNoPart="0010"><Qty>2.000</Qty><QU>St</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Projektionsleinwand motorisch 16:10, Breite 3,60 m</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i080020" RNoPart="0020"><Qty>2.000</Qty><QU>St</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Laserprojektor ≥ 10.000 lm WUXGA inkl. Deckenhalterung</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i080030" RNoPart="0030"><Qty>1.000</Qty><QU>St</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Dokumentenkamera</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i080040" RNoPart="0040"><Qty>4.000</Qty><QU>St</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Lautsprecher Wandmontage</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i080050" RNoPart="0050"><Qty>1.000</Qty><QU>St</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>PTZ-Kamera für Vorlesungsaufzeichnung</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i080060" RNoPart="0060"><Qty>1.000</Qty><QU>St</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Medienrack 19" inkl. Mediensteuerung und Verstärker</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i080070" RNoPart="0070"><Qty>1.000</Qty><QU>psch</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Verkabelung Medientechnik (Pult, Rack, Projektoren, Lautsprecher, Kamera)</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+</Itemlist></BoQBody></BoQCtgy>
+<BoQCtgy ID="c09" RNoPart="09"><LblTx><p><span>Elektro und Sicherheit</span></p></LblTx><BoQBody><Itemlist>
+<Item ID="i090010" RNoPart="0010"><Qty>1.000</Qty><QU>St</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Elektro-Unterverteilung</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i090020" RNoPart="0020"><Qty>3.000</Qty><QU>St</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Rettungszeichenleuchte „Notausgang“</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i090030" RNoPart="0030"><Qty>3.000</Qty><QU>St</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Feuerlöscher 6 kg Schaum inkl. Wandhalterung und Schild</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+<Item ID="i090040" RNoPart="0040"><Qty>1.000</Qty><QU>psch</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Allgemein- und Sicherheitsbeleuchtung Hörsaal</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+</Itemlist></BoQBody></BoQCtgy>
+<BoQCtgy ID="c10" RNoPart="10"><LblTx><p><span>Sanitär</span></p></LblTx><BoQBody><Itemlist>
+<Item ID="i100010" RNoPart="0010"><Qty>1.000</Qty><QU>St</QU><Description><CompleteText><OutlineText><OutlTxt><TextOutlTxt><p><span>Waschbecken inkl. Armatur und Anschlüsse</span></p></TextOutlTxt></OutlTxt></OutlineText></CompleteText></Description></Item>
+</Itemlist></BoQBody></BoQCtgy>
+</BoQBody></BoQ></Award></GAEB>

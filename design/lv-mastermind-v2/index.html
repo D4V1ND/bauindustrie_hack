@@ -1150,6 +1150,18 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 @media (max-width:900px){.st-grid{grid-template-columns:1fr}}
 .st-ok i{background:var(--ok)}
 @media (max-width:560px){.smp li{flex-direction:column;align-items:stretch}.smp-b .btn{flex:1;justify-content:center}.st-p{grid-template-columns:minmax(0,1fr) auto}.st-p>.i{display:none}}
+
+.st-plans{margin-top:20px}
+.st-note{margin:10px 0 0;max-width:720px;font-size:13px;line-height:1.5}
+.pls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:18px}
+.pl{display:flex;flex-direction:column;gap:10px;min-width:0}
+.pl-img{display:block;aspect-ratio:4/3;overflow:hidden;border:1px solid var(--line);background:#fff}
+.pl-img img{width:100%;height:100%;object-fit:contain;padding:8px;box-sizing:border-box;display:block;transition:transform .3s var(--ease)}
+.pl-img:hover img{transform:scale(1.03)}
+.pl-t{display:flex;flex-direction:column;gap:3px;min-width:0}.pl-t b{font-weight:600}.pl-t small{color:var(--ink-3);font-size:11px;line-height:1.4}
+.pl-b{display:flex;gap:8px;flex-wrap:wrap}
+@media (max-width:900px){.pls{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.pls{grid-template-columns:1fr}.pl-b .btn{flex:1;justify-content:center}}
 </style>
 </head>
 <body>
@@ -2519,6 +2531,13 @@ var SAMPLES = [
   { id: 'BSP-TIEFBAU', file: 'tiefbau-verlegung.x83', name: 'Tiefbau und Verlegung', n: 296, kind: 'Tiefbau' },
   { id: 'BSP-KURZ', file: 'kurz-lv-50.x83', name: 'Kurzes LV', n: 50, kind: 'Kurzes LV' }
 ];
+
+// Plan samples: a fictional plan with its matching LV and an LV with deliberate quantity errors (vlm test set).
+var PLAN_SAMPLES = [
+  { id: 'BSP-KINO-GRUNDRISS', name: 'Kino Saal 3 · Grundriss A-201', img: 'kino_grundriss.png', lv: 'kino-grundriss.x83', bad: 'kino-grundriss-fehler.x83', n: 26, what: 'Sitze, Türen, Lautsprecher, Bodenflächen' },
+  { id: 'BSP-KINO-DECKE', name: 'Kino Saal 3 · Deckenspiegel A-401', img: 'kino_deckenspiegel.png', lv: 'kino-deckenspiegel.x83', bad: 'kino-deckenspiegel-fehler.x83', n: 13, what: 'Leuchten, Rauchmelder, Lüftungsgitter' },
+  { id: 'BSP-HOERSAAL', name: 'Hörsaal H1 · Grundriss A-110', img: 'hoersaal_grundriss.png', lv: 'hoersaal.x83', bad: 'hoersaal-fehler.x83', n: 52, what: 'Fenster, Türen, Sitze, Ausstattung' }
+];
 function freshUp() { var c = store('lvm-copy'); return { phase: 'form', lv: null, plan: null, copy: c === null ? true : !!c, err: '' }; }
 function vStart() {
   var U = S.up || (S.up = freshUp()), off = S.apiOk === false;
@@ -2540,9 +2559,17 @@ function vStart() {
         '<div class="smp-b"><button class="btn btn-sm btn-quiet" data-act="sample" data-i="' + i + '" data-mode="copy"' + (off ? ' disabled' : '') + '>Schnelltest</button>' +
         '<button class="btn btn-sm btn-primary" data-act="sample" data-i="' + i + '" data-mode="ai"' + (off ? ' disabled' : '') + ' title="Volle Analyse mit KI, braucht API-Schlüssel im Backend">KI-Analyse</button></div></li>';
     }).join('') + '</ol></section>';
+  var plans = '<section class="card st-plans" aria-label="Beispiele mit Bauplan"><div class="card-h"><span class="mono"><b>[03]</b> Beispiele mit Bauplan</span><span class="mono faint">Fiktive Testpläne · volle Analyse mit KI und Planprüfung</span></div>' +
+    '<p class="st-note muted">Zu jedem Plan gibt es das passende LV und eine Variante, in der Mengen absichtlich nicht zum Plan passen. Die Planprüfung soll diese Abweichungen finden.</p>' +
+    '<div class="pls">' + PLAN_SAMPLES.map(function (x, i) {
+      return '<div class="pl" data-k="pl' + i + '"><a class="pl-img" href="samples/plan/' + x.img + '" target="_blank" rel="noopener" title="Plan öffnen"><img src="samples/plan/' + x.img + '" alt="' + esc(x.name) + '"></a>' +
+        '<div class="pl-t"><b>' + esc(x.name) + '</b><small class="mono">' + x.n + ' Positionen · prüft ' + esc(x.what) + '</small></div>' +
+        '<div class="pl-b"><button class="btn btn-sm btn-quiet" data-act="planSample" data-i="' + i + '" data-v="ok"' + (off ? ' disabled' : '') + '>Passendes LV</button>' +
+        '<button class="btn btn-sm btn-primary" data-act="planSample" data-i="' + i + '" data-v="bad"' + (off ? ' disabled' : '') + '>LV mit Fehlern</button></div></div>';
+    }).join('') + '</div></section>';
   return '<div class="start" data-k="start"><div class="eyebrow mono"><span class="num">[Start]</span>' + api0 + '</div>' +
     '<h1>Neues LV analysieren</h1><p class="st-lead muted">Lade ein Leistungsverzeichnis hoch. Jede Position bekommt einen Preis aus euren Alt-LVs, eine Konfidenz und eine Quelle. Ein Bauplan als Kontext prüft zusätzlich die Mengen.</p>' +
-    '<div class="st-grid">' + form + samples + '</div></div>';
+    '<div class="st-grid">' + form + samples + '</div>' + plans + '</div>';
 }
 var STARTA = {
   home: function () {
@@ -2551,6 +2578,18 @@ var STARTA = {
     if (!S.up || S.up.phase !== 'run') S.up = freshUp();
     try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
     render(); window.scrollTo({ top: 0 }); pingApi();
+  },
+  planSample: function (ds) {
+    var x = PLAN_SAMPLES[+ds.i]; if (!x) return;
+    var bad = ds.v === 'bad', lvName = bad ? x.bad : x.lv;
+    if (!S.up) S.up = freshUp();
+    S.up.err = '';
+    var get = function (f) { return fetch('samples/plan/' + f).then(function (r) { if (!r.ok) throw new Error('Beispiel ' + f + ' nicht gefunden'); return r.blob(); }); };
+    Promise.all([get(lvName), get(x.img)]).then(function (b) {
+      S.up.lv = new File([b[0]], lvName); S.up.plan = new File([b[1]], x.img, { type: 'image/png' }); S.up.copy = false;
+      S.upId = x.id + (bad ? '-FEHLER' : ''); S.upName = x.name + (bad ? ' (LV mit Fehlern)' : ''); S.upDeadline = ''; S.upIdTouched = true;
+      A.upGo();
+    }).catch(function (e) { S.up.err = e.message; render(); });
   },
   sample: function (ds) {
     var x = SAMPLES[+ds.i]; if (!x) return;
