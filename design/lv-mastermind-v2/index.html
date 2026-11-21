@@ -1330,7 +1330,6 @@ function vHeader() {
     '<div class="brand"><span class="mark" aria-hidden="true"></span><b>LV Mastermind</b><span class="crumb">/ <a href="#">Projekte</a> /</span><span>Kita Sonnenhof</span></div>' +
     '<div class="top-r">' +
       '<label class="search">' + IC.search + '<span class="sr">Positionen durchsuchen</span><input id="q-top" type="search" data-in="q" value="' + esc(S.q) + '" placeholder="Position, OZ oder Gewerk…"><span class="kbd">/</span></label>' +
-      '<div class="team" aria-label="Team: 4 Personen">' + TEAM.map(function (k) { return '<span class="av" title="' + esc(T[k].name) + '" style="background:' + T[k].color + '">' + k + '</span>'; }).join('') + '</div>' +
       '<button class="theme-btn" data-act="theme" aria-label="Farbschema wechseln"><span class="theme-icon"></span>' + (isDark() ? 'Hell' : 'Dunkel') + '</button>' +
       '<button class="bell" aria-label="Benachrichtigungen">' + IC.bell + '</button>' +
       '<button class="btn btn-primary">' + IC.plus + 'Neues Projekt</button>' +
@@ -1456,7 +1455,7 @@ function vRow(r, d) {
       '<span class="rmeta"><button class="gw" data-act="gewerk" data-v="' + esc(r.gewerk) + '" title="Nur ' + esc(r.gewerk) + ' anzeigen">' + esc(r.gewerk) + '</button>' +
       (r.gen ? '<span class="why lo">' + esc(r.why) + '</span>' : '<span class="why ' + k + '">' + IC.warn + esc(r.why) + '</span>') +
       (S.bundled[r.oz] ? '<span class="chip bundle">Bündel · ' + esc(S.bundled[r.oz]) + '</span>' : '') +
-      (n ? '<span class="why lo" title="Kommentare">' + IC.chat + n + '</span>' : '') + '</span></span>' +
+      '</span></span>' +
     '<span role="cell" class="c2" style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">' + (r.np ? '<span class="np">Kein Preis</span>' : '<span style="font-size:13px;font-weight:500">' + eur(r.ep) + '</span>') + '<span class="qty">' + qty(r.menge) + ' ' + r.einheit + '</span>' + chip + '</span>' +
     '<span role="cell" class="num c2"><span style="font-size:14px;font-weight:500">' + (r.np ? '<span class="np">–</span>' : eur(r.gp)) + '</span><span class="gpbar" title="' + fmt(r.gp / d.tot * 100, 1) + ' % des Volumens"><i style="width:' + Math.max(4, Math.round(r.gp / d.maxGp * 100)) + '%;background:' + (d.driver[r.oz] ? 'var(--signal)' : 'var(--ink-3)') + '"></i></span></span>' +
     '<span role="cell">' + (r.np ? '<button class="okbtn need" data-act="priceNow" data-oz="' + r.oz + '" aria-label="Preis für ' + r.oz + ' eingeben" title="Preis eingeben">' + IC.pen + '</button>' : r.gen ? '<span class="auto1" title="1:1 übernommen, keine Bestätigung nötig">1:1</span>' : '<button class="okbtn' + (ok ? ' is-ok' : '') + (fresh && ok ? ' fx' : '') + '" data-act="toggleOk" data-oz="' + r.oz + '" aria-pressed="' + ok + '" aria-label="' + (ok ? 'Bestätigung zurücknehmen' : 'Preis bestätigen') + '" title="' + (ok ? 'Bestätigung zurücknehmen' : 'Preis bestätigen') + '">' + IC.tickRaw + (fresh && ok && S.justOk[r.oz] === 0 ? particles('conf', 10, 34) : '') + '</button>') + '</span>' +
@@ -1632,8 +1631,7 @@ function vKontext() {
   var ctx = [
     { tag: '[K1] Dokumente', title: 'Ausschreibungsunterlagen', sub: 'Vom Bauherrn, analysiert am 21.11.2026', items: [['LV_Kita_Sonnenhof.X83', '1.284 Pos.', 'var(--signal)'], ['Grundrisse EG–2. OG (A-101–A-103)', 'PDF · 3 Blätter', 'var(--signal)'], ['Schnitte & Ansichten', 'PDF · 6 Blätter', 'var(--signal)'], ['Statik Positionsplan (S-01–S-05)', 'PDF · 5 Blätter', 'var(--signal)']] },
     { tag: '[K2] Preisbasis', title: 'Eigene Alt-LVs mit Preisen', sub: 'Nur eigene Daten, keine Internetpreise', items: [['Grundschule Trudering 2024', '2.910 Pos.', 'var(--ok)'], ['Turnhalle Pasing 2025', '1.650 Pos.', 'var(--ok)'], ['Kita Freiham 2023', '1.120 Pos.', 'var(--ok)'], ['Baupreisindex Q3/2026', '+4,2 % ggü. 2024', 'var(--warn)']] },
-    { tag: '[K3] Regeln', title: 'Kalkulationslogik', sub: 'Vom Team festgelegt, für jeden Vorschlag nachvollziehbar', items: [['Preis übernehmen bei Abweichung', '≤ ±10 %', 'var(--ink)'], ['Gleiche Texte bündeln', 'automatisch', 'var(--ink)'], ['Materialfaktor Edelstahl', '× 3,0 ggü. Stahl', 'var(--ink)'], ['Örtlicher Preis', 'Beton, Erdbau', 'var(--ink)']] },
-    { tag: '[K4] Team', title: 'Team', sub: 'Wer am Angebot mitarbeitet', items: TEAM.map(function (k) { return [T[k].name, T[k].role, T[k].color]; }) }
+    { tag: '[K3] Regeln', title: 'Kalkulationslogik', sub: 'Festgelegt, für jeden Vorschlag nachvollziehbar', items: [['Preis übernehmen bei Abweichung', '≤ ±10 %', 'var(--ink)'], ['Gleiche Texte bündeln', 'automatisch', 'var(--ink)'], ['Materialfaktor Edelstahl', '× 3,0 ggü. Stahl', 'var(--ink)'], ['Örtlicher Preis', 'Beton, Erdbau', 'var(--ink)']] }
   ];
   return '<div class="ctx">' + ctx.map(function (g, i) {
     return '<section class="card rise" style="--d:' + (i * 70) + 'ms"><div class="mono faint">' + g.tag + '</div><h2>' + g.title + '</h2><p class="muted" style="margin:0 0 12px;font-size:13px">' + g.sub + '</p>' +
@@ -1763,14 +1761,12 @@ function vDrawer(d) {
             (p.manual ? ' · <button class="lnk" data-act="resetEp">' + (noAi ? 'Preis entfernen' : 'KI-Vorschlag ' + eur(p.aiEp) + ' wiederherstellen') + '</button>' : '') + '</div>') +
         (ok ? '<div class="stamp' + (fresh ? ' fx' : '') + '" data-k="st"><span class="sq">' + IC.tickRaw + '</span><span><b>Bestätigt</b><small>' + (p.manual ? 'Eigener Preis' : 'KI-Preis') + ' · T. Berger</small></span></div>' : '') + '</div>' +
         '<div class="pconf"><span class="mono">Konfidenz</span><span class="conf-v ' + confLvl(p.conf) + '"><b>' + p.conf + ' %</b>' + confWord(p.conf) + '</span>' + cmeter(p.conf, 10) + '</div></div>' +
-        (noAi ? '<div class="why2"><div class="mono lab">Warum kein Preis</div><p>' + esc(p.why) + '. In euren Alt-LVs gibt es keine vergleichbare Position. Kalkuliere den Preis selbst oder frag über »Extern« einen Lieferanten an.</p></div></section>' :
+        (noAi ? '<div class="why2"><div class="mono lab">Warum kein Preis</div><p>' + esc(p.why) + '. In euren Alt-LVs gibt es keine vergleichbare Position. Kalkuliere den Preis selbst oder hol ein Lieferantenangebot ein.</p></div></section>' :
         '<div class="why2' + (S.whyOpen ? ' open' : '') + '"><div class="mono lab">Begründung</div><p>' + esc(C.cands[0].why) + '</p>' +
           '<div class="whymore" aria-hidden="' + !S.whyOpen + '"><div class="whyin"><div class="calc2">' + C.steps.map(function (s, j) { return '<div class="cs' + (j === C.steps.length - 1 ? ' last' : '') + '"><span>' + esc(s[0]) + '</span><span>' + esc(s[1]) + '</span></div>'; }).join('') + '</div>' +
           ((R.similar || []).length ? '<div class="refs"><span class="mono">Quellen</span>' + R.similar.map(function (x) { var e = D.extra[x[0]]; return e ? '<button class="ref" data-act="preview" data-key="' + x[0] + '">' + esc(e.proj) + '<small>' + esc(x[1]) + '</small></button>' : ''; }).join('') + '</div>' : '') +
         '</div></div><button class="whytg" data-act="whyToggle" aria-expanded="' + !!S.whyOpen + '">' + (S.whyOpen ? 'Weniger anzeigen' : 'Berechnung &amp; Quellen anzeigen') + IC.chev + '</button></div></section>') +
-      '<div class="lower"><div class="lowin">' + gwPanel + '<section class="comm" aria-label="Kommunikation"><button class="mini" data-act="aiClose" tabindex="-1"><span class="mono">Kommunikation</span><b>Team ' + cm.length + '</b><span class="muted">Extern ' + (thread.length + notes.length) + '</span></button><div class="comm-h"><span class="mono">Kommunikation</span>' +
-        '<div class="ctabs" role="tablist">' + tabs.map(function (t) { var on = dt === t[0]; return '<button role="tab" class="ctab' + (on ? ' on' : '') + '" aria-selected="' + on + '" data-act="dtab" data-v="' + t[0] + '">' + t[1] + (t[2] ? '<span class="dn">' + t[2] + '</span>' : '') + '</button>'; }).join('') + '</div></div>' +
-        '<div class="panel" data-k="p' + dt + '">' + panel + '</div></section></div></div>' +
+      '<div class="lower"><div class="lowin">' + gwPanel + '</div></div>' +
       '<div class="aiwrap"><div class="aiin"><section class="aichat" role="region" aria-label="Chat mit dem Agenten zu ' + p.oz + '">' +
       '<div class="cp-h"><span class="agent-ic">' + IC.star + '</span><span><b>Agent</b><small>' + p.oz + ' · ' + esc(p.kurz) + '</small></span><span class="cp-live"><i></i>online</span><button class="ic" data-act="aiClose" aria-label="Chat schließen">' + IC.x + '</button></div>' +
       '<div class="cp-log" data-k="cplog' + p.oz + '">' +
@@ -1780,7 +1776,7 @@ function vDrawer(d) {
         (S.thinking ? '<div class="cp-m agent" data-k="cth"><span class="agent-ic">' + IC.star + '</span><div class="bub thinking"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>' : '') +
       '</div></section></div></div>' +
     '</div></div>' +
-    '<div class="dw-cta" data-k="cta-bar">' + (devWarn && !ok && !p.gen && !noAi ? '<p class="hint" data-k="hint">' + IC.warn + '<span>Mehr als 10 % neben der Empfehlung. Gedrückt halten und kurz im Team begründen.</span></p>' : '') + cta + '</div>' +
+    '<div class="dw-cta" data-k="cta-bar">' + (devWarn && !ok && !p.gen && !noAi ? '<p class="hint" data-k="hint">' + IC.warn + '<span>Mehr als 10 % neben der Empfehlung. Gedrückt halten, um den eigenen Preis zu bestätigen.</span></p>' : '') + cta + '</div>' +
     '<footer class="ask">' +
       '<div class="askin"><span style="color:var(--signal);display:flex">' + IC.star + '</span><label style="flex:1;display:flex"><span class="sr">Frage an den Agenten</span><input data-in="draft" data-enter="sendDraft" value="' + esc(S.draft) + '" placeholder="Agent fragen zu ' + p.oz + '…"></label><button class="send" data-act="sendDraft" aria-label="Senden">' + IC.arrow + '</button></div></footer>' +
   '</aside>';
