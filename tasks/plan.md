@@ -3,8 +3,8 @@
 Covers extraction (step 0), exact match (step 1), trades and item types (step 2) and the price lookup with evidence
 (step 3) from [SPEC.md](../SPEC.md). The tasks with acceptance criteria are in [todo.md](todo.md).
 
-**Order changed:** step 3 (tasks 8–11) is built before step 2 (tasks 6 and 7), because it does not need trades or
-item types. Its plan is the section "Step 3" at the end of this file.
+**Order changed:** step 3 (tasks 8–11) was built before step 2 (tasks 6 and 7), because it does not need trades or
+item types. Its plan is the section "Step 3" at the end of this file. All tasks 1–11 are built now.
 
 ## What exists after this plan
 

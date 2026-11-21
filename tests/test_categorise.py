@@ -71,11 +71,13 @@ def test_the_model_reads_sections_short_texts_and_the_cap_and_never_a_price():
 
 def test_the_list_is_cleaned_in_code_whatever_the_model_answers():
     asked = FakeProposer(a_type(" Flansch "), a_type("flansch"), a_type("Zulage Flansch"), a_type("Sonstiges"),
-                         a_type(""), a_type("Rohr", "Rohrleitungsbau"), a_type("Schieber", "Armaturen"))
+                         a_type(""), a_type("Rohr", "Rohrleitungsbau"), a_type("Erschwerniszulage Tiefbau", "Erdarbeiten"),
+                         a_type("Schieber", "Armaturen"), a_type("Zuschlagstoff", "Betonarbeiten"))
 
     types = propose(lv(item("P4/1", "Flansch DN 150")), asked)
 
-    assert [(t.name, t.trade) for t in types] == [("Flansch", "Rohrleitungsbau"), ("Rohr", "Rohrleitungsbau"), ("Schieber", "Armaturen")]
+    assert [(t.name, t.trade) for t in types] == [("Flansch", "Rohrleitungsbau"), ("Rohr", "Rohrleitungsbau"),
+                                                  ("Schieber", "Armaturen"), ("Zuschlagstoff", "Betonarbeiten")]
     assert all(t.description for t in types)
 
 

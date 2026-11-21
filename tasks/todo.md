@@ -78,9 +78,10 @@ Test command for every task: `.venv\Scripts\python.exe -m pytest`
     to that (open question 2).
   - Built without a key: only the judge model (`claude-sonnet-5-5`) is set up, because tasks 6 and 7 are not built
     yet. Answers are not saved between runs (open question 2 is still open).
-  - **Still to do by you:** put the key into `.env`, then run `.venv\Scripts\python.exe -m lv.ai` (one real call).
+  - Real call checked on 2026-11-21 with the key in `.env`: `.venv\Scripts\python.exe -m lv.ai` returned the answer
+    in the requested shape.
   - Acceptance:
-    - One real call returns an answer in the requested shape. (not checked yet: no key)
+    - One real call returns an answer in the requested shape.
     - A missing key stops the program with a message that says what to do.
     - No `temperature` is sent, and structured output uses the native method, checked against the current docs.
   - Verify: run the one-call check by hand; tests for the no-key message pass.
@@ -106,6 +107,13 @@ Test command for every task: `.venv\Scripts\python.exe -m pytest`
     `Sonstiges`. Step 3 on the same run: 2 `similar`, 13 `reference`, 35 `none` (library: P1 and P2).
   - Items go to `claude-haiku-5-5` 25 per call. The overview counts normal items only; optional items are named
     in one line below it. With `--copy-only` step 2 is skipped as well.
+  - Real run on P4 (once, 219 calls, no failed call): 296 items -> 73 item types -> 16 trades, no item outside the
+    list, none forced to `Sonstiges`. The 24 optional items are all hourly rates. Step 3 on the same run: 1 `copied`
+    (32.74), 1 `similar` (an optional hourly rate, so not in the total), 0 `adjusted`, 69 `reference`, 225 `none`.
+  - Seen in that run and fixed afterwards: the model proposed a type "Erschwerniszulage Tiefbau" (7 items). A type
+    with "zulage" anywhere in its name is now dropped. `data/out/P4.json` is from before this fix.
+  - Seen on P5 and not changed: the judge called P1's site-setup lump sum the `same` item as P5's (5,700.00). A lump
+    sum depends on the project; the judging rules have no rule for that yet.
   - Does: assigns every item of the new LV one type from the list, in batches, writes `item_type` and `trade` into the
     result file, and makes `lv price` print the overview: trade → item type → quantities per unit.
   - Acceptance:
@@ -117,10 +125,10 @@ Test command for every task: `.venv\Scripts\python.exe -m pytest`
   - Files: `lv/categorise.py`, `lv/__main__.py`, `tests/test_categorise.py`.
 
 ### Checkpoint: steps 0–2 complete
-- [ ] All tests pass.
-- [ ] `lv price` runs on P4 and P5 end to end.
+- [x] All tests pass.
+- [x] `lv price` runs on P4 and P5 end to end.
 - [ ] You have read the printed overview for P5.
-- [ ] Nothing is committed until you say so.
+- [x] Committed locally after each task, as you asked for this build. Nothing is pushed.
 
 ## Phase 4: price lookup with evidence (step 3)
 
@@ -174,7 +182,7 @@ Built before tasks 6 and 7: step 3 does not need trades or item types.
   - Files: `lv/predict.py`, `lv/ai.py`, `tests/test_predict.py`.
 
 - [x] **Task 11: `lv price` with the judge** (small)
-  - Built and tested with a fake judge. The planned real run on P5 is still yours (last acceptance point).
+  - Built and tested with a fake judge. Real runs on P5 and P4 are done: numbers under task 7.
   - Found while building: once `.env` held a key, one test that ran `lv price` reached the real judge (2 test runs,
     28 calls each, P5 against P2). `tests/conftest.py` now hides the key from every test.
   - Items that would go to the judge with P1 and P2 in the library: 32 of 50 for P5, 206 of 296 for P4.
@@ -183,18 +191,18 @@ Built before tasks 6 and 7: step 3 does not need trades or item types.
     - A missing API key stops the command with a message that says what to do, and only when at least one item
       has candidates. With `--copy-only`, or when nothing needs judging, no key is needed.
     - The command prints the number of items per method and the total, and writes `data/out/<project>.json`.
-    - One real run on P5 returns verdicts in the fixed shape. (needs the API key: to be run by you)
+    - One real run on P5 returns verdicts in the fixed shape.
   - Verify: tests pass; with the key in `.env`, run `lv price` on P5 and read the result file.
   - Depends on: 10.
   - Files: `lv/__main__.py`, `tests/test_predict.py`.
 
 ### Checkpoint: step 3
-- [ ] All tests pass without network and without a key.
-- [ ] `lv price --copy-only` on P2's own `.X83` copies only correct prices.
-- [ ] You have put the key into `.env`, run `.venv\Scripts\python.exe -m lv.ai` and `lv price` on P5, and read the result.
+- [x] All tests pass without network and without a key.
+- [x] `lv price --copy-only` on P2's own `.X83` copies only correct prices.
+- [x] The key is in `.env`; `.venv\Scripts\python.exe -m lv.ai` and `lv price` on P5 and P4 were run.
+- [ ] You have read `data/out/P5.json` and `data/out/P4.json`.
 
 ## Waiting
 
-- [ ] **Tasks 6 and 7** (trades and item types).
 - [ ] **P3 in the price library.** Prices are read from the `.D84`; the texts sit in PDFs.
 - [ ] **`lv check --hide <project>`**: the accuracy check as a command.

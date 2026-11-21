@@ -1,7 +1,7 @@
 # Spec: LV estimating backend, steps 0–3
 
-Status: steps 0, 1 and 3 are built. Step 2 is not built. Step 3's judge has not been checked with a planned real
-run yet (see `tasks/todo.md`, task 11). Terms in **bold** are defined in [CONTEXT.md](CONTEXT.md).
+Status: steps 0 to 3 are built and were run once with real AI calls on P5 and on P4 (numbers in `tasks/todo.md`).
+Not built: P3 in the price library, `lv check`. Terms in **bold** are defined in [CONTEXT.md](CONTEXT.md).
 
 ## Objective
 
@@ -102,14 +102,24 @@ the price library (for copying a price).
 
 Three levels above the line item: **trade** → **item type** → **group**.
 
-1. **Propose the list.** One AI call reads all short texts and section titles of the LV and returns the list of
-   item types, each with exactly one trade from a fixed trade list. Cap: about one type per four items, at most 100.
-2. **Assign.** AI gives every item exactly one item type from that list, or `Sonstiges` if none fits.
+1. **Propose the list.** One AI call (`claude-opus-5-5`) reads the section titles, short texts and the first 200
+   characters of each long text of the LV. It returns the list of item types, each with a one-line description and
+   exactly one trade from the fixed trade list (17 stand-in names, `TRADES` in `lv/categorise.py`). Cap: about one
+   type per four items, never below 20 and never above 100. Code removes double names, a type named after
+   surcharges, a catch-all type and everything over the cap.
+2. **Assign.** AI (`claude-haiku-5-5`, 25 items per call) gives every item exactly one item type from that list,
+   or `Sonstiges` if none fits. Code checks every answer against the list. An answer outside the list, or a missing
+   one, is asked again once; what is left then becomes `Sonstiges`.
 
-Rules: surcharge items ("Zulage …") get the type of the thing they are a surcharge for. Types are for the overview,
-not for prices. Quantities add up per unit and are never added across units.
+Rules: surcharge items ("Zulage …") get the type of the thing they are a surcharge for. A repeat item is sent
+together with the text of the item it refers to. Types are for the overview, not for prices. Quantities add up
+per unit and are never added across units. The AI sees no price in this step either.
 
-Each item gains `item_type` and `trade`.
+Each item gains `item_type` and `trade` (`Sonstiges` has the trade `Sonstiges`). The result file gains
+`item_types`: the LV's list with `name`, `trade` and `description`.
+
+`lv price` prints the overview: trade → item type → number of items and quantities per unit. It counts normal
+items only and names the number of optional items below. With `--copy-only` step 2 is skipped.
 
 ## Step 3: price lookup with evidence
 
@@ -185,8 +195,9 @@ The result file `data/out/<project>.json` also holds a `summary`: per method the
 `median × quantity`, and the project `total`. Sums count only **normal items** whose method is `copied`, `similar`
 or `adjusted`. `lv price` prints the same numbers.
 
-`lv price … --copy-only` stops after check 1: no search, no AI call, no API key needed. Without that option a
-missing API key stops the command with a message that says what to do, and only if at least one item has candidates.
+`lv price … --copy-only` stops after check 1: no item types, no search, no AI call, no API key needed. Without
+that option a missing API key stops the command with a message that says what to do, before anything is written.
+The judge itself is only called if at least one item has candidates.
 
 ### What step 3 hands to step 4
 
@@ -209,8 +220,8 @@ Step 3 records facts and contains no thresholds. Step 4 will read `method`, `min
 - AI: Claude API through `langchain-anthropic`, used thinly: chat model, structured output, `.batch()` with a
   concurrency limit. No agents, chains, vector stores or LangGraph.
   - `claude-sonnet-5-5` for the step 3 judge: the variant that was measured.
-  - Step 2 (not built yet): `claude-haiku-5-5` to assign item types, `claude-opus-5-5` for the two one-off calls
-    (propose the item type list, read PDF texts).
+  - `claude-opus-5-5` for the one call per LV that proposes the item type list, `claude-haiku-5-5` to assign
+    item types. Reading PDF texts (P3) is not built yet.
   - Model names live in one settings place. No `temperature` parameter; structured output through the native
     JSON-schema method, not forced tool calls. Check both against the current `langchain-anthropic` docs when building.
 - `pydantic` for the data shapes, `python-dotenv` for the API key, `pytest` for tests.
@@ -221,7 +232,7 @@ Step 3 records facts and contains no thresholds. Step 4 will read `method`, `min
 .venv\Scripts\python.exe -m pip install -r requirements.txt
 .venv\Scripts\python.exe -m lv ingest "<priced LV file>" --project P2     # flow A
 .venv\Scripts\python.exe -m lv price "<new LV file>" --project P4         # flow B
-.venv\Scripts\python.exe -m lv price "<new LV file>" --project P4 --copy-only   # exact matches only, no AI
+.venv\Scripts\python.exe -m lv price "<new LV file>" --project P4 --copy-only   # steps 0 and 1 and exact matches only, no AI
 .venv\Scripts\python.exe -m lv.ai                                         # one real AI call, to check the key
 .venv\Scripts\python.exe -m lv check --hide P2                            # accuracy check (not built yet)
 .venv\Scripts\python.exe -m pytest
@@ -235,7 +246,7 @@ lv/
   model.py        line item, prediction and file shapes
   extract.py      step 0: one reader per format
   match.py        step 1 group label; step 3 candidate search
-  categorise.py   step 2 (not built yet)
+  categorise.py   step 2: trade list, item type list, assignment, overview
   predict.py      step 3: judge input, verdicts to prediction, interpolation, statistics, totals
   ai.py           model setup, API key and prompts
 tests/            one small test file per module
@@ -286,8 +297,10 @@ Step 1
 - Two items that differ in one character of meaning (e.g. DN 150 vs DN 200) never share a label.
 
 Step 2
-- Every item of the new LV has exactly one item type from the LV's list, and every type exactly one trade.
+- Every item of the new LV has exactly one item type from the LV's list or `Sonstiges`, and every type exactly one
+  trade from the fixed list.
 - P1 comes out at 40 item types or fewer.
+- The overview never adds quantities across units.
 
 Step 3
 - Every prediction with a method other than `none` has at least one source, and every source `id` exists in the library.

@@ -24,7 +24,9 @@ OTHER = "Sonstiges"  # the item type, and its trade, for an item that fits no ty
 BATCH = 25  # items per assignment call
 MIN_CAP, MAX_CAP = 20, 100  # a small LV may still have 20 types: with 13, P5 lost its hourly-rate items to "Sonstiges"
 
-_SURCHARGE_NAME = re.compile(r"(Zulage|Zuschlag|Mehrpreis|Aufpreis|Mehrkosten)", re.I)
+# A type named after surcharges: starts with a surcharge word, or has "zulage" inside ("Erschwerniszulage").
+# A longer word that only starts like one is left alone: "Zuschlagstoff" is aggregate for concrete.
+_SURCHARGE_NAME = re.compile(r"(Zulage|Zuschlag|Zuschläge|Mehrpreis|Aufpreis|Mehrkosten)\b|.*zulage", re.I)
 
 
 class ProposedType(BaseModel):
