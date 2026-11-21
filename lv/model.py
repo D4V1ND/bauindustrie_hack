@@ -27,6 +27,7 @@ class Prediction(BaseModel):
     calculation: str | None = None
     result: float | None = None
     reason: str = ""
+    judged_item: str | None = None  # set on a copy: the identical item of this LV that was searched and judged
 
 
 class MethodSum(BaseModel):

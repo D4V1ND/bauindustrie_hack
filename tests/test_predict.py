@@ -9,7 +9,7 @@ from lv.ai import JUDGE_RULES
 from lv.categorise import Assigned, Assignments, Proposal, ProposedType
 from lv.extract import read
 from lv.model import LV, LineItem, load
-from lv.predict import Judged, Verdicts, predict
+from lv.predict import MAX_PACK, NO_ANSWER, JudgeAnswer, Judged, Verdicts, predict
 
 RAW = Path(__file__).resolve().parent.parent / "data" / "raw" / "Challenge A Dataset"
 P2_PRICED, P2_NEW, P5_NEW = "StBALV23040.D86", "[NUMMER_001]_leer.X83", "GAEB-[PROJEKT_004].X83"
@@ -99,15 +99,45 @@ def test_an_item_without_a_quantity_adds_nothing():
 
 # --- the judge: replaced by a fake that answers with fixed verdicts ------------------------------------------
 
+def blocks_in(question: str) -> list[tuple[str, list[str]]]:
+    """The items a question asks about: (item id, ids of its candidates), in the order of the question."""
+    blocks = []
+    for line in question.splitlines():
+        if line.startswith("### "):
+            blocks.append((line.split()[1], []))
+        elif line.startswith("- "):
+            blocks[-1][1].append(line[2:].split(": ")[0])
+    return blocks
+
+
 class FakeJudge:
-    """Answers every item with the same verdicts and keeps what it was sent."""
+    """Answers every item with the same verdicts and keeps the questions it was sent."""
 
     def __init__(self, *judged: Judged, reason: str = "The judge's sentence."):
         self.judged, self.reason, self.sent = list(judged), reason, []
 
-    def __call__(self, blocks: list[str]) -> list[Verdicts | None]:
-        self.sent += blocks
-        return [Verdicts(id="?", judged=self.judged, reason=self.reason) for _ in blocks]
+    def __call__(self, questions: list[str]) -> list[JudgeAnswer | None]:
+        self.sent += questions
+        return [JudgeAnswer(items=[Verdicts(id=id, judged=self.judged, reason=self.reason) for id, _ in blocks_in(q)])
+                for q in questions]
+
+
+class RuleJudge:
+    """Answers each item by a rule: rule(item id, ids of its candidates, number of earlier calls) gives the verdicts,
+    or None to leave the item out of the answer. Keeps the questions of every call."""
+
+    def __init__(self, rule):
+        self.rule, self.calls = rule, []
+
+    def __call__(self, questions: list[str]) -> list[JudgeAnswer | None]:
+        earlier = len(self.calls)
+        self.calls.append(questions)
+        answers = []
+        for question in questions:
+            judged = [(id, self.rule(id, cands, earlier)) for id, cands in blocks_in(question)]
+            answers.append(JudgeAnswer(items=[Verdicts(id=id, judged=verdicts, reason=f"Reason for {id}.")
+                                              for id, verdicts in judged if verdicts is not None]))
+        return answers
 
 
 def said(cand: str, verdict: str, cand_size: float | None = None, target_size: float | None = None,
@@ -293,6 +323,160 @@ def test_every_source_is_a_real_item_of_the_price_library():
     assert all(i.prediction.sources for i in new.items if i.prediction.method != "none")
 
 
+# --- one search and one judgement per set of identical items -----------------------------------------------------
+
+def test_identical_items_are_judged_once_and_all_carry_the_result_and_the_item_that_was_judged():
+    new = lv("P4", item("P4/1", "Flansch DN 125, PN 10", "Glatter Flansch, Edelstahl", quantity=2.0),
+             item("P4/2", "Bauzaun", "Mobilzaun umsetzen"),
+             item("P4/3", "FLANSCH DN 125, PN 10", "Glatter Flansch,  Edelstahl", quantity=5.0),
+             item("P4/4", "Bauzaun", "Mobilzaun umsetzen"))
+    judge = FakeJudge(said("P1/100", "same", difference="wording"))
+
+    predict(new, flanges(), judge=judge)
+
+    first, fence, twin, second_fence = (i.prediction for i in new.items)
+    assert [id for q in judge.sent for id, _ in blocks_in(q)] == ["P4/1"]  # asked about once
+    assert (first.method, first.median, first.judged_item) == ("similar", 80.0, None)
+    assert (twin.method, twin.median, twin.judged_item) == ("similar", 80.0, "P4/1")
+    assert twin.sources == first.sources and twin.reason == first.reason and twin is not first
+    assert (fence.method, fence.judged_item, second_fence.method, second_fence.judged_item) == ("none", None, "none", "P4/2")
+    assert new.summary.total == 80.0 * 2 + 80.0 * 5  # each item counts with its own quantity
+
+
+def test_two_repeat_items_with_the_same_words_after_different_items_are_judged_separately():
+    new = lv("P4", item("P4/1", "Flansch DN 100, PN 16", "Glatter Flansch, Edelstahl"), item("P4/2", "Ausführung", "wie vor, jedoch DN 125"),
+             item("P4/3", "Blindflansch DN 100", "Edelstahl, PN 10"), item("P4/4", "Ausführung", "wie vor, jedoch DN 125"))
+    judge = FakeJudge(said("P1/100", "type_only"))
+
+    predict(new, flanges(), judge=judge)
+
+    assert [id for q in judge.sent for id, _ in blocks_in(q)] == ["P4/1", "P4/2", "P4/3", "P4/4"]
+    assert all(i.prediction.judged_item is None for i in new.items)
+
+
+# --- packs: one judge call per item type -------------------------------------------------------------------------
+
+def typed(*sizes: int, item_type: str = "Flansch", **more) -> list[LineItem]:
+    """New flanges that step 2 sorted under one item type. Each finds the four library flanges as candidates."""
+    return [item(f"P4/{dn}", f"Flansch DN {dn}, PN 10", "Glatter Flansch, Edelstahl", item_type=item_type,
+                 trade="Rohrleitungsbau", **more) for dn in sizes]
+
+
+def all_different(id: str, cands: list[str], earlier_calls: int) -> list[Judged]:
+    return [said(cand, "different") for cand in cands]
+
+
+def test_items_go_to_the_judge_in_packs_by_item_type_of_at_most_15():
+    new = lv("P4", *typed(*range(301, 311)), *typed(401, 402, 403, item_type="Blindflansch"), *typed(*range(311, 321)),
+             item("P4/rohr", "Rohr DN 125", "Edelstahlrohr", unit="m"))  # an item step 2 gave no type
+    judge = RuleJudge(all_different)
+
+    predict(new, flanges(), judge=judge)
+
+    packs = sorted((q.splitlines()[0], [id for id, _ in blocks_in(q)]) for q in judge.calls[0])
+    assert len(judge.calls) == 1 and MAX_PACK == 15
+    assert packs == [
+        ("### P4/rohr | unit m | qty 1", ["P4/rohr"]),  # no item type: asked on its own, as before
+        ('HINT: the 15 new items below were sorted under "Flansch" (trade: Rohrleitungsbau) by an earlier step. '
+         "Decide by the texts only.", [f"P4/{dn}" for dn in range(301, 316)]),  # file order inside the pack
+        ('HINT: the 3 new items below were sorted under "Blindflansch" (trade: Rohrleitungsbau) by an earlier step. '
+         "Decide by the texts only.", ["P4/401", "P4/402", "P4/403"]),
+        ('HINT: the 5 new items below were sorted under "Flansch" (trade: Rohrleitungsbau) by an earlier step. '
+         "Decide by the texts only.", [f"P4/{dn}" for dn in range(316, 321)]),
+    ]
+    assert all(q.count("HINT:") == (0 if q.startswith("###") else 1) for q in judge.calls[0])
+    assert all(i.prediction.method == "none" and i.prediction.reason.startswith("Reason for") for i in new.items)
+
+
+def test_a_pack_holds_each_item_in_the_same_form_as_a_single_question():
+    new = lv("P4", *typed(125, 160))
+    judge, single = RuleJudge(all_different), FakeJudge()
+
+    predict(new, flanges(), judge=judge)
+    predict(lv("P4", *typed(125, 160)), flanges(), judge=single, packed=False)
+
+    assert judge.calls[0][0].split("\n\n") == [judge.calls[0][0].splitlines()[0], *single.sent]
+    assert len(single.sent) == 2 and not any("HINT" in q for q in single.sent)  # packing can be switched off
+
+
+def test_an_item_missing_from_a_pack_answer_is_asked_again_on_its_own():
+    new = lv("P4", *typed(125, 160, 180))
+
+    def rule(id, cands, earlier_calls):
+        if id == "P4/160" and earlier_calls == 0:
+            return None  # left out of the pack answer
+        return [said(cand, "same" if cand == "P1/150" and id == "P4/160" else "different") for cand in cands]
+
+    judge = RuleJudge(rule)
+    predict(new, flanges(), judge=judge)
+
+    assert [len(call) for call in judge.calls] == [1, 1]
+    assert judge.calls[1][0].startswith("### P4/160 | unit St") and "HINT" not in judge.calls[1][0]
+    assert [i.prediction.method for i in new.items] == ["none", "similar", "none"]
+    assert new.items[1].prediction.median == 120.0
+
+
+@pytest.mark.parametrize("bad_answer", [
+    lambda cands: [said(cand, "different") for cand in cands] + [said("P1/rohr", "same")],  # another item's candidate
+    lambda cands: [said(cand, "different") for cand in cands[1:]],                          # one candidate missing
+    lambda cands: [said(cand, "different") for cand in cands] + [said(cands[0], "same")],   # a candidate twice
+    lambda cands: [said(cand, "different") for cand in cands] + [said("P9/404", "same")],   # an invented id
+])
+def test_a_pack_answer_that_does_not_fit_the_items_own_candidates_is_rejected_and_asked_again(bad_answer):
+    new = lv("P4", *typed(125), item("P4/rohr", "Rohr DN 100", "Edelstahlrohr geschweisst", unit="m",
+                                     item_type="Flansch", trade="Rohrleitungsbau"))
+
+    def rule(id, cands, earlier_calls):
+        if id == "P4/rohr":
+            return [said(cand, "same") for cand in cands]
+        return bad_answer(cands) if earlier_calls == 0 else [said(cand, "type_only") for cand in cands]
+
+    judge = RuleJudge(rule)
+    predict(new, flanges(), judge=judge)
+
+    flange, pipe = (i.prediction for i in new.items)
+    assert [[id for q in call for id, _ in blocks_in(q)] for call in judge.calls] == [["P4/125", "P4/rohr"], ["P4/125"]]
+    assert flange.method == "reference" and {s.id for s in flange.sources} == {"P1/50", "P1/100", "P1/150", "P1/200"}
+    assert (pipe.method, [s.id for s in pipe.sources]) == ("similar", ["P1/rohr"])  # the good part of the answer is kept
+
+
+def test_what_still_fails_after_the_single_question_counts_as_unanswered():
+    def leave_out_125(id, cands, earlier_calls):
+        return None if id == "P4/125" else [said(cand, "different") for cand in cands]
+
+    new = lv("P4", *typed(125, 160))
+    predict(new, flanges(), judge=RuleJudge(leave_out_125))
+    assert [i.prediction.reason for i in new.items] == [NO_ANSWER, "Reason for P4/160."]
+
+    calls = []
+
+    def judge(questions):  # the pack call fails as a whole, and then every single question fails too
+        calls.append(len(questions))
+        if len(calls) == 1:
+            return [None for _ in questions]
+        raise RuntimeError("Every call to the judge failed.")
+
+    new = lv("P4", *typed(125, 160))
+    predict(new, flanges(), judge=judge)
+    assert calls == [1, 2] and [i.prediction.reason for i in new.items] == [NO_ANSWER, NO_ANSWER]
+
+
+def test_without_item_types_every_item_is_asked_on_its_own_as_before():
+    new = lv("P4", *[item(f"P4/{dn}", f"Flansch DN {dn}, PN 10", "Glatter Flansch, Edelstahl") for dn in (125, 160, 180)])
+    judge = FakeJudge(said("P1/100", "type_only"), said("P9/404", "same"))  # an invented id is ignored, as before
+
+    predict(new, flanges(), judge=judge)
+
+    assert len(judge.sent) == 3 and all(q.startswith("### P4/") and len(blocks_in(q)) == 1 for q in judge.sent)
+    assert all(i.prediction.method == "reference" for i in new.items)
+
+
+def test_the_rules_say_that_the_hint_line_is_only_a_hint():
+    before_the_reading_rules = JUDGE_RULES.split("# How to read the texts")[0]
+
+    assert "HINT" in before_the_reading_rules and "only a hint" in before_the_reading_rules
+
+
 # --- measured on the real files: P2's tender file priced from P2's own priced file ----------------------------
 
 def test_p2_priced_from_itself_copies_only_correct_prices():
@@ -350,15 +534,16 @@ def test_price_command_asks_the_judge_and_writes_what_code_made_of_the_verdicts(
     asked = []
 
     def fake_ask(model, system, questions, shape, effort):
-        if shape is not Verdicts:
+        if shape is not JudgeAnswer:
             return fake_step_2(model, system, questions, shape, effort)
-        asked.append((model, effort, system, shape))
+        asked.append((model, effort, system, shape, len(questions)))
         answers = []
-        for block in questions:  # the first candidate of every item is "the same", the others are "different"
-            cands = [line[2:].split(": ")[0] for line in block.splitlines() if line.startswith("- ")]
-            answers.append(Verdicts(id=block.split()[1], reason="First candidate matches.", judged=[
-                said(cand, "same" if n == 0 else "different") for n, cand in enumerate(cands)]))
-        return answers[:-1] + [None]  # and one call fails
+        for question in questions:  # the first candidate of every item is "the same"; the last item gets no answer
+            items = [Verdicts(id=id, reason="First candidate matches.",
+                              judged=[said(cand, "same" if n == 0 else "different") for n, cand in enumerate(cands)])
+                     for id, cands in blocks_in(question)]
+            answers.append(JudgeAnswer(items=items[:-1]))
+        return answers
 
     monkeypatch.setattr(ai, "ask", fake_ask)
     main(["ingest", str(RAW / P2_PRICED), "--project", "P2"], data=tmp_path)
@@ -368,11 +553,13 @@ def test_price_command_asks_the_judge_and_writes_what_code_made_of_the_verdicts(
     result, library = load(tmp_path / "out" / "P5.json"), load(tmp_path / "library" / "P2.json")
     price = {i.id: i.unit_price for i in library.items}
     methods = result.summary.methods
-    assert asked == [("claude-sonnet-5-5", "high", JUDGE_RULES, Verdicts)]
-    assert methods["similar"].items > 0 and sum(m.items for m in methods.values()) == 50
-    assert methods["similar"].items + 1 + sum(1 for i in result.items if "No library item" in i.prediction.reason) == 50
+    # step 2 put all items under one type: 28 items with candidates go out in 2 packs (15 + 13). Each pack comes
+    # back without its last item, so 2 items are asked again on their own, and those 2 calls come back empty.
+    assert asked == [("claude-sonnet-5-5", "high", JUDGE_RULES, JudgeAnswer, 2)] * 2
+    assert methods["similar"].items == 26 and sum(m.items for m in methods.values()) == 50
+    assert methods["similar"].items + 2 + sum(1 for i in result.items if "No library item" in i.prediction.reason) == 50
     assert all(price[s.id] == s.unit_price == i.prediction.median for i in result.items for s in i.prediction.sources)
-    assert f"to judge candidates: {methods['similar'].items + 1} calls" in printed and "gave no answer for 1 of these items" in printed
+    assert printed.count("to judge candidates: 2 calls") == 2 and "gave no answer for 2 of these items" in printed
     assert result.summary.total == pytest.approx(sum(i.prediction.median * i.quantity for i in result.items
                                                      if i.prediction.method == "similar"))
     assert not result.priced

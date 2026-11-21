@@ -10,7 +10,7 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-from lv.match import Described, describe, group_label
+from lv.match import Described, describe, same_item
 from lv.model import LV, ItemType
 
 # ponytail: 17 stand-in names from the first test; swap this one constant when an official trade list is chosen
@@ -81,9 +81,9 @@ def assign(lv: LV, item_types: list[ItemType], ask: Callable[[list[str]], list[A
     """
     trade_of = {item_type.name: item_type.trade for item_type in item_types} | {OTHER: OTHER}
     everything = describe(lv)
-    first: dict[tuple[str, str], Described] = {}  # the first item of each set of identical items
+    first: dict[tuple, Described] = {}  # the first item of each set of identical items
     for described in everything:
-        first.setdefault(_same_item(described), described)
+        first.setdefault(same_item(described), described)
 
     waiting = list(first.values())
     for _ in range(2):
@@ -100,14 +100,9 @@ def assign(lv: LV, item_types: list[ItemType], ask: Callable[[list[str]], list[A
         described.item.item_type, described.item.trade, described.item.item_type_reason = OTHER, OTHER, NO_VALID_ANSWER
 
     for described in everything:
-        decided, item = first[_same_item(described)].item, described.item
+        decided, item = first[same_item(described)].item, described.item
         item.item_type, item.trade, item.item_type_reason = decided.item_type, decided.trade, decided.item_type_reason
     return len(first)
-
-
-def _same_item(described: Described) -> tuple[str, str]:
-    """Identical for step 2: the same group label, and for a repeat item ("wie vor") the same item it refers to."""
-    return group_label(described.item), described.refers_to
 
 
 def _assignment_input(batch: list[Described], item_types: list[ItemType]) -> str:

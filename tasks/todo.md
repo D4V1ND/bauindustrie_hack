@@ -215,6 +215,46 @@ Built before tasks 6 and 7: step 3 does not need trades or item types.
   - Depends on: 10.
   - Files: `lv/__main__.py`, `tests/test_predict.py`.
 
+- [x] **Task 13: Pack the judge's questions by item type, one judgement per set of identical items** (medium)
+  - Does: identical items of the new LV are searched and judged once and the result is copied to the others with
+    `judged_item`; items with candidates go to the judge in packs of one item type (at most 15), with one hint
+    line; an item whose part of a pack answer does not fit is asked again on its own. The five outcomes, the
+    judging rules and the search stay as they were (one sentence about the hint line was added to the rules).
+  - Acceptance (all with the fake judge):
+    - Identical items are judged once and all carry the result plus the id of the judged item.
+    - Packs follow item types and never exceed 15; the hint line appears once per pack.
+    - A pack answer missing one item leads to one single-item question. A verdict naming a candidate of another
+      item, an invented id, a missing or a doubled candidate rejects that item's part of the answer.
+    - What still fails after the single question counts as unanswered. Without item types the calls are per item.
+  - Agreement check with real calls (library P1 and P2; same items judged one by one and packed):
+
+    | | P5 | P4 |
+    |---|---|---|
+    | Judge calls before this change | 32 | 206 |
+    | Judge calls packed | 18 (17 packs + 1 single question) | 62 (no item had to be asked again) |
+    | Items judged / copied back from an identical item | 32 / 0 | 198 / 9 |
+    | Verdicts compared | 117 | 865 |
+    | Same verdict | 105 | 834 |
+    | Looser in packs (`same` or `size_only` instead of `type_only` or `different`) | 0 | 0 |
+    | Stricter in packs (`type_only` instead of `size_only`) | 0 | 2 |
+    | `different` one by one, `type_only` packed | 9 | 20 |
+    | `type_only` one by one, `different` packed | 3 | 9 |
+    | Judge time one by one / packed | 33 s / 34 s | 161 s / 119 s |
+
+    The rule "packed must nowhere be looser" holds on both. In packs the judge more often calls a candidate
+    `type_only` where it said `different` one by one; that adds references (P4: 63 against 51), never a price.
+  - Also seen in these runs:
+    - P4's fresh step 2 run has no item type named after a surcharge; the 7 items that sat under
+      "Erschwerniszulage Tiefbau" now sit under the thing they belong to.
+    - The same P4 run proposed no type for hourly rates, so the 25 items of the section "Stundenlohnarbeiten" went
+      to `Sonstiges` (with reasons that say so). The earlier run had two such types. The list differs from run to run.
+    - The judge is not fully repeatable: P5's "Asphaltbeton 0/11 mm, Stärke 4 cm" was judged `same` as a P2 surface
+      course in both of these runs (77.34 per m2) and not in the two runs before.
+  - `data/out/P5.json` and `data/out/P4.json` are the packed results of this check.
+  - Verify: tests pass; the check script and its lists of differences are outside the repo (one-off).
+  - Depends on: 7, 10.
+  - Files: `lv/predict.py`, `lv/match.py`, `lv/model.py`, `lv/ai.py`, `lv/__main__.py`, `tests/test_predict.py`.
+
 ### Checkpoint: step 3
 - [x] All tests pass without network and without a key.
 - [x] `lv price --copy-only` on P2's own `.X83` copies only correct prices.

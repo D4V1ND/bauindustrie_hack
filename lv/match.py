@@ -61,6 +61,12 @@ def describe(lv: LV) -> list[Described]:
     return described
 
 
+def same_item(described: Described) -> tuple[str, str, bool]:
+    """Two items of one LV with the same value here are word-for-word the same item, so one decision serves both:
+    the same group label and, for a repeat item ("wie vor"), the same item it refers to."""
+    return group_label(described.item), described.refers_to, described.surcharge
+
+
 def searcher(library: list[Described]) -> Callable[[Described], list[Described]]:
     """Prepares the price library once and returns the search: the candidates for one item, best first.
 

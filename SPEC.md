@@ -177,10 +177,26 @@ For each item of the new LV, in this order:
 
 ### Judge (AI, `claude-sonnet-5-5`)
 
-One call per item that has candidates. The judge reads the new item's text and the candidates' texts. It never
-sees a price, a quantity-times-price or a total, and it never states one. Its rules are the estimator's own
-(`JUDGE_RULES` in `lv/ai.py`): compare kind, material, scope, size, class and, for hourly rates, the kind of worker
-or machine. It answers in a fixed shape:
+The judge reads the new item's text and the candidates' texts. It never sees a price, a quantity-times-price or a
+total, and it never states one. Its rules are the estimator's own (`JUDGE_RULES` in `lv/ai.py`): compare kind,
+material, scope, size, class and, for hourly rates, the kind of worker or machine.
+
+How the questions are packed (code):
+
+- **One per set of identical items.** Items of the new LV with the same `group` label (and, for repeat items, the
+  same item they refer to) are searched and judged once. The others get a copy of the prediction, with
+  `judged_item` naming the item that was actually judged.
+- **Packs by item type.** Items that found candidates go to the judge together with the other items of their
+  `item_type` from step 2, in file order, at most 15 per call. A pack starts with one hint line (`HINT: the N new
+  items below were sorted under "<item type>" (trade: <trade>) by an earlier step. Decide by the texts only.`),
+  then every item in exactly the form of a single question. The search still covers the whole library; the item
+  type only decides which questions travel together.
+- **Check.** An item's part of a pack answer counts only if it is there once and names each of the item's own
+  candidates once and no other. Otherwise the item is asked again on its own. What still fails counts as
+  unanswered.
+- If step 2 did not run, every item is asked on its own.
+
+For each item the judge answers in a fixed shape:
 
 | Field | Meaning |
 |---|---|
@@ -189,7 +205,8 @@ or machine. It answers in a fixed shape:
 | `dimension`, `cand_size`, `target_size` | only for `size_only`: what differs (e.g. `DN`) and both sizes as numbers |
 | `reason` | one sentence for the item |
 
-Verdicts for ids that were not offered are ignored. If the judge gives no answer for an item, the item gets `none`.
+In an answer about a single item, verdicts for ids that were not offered are ignored. If the judge gives no answer
+for an item, the item gets `none`.
 
 ### From verdicts to the prediction (code)
 
@@ -211,6 +228,7 @@ Each item gains a `prediction`:
 | `sources` | list of `{id, unit_price, verdict, difference}`: every past item used or shown. `verdict` is `exact` for `copied` |
 | `rule`, `calculation`, `result` | only for `adjusted`, e.g. `linear interpolation by DN`, `80 + (125 - 100) / (150 - 100) x (120 - 80)`, `100.0` |
 | `reason` | the judge's sentence, or a fixed sentence when code decided alone |
+| `judged_item` | only on a copy: the id of the identical item of this LV that was searched and judged |
 
 The result file `data/out/<project>.json` also holds a `summary`: per method the number of items and the sum of
 `median × quantity`, and the project `total`. Sums count only **normal items** whose method is `copied`, `similar`

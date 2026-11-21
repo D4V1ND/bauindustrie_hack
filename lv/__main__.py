@@ -8,7 +8,7 @@ from lv.categorise import Assignments, Proposal, assign, overview, propose
 from lv.extract import read
 from lv.match import group_label
 from lv.model import LV, load, save
-from lv.predict import NO_ANSWER, Verdicts, predict
+from lv.predict import NO_ANSWER, JudgeAnswer, predict
 
 DATA = Path(__file__).resolve().parent.parent / "data"
 FOLDERS = {"ingest": "library", "price": "out"}
@@ -90,9 +90,9 @@ def print_overview(lv: LV) -> None:
         print(f"  ({optional} optional items are not in the overview)")
 
 
-def ask_judge(blocks: list[str]) -> list[Verdicts | None]:
-    """The real judge: one Claude call per item that has candidates."""
-    return _ask("to judge candidates", ai.JUDGE_MODEL, ai.JUDGE_EFFORT, ai.JUDGE_RULES, blocks, Verdicts)
+def ask_judge(questions: list[str]) -> list[JudgeAnswer | None]:
+    """The real judge: one Claude call per question (a pack of items of one item type, or one item)."""
+    return _ask("to judge candidates", ai.JUDGE_MODEL, ai.JUDGE_EFFORT, ai.JUDGE_RULES, questions, JudgeAnswer)
 
 
 def print_summary(lv: LV) -> None:

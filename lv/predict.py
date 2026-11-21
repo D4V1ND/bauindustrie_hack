@@ -10,7 +10,7 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-from lv.match import Described, describe, group_label, searcher
+from lv.match import Described, describe, group_label, same_item, searcher
 from lv.model import LV, LineItem, MethodSum, Prediction, Source, Summary
 
 METHODS = ("copied", "similar", "adjusted", "reference", "none")
@@ -34,12 +34,22 @@ class Verdicts(BaseModel):
     reason: str
 
 
-# Takes one text block per item (see judge_input) and returns one answer per block, or None where it has none.
-Judge = Callable[[list[str]], list[Verdicts | None]]
+class JudgeAnswer(BaseModel):
+    """What one judge call returns: one set of verdicts per item it was asked about."""
+    items: list[Verdicts]
 
 
-def predict(new: LV, library: list[LV], judge: Judge | None) -> None:
-    """Gives every item of the new LV its prediction, and the LV its summary. Without a judge: copy only."""
+# Takes questions (one item each, or a pack of items; see judge_input and _pack_input) and returns one answer per
+# question, or None where it has none.
+Judge = Callable[[list[str]], list[JudgeAnswer | None]]
+MAX_PACK = 15  # items in one judge call
+
+
+def predict(new: LV, library: list[LV], judge: Judge | None, packed: bool = True) -> None:
+    """Gives every item of the new LV its prediction, and the LV its summary. Without a judge: copy only.
+
+    `packed=False` asks the judge about every item on its own, as before packs existed (used to compare the two).
+    """
     # An item without a price, or priced at zero, is no evidence for a price.
     past_items = [past for lv in library for past in describe(lv) if past.item.unit_price]
     by_group: dict[str, list[LineItem]] = defaultdict(list)
@@ -55,21 +65,88 @@ def predict(new: LV, library: list[LV], judge: Judge | None) -> None:
         else:
             unmatched.append(described)
 
+    first: dict[tuple, Described] = {}  # identical items are searched and judged once: the first of each set
+    for described in unmatched:
+        first.setdefault(same_item(described), described)
+
     if judge is None:
-        for described in unmatched:
+        for described in first.values():
             described.item.prediction = Prediction(
                 method="none", reason="No exact match in the price library. Search and judge were switched off.")
     else:
         search = searcher(past_items)
-        candidates = {described.item.id: search(described) for described in unmatched}
-        to_judge = [described for described in unmatched if candidates[described.item.id]]
-        answers = judge([judge_input(d, candidates[d.item.id]) for d in to_judge]) if to_judge else []
-        answer_for = {d.item.id: answer for d, answer in zip(to_judge, answers, strict=True)}
-        for described in unmatched:
+        candidates = {described.item.id: search(described) for described in first.values()}
+        verdicts = _ask_judge([d for d in first.values() if candidates[d.item.id]], candidates, judge, packed)
+        for described in first.values():
             found = candidates[described.item.id]
-            described.item.prediction = _from_verdicts(found, answer_for.get(described.item.id)) if found else Prediction(
+            described.item.prediction = _from_verdicts(found, verdicts.get(described.item.id)) if found else Prediction(
                 method="none", reason="No library item with the same unit and a similar text.")
+
+    for described in unmatched:  # copy back, and record which item was actually judged
+        judged = first[same_item(described)].item
+        if described.item is not judged:
+            described.item.prediction = judged.prediction.model_copy(deep=True, update={"judged_item": judged.id})
     new.summary = summarise(new.items)
+
+
+def _ask_judge(to_judge: list[Described], candidates: dict[str, list[Described]], judge: Judge,
+               packed: bool) -> dict[str, Verdicts | None]:
+    """The judge's verdicts per item id. Items that step 2 sorted under one item type go out together in a pack;
+    an item whose part of a pack answer does not fit is asked again on its own."""
+    if not to_judge:
+        return {}
+    singles: list[Described] = []  # step 2 did not run for these (or packing is off): asked one by one, as before
+    by_type: dict[str, list[Described]] = defaultdict(list)
+    for described in to_judge:
+        (by_type[described.item.item_type] if packed and described.item.item_type else singles).append(described)
+    packs = [members[start:start + MAX_PACK] for members in by_type.values()
+             for start in range(0, len(members), MAX_PACK)]
+
+    def own(described: Described) -> str:
+        return judge_input(described, candidates[described.item.id])
+
+    answers = judge([own(d) for d in singles] + [_pack_input(pack, own) for pack in packs])
+    verdicts = {d.item.id: _only(answer, d.item.id) for d, answer in zip(singles, answers)}
+    again: list[Described] = []
+    for pack, answer in zip(packs, answers[len(singles):], strict=True):
+        for described in pack:
+            fitting = _fitting(answer, described.item.id, [c.item.id for c in candidates[described.item.id]])
+            verdicts[described.item.id] = fitting
+            if fitting is None:
+                again.append(described)
+    if again:
+        try:
+            answers = judge([own(d) for d in again])
+        except RuntimeError:  # every one of these calls failed: the items count as unanswered, the rest stands
+            answers = [None for _ in again]
+        verdicts |= {d.item.id: _only(answer, d.item.id) for d, answer in zip(again, answers, strict=True)}
+    return verdicts
+
+
+def _pack_input(pack: list[Described], own: Callable[[Described], str]) -> str:
+    """One hint line, then every item in exactly the form of a single question."""
+    item = pack[0].item
+    counted = "1 new item below was" if len(pack) == 1 else f"{len(pack)} new items below were"
+    hint = (f'HINT: the {counted} sorted under "{item.item_type}" (trade: {item.trade}) by an earlier step. '
+            "Decide by the texts only.")
+    return "\n\n".join([hint, *(own(described) for described in pack)])
+
+
+def _only(answer: JudgeAnswer | None, id: str) -> Verdicts | None:
+    """The answer to a question about one item. As before packs: candidate ids are checked later, one by one."""
+    if answer is None:
+        return None
+    named = [verdicts for verdicts in answer.items if verdicts.id == id]
+    return named[0] if named else answer.items[0] if len(answer.items) == 1 else None
+
+
+def _fitting(answer: JudgeAnswer | None, id: str, own_candidates: list[str]) -> Verdicts | None:
+    """An item's part of a pack answer, if it is there exactly once and names each of the item's own candidates
+    exactly once and no other. In a pack a stray id may be a mix-up with a neighbour, so nothing is guessed."""
+    named = [verdicts for verdicts in answer.items if verdicts.id == id] if answer else []
+    if len(named) == 1 and sorted(judged.cand for judged in named[0].judged) == sorted(own_candidates):
+        return named[0]
+    return None
 
 
 def judge_input(new: Described, candidates: list[Described]) -> str:
