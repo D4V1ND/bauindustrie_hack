@@ -633,6 +633,11 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .why2 p{margin:8px 0 0;font-size:13.5px;line-height:1.6;color:var(--ink-2);max-width:60ch}
 .calc2{margin-top:12px;padding:10px 12px;background:var(--paper-2);font-size:12.5px}
 .refs{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:12px}
+.whysrc{margin-top:14px}
+.whysrc ul{margin:6px 0 0;padding:0;list-style:none;display:grid;gap:4px}
+.whysrc li{display:flex;align-items:flex-start;gap:8px;font-size:12.5px;line-height:1.4}
+.whysrc li::before{content:"";flex:none;width:4px;height:4px;margin-top:.55em;border-radius:50%;background:var(--ink-3)}
+.whysrc .lnk{display:block;text-align:left;font-size:12.5px;line-height:1.4;color:var(--ink-2)}
 .refs>.mono{color:var(--ink-3);margin-right:4px;line-height:28px}
 .ref{display:inline-flex;align-items:center;gap:7px;height:28px;padding:0 10px;line-height:1;border:1px solid var(--line-2);background:transparent;font-size:12px;cursor:pointer;transition:border-color .15s,background .15s}
 .ref small{font:.58rem/1 var(--mono);padding-top:1px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
@@ -1503,6 +1508,7 @@ function toRich(it, extra) {
   var seen = {}; R.similar = [];
   srcs.concat(jd).forEach(function (s) { if (seen[s.id]) return; seen[s.id] = 1; R.similar.push([s.id, VERD[s.verdict] || s.verdict]); });
   R.judge = pr.judge_call;
+  R.srcs = (srcs.length ? srcs : pr.min != null ? jd : []).map(function (x) { return x.id; });
   return R;
 }
 var DEMO = null;
@@ -2187,11 +2193,10 @@ function vDrawer(d) {
             '</div>') +
         (ok ? '<div class="stamp' + (fresh ? ' fx' : '') + '" data-k="st"><span class="sq">' + IC.tickRaw + '</span><span><b>Bestätigt</b><small>' + (p.manual ? 'Eigener Preis' : 'KI-Preis') + '</small></span></div>' : '') + '</div>' +
         '<div class="pconf"><span class="mono">Konfidenz</span><span class="conf-v ' + confLvl(p.conf) + '"><b>' + p.conf + ' %</b>' + confWord(p.conf) + '</span>' + cmeter(p.conf, 10) + '</div></div>' +
-        (noAi ? '<div class="why2"><div class="mono lab ai-h">' + IC.needle + 'Reasoning</div><p>' + esc(P.live && R.brief ? R.brief : p.why) + '. In euren Alt-LVs gibt es keine vergleichbare Position. Kalkuliere den Preis selbst oder hol ein Lieferantenangebot ein.</p></div></section>' :
-        '<div class="why2' + (S.whyOpen ? ' open' : '') + '"><div class="mono lab ai-h">' + IC.needle + 'Reasoning</div><p>' + esc(C.cands[0].why) + '</p>' +
+        (noAi ? '<div class="why2"><div class="mono lab ai-h">' + IC.needle + 'Reasoning</div><p>' + esc(P.live && R.brief ? R.brief : p.why) + '. In euren Alt-LVs gibt es keine vergleichbare Position. Kalkuliere den Preis selbst oder hol ein Lieferantenangebot ein.</p>' + vSources(R) + '</div></section>' :
+        '<div class="why2' + (S.whyOpen ? ' open' : '') + '"><div class="mono lab ai-h">' + IC.needle + 'Reasoning</div><p>' + esc(C.cands[0].why) + '</p>' + vSources(R) +
           '<div class="whymore" aria-hidden="' + !S.whyOpen + '"><div class="whyin"><div class="calc2">' + C.steps.map(function (s, j) { return '<div class="cs' + (j === C.steps.length - 1 ? ' last' : '') + '"><span>' + esc(s[0]) + '</span><span>' + esc(s[1]) + '</span></div>'; }).join('') + '</div>' +
-          ((R.similar || []).length ? '<div class="refs"><span class="mono">Quellen</span>' + R.similar.map(function (x) { var e = D.extra[x[0]]; return e ? '<button class="ref" data-act="preview" data-key="' + x[0] + '">' + esc(e.proj) + '<small>' + esc(x[1]) + '</small></button>' : ''; }).join('') + '</div>' : '') +
-        '</div></div><button class="whytg" data-act="whyToggle" aria-expanded="' + !!S.whyOpen + '">' + (S.whyOpen ? 'Weniger anzeigen' : 'Berechnung &amp; Quellen anzeigen') + IC.chev + '</button></div></section>') +
+        '</div></div><button class="whytg" data-act="whyToggle" aria-expanded="' + !!S.whyOpen + '">' + (S.whyOpen ? 'Weniger anzeigen' : 'Berechnung anzeigen') + IC.chev + '</button></div></section>') +
       '<div class="lower"><div class="lowin">' + (function () {
         var L = cmtList(p);
         return '<section class="comm cmts" aria-label="Kommentare"><div class="comm-h"><span class="gw-t"><span class="mono">Kommentare</span></span><span class="mono gw-m">' + (L.length ? L.length + (L.length === 1 ? ' Kommentar' : ' Kommentare') : 'keine') + '</span></div><div class="panel">' +
@@ -2215,6 +2220,15 @@ function vDrawer(d) {
   '</aside>';
 }
 
+// "Sources": the past line items behind the price (or the span), each a link that opens it
+function vSources(R) {
+  var ids = (R.srcs || []).filter(function (id) { return D.extra[id]; });
+  if (!ids.length) return '';
+  return '<div class="whysrc"><div class="mono lab">Sources</div><ul>' + ids.map(function (id) {
+    var e = D.extra[id];
+    return '<li><button class="lnk" data-act="preview" data-key="' + esc(id) + '">' + esc(e.proj.replace(/^Alt-LV /, '') + ' · ' + e.oz + ' ' + (e.kurz || '')) + '</button></li>';
+  }).join('') + '</ul></div>';
+}
 function vPreview(d) {
   if (!S.preview) return '';
   var lp = lookup(S.preview, d) || {};
