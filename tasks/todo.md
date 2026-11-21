@@ -72,12 +72,15 @@ Test command for every task: `.venv\Scripts\python.exe -m pytest`
 
 ## Phase 3: trades and item types (step 2)
 
-- [ ] **Task 5: AI setup** (small; needs the API key)
+- [x] **Task 5: AI setup** (small; needs the API key)
   - Does: sets up the two Claude models through `langchain-anthropic` in one place, loads the key from `.env`, and
     provides one helper that returns an answer in a fixed, validated shape. Saves answers between runs if you agreed
     to that (open question 2).
+  - Built without a key: only the judge model (`claude-sonnet-5-5`) is set up, because tasks 6 and 7 are not built
+    yet. Answers are not saved between runs (open question 2 is still open).
+  - **Still to do by you:** put the key into `.env`, then run `.venv\Scripts\python.exe -m lv.ai` (one real call).
   - Acceptance:
-    - One real call returns an answer in the requested shape.
+    - One real call returns an answer in the requested shape. (not checked yet: no key)
     - A missing key stops the program with a message that says what to do.
     - No `temperature` is sent, and structured output uses the native method, checked against the current docs.
   - Verify: run the one-call check by hand; tests for the no-key message pass.
