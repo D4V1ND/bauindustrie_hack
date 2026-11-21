@@ -4,9 +4,14 @@ A reader copies the file faithfully: one row per item, in file order, nothing co
 """
 import re
 import xml.etree.ElementTree as ET
+from dataclasses import dataclass
 from datetime import date, datetime
+from functools import cache
 from itertools import groupby
 from pathlib import Path
+
+from pypdf import PdfReader
+from pypdf.errors import PyPdfError
 
 from lv.model import LV, LineItem
 
@@ -187,3 +192,116 @@ def _flow(text: str) -> str:
 
 
 READERS = {".x83": read_x83, ".d83": read_gaeb90, ".d84": read_gaeb90, ".d86": read_gaeb90}
+
+
+# --- texts from PDF prints of an LV whose prices come from another file (P3) -------------------------------------
+# A bid file can hold prices without texts. The texts are then read from PDF prints of the same LV and joined by
+# item number. Read by code, no AI. No price is ever taken from a PDF: prices, quantities and units stay with the
+# prices file; a PDF's quantity and unit are only used to check that a text belongs to the item it is joined to.
+# Two print layouts are known, both from P3:
+#   tender LV   "2.1.60.   <short text>" at the left edge, then the long text, then a line "550,000 m³ ......"
+#   priced bid  "2.1.60   550,000 m³ ... prices" on one line, then the short text on the indented lines below
+
+@dataclass
+class PdfItem:
+    lines: list[str]  # the item's text lines, in reading order
+    quantity: float | None
+    unit: str
+    whole: bool  # True: short and long text (tender LV). False: the short text only (priced bid).
+
+
+_LV_ITEM = re.compile(r"^(\d+\.\d+\.\d+)\.(?:\s+(.*))?$")
+_LV_QUANTITY = re.compile(r"^\s+([\d.]+,\d{3})\s+(\S+)\s+\.{5,}")
+_LV_SECTION = re.compile(r"^(\d+(?:\.\d+)?)\.\s+(\S.*)$")
+_BID_ITEM = re.compile(r"^(\s*)(\d+\.\d+\.\d+)\s+([\d.]+,\d{3})\s+(\S+)")
+_BID_SECTION = re.compile(r"^\s*(?:Bereich|Abschnitt)\s+(\d+(?:\.\d+)?)\.\s+(\S.*)$")
+_PAGE_FURNITURE = re.compile(r"^(Projekt:|LV:?\s|Ordnungszahl\s)|^\s*(Leistungsverzeichnis Kurz- und Langtext\s*$"
+                             r"|Seite: \d+ von \d+\s*$|\[BILD(_\d+)?\]\s*$)")
+
+
+@cache  # reading 70 pages takes seconds, and one run may ask for the same file more than once
+def pdf_texts(path: Path) -> tuple[dict[str, PdfItem], dict[str, str]]:
+    """The item texts of one PDF print by item number, and its section titles by section number."""
+    try:
+        pages = [page.extract_text(extraction_mode="layout") or "" for page in PdfReader(path).pages]
+    except (PyPdfError, ValueError, KeyError, TypeError) as error:  # pypdf's ways of saying "not a usable PDF"
+        raise ValueError(f"Cannot read {path.name} as a PDF: {error}")
+    items: dict[str, PdfItem] = {}
+    sections: dict[str, str] = {}
+    item: PdfItem | None = None
+    left = 0  # where the item line of a priced bid starts; its short text is indented further
+    for line in (line for page in pages for line in [*page.splitlines(), "\f"]):
+        if line == "\f":  # a long text of a tender LV runs on over the page; a short text of a bid does not
+            item = item if item and item.whole else None
+        elif not line.strip() or _PAGE_FURNITURE.match(line):
+            continue
+        elif found := _BID_ITEM.match(line):
+            left = len(found[1])
+            item = items[found[2]] = PdfItem([], _german(found[3]), clean_unit(found[4]), whole=False)
+        elif found := _LV_ITEM.match(line):
+            item = items[found[1]] = PdfItem([found[2] or ""], None, "", whole=True)
+        elif found := _LV_SECTION.match(line) or _BID_SECTION.match(line):
+            sections[found[1]] = re.sub(r"\s*\.{5,}.*$", "", _flow(found[2]))
+            item = None
+        elif found := _LV_QUANTITY.match(line):  # the last line of an item in a tender LV
+            if item and item.whole:
+                item.quantity, item.unit = _german(found[1]), clean_unit(found[2])
+            item = None
+        elif item and (item.whole or (len(line) - len(line.lstrip()) >= left + 10 and "Übertrag:" not in line)):
+            item.lines.append(line.strip())
+        else:
+            item = None  # a note between items, a sum line, a page footer
+    return items, sections
+
+
+def add_texts(lv: LV, pdfs: list[Path]) -> list[str]:
+    """Gives the items of a priced LV their texts from PDF prints of the same LV, by item number.
+
+    Returns what the user should know: items whose PDF quantity or unit disagrees with the prices file (their text is
+    not used) and items left without any text. Nothing is dropped.
+    """
+    names = ", ".join(path.name for path in pdfs)
+    notes: list[str] = []
+    shorts: dict[str, str] = {}  # item number -> short text from a priced bid
+    wholes: dict[str, list[str]] = {}  # item number -> text lines from a tender LV
+    titles: dict[str, str] = {}
+    for path in pdfs:
+        items, sections = pdf_texts(path)
+        titles |= sections
+        differing = []
+        for item in lv.items:
+            found = items.get(item.oz)
+            if found is None or not any(found.lines):
+                continue
+            if (found.quantity, found.unit) != (item.quantity, item.unit):
+                differing.append(f"{item.oz} ({found.quantity:.10g} {found.unit}, prices file {item.quantity:.10g} {item.unit})")
+            elif found.whole:
+                wholes.setdefault(item.oz, found.lines)
+            else:
+                shorts.setdefault(item.oz, _flow(" ".join(found.lines)))
+        if differing:
+            notes.append(f"{path.name}: quantity or unit differs from the prices file for {len(differing)} items, "
+                         f"so their text was not used: {', '.join(differing)}")
+
+    without = []
+    for item in lv.items:
+        short, lines = shorts.get(item.oz, ""), wholes.get(item.oz)
+        whole = _flow(" ".join(lines)) if lines else ""
+        if not short and not whole:
+            without.append(item.oz)
+            continue
+        if not (short and whole.startswith(short)):  # no bid print, or it words the short text differently
+            short = short if not whole else _flow(lines[0])
+        item.short_text, item.long_text, item.read_by = short, whole[len(short):].strip(), "pdf"
+        if not item.section:
+            parts = item.oz.split(".")
+            item.section = [f"{number} {titles[number]}" for number in (".".join(parts[:n]) for n in range(1, len(parts)))
+                            if number in titles]
+    if without:
+        notes.append(f"{names} {'has' if len(pdfs) == 1 else 'have'} no text for {len(without)} of the {len(lv.items)} "
+                     f"items: {', '.join(without)}")
+    return notes
+
+
+def _german(number: str) -> float:
+    return float(number.replace(".", "").replace(",", "."))

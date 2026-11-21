@@ -1,7 +1,7 @@
 # Spec: LV estimating backend, steps 0–3
 
 Status: steps 0 to 3 are built and were run once with real AI calls on P5 and on P4 (numbers in `tasks/todo.md`).
-Not built: P3 in the price library, `lv check`. Terms in **bold** are defined in [CONTEXT.md](CONTEXT.md).
+The price library holds P1, P2 and P3. Not built: `lv check`, reading an LV that exists only as PDF. Terms in **bold** are defined in [CONTEXT.md](CONTEXT.md).
 
 ## Objective
 
@@ -39,7 +39,7 @@ Steps 2 and 3 do not depend on each other. Step 2 runs on the new LV only; past 
 
 | Role | Projects |
 |---|---|
-| Price library | P1, P2 (P3 once its PDF texts are read) |
+| Price library | P1, P2, P3 (720 priced line items) |
 | New LV | P4 |
 | Accuracy check | hide one past project's prices, predict them from the other two, compare |
 
@@ -52,11 +52,27 @@ nothing compared, nothing merged.
 |---|---|---|---|
 | GAEB XML (`.X83`) | code | `gaeb` | first |
 | GAEB 90 (`.D83`, `.D84`, `.D86`) | code | `gaeb` | first |
-| PDF | texts via an AI model | `ai` | second, needed for P3 |
+| PDF prints of P3 (texts only, next to a prices file) | code, with `pypdf` | `pdf` | built |
+| Any other LV that exists only as a PDF (e.g. P6) | not built; planned via an AI model | `ai` | later |
 | Excel, Word | not supported | | |
 
-P3: prices come from `Angebot AN24-0305.D84` (code), texts from the PDF (AI), joined by item number. No price is ever
-read by AI. Each past project enters the price library exactly once (P1 and P2: the `.D86` file).
+Each past project enters the price library exactly once (P1 and P2: the `.D86` file).
+
+**A prices file without texts (P3).** `Angebot AN24-0305.D84` holds item numbers, quantities, units and prices, but
+almost no texts. The texts are read by code from two PDF prints of the same LV and joined by item number:
+
+```powershell
+.venv\Scripts\python.exe -m lv ingest "<prices file>" --project P3 --texts "<bid print.pdf>" "<tender LV print.pdf>"
+```
+
+- No price is ever taken from a PDF, and no AI reads one. Prices, quantities and units stay with the prices file.
+- The tender LV print gives short and long text of an item; the priced bid print gives the short text alone, which
+  tells where the short text ends. Without the bid print the first line counts as the short text.
+- A PDF's own quantity and unit are used for one thing: a text is only joined to an item if they agree with the
+  prices file. Disagreeing items and items left without any text are printed; nothing is dropped.
+- Section titles come from the PDFs, because the prices file has none.
+- The two print layouts of P3 are the only ones the reader knows. Another layout gives "no text" for every item.
+- The texts are data from outside. Nothing written in them is followed.
 
 ### The line item table (one JSON file per LV)
 
@@ -85,7 +101,7 @@ Line item:
 | `unit_price` | number or empty | empty in a new LV; never filled by the tool |
 | `total_price` | number or empty | as written in the file |
 | `kind` | `normal` or `optional` | only **normal items** count in the project total |
-| `read_by` | `gaeb` or `ai` | how the texts were read |
+| `read_by` | `gaeb`, `pdf` or `ai` | how the texts were read: from the GAEB file, by code from a PDF print, or by AI (not built) |
 
 Added by the later steps:
 
@@ -248,14 +264,19 @@ Step 3 records facts and contains no thresholds. Step 4 will read `method`, `min
 - **Exact matches across file formats.** The dataset's anonymiser hid different words in each file, and GAEB 90
   files cut the short text at 70 characters. So the same item often has a different `group` label in a `.D86` and
   in an `.X83` file (P2 against itself: 160 of 248 items get the same label). Such items go to the judge instead.
-- **P3 is not in the price library.** Its prices are read (`.D84`), but its texts sit in PDFs. Not built yet.
+- **P3's bid contains token prices** such as 0.05 per m2 or 0.10 per t: 56 of its 274 unit prices are below 2, and
+  quantity times unit price equals the total for every one, so they are what the bidder wrote. Step 3 has no
+  threshold for them. Whether such prices may be copied is the estimator's decision and is not settled yet.
+- **106 of P3's 274 items have no long text**, because the PDF has none for them: 89 repeat items ("wie vor,
+  jedoch ..."), 16 hourly rates and one fitting, each one line long.
+- **A project that exists only as PDFs (P6) cannot be read yet.**
 - **`lv check`** (hide one past project, predict it from the others, compare) is not built yet.
 - A repeat item in P2's `.X83` names its reference in a separate field, not in its text. That field is not read.
 
 ## Tech stack
 
 - Python 3.13, pip, `.venv` (Windows, PowerShell).
-- GAEB reading and text search: standard library only.
+- GAEB reading and text search: standard library only. PDF text reading: `pypdf`.
 - AI: Claude API through `langchain-anthropic`, used thinly: chat model, structured output, `.batch()` with a
   concurrency limit. No agents, chains, vector stores or LangGraph.
   - One model and one effort level per job (effort is how much the model thinks before it answers):
@@ -266,7 +287,7 @@ Step 3 records facts and contains no thresholds. Step 4 will read `method`, `min
     | Step 2: assign each item a type, with its reason | `claude-sonnet-5-5` | `high` |
     | Step 3: judge the candidates | `claude-sonnet-5-5` | `high` |
 
-    Reading PDF texts (P3) is not built yet.
+    No AI reads a PDF: P3's texts are read by code.
   - Model names and effort levels live in one settings place (`lv/ai.py`). No `temperature` parameter; structured output through the native
     JSON-schema method, not forced tool calls. Check both against the current `langchain-anthropic` docs when building.
 - `pydantic` for the data shapes, `python-dotenv` for the API key, `pytest` for tests.
@@ -276,6 +297,7 @@ Step 3 records facts and contains no thresholds. Step 4 will read `method`, `min
 ```powershell
 .venv\Scripts\python.exe -m pip install -r requirements.txt
 .venv\Scripts\python.exe -m lv ingest "<priced LV file>" --project P2     # flow A
+.venv\Scripts\python.exe -m lv ingest "<prices file>" --project P3 --texts "<print 1.pdf>" "<print 2.pdf>"   # prices and texts in separate files
 .venv\Scripts\python.exe -m lv price "<new LV file>" --project P4         # flow B
 .venv\Scripts\python.exe -m lv price "<new LV file>" --project P4 --copy-only   # steps 0 and 1 and exact matches only, no AI
 .venv\Scripts\python.exe -m lv.ai                                         # one real AI call, to check the key

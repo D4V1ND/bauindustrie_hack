@@ -58,7 +58,7 @@ class LineItem(BaseModel):
     unit_price: float | None = None  # empty in a new LV; never filled by the tool
     total_price: float | None = None
     kind: Literal["normal", "optional"] = "normal"
-    read_by: Literal["gaeb", "ai"] = "gaeb"
+    read_by: Literal["gaeb", "pdf", "ai"] = "gaeb"  # "pdf": texts read by code from a PDF print; "ai": not built
     group: str = ""  # step 1: the same label for every exact match, inside one LV and across the price library
     item_type: str = ""  # step 2: one type from the LV's list, or "Sonstiges"
     trade: str = ""  # step 2: the trade of that item type

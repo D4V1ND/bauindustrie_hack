@@ -5,7 +5,7 @@ from pathlib import Path
 
 from lv import ai
 from lv.categorise import Assignments, Proposal, assign, overview, propose
-from lv.extract import read
+from lv.extract import add_texts, read
 from lv.match import group_label
 from lv.model import LV, load, save
 from lv.predict import NO_ANSWER, JudgeAnswer, predict
@@ -22,6 +22,9 @@ def main(argv: list[str] | None = None, data: Path = DATA) -> None:
         command = commands.add_parser(name, help=text)
         command.add_argument("file", type=Path, help="the LV file")
         command.add_argument("--project", required=True, help="short project ID, e.g. P4")
+        if name == "ingest":
+            command.add_argument("--texts", type=Path, nargs="+", default=[], metavar="PDF",
+                                 help="PDF prints of the same LV, when the priced file holds prices without texts")
         if name == "price":
             command.add_argument("--copy-only", action="store_true",
                                  help="only copy the prices of exact matches: no item types, no search, no AI, "
@@ -30,10 +33,17 @@ def main(argv: list[str] | None = None, data: Path = DATA) -> None:
 
     try:
         lv = read(args.file, args.project)
+        notes = add_texts(lv, args.texts) if args.command == "ingest" and args.texts else []
     except (ValueError, OSError) as error:
         raise SystemExit(str(error))
     if args.command == "ingest" and not lv.priced:
         raise SystemExit(f"{args.file.name} has no prices, so it cannot go into the price library.")
+    if args.command == "ingest" and args.texts:
+        from_pdf = [item for item in lv.items if item.read_by == "pdf"]
+        print(f"texts from PDF: {len(from_pdf)} of {_items(len(lv.items))}, "
+              f"{sum(1 for item in from_pdf if item.long_text)} of them with a long text")
+        for note in notes:
+            print(f"  {note}")
     for item in lv.items:
         item.group = group_label(item)
     if args.command == "price":

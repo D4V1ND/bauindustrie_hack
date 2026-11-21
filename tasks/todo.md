@@ -255,6 +255,51 @@ Built before tasks 6 and 7: step 3 does not need trades or item types.
   - Depends on: 7, 10.
   - Files: `lv/predict.py`, `lv/match.py`, `lv/model.py`, `lv/ai.py`, `lv/__main__.py`, `tests/test_predict.py`.
 
+- [x] **Task 14: P3's texts from its PDF prints, P3 into the price library** (medium)
+  - Does: reads item texts by code (`pypdf`, no AI) from PDF prints of an LV whose prices file has no texts, joins
+    them to the priced items by item number, and makes `lv ingest <prices file> --project P3 --texts <pdf> <pdf>`
+    write `data/library/P3.json`. Items read this way get `read_by` `pdf`.
+  - Acceptance (against the real files):
+    - 274 priced items, every one with a short text; quantity x unit price equals the total for all.
+    - Prices, quantities and units are exactly those of the `.D84`; nothing is taken from a PDF.
+    - A handful of items word for word as in the PDF, among them a long text that runs over three pages.
+    - Items of the `.D84` without any text in the PDFs are listed and kept. A text whose PDF quantity or unit
+      disagrees with the prices file is not used and is listed.
+  - Found:
+    - Both PDFs hold all 274 item numbers of the `.D84`, and quantity and unit agree for every item in both.
+    - 168 items have a long text, 106 have none. All 106 were checked: the PDF shows the short text and then the
+      quantity, nothing else. 89 are repeat items ("wie vor, jedoch ..."), 16 hourly rates, 1 fitting. No miss is
+      left. The throwaway prototype had 165 with a long text; it read the PDF in plain mode.
+    - Plain text extraction scrambles the tender print (quantity, long text, then item number, and lines with
+      anonymised words pushed to the page end). Layout mode gives the reading order. The reader uses layout mode.
+    - The bid print has no text for one item (3.2.160); its text comes from the tender print.
+    - The `.D84` has no section records; section titles come from the PDFs.
+  - Library: 446 priced line items before (P1 197, P2 249), 720 after (P3 274).
+  - Real runs, library P1 + P2 against P1 + P2 + P3 (the "before" numbers are the packed runs of task 13):
+
+    | | P5 before | P5 after | P4 before | P4 after |
+    |---|---|---|---|---|
+    | `copied` | 0 | 0 | 1 | 1 |
+    | `similar` | 3 | 3 | 1 | 4 |
+    | `adjusted` | 0 | 0 | 0 | 0 |
+    | `reference` | 10 | 25 | 63 | 95 |
+    | `none` | 37 | 22 | 231 | 196 |
+    | total | 13,913.60 | 8,385.00 | 32.74 | 22,532.74 |
+
+    P5's total fell because one borderline item (Asphaltbeton, 6,960.60) was judged `same` in the run before and
+    not in this one; that is the judge varying between runs, not P3.
+  - Predictions with a price that rest on a P3 price (none of them on a token price):
+    - P5 04.0002 "Gehobener [PERSON_020]", 20 h: `similar`, 71.60 per h from P3/7.1.50 "BGr. IV, Gehobener
+      [PERSON_020]" = 1,432.00.
+    - P4 01.01.0002, 02.01.0002 and 03.01.0002 "Baustelle räumen", 1 psch each: `similar`, 7,500.00 from P3/1.1.30
+      "Baustelle räumen" = 22,500.00 together. They are one judgement: the three items are identical, the second
+      and third carry `judged_item` P4/01.01.0002. A lump sum again (see task 7).
+  - P3's token prices show up only in references so far: 33 reference sources on P5 and P4 carry a P3 unit price
+    below 2. No rule was added.
+  - Verify: tests pass; `lv ingest` for P3 as above and open `data/library/P3.json`.
+  - Depends on: 3.
+  - Files: `lv/extract.py`, `lv/model.py`, `lv/__main__.py`, `tests/test_extract_pdf.py`, `requirements.txt`.
+
 ### Checkpoint: step 3
 - [x] All tests pass without network and without a key.
 - [x] `lv price --copy-only` on P2's own `.X83` copies only correct prices.
@@ -263,5 +308,5 @@ Built before tasks 6 and 7: step 3 does not need trades or item types.
 
 ## Waiting
 
-- [ ] **P3 in the price library.** Prices are read from the `.D84`; the texts sit in PDFs.
+- [x] **P3 in the price library.** Done in task 14.
 - [ ] **`lv check --hide <project>`**: the accuracy check as a command.
