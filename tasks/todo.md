@@ -5,7 +5,7 @@ Test command for every task: `.venv\Scripts\python.exe -m pytest`
 
 ## Phase 1: read LV files (step 0)
 
-- [ ] **Task 1: Skeleton and line item shapes** (small)
+- [x] **Task 1: Skeleton and line item shapes** (small)
   - Does: creates the `lv` package, the command line with `ingest` and `price` (no behaviour yet), the LV and line
     item shapes from the spec, `requirements.txt` and a `.gitignore` covering `.env` and `.venv`.
   - Acceptance:
