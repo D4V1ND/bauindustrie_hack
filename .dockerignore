@@ -1,0 +1,13 @@
+.git
+.venv
+.vercel
+.env
+.env.*
+data/out
+data/library
+data/uploads
+data/embeddings
+data/views
+design
+tests
+**/__pycache__
