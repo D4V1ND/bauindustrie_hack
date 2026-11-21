@@ -2066,7 +2066,7 @@ function vDrawer(d) {
           : p.np ? '<div class="sub">' + qty(p.menge) + ' ' + p.einheit + (p.sg ? ' · GP ≈ ' + eur(p.sg.ep * p.menge) + (p.sg.hi > p.sg.lo ? ' (' + eur(p.sg.lo * p.menge) + ' – ' + eur(p.sg.hi * p.menge) + ')' : '') : ' · GP wird nach der Eingabe berechnet') + '</div>'
           : '<div class="sub">GP <b>' + eur(p.gp) + '</b> · ' + fmt(p.gp / TOTAL * 100, 2) + ' % des LV · ' + qty(p.menge) + ' ' + p.einheit +
             (p.manual && !p.srvManual ? ' · <button class="lnk" data-act="resetEp">' + (noAi ? 'Preis entfernen' : 'KI-Vorschlag ' + eur(p.aiEp) + ' wiederherstellen') + '</button>' : '') +
-            (P.live && !p.manual && !p.np ? ' · <button class="lnk" data-act="doubt" title="Senkt die Konfidenz dieser Position im Backend">Preis anzweifeln</button>' : '') + '</div>') +
+            '</div>') +
         (ok ? '<div class="stamp' + (fresh ? ' fx' : '') + '" data-k="st"><span class="sq">' + IC.tickRaw + '</span><span><b>Bestätigt</b><small>' + (p.manual ? 'Eigener Preis' : 'KI-Preis') + '</small></span></div>' : '') + '</div>' +
         '<div class="pconf"><span class="mono">Konfidenz</span><span class="conf-v ' + confLvl(p.conf) + '"><b>' + p.conf + ' %</b>' + confWord(p.conf) + '</span>' + cmeter(p.conf, 10) + '</div></div>' +
         (noAi ? '<div class="why2"><div class="mono lab">Warum kein Preis</div><p>' + esc(P.live && R.brief ? R.brief : p.why) + '. In euren Alt-LVs gibt es keine vergleichbare Position. Kalkuliere den Preis selbst oder hol ein Lieferantenangebot ein.</p></div></section>' :
