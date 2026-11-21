@@ -1455,7 +1455,6 @@ function toPos(it) {
   var pr = it.prediction || {}, rk = it.risk || {}, m = pr.method || 'none', own = ownPrice(it), med = pr.median || 0, conf = rk.confidence || 0;
   var why = own != null ? 'Eigener Preis' : (WHY[m] || m);
   if (own == null && m === 'none' && pr.min != null) why += ' · Spanne ' + eur(pr.min) + ' – ' + eur(pr.max);  // no price, only the span of differing items
-  if (own == null && (it.comments || []).some(function (c) { return c.effect === 'doubt'; })) why = 'Preis angezweifelt · ' + why;
   if (rk.missing && rk.missing.length) why += ' · fehlt: ' + rk.missing[0];
   if (it.plan && it.plan.status === 'differs') why = 'Plan ' + qty(it.plan.quantity || 0) + ' ' + (it.plan.unit || '') + ', LV ' + qty(it.quantity || 0) + ' · ' + why;
   var mode = MODE[m] || 'offen';
@@ -2333,7 +2332,7 @@ function send(text) {
   setTimeout(function () { var c2 = Object.assign({}, S.chats); c2[oz] = (c2[oz] || []).concat([{ role: 'agent', t: reply(p, text) }]); set({ chats: c2, thinking: false }); }, 1500);
 }
 function cmtList(p) {
-  if (P.live) return (p.cmts || []).map(function (c) { return { t: c.text, tag: c.price != null ? 'Preis ' + eur(c.price) : c.effect === 'doubt' ? 'Zweifel' : '' }; });
+  if (P.live) return (p.cmts || []).map(function (c) { return { t: c.text, tag: c.price != null ? 'Preis ' + eur(c.price) : '' }; });
   return (S.comments[p.oz] || []).map(function (c) { return { t: c.t, tag: '', time: c.time }; });
 }
 function addComment() {
@@ -2652,7 +2651,6 @@ var LIVEA = {
     api('/projects', { method: 'POST', body: fd }).then(function (st) { U.log = st.log || []; render(); upT = setTimeout(function () { pollRun(id); }, 1200); },
       function (e) { U.phase = 'form'; U.err = e.message === 'Failed to fetch' ? 'Der Upload hat nicht geklappt. Bitte gleich noch einmal versuchen.' : e.message; render(); });
   },
-  doubt: function () { var p = cur(); if (p) postComment(p.oz, { doubt: true, text: 'Preis passt nicht (Dashboard)' }, 'Zweifel an ' + p.oz); }
 };
 Object.assign(A, LIVEA, STARTA);
 
