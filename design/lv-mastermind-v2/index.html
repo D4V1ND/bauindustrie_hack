@@ -457,7 +457,7 @@ h1{margin:12px 0 0;font-size:clamp(2rem,4.2vw,3.3rem);line-height:1.02;font-weig
 .confirm .cfill{position:absolute;inset:0;z-index:0;background:var(--ok);transform:scaleX(0);transform-origin:left;transition:transform .55s var(--ease)}
 .confirm.is-confirming{color:var(--on-ok);transition:color .25s .2s;pointer-events:none}
 .confirm.is-confirming .cfill{transform:none}
-.confirm.is-confirming::after,.confirm.is-confirming .arrow{display:none}
+.confirm.is-confirming::after,.confirm.is-confirming .cgo{display:none}
 .confirm.is-confirming .cbadge{background:color-mix(in srgb,var(--on-ok) 18%,transparent);color:var(--on-ok)}
 .confirm.is-confirming .cbadge path{stroke-dasharray:24;stroke-dashoffset:24;animation:draw .35s var(--ease) .25s forwards}
 .cbadge svg.i{width:18px;height:18px;stroke-width:2.6}
@@ -467,13 +467,15 @@ h1{margin:12px 0 0;font-size:clamp(2rem,4.2vw,3.3rem);line-height:1.02;font-weig
 .confirm .ca{display:flex;flex-direction:column;align-items:flex-end;gap:5px;white-space:nowrap}
 .confirm .ca small{font:400 .6rem/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;opacity:.55}
 .confirm .ca b{font:500 17px/1 var(--sans);letter-spacing:-.02em}
-.confirm .arrow{width:18px;height:18px;opacity:.7}
+.confirm .cgo{flex:none;width:38px;height:38px;margin-left:6px;display:grid;place-items:center;border:1px solid color-mix(in srgb,currentColor 28%,transparent);transition:background .25s,border-color .25s,color .25s}
+.confirm .arrow{width:16px;height:16px;stroke-width:2;transition:transform .3s var(--spring)}
 .confirm::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.14) 50%,transparent 65%);transform:translateX(-120%);animation:pay-sheen 3.6s ease-in-out infinite;pointer-events:none}
 .confirm::before{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--ok);transform:scaleX(0);transform-origin:left;transition:transform .5s var(--ease)}
 .confirm:hover{transform:translateY(-1px);box-shadow:0 18px 36px -16px color-mix(in srgb,var(--ok) 60%,rgba(0,0,0,.5))}
 .confirm:hover::before{transform:none}
 .confirm:hover .cbadge svg{transform:scale(1.18)}
-.confirm:hover .arrow{transform:translateX(4px);opacity:1}
+.confirm:hover .cgo{background:var(--ok);border-color:var(--ok);color:var(--on-ok)}
+.confirm:hover .arrow{transform:translateX(2px)}
 .confirm:active{transform:scale(.985)}
 .confirm.hold .cbadge{background:var(--warn);color:#fff}
 .confirm.hold::before{top:0;height:auto;background:var(--warn);opacity:.9;transition:transform .25s var(--ease)}
@@ -961,7 +963,7 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .dw.ai-open .confirm{height:38px}
 .dw.ai-open .confirm .cl small,.dw.ai-open .confirm .ca small{opacity:0;max-height:0}
 .dw.ai-open .confirm .cl,.dw.ai-open .confirm .ca{gap:0}
-.dw.ai-open .confirm .cbadge{width:26px;height:26px}
+.dw.ai-open .confirm .cbadge,.dw.ai-open .confirm .cgo{width:26px;height:26px}
 .dw.ai-open .confirm .ca b{font-size:14px}
 .dw.ai-open .okline{min-height:38px;padding:6px 14px}
 .price>.mini,.gwsec>.mini{height:40px}
@@ -1987,7 +1989,7 @@ function vDrawer(d) {
     : '<button class="confirm' + (devWarn ? ' hold' : '') + (S.holding ? ' is-holding' : '') + (S.confirming ? ' is-confirming' : '') + '" data-k="cta" ' + (devWarn ? 'data-hold="1"' : 'data-act="okNext"') + '>' +
         '<span class="cfill"></span><span class="cbadge">' + (devWarn ? IC.warn : IC.tick) + '</span>' +
         '<span class="cl"><b>' + (S.confirming ? 'Bestätigt' : devWarn ? 'Gedrückt halten' : 'Preis bestätigen') + '</b><small>' + (devWarn ? 'Mehr als 10 % neben der Empfehlung' : nextOpen ? 'und weiter zu ' + nextOpen.oz : 'letzte offene Position') + '</small></span>' +
-        '<span class="ca"><small>GP</small><b>' + eur(S.editEp && dd !== null ? Math.round(dv * 100) / 100 * p.menge : p.gp) + '</b></span>' + (devWarn ? '' : IC.arrow) + '</button>';
+        '<span class="ca"><small>GP</small><b>' + eur(S.editEp && dd !== null ? Math.round(dv * 100) / 100 * p.menge : p.gp) + '</b></span>' + (devWarn || !nextOpen ? '' : '<span class="cgo" aria-hidden="true">' + IC.arrow + '</span>') + '</button>';
 
   var cm = (R.comments || []).concat(S.comments[p.oz] || []);
   var ext = R.ext, seq = S.seqs[p.oz];
