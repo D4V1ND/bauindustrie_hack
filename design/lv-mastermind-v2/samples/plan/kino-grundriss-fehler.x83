@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GAEB xmlns="http://www.gaeb.de/GAEB_DA_XML/DA83/3.3">
+ <GAEBInfo>
+  <Version>3.3</Version>
+  <VersDate>2021-05</VersDate>
+  <Date>2026-11-21</Date>
+  <Time>14:20:00</Time>
+  <ProgSystem>LV-Check Mock-Generator</ProgSystem>
+ </GAEBInfo>
+ <PrjInfo>
+  <NamePrj>KINO-S3</NamePrj>
+  <LblPrj>Umbau Kino Muster, Saal 3 (fiktiv)</LblPrj>
+  <Cur>EUR</Cur>
+  <CurLbl>Euro</CurLbl>
+  <BidCommPerm>Yes</BidCommPerm>
+  <AlterBidPerm>No</AlterBidPerm>
+  <UPFracDig>2</UPFracDig>
+ </PrjInfo>
+ <Award>
+  <DP>83</DP>
+  <AwardInfo>
+   <Cur>EUR</Cur>
+   <CurLbl>Euro</CurLbl>
+  </AwardInfo>
+  <OWN>
+   <Address>
+    <Name1>Architekturbüro Beispiel GmbH (fiktiv)</Name1>
+    <Street>Musterstraße 1</Street>
+    <PCode>80000</PCode>
+    <City>Musterstadt</City>
+    <Country>DE</Country>
+   </Address>
+  </OWN>
+  <BoQ ID="8b443d53-9b9d-48d4-b448-5d5ff4b49c75">
+   <BoQInfo>
+    <Name>LV A-201</Name>
+    <LblTx>LV Kino Saal 3 – Ausbau und Ausstattung nach Grundriss A-201, Index b</LblTx>
+    <Date>2026-11-21</Date>
+    <OutlCompl>AllTxt</OutlCompl>
+    <BoQBkdn>
+     <Type>BoQLevel</Type>
+     <Length>2</Length>
+     <Num>Yes</Num>
+    </BoQBkdn>
+    <BoQBkdn>
+     <Type>Item</Type>
+     <Length>4</Length>
+     <Num>Yes</Num>
+    </BoQBkdn>
+   </BoQInfo>
+   <BoQBody>
+    <BoQCtgy ID="c8117003-6661-4ddb-8c53-daa0258e4df3" RNoPart="01">
+     <LblTx><p><span>Baustelleneinrichtung und Reinigung</span></p></LblTx>
+     <BoQBody>
+      <Itemlist>
+       <Item ID="c78cfb80-461d-41bf-89df-dc4726cf9415" RNoPart="0010">
+        <Qty>1.000</Qty>
+        <QU>psch</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Baustelle einrichten, vorhalten und räumen</span></p><p><span>Planbezug: Grundriss A-201, Index b</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Baustelle einrichten, vorhalten und räumen</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+       <Item ID="002d73cf-da39-4980-a28b-a6650253961e" RNoPart="0020">
+        <Qty>331.800</Qty>
+        <QU>m²</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Bauendreinigung Kinosaal und Foyer</span></p><p><span>Mengenermittlung: NGF lt. Plankopf 331,80 m²</span></p><p><span>Planbezug: Grundriss A-201, Index b</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Bauendreinigung Kinosaal und Foyer</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+      </Itemlist>
+     </BoQBody>
+    </BoQCtgy>
+    <BoQCtgy ID="bb9db5f5-e272-4c21-81bf-6904e87789dd" RNoPart="02">
+     <LblTx><p><span>Stufenanlage</span></p></LblTx>
+     <BoQBody>
+      <Itemlist>
+       <Item ID="db53f5bb-4519-4c38-9138-2d689b1dcc61" RNoPart="0010">
+        <Qty>180.600</Qty>
+        <QU>m²</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Stufenanlage aus StB-Fertigteilen, 13 Reihen, Auftritt 1,00 m, Steigung 0,20 m, Breite 14,00 m</span></p><p><span>Mengenermittlung: 14,00 m × 13 × 1,00 m − Tiefe letzte Reihe 0,10 m = 14,00 × 12,90 m</span></p><p><span>Planbezug: Grundriss A-201, Index b</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Stufenanlage aus StB-Fertigteilen, 13 Reihen, Auftritt 1,00 m, Steigu…</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+       <Item ID="869acc35-cab4-451c-9587-9bc2a90ac73b" RNoPart="0020">
+        <Qty>19.600</Qty>
+        <QU>m²</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Querweg OKFF +2,60 m, StB-Podest, Tiefe 1,40 m</span></p><p><span>Mengenermittlung: 14,00 m × 1,40 m</span></p><p><span>Planbezug: Grundriss A-201, Index b</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Querweg OKFF +2,60 m, StB-Podest, Tiefe 1,40 m</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+       <Item ID="659830e1-0898-4f50-9f8b-d57aa99f006f" RNoPart="0030">
+        <Qty>52.000</Qty>
+        <QU>St</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Gangstufe 10/50 cm in den Seitengängen</span></p><p><span>Mengenermittlung: 2 Gänge × 13 Reihen × 2 Stufen</span></p><p><span>Planbezug: Grundriss A-201, Index b</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Gangstufe 10/50 cm in den Seitengängen</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+       <Item ID="3f4749c2-a4cd-4c21-b333-11251e88fcd8" RNoPart="0040">
+        <Qty>62.400</Qty>
+        <QU>m</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Stufenkantenprofil nachleuchtend, Länge 1,20 m</span></p><p><span>Mengenermittlung: 52 Gangstufen × 1,20 m</span></p><p><span>Planbezug: Grundriss A-201, Index b</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Stufenkantenprofil nachleuchtend, Länge 1,20 m</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+      </Itemlist>
+     </BoQBody>
+    </BoQCtgy>
+    <BoQCtgy ID="13478529-ae6f-48b3-922e-e4e961e5ba9c" RNoPart="03">
+     <LblTx><p><span>Türen und Fenster</span></p></LblTx>
+     <BoQBody>
+      <Itemlist>
+       <Item ID="0046cdfc-17b5-47c7-b6bf-4f8b733be033" RNoPart="0010">
+        <Qty>2.000</Qty>
+        <QU>St</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Fluchttür 2-flügelig 1,26 × 2,26 m, EI30-RS, Panikbeschlag EN 1125 (T1, T2)</span></p><p><span>Mengenermittlung: T1, T2 Saal → Foyer</span></p><p><span>Planbezug: Grundriss A-201, Index b</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Fluchttür 2-flügelig 1,26 × 2,26 m, EI30-RS, Panikbeschlag EN 1125 (T…</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+       <Item ID="5510283b-a4d4-42cc-a6f5-5b90d32d82a8" RNoPart="0020">
+        <Qty>2.000</Qty>
+        <QU>St</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Notausgangstür ins Freie 1,26 × 2,26 m, Panikbeschlag EN 1125 (T3, T4)</span></p><p><span>Mengenermittlung: T3, T4 Vorzone Saal</span></p><p><span>Planbezug: Grundriss A-201, Index b</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Notausgangstür ins Freie 1,26 × 2,26 m, Panikbeschlag EN 1125 (T3, T4)</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+       <Item ID="5951dbc1-01f9-40d1-83fa-67e2d35a6603" RNoPart="0030">
+        <Qty>1.000</Qty>
+        <QU>St</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Außentür 2-flügelig 1,76 × 2,26 m (T5)</span></p><p><span>Mengenermittlung: T5 Foyer → Außentreppe</span></p><p><span>Planbezug: Grundriss A-201, Index b</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Außentür 2-flügelig 1,76 × 2,26 m (T5)</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+       <Item ID="d14c9756-d725-4cf9-a879-3f64e92b2e94" RNoPart="0040">
+        <Qty>2.000</Qty>
+        <QU>St</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Fensterelement Aluminium 2,51 × 2,26 m (F1, F2)</span></p><p><span>Mengenermittlung: F1, F2 Foyer Südseite</span></p><p><span>Planbezug: Grundriss A-201, Index b</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Fensterelement Aluminium 2,51 × 2,26 m (F1, F2)</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+       <Item ID="d48a3a36-783d-4ed8-8402-263c97dc85a5" RNoPart="0050">
+        <Qty>1.000</Qty>
+        <QU>St</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Fensterelement Aluminium 1,76 × 2,26 m (F3)</span></p><p><span>Mengenermittlung: F3 Foyer Westseite</span></p><p><span>Planbezug: Grundriss A-201, Index b</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Fensterelement Aluminium 1,76 × 2,26 m (F3)</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+       <Item ID="42a0e1df-05fa-4b30-83e5-c5bc154f84f8" RNoPart="0060">
+        <Qty>2.000</Qty>
+        <QU>St</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Notausgangstür ins Freie 1,26 × 2,26 m, Panikbeschlag EN 1125 (T3, T4)</span></p><p><span>Mengenermittlung: T3, T4 Vorzone Saal</span></p><p><span>Planbezug: Grundriss A-201, Index b</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Notausgangstür ins Freie 1,26 × 2,26 m, Panikbeschlag EN 1125 (T3, T4)</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+      </Itemlist>
+     </BoQBody>
+    </BoQCtgy>
+    <BoQCtgy ID="086b9d1b-6443-4fc3-af7d-6284bc3270dc" RNoPart="04">
+     <LblTx><p><span>Bodenbeläge</span></p></LblTx>
+     <BoQBody>
+      <Itemlist>
+       <Item ID="108b16bb-088f-4c3c-8595-c0473a5b16d0" RNoPart="0010">
+        <Qty>116.360</Qty>
+        <QU>m</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Teppichboden Objektqualität, Kinosaal (Vorzone, Gänge, Querweg)</span></p><p><span>Mengenermittlung: Vorzone 14,00 × 4,70 + Gänge 2 × 1,20 × 12,90 + Querweg 14,00 × 1,40</span></p><p><span>Planbezug: Grundriss A-201, Index b</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Teppichboden Objektqualität, Kinosaal (Vorzone, Gänge, Querweg)</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+       <Item ID="aecf61f3-4781-4d97-9d9a-279156eeecf3" RNoPart="0020">
+        <Qty>194.640</Qty>
+        <QU>m²</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Bodenbeschichtung PU auf Stufen unter dem Gestühl</span></p><p><span>Mengenermittlung: 11,60 m × 12,90 m</span></p><p><span>Planbezug: Grundriss A-201, Index b</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Bodenbeschichtung PU auf Stufen unter dem Gestühl</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+       <Item ID="390a7fa5-bd82-4d3e-a8cf-a116198d4c15" RNoPart="0030">
+        <Qty>58.240</Qty>
+        <QU>m²</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Feinsteinzeug 60 × 60 cm, Foyer</span></p><p><span>Mengenermittlung: 65,80 m² − Treppenauge 2,80 × 2,70 m (7,56 m²)</span></p><p><span>Planbezug: Grundriss A-201, Index b</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Feinsteinzeug 60 × 60 cm, Foyer</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+       <Item ID="6d293b1f-241d-49d6-a097-c43fe31e5d44" RNoPart="0030">
+        <Qty>32.120</Qty>
+        <QU>m</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Sockelleiste Feinsteinzeug, Foyer</span></p><p><span>Mengenermittlung: Umfang 2 × (14,00 + 4,70) = 37,40 m − Türen T1, T2, T5 (5,28 m)</span></p><p><span>Planbezug: Grundriss A-201, Index b</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Sockelleiste Feinsteinzeug, Foyer</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+      </Itemlist>
+     </BoQBody>
+    </BoQCtgy>
+    <BoQCtgy ID="03c0929a-06b8-45fb-9195-333f0f938682" RNoPart="05">
+     <LblTx><p><span>Gestühl</span></p></LblTx>
+     <BoQBody>
+      <Itemlist>
+       <Item ID="2a5862d7-3838-4598-a70d-ddc64e1250d6" RNoPart="0010">
+        <Qty>237.000</Qty>
+        <QU>St</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Kinosessel Klappsitz, Breite 0,55 m, mit Armlehnen und Becherhaltern, inkl. Reihen-/Platznummer</span></p><p><span>Mengenermittlung: 13 Reihen × 21 Plätze</span></p><p><span>Planbezug: Grundriss A-201, Index b</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Kinosessel Klappsitz, Breite 0,55 m, mit Armlehnen und Becherhaltern,…</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+       <Item ID="9f5b1134-60eb-4476-ac73-e062a79966e1" RNoPart="0020">
+        <Qty>4.000</Qty>
+        <QU>St</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Rollstuhlplatz 0,95 × 1,30 m mit Begleitsitz und Kennzeichnung</span></p><p><span>Mengenermittlung: RS Vorzone</span></p><p><span>Planbezug: Grundriss A-201, Index b</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Rollstuhlplatz 0,95 × 1,30 m mit Begleitsitz und Kennzeichnung</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+      </Itemlist>
+     </BoQBody>
+    </BoQCtgy>
+    <BoQCtgy ID="91cdf775-7d30-480a-b3dc-4bbba098110d" RNoPart="06">
+     <LblTx><p><span>Kinotechnik und Beschallung</span></p></LblTx>
+     <BoQBody>
+      <Itemlist>
+       <Item ID="538e5b9b-ac65-4d23-85f7-1700b09ef7be" RNoPart="0010">
+        <Qty>60.000</Qty>
+        <QU>m²</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Bildwand ca. 60 m², Ausführung nach Wahl des AN, ggf. mit Maskierung</span></p><p><span>Planbezug: Grundriss A-201, Index b</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Bildwand ca. 60 m², Ausführung nach Wahl des AN, ggf. mit Maskierung</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+       <Item ID="9f115eb9-b5a0-4577-a079-2eb61a2885de" RNoPart="0020">
+        <Qty>3.000</Qty>
+        <QU>St</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Bühnenlautsprecher hinter Bildwand (L, C, R)</span></p><p><span>Mengenermittlung: L, C, R</span></p><p><span>Planbezug: Grundriss A-201, Index b</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Bühnenlautsprecher hinter Bildwand (L, C, R)</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+       <Item ID="5e031088-5784-4811-a903-970ff784595f" RNoPart="0040">
+        <Qty>8.000</Qty>
+        <QU>St</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Surround-Lautsprecher Wandmontage</span></p><p><span>Mengenermittlung: SL1–SL4, SR1–SR4, RS1–RS2</span></p><p><span>Planbezug: Grundriss A-201, Index b</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Surround-Lautsprecher Wandmontage</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+       <Item ID="9013c6cb-6bc8-41cc-991a-48d897f4862a" RNoPart="0050">
+        <Qty>1.000</Qty>
+        <QU>St</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Digital-Kinoprojektor inkl. Projektionsfenster</span></p><p><span>Mengenermittlung: Vorführraum OG, nur gestrichelt</span></p><p><span>Planbezug: Grundriss A-201, Index b</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Digital-Kinoprojektor inkl. Projektionsfenster</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+      </Itemlist>
+     </BoQBody>
+    </BoQCtgy>
+    <BoQCtgy ID="4a3ad2bd-a428-4329-bf2f-499692d25f1c" RNoPart="07">
+     <LblTx><p><span>Foyer</span></p></LblTx>
+     <BoQBody>
+      <Itemlist>
+       <Item ID="7af5bdb4-5e20-4fd9-97ca-1c3f5fdf5cf5" RNoPart="0010">
+        <Qty>1.000</Qty>
+        <QU>St</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Theke Bar/Kasse, Länge 3,60 m</span></p><p><span>Mengenermittlung: Bar / Kasse</span></p><p><span>Planbezug: Grundriss A-201, Index b</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Theke Bar/Kasse, Länge 3,60 m</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+       <Item ID="63125d81-b7b7-4d8d-853e-ae74e9e1dda2" RNoPart="0020">
+        <Qty>1.000</Qty>
+        <QU>St</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Treppe Foyer → EG, 13 Steigungen à 20 cm, Breite 2,80 m, inkl. Geländer</span></p><p><span>Mengenermittlung: Treppe ins EG ±0,00</span></p><p><span>Planbezug: Grundriss A-201, Index b</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Treppe Foyer → EG, 13 Steigungen à 20 cm, Breite 2,80 m, inkl. Geländ…</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+      </Itemlist>
+     </BoQBody>
+    </BoQCtgy>
+    <BoQCtgy ID="3d043af9-9903-4ea7-9a2a-ac2ff93cf533" RNoPart="08">
+     <LblTx><p><span>Brandschutz und Sicherheit</span></p></LblTx>
+     <BoQBody>
+      <Itemlist>
+       <Item ID="c2470397-62e4-4862-8de7-5e67bac96d06" RNoPart="0010">
+        <Qty>3.000</Qty>
+        <QU>St</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Feuerlöscher 6 kg Schaum inkl. Wandhalterung und Schild</span></p><p><span>Mengenermittlung: 2 × Saal, 1 × Foyer</span></p><p><span>Planbezug: Grundriss A-201, Index b</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Feuerlöscher 6 kg Schaum inkl. Wandhalterung und Schild</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+       <Item ID="a8a04ad4-654e-4883-938d-dac668c55d9e" RNoPart="0020">
+        <Qty>4.000</Qty>
+        <QU>St</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Rettungszeichen Notausgang (Schild)</span></p><p><span>Mengenermittlung: NA an T1–T4</span></p><p><span>Planbezug: Grundriss A-201, Index b</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Rettungszeichen Notausgang (Schild)</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+      </Itemlist>
+     </BoQBody>
+    </BoQCtgy>
+   </BoQBody>
+  </BoQ>
+ </Award>
+</GAEB>

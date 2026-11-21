@@ -25,7 +25,8 @@ ENV_FILE = Path(__file__).resolve().parent.parent / ".env"
 # Step 3 search by meaning (Voyage AI; Anthropic has no embedding model). The saved vectors are per model, so a
 # new model never meets old vectors.
 EMBED_MODEL = "voyage-4"
-EMBED_FILE = Path(__file__).resolve().parent.parent / "data" / "embeddings" / f"{EMBED_MODEL}.json"
+# LV_DATA (set by the API, on the server a persistent volume) keeps the vectors across redeploys
+EMBED_FILE = Path(os.environ.get("LV_DATA") or Path(__file__).resolve().parent.parent / "data") / "embeddings" / f"{EMBED_MODEL}.json"
 # ponytail: sized for Voyage's limit without a payment method (3 calls and 10,000 tokens a minute; a text here is at
 # most ~300 tokens). With a payment method the limit is far higher; raise the batch to 128 if embedding is too slow.
 EMBED_BATCH = 32  # texts per Voyage call
@@ -225,7 +226,7 @@ class MissingKey(Exception):
 def structured(model: str, shape: type[Shape], effort: str, thinking: bool = False):
     """The chat model, set up to answer in `shape` with the given effort level. With `thinking`, each answer also
     carries the model's summarised thinking: {"raw": message, "parsed": shape or None, "parsing_error": ...}."""
-    key = os.environ.get("ANTHROPIC_API_KEY") or dotenv_values(ENV_FILE).get("ANTHROPIC_API_KEY")
+    key = (os.environ.get("ANTHROPIC_API_KEY") or dotenv_values(ENV_FILE).get("ANTHROPIC_API_KEY") or "").strip()  # a pasted key often ends in a newline
     if not key:
         raise MissingKey(
             "This step asks Claude, and no API key is set up.\n"
@@ -296,7 +297,7 @@ def anthropic_client():
 
 def voyage_key() -> str | None:
     """The Voyage AI key, if set up. Without it the search runs by words only."""
-    return os.environ.get("VOYAGE_API_KEY") or dotenv_values(ENV_FILE).get("VOYAGE_API_KEY")
+    return (os.environ.get("VOYAGE_API_KEY") or dotenv_values(ENV_FILE).get("VOYAGE_API_KEY") or "").strip() or None
 
 
 @functools.cache

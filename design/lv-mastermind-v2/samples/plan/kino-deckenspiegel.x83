@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GAEB xmlns="http://www.gaeb.de/GAEB_DA_XML/DA83/3.3">
+ <GAEBInfo>
+  <Version>3.3</Version>
+  <VersDate>2021-05</VersDate>
+  <Date>2026-11-21</Date>
+  <Time>14:20:00</Time>
+  <ProgSystem>LV-Check Mock-Generator</ProgSystem>
+ </GAEBInfo>
+ <PrjInfo>
+  <NamePrj>KINO-S3</NamePrj>
+  <LblPrj>Umbau Kino Muster, Saal 3 (fiktiv)</LblPrj>
+  <Cur>EUR</Cur>
+  <CurLbl>Euro</CurLbl>
+  <BidCommPerm>Yes</BidCommPerm>
+  <AlterBidPerm>No</AlterBidPerm>
+  <UPFracDig>2</UPFracDig>
+ </PrjInfo>
+ <Award>
+  <DP>83</DP>
+  <AwardInfo>
+   <Cur>EUR</Cur>
+   <CurLbl>Euro</CurLbl>
+  </AwardInfo>
+  <OWN>
+   <Address>
+    <Name1>Architekturbüro Beispiel GmbH (fiktiv)</Name1>
+    <Street>Musterstraße 1</Street>
+    <PCode>80000</PCode>
+    <City>Musterstadt</City>
+    <Country>DE</Country>
+   </Address>
+  </OWN>
+  <BoQ ID="33987017-5eef-48d1-a702-4b1c0a9bcc1c">
+   <BoQInfo>
+    <Name>LV A-401</Name>
+    <LblTx>LV Kino Saal 3 – Decke, Elektro, Lüftung nach Deckenspiegel A-401</LblTx>
+    <Date>2026-11-21</Date>
+    <OutlCompl>AllTxt</OutlCompl>
+    <BoQBkdn>
+     <Type>BoQLevel</Type>
+     <Length>2</Length>
+     <Num>Yes</Num>
+    </BoQBkdn>
+    <BoQBkdn>
+     <Type>Item</Type>
+     <Length>4</Length>
+     <Num>Yes</Num>
+    </BoQBkdn>
+   </BoQInfo>
+   <BoQBody>
+    <BoQCtgy ID="973d8550-e242-4ae3-aa7f-bc1709bb6054" RNoPart="01">
+     <LblTx><p><span>Deckenbekleidungen</span></p></LblTx>
+     <BoQBody>
+      <Itemlist>
+       <!-- Prüfhinweis 01.0010: W3: Schnitt A-302 und Grundriss nennen UK +7,50 m -->
+       <Item ID="af52accf-80df-4bea-bdae-415b1c78caee" RNoPart="0010">
+        <Qty>266.000</Qty>
+        <QU>m²</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Akustikdecke Mineralfaser 625 × 625 mm, abgehängt, Kinosaal, UK +7,20 m</span></p><p><span>Mengenermittlung: 14,00 m × 19,00 m</span></p><p><span>Planbezug: Deckenspiegel A-401, Index -</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Akustikdecke Mineralfaser 625 × 625 mm, abgehängt, Kinosaal, UK +7,20…</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+       <!-- Prüfhinweis 01.0020: W3: bei UK +7,50 beträgt die Abhängehöhe nur 1,50 m -->
+       <Item ID="7da433b7-57ed-47e2-b9ec-506f4485dd04" RNoPart="0020">
+        <Qty>266.000</Qty>
+        <QU>m²</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Zulage Abhängehöhe 1,50–2,00 m (Rohdecke UK +9,00)</span></p><p><span>Mengenermittlung: wie 01.0010, Abhängehöhe 9,00 − 7,20 = 1,80 m</span></p><p><span>Planbezug: Deckenspiegel A-401, Index -</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Zulage Abhängehöhe 1,50–2,00 m (Rohdecke UK +9,00)</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+       <Item ID="6c813fd9-e0e0-473c-bebb-0eba6d621abf" RNoPart="0030">
+        <Qty>58.240</Qty>
+        <QU>m²</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>GK-Decke abgehängt, Foyer, UK +5,30 m, Q3</span></p><p><span>Mengenermittlung: 14,00 × 4,70 m − Treppenauge 7,56 m²</span></p><p><span>Planbezug: Deckenspiegel A-401, Index -</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>GK-Decke abgehängt, Foyer, UK +5,30 m, Q3</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+       <Item ID="90360773-5903-40ac-8a24-e2d8094be803" RNoPart="0040">
+        <Qty>69.000</Qty>
+        <QU>St</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Deckenausschnitt für Einbauteile herstellen</span></p><p><span>Mengenermittlung: Saal: 40 Downlights + 6 Lautsprecher + 6 Abluftgitter + 8 Sicherheitsleuchten; Foyer: 7 Downlights + 2 Sicherheitsleuchten</span></p><p><span>Planbezug: Deckenspiegel A-401, Index -</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Deckenausschnitt für Einbauteile herstellen</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+      </Itemlist>
+     </BoQBody>
+    </BoQCtgy>
+    <BoQCtgy ID="2c78ad3c-44d1-49cf-80cb-3831ce165b77" RNoPart="02">
+     <LblTx><p><span>Beleuchtung</span></p></LblTx>
+     <BoQBody>
+      <Itemlist>
+       <Item ID="398b9c28-0cc7-47e6-afe7-147c30ac0224" RNoPart="0010">
+        <Qty>40.000</Qty>
+        <QU>St</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>LED-Downlight dimmbar DALI, Saalbeleuchtung</span></p><p><span>Mengenermittlung: 5 × 8 Raster</span></p><p><span>Planbezug: Deckenspiegel A-401, Index -</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>LED-Downlight dimmbar DALI, Saalbeleuchtung</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+       <Item ID="9276cc22-ad2e-4dc2-b5d7-adc286dc2d0e" RNoPart="0020">
+        <Qty>7.000</Qty>
+        <QU>St</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>LED-Downlight Foyer</span></p><p><span>Mengenermittlung: Foyer</span></p><p><span>Planbezug: Deckenspiegel A-401, Index -</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>LED-Downlight Foyer</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+       <Item ID="99da9eb4-121a-4a6c-b445-a68763fdec10" RNoPart="0030">
+        <Qty>1.000</Qty>
+        <QU>psch</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Lichtsteuerung DALI inkl. Programmierung</span></p><p><span>Mengenermittlung: Hinweis Saalbeleuchtung DALI</span></p><p><span>Planbezug: Deckenspiegel A-401, Index -</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Lichtsteuerung DALI inkl. Programmierung</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+       <Item ID="db3ca457-aa1e-44ed-aed2-36f672d3173b" RNoPart="0040">
+        <Qty>10.000</Qty>
+        <QU>St</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Sicherheitsleuchte nach DIN EN 1838</span></p><p><span>Mengenermittlung: 8 × Saal, 2 × Foyer</span></p><p><span>Planbezug: Deckenspiegel A-401, Index -</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Sicherheitsleuchte nach DIN EN 1838</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+       <!-- Prüfhinweis 02.0050: W4: Grundriss A-201 hat 4 Notausgänge (T1–T4) → an T4 fehlt eine Leuchte -->
+       <Item ID="1ff45685-617b-4b1e-b339-ca19d9160018" RNoPart="0050">
+        <Qty>3.000</Qty>
+        <QU>St</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Rettungszeichenleuchte, beidseitig, Einzelbatterie</span></p><p><span>Mengenermittlung: RZL an T1, T2, T3</span></p><p><span>Planbezug: Deckenspiegel A-401, Index -</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Rettungszeichenleuchte, beidseitig, Einzelbatterie</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+      </Itemlist>
+     </BoQBody>
+    </BoQCtgy>
+    <BoQCtgy ID="5d99b189-6b66-463c-baa6-2542d5cbc8f3" RNoPart="03">
+     <LblTx><p><span>Brandmeldetechnik</span></p></LblTx>
+     <BoQBody>
+      <Itemlist>
+       <!-- Prüfhinweis 03.0010: Melder lt. Notiz auf Rohdecke über Akustikdecke → Detektion im Saal prüfen -->
+       <Item ID="c62ece97-b70f-4181-b8f2-49a320b68854" RNoPart="0010">
+        <Qty>10.000</Qty>
+        <QU>St</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Automatischer Rauchmelder inkl. Sockel</span></p><p><span>Mengenermittlung: 8 × Saal, 2 × Foyer</span></p><p><span>Planbezug: Deckenspiegel A-401, Index -</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Automatischer Rauchmelder inkl. Sockel</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+      </Itemlist>
+     </BoQBody>
+    </BoQCtgy>
+    <BoQCtgy ID="19c1055b-f3ea-4b67-9a15-3bf909af3460" RNoPart="04">
+     <LblTx><p><span>Lüftung</span></p></LblTx>
+     <BoQBody>
+      <Itemlist>
+       <Item ID="bd4f6208-eaa6-40af-9c14-413f5298d4b1" RNoPart="0010">
+        <Qty>6.000</Qty>
+        <QU>St</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Abluftgitter 800 × 400 mm in Akustikdecke</span></p><p><span>Mengenermittlung: AB, 2 × 3 Stück</span></p><p><span>Planbezug: Deckenspiegel A-401, Index -</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Abluftgitter 800 × 400 mm in Akustikdecke</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+       <!-- Prüfhinweis 04.0020: Kanal nicht im Deckenspiegel dargestellt, nur im Schnitt -->
+       <Item ID="962db213-dd7c-4190-98c7-4b8fb0fd31bc" RNoPart="0020">
+        <Qty>12.000</Qty>
+        <QU>m</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Abluftkanal 800 × 500 mm über Akustikdecke</span></p><p><span>Mengenermittlung: Länge aus Schnitt A-302</span></p><p><span>Planbezug: Deckenspiegel A-401, Index -</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Abluftkanal 800 × 500 mm über Akustikdecke</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+      </Itemlist>
+     </BoQBody>
+    </BoQCtgy>
+    <BoQCtgy ID="5986a6fc-0fc6-466c-b0d0-559d91ff1e66" RNoPart="05">
+     <LblTx><p><span>Beschallung Decke</span></p></LblTx>
+     <BoQBody>
+      <Itemlist>
+       <Item ID="6a74a2e0-d96d-4663-b7c7-f21f4bbaf09a" RNoPart="0010">
+        <Qty>6.000</Qty>
+        <QU>St</QU>
+        <Description>
+         <CompleteText>
+          <DetailTxt><Text><p><span>Deckenlautsprecher Top-Surround inkl. Einbaurahmen</span></p><p><span>Mengenermittlung: 2 × 3 Stück</span></p><p><span>Planbezug: Deckenspiegel A-401, Index -</span></p></Text></DetailTxt>
+          <OutlineText><OutlTxt><TextOutlTxt><p><span>Deckenlautsprecher Top-Surround inkl. Einbaurahmen</span></p></TextOutlTxt></OutlTxt></OutlineText>
+         </CompleteText>
+        </Description>
+       </Item>
+      </Itemlist>
+     </BoQBody>
+    </BoQCtgy>
+   </BoQBody>
+  </BoQ>
+ </Award>
+</GAEB>

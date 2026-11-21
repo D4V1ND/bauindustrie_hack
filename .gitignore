@@ -23,3 +23,6 @@ vlm/plans/*
 # VLM local env and outputs
 vlm/.venv/
 vlm/out/
+.vercel
+.env*
+!.env.example
