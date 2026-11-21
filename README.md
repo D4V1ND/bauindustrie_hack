@@ -249,7 +249,7 @@ words only.
 - `python -m lv ingest ...` and `python -m lv price ...` index the LV as their **last step**. A run's status stays
   `running` until that is done. A `--copy-only` run builds a word-only index (it promises no AI calls).
 - **While a tender's run is going, the assistant does not answer about it.** It replies with `state: "waiting"`
-  ("Bitte warte, bis die Extraktion abgeschlossen ist"), asks no model and saves nothing. The panel polls
+  ("Please wait until the extraction has finished"), asks no model and saves nothing. The panel polls
   `GET /assistant/status` and unlocks the input when the state is `ready`.
 - A result without an index (from before this feature) or with an outdated one is indexed in the background the
   first time the assistant is asked; the state is `indexing` until then.
@@ -289,5 +289,5 @@ server-side refusal fallback. It needs `ANTHROPIC_API_KEY` in `.env`. The addres
 | `PATCH` | `/projects/{project}/bidder-questions/{id}` | change a draft or its `status` (`draft`, `ready`, `discarded`) |
 
 `state` of an answer: `answered`, `waiting` (the tender is still extracting or indexing), `refused` or `error`.
-`actions` lists what the assistant changed (e.g. "Kommentar an 03.0040 gespeichert"), so the view can reload that
+`actions` lists what the assistant changed (e.g. "Comment saved on 03.0040"), so the view can reload that
 item; `positions` lists the cards it looked at.

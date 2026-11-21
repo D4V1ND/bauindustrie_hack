@@ -41,7 +41,7 @@ class Shown(BaseModel):
     role: Literal["user", "assistant"]
     text: str
     at: str
-    actions: list[str] = []  # what the assistant changed, e.g. "Kommentar an 03.0040 gespeichert"
+    actions: list[str] = []  # what the assistant changed, e.g. "Comment saved on 03.0040"
     positions: list[str] = []  # card ids the answer looked at
 
 
@@ -198,18 +198,18 @@ def readiness(data: Path, project: str | None, run_state: Callable[[str], str | 
         run = run_state(project)
         if run == "running":
             return Readiness(state="extracting", library=library, message=(
-                f"Die Extraktion von {project} läuft noch. Ich kann Fragen zu diesem LV beantworten, sobald sie "
-                "fertig und alles für mich indexiert ist. Bitte warte, bis die Extraktion abgeschlossen ist."))
+                f"The extraction of {project} is still running. I can answer questions about this LV once it is "
+                "done and everything is indexed for me. Please wait until the extraction has finished."))
         if not (data / "out" / f"{project}.json").exists():
             return Readiness(state="failed" if run == "failed" else "missing", library=library, message=(
-                f"Für {project} gibt es noch kein Ergebnis" + (", die letzte Extraktion ist fehlgeschlagen." if run ==
-                                                                "failed" else ". Lade zuerst ein LV hoch.")))
+                f"There is no result for {project} yet" + (", the last extraction failed." if run == "failed"
+                                                             else ". Upload an LV first.")))
         if not built(project, "tender"):
             waiting.insert(0, project)
     if waiting:
         return Readiness(state="indexing", library=library, message=(
-            f"Die Positionen von {', '.join(waiting)} werden gerade für mich indexiert. Bitte warte einen Moment, "
-            "bis das fertig ist."))
+            f"The items of {', '.join(waiting)} are being indexed for me. Please wait a moment until that is "
+            "done."))
     return Readiness(state="ready", message="", library=library)
 
 
@@ -358,7 +358,7 @@ class Session:
         lv, item = self._write_item(oz, lambda lv: comment(lv, oz, text, price, doubt))
         item.comments[-1].author = "assistant"
         self._save(lv)
-        self.actions.append(f"Kommentar an {item.oz} gespeichert")
+        self.actions.append(f"Comment saved on {item.oz}")
         return {"saved": item.comments[-1].model_dump(), "confidence": item.risk.confidence if item.risk else None}
 
     def edit_comment(self, oz: str, comment_number: int, text: str) -> dict:
@@ -372,7 +372,7 @@ class Session:
             return item
         lv, item = self._write_item(oz, change)
         self._save(lv)
-        self.actions.append(f"Kommentar {comment_number} an {item.oz} geändert")
+        self.actions.append(f"Comment {comment_number} on {item.oz} changed")
         return {"comment": item.comments[comment_number - 1].model_dump()}
 
     def draft_bidder_question(self, items: list[str], subject: str, question: str, reason_internal: str) -> dict:
@@ -385,7 +385,7 @@ class Session:
                                    question=question.strip(), reason_internal=reason_internal.strip(),
                                    created=_now(), updated=_now())
             save_bidder_questions(self.data, project, found + [draft])
-        self.actions.append(f"Bieterfrage {draft.id} entworfen")
+        self.actions.append(f"Bidder question {draft.id} drafted")
         return {"saved": draft.model_dump()}
 
     def update_bidder_question(self, id: str, subject: str | None, question: str | None,
@@ -402,18 +402,18 @@ class Session:
                     setattr(draft, field, new.strip() if field != "status" else new)
             draft.updated = _now()
             save_bidder_questions(self.data, project, found)
-        self.actions.append(f"Bieterfrage {id} geändert")
+        self.actions.append(f"Bidder question {id} changed")
         return {"saved": draft.model_dump()}
 
     def remember(self, text: str, only_this_project: bool) -> dict:
         fact = remember(self.data, text, self.tab.project if only_this_project else None)
-        self.actions.append("Gemerkt: " + fact.text[:60])
+        self.actions.append("Remembered: " + fact.text[:60])
         return {"saved": fact.model_dump()}
 
     def forget(self, id: str) -> dict:
         if not forget(self.data, id):
             raise ToolError(f"No stored fact {id}.")
-        self.actions.append(f"Vergessen: {id}")
+        self.actions.append(f"Forgot: {id}")
         return {"forgotten": id}
 
     # helpers -----------------------------------------------------------------------------------------------------
@@ -537,7 +537,7 @@ def ask(data: Path, tab: Tab, text: str, ready: Readiness, running: Callable[[st
         blocks = [block.model_dump(mode="json", exclude_none=True) for block in response.content]
         messages.append({"role": "assistant", "content": blocks})
         if response.stop_reason == "refusal":
-            state, answer = "refused", "Dabei kann ich nicht helfen. Frag mich gern etwas zu den LVs und Preisen."
+            state, answer = "refused", "I can't help with that. Feel free to ask me about the LVs and prices."
             break
         if response.stop_reason == "pause_turn":
             continue
@@ -545,7 +545,7 @@ def ask(data: Path, tab: Tab, text: str, ready: Readiness, running: Callable[[st
         answer = "\n\n".join(block.text for block in response.content if block.type == "text").strip()
         if response.stop_reason != "tool_use" or not uses:
             if response.stop_reason == "max_tokens":
-                answer += "\n\n(Die Antwort wurde abgeschnitten.)"
+                answer += "\n\n(The answer was cut off.)"
             break
         results = []
         for use in uses:
@@ -561,13 +561,13 @@ def ask(data: Path, tab: Tab, text: str, ready: Readiness, running: Callable[[st
         messages.append({"role": "user", "content": results})
     else:
         state = "error"
-        answer = (answer + "\n\n" if answer else "") + "Ich habe zu viele Schritte gebraucht und hier abgebrochen."
+        answer = (answer + "\n\n" if answer else "") + "I needed too many steps and stopped here."
     if state == "refused":
         messages = messages[:-1]  # a refused turn is not kept, so the next message starts clean
         messages.append({"role": "assistant", "content": [{"type": "text", "text": answer}]})
     tab.messages = messages
     tab.shown += [Shown(role="user", text=text, at=_now()),
-                  Shown(role="assistant", text=answer or "(keine Antwort)", at=_now(), actions=session.actions,
+                  Shown(role="assistant", text=answer or "(no answer)", at=_now(), actions=session.actions,
                         positions=list(dict.fromkeys(session.positions)))]
     tab.updated = _now()
     save_tab(data, tab)

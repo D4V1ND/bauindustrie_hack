@@ -82,7 +82,7 @@ def test_the_assistant_searches_then_comments_only_on_its_own_tender(data):
     reply = assistant.ask(data, tab, "Was kostet ein Schieber DN 200? Schreib es an 01.0010.", ready,
                           running=lambda p: False, create=create)
     assert reply.state == "answered" and reply.text.startswith("774,53")
-    assert reply.actions == ["Kommentar an 01.0010 gespeichert"] and "P1/06.01.4" in reply.positions
+    assert reply.actions == ["Comment saved on 01.0010"] and "P1/06.01.4" in reply.positions
     results = sent[2][-1]["content"]
     assert results[0].get("is_error") is None and results[1]["is_error"]  # the library cannot be changed
     saved = json.loads((data / "out" / "H1.json").read_text())["items"][0]["comments"][0]
@@ -146,7 +146,7 @@ def test_tabs_and_the_waiting_answer_while_the_extraction_runs(client, data):
     api.runs["H1"] = SimpleNamespace(poll=lambda: None)  # a run of H1 is going
     assert client.get("/assistant/status?project=H1").json()["state"] == "extracting"
     reply = client.post(f"/assistant/tabs/{tab['id']}/messages", json={"text": "Was kostet 01.0010?"}).json()
-    assert reply["state"] == "waiting" and "warte" in reply["text"]
+    assert reply["state"] == "waiting" and "wait" in reply["text"]
     assert client.get(f"/assistant/tabs/{tab['id']}").json()["shown"] == []  # nothing saved, ask again later
 
     api.runs["H1"] = SimpleNamespace(poll=lambda: 0)  # done
