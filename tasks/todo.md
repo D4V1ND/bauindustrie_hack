@@ -457,6 +457,14 @@ Built before tasks 6 and 7: step 3 does not need trades or item types.
     merge (ok, differs with its finding and marker, an m2 item not checked, a plan component no item covers); the
     command writes the merged file.
 
+- [x] **Task 23: Backend API for the frontend** (small)
+  - `lv/api.py` (FastAPI): `POST /projects` saves the LV and the optional plan under `data/uploads/<project>/` and
+    starts `python -m lv price` in its own process (`LV_DATA` tells it the data folder); its printed lines are the
+    run's log. Status, project list, result, judge log and one judge call, plan files by name, comments.
+  - README: architecture, endpoints, a typical session, shapes, errors. Interactive docs at `/docs`.
+  - Tests: a copy-only upload runs end to end and takes a comment; bad uploads are refused before anything runs;
+    only files named in the result's `plan` are served.
+
 ### Checkpoint: step 3
 - [x] All tests pass without network and without a key.
 - [x] `lv price --copy-only` on P2's own `.X83` copies only correct prices.
