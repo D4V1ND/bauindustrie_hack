@@ -415,6 +415,8 @@ h1{margin:12px 0 0;font-size:clamp(2rem,4.2vw,3.3rem);line-height:1.02;font-weig
 .ffsearch input::placeholder{color:var(--ink-3)}
 .fflist{max-height:300px;overflow:auto;padding:4px}
 .ffopt .mono{font-size:11px}
+.ffsub{padding-left:28px;font-size:12.5px;color:var(--ink-2)}
+.fflist .menu-h{padding:6px 10px 4px}
 .ffback{color:var(--ink-3)}
 .ffsep{display:block;height:1px;background:var(--line);margin:4px -4px}
 .ffempty{margin:0;padding:18px 10px;text-align:center;font-size:12.5px;color:var(--ink-3)}
@@ -1485,7 +1487,7 @@ function toPos(it) {
   var mode = MODE[m] || 'offen';
   if (mode !== 'offen' && conf < 50) mode = 'unsicher';
   return { oz: it.oz, kurz: it.short_text || it.oz, lang: it.long_text || it.short_text || '', menge: it.quantity || 0, einheit: it.unit || '', gewerk: gwName(it),
-    ep: own != null ? own : med, aiEp: med, srvManual: own != null, risk: rk.score || 0, conf: conf, mode: mode, why: why, method: m, typ: it.item_type || '', planSt: it.plan ? it.plan.status || '' : '', opt: it.kind === 'optional', owner: '', val: rk.value || 0, cmts: it.comments || [],
+    ep: own != null ? own : med, aiEp: med, srvManual: own != null, risk: rk.score || 0, conf: conf, mode: mode, why: why, method: m, typ: it.item_type || '', descQ: rk.description || '', missing: rk.missing || [], planSt: it.plan ? it.plan.status || '' : '', opt: it.kind === 'optional', owner: '', val: rk.value || 0, cmts: it.comments || [],
     lo: own != null ? own : pr.min != null ? Math.min(pr.min, med) : med, hi: own != null ? own : pr.max != null ? Math.max(pr.max, med) : med, sg: own == null && !med ? suggest(pr) : null };
 }
 function toRich(it, extra) {
@@ -1603,18 +1605,22 @@ function cmtN(oz) { var rr = D.rich[oz] || {}; return (rr.comments || []).length
 // Each facet: its label, the value a row has, and the names of known values (in this order; others follow A to Z).
 // Options inside a facet are alternatives (OR); different facets narrow each other (AND).
 var FACETS = [
-  { k: 'gewerk', label: 'Gewerk', icon: 'hat', of: function (r) { return r.gewerk; } },
+  // Gewerk (trade) on top, its categories (item_type) below: "g:<Gewerk>" and "t:<Gewerk>›<Kategorie>"
+  { k: 'kat', label: 'Gewerk & Kategorie', icon: 'hat', tree: true, of: function (r) { return ['g:' + r.gewerk, r.typ ? 't:' + r.gewerk + '›' + r.typ : '']; } },
   { k: 'quelle', label: 'Preisquelle', icon: 'tag', of: function (r) { return r.manual ? 'own' : r.method || ''; },
     names: { copied: '1:1 aus Alt-LV', similar: 'Gleichwertige Position', adjusted: 'Interpoliert', reference: 'Verwandte Positionen (Median)', none: 'Keine Referenz', own: 'Eigener Preis' },
     dots: { copied: 'var(--ok)', similar: 'var(--ok)', adjusted: 'var(--signal)', reference: 'var(--warn)', none: 'var(--bad)', own: 'var(--ink)' } },
   { k: 'status', label: 'Status', icon: 'dash', of: function (r) { return S.confirmed[r.oz] ? 'ok' : r.gen && !r.manual ? 'auto' : !(r.ep > 0) ? 'noprice' : 'open'; },
     names: { open: 'Offen', noprice: 'Offen · ohne Preis', ok: 'Bestätigt', auto: 'Automatisch übernommen' },
     icons: { open: 'circle', noprice: 'dash', ok: 'check', auto: 'check' }, tints: { open: 'var(--ink)', noprice: 'var(--bad)', ok: 'var(--ok)', auto: 'var(--ink-3)' } },
-  { k: 'typ', label: 'Kategorie', icon: 'box', of: function (r) { return r.typ || ''; } },
   { k: 'konf', label: 'Konfidenz', icon: 'gauge', of: function (r) { return !(r.ep > 0) ? '' : r.conf >= 75 ? 'hi' : r.conf >= 50 ? 'mid' : 'lo'; },
     names: { lo: 'Niedrig · unter 50 %', mid: 'Mittel · 50–74 %', hi: 'Hoch · ab 75 %' }, dots: { lo: 'var(--bad)', mid: 'var(--warn)', hi: 'var(--ok)' } },
   { k: 'hint', label: 'Hinweis', icon: 'flag', of: function (r) { return [r.isDriver ? 'driver' : '', r.why.indexOf('Bündelbar') === 0 || S.bundled[r.oz] ? 'bundle' : '']; },
     names: { driver: 'Kostentreiber · 80 % des Volumens', bundle: 'Bündelbar' } },
+  { k: 'desc', label: 'Beschreibung', icon: 'doc', of: function (r) { return r.descQ; },
+    names: { vague: 'Unklar', gaps: 'Lücken', complete: 'Vollständig' }, dots: { vague: 'var(--bad)', gaps: 'var(--warn)', complete: 'var(--ok)' } },
+  { k: 'miss', label: 'Fehlende Angabe', icon: 'alert', of: function (r) { return r.missing || []; } },
+  { k: 'unit', label: 'Einheit', icon: 'ruler', of: function (r) { return r.einheit; } },
   { k: 'plan', label: 'Bauplan', icon: 'plan', of: function (r) { return r.planSt || ''; },
     names: { differs: 'Menge weicht ab', not_in_plan: 'Nicht im Plan', units_differ: 'Einheit weicht ab', ok_unstable: 'Zählung schwankt', ok: 'Stimmt mit Plan', not_checked: 'Nicht geprüft' },
     dots: { differs: 'var(--bad)', not_in_plan: 'var(--warn)', units_differ: 'var(--warn)', ok_unstable: 'var(--warn)', ok: 'var(--ok)', not_checked: 'var(--ink-3)' } }
@@ -1630,10 +1636,14 @@ var FI = {  // small line icons for the filter bar (lucide shapes)
   plan: '<svg class="i" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17"/><path d="M3.5 12h8v8.5M11.5 3.5V8M15 12h5.5"/></svg>',
   back: '<svg class="i" viewBox="0 0 24 24"><path d="m14 6-6 6 6 6"/></svg>',
   gauge: '<svg class="i" viewBox="0 0 24 24"><path d="M4 17a8 8 0 1 1 16 0"/><path d="m12 17 4-5"/></svg>',
-  flag: '<svg class="i" viewBox="0 0 24 24"><path d="M5 21V4h11l-2 4 2 4H5"/></svg>'
+  flag: '<svg class="i" viewBox="0 0 24 24"><path d="M5 21V4h11l-2 4 2 4H5"/></svg>',
+  doc: '<svg class="i" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h5"/></svg>',
+  alert: '<svg class="i" viewBox="0 0 24 24"><path d="M12 4 3 20h18z"/><path d="M12 10v4M12 17v.5"/></svg>',
+  ruler: '<svg class="i" viewBox="0 0 24 24"><path d="m4 16 12-12 4 4-12 12z"/><path d="m8 12 2 2M11 9l2 2M14 6l2 2"/></svg>',
+  sort: '<svg class="i" viewBox="0 0 24 24"><path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4"/></svg>'
 };
 function facet(k) { return FACETS.filter(function (f) { return f.k === k; })[0]; }
-function ffName(f, v) { return (f.names && f.names[v]) || v; }
+function ffName(f, v) { if (f.tree) return v.slice(2).split('›').pop(); return (f.names && f.names[v]) || v; }
 function ffValIcon(f, v) {
   if (f.dots) return '<i class="ffdot" style="background:' + (f.dots[v] || 'var(--ink-3)') + '"></i>';
   if (f.icons) return '<span class="ffic" style="color:' + f.tints[v] + '">' + FI[f.icons[v]] + '</span>';
@@ -1656,6 +1666,17 @@ function ffCounts(d, k) {  // option counts for facet k, given every other facet
 }
 function ffOpts(d, k, q) {  // the facet's values, known ones in their order, then A to Z; filtered by the search text
   var f = facet(k), c = ffCounts(d, k), known = Object.keys(f.names || {});
+  if (f.tree) {  // each Gewerk, then its categories; a search hit on a category keeps its Gewerk, a hit on the Gewerk keeps all
+    var out = [], m = function (v) { return !q || ffName(f, v).toLowerCase().indexOf(q) >= 0; };
+    Object.keys(c).filter(function (v) { return v[0] === 'g'; }).sort(function (a, b) { return a.localeCompare(b, 'de'); }).forEach(function (g) {
+      var name = g.slice(2), kids = Object.keys(c).filter(function (v) { return v.indexOf('t:' + name + '›') === 0; }).sort(function (a, b) { return a.localeCompare(b, 'de'); });
+      var hit = m(g), shown = hit ? kids : kids.filter(m);
+      if (!hit && !shown.length) return;
+      out.push({ v: g, n: c[g] });
+      shown.forEach(function (t) { out.push({ v: t, n: c[t], sub: true }); });
+    });
+    return out;
+  }
   return Object.keys(c).sort(function (a, b) { var x = known.indexOf(a), y = known.indexOf(b); return x >= 0 || y >= 0 ? (x < 0 ? 99 : x) - (y < 0 ? 99 : y) : a.localeCompare(b, 'de'); })
     .filter(function (v) { return !q || ffName(f, v).toLowerCase().indexOf(q) >= 0; }).map(function (v) { return { v: v, n: c[v] }; });
 }
@@ -1694,7 +1715,7 @@ function derive() {
   var f = fdef[S.filter] ? S.filter : 'all';
   var rows = base.filter(fdef[f]);
   var k = S.sort.k, d = S.sort.d;
-  rows.sort(function (a, b) { var x = a[k], y = b[k]; return (typeof x === 'string' ? x.localeCompare(y, 'de') : x - y) * d; });
+  rows.sort(function (a, b) { var x = a[k], y = b[k], c = (typeof x === 'string' ? x.localeCompare(y, 'de') : x - y) * d; return c || (b.gp - a.gp) || a.oz.localeCompare(b.oz, 'de', { numeric: true }); });
   return { all: all, full: full, tot: tot, maxGp: maxGp, driver: driver, base: base, pre: pre, fdef: fdef, f: f, rows: rows };
 }
 function lookup(key, d) {
@@ -1755,9 +1776,12 @@ function vFilterChips(d) {
       '<div class="mw"><button class="fc-b" data-act="ffMenu" data-v="' + valM + '" aria-haspopup="true" aria-expanded="' + (S.menu === valM) + '"><span class="fc-icons">' + x.vals.slice(0, 3).map(function (v) { return ffValIcon(f, v); }).join('') + '</span>' +
         (many ? x.vals.length + ' ausgewählt' : esc(ffName(f, x.vals[0]))) + '</button>' +
         (S.menu === valM ? (function () {
-          var opts = ffOpts(d, x.k, q), sel = opts.filter(function (o) { return x.vals.indexOf(o.v) >= 0; }), rest = opts.filter(function (o) { return x.vals.indexOf(o.v) < 0; });
+          var item = function (o, on) { return '<button class="mi ffopt' + (o.sub ? ' ffsub' : '') + (on ? ' on' : '') + '" role="menuitemcheckbox" aria-checked="' + on + '" data-act="ffVal" data-id="' + x.id + '" data-v="' + esc(o.v) + '"><span class="ffbox">' + (on ? IC.tick : '') + '</span>' + ffValIcon(f, o.v) + '<span class="mt">' + esc(ffName(f, o.v)) + '</span><span class="mono faint">' + o.n + '</span></button>'; };
+          var opts = ffOpts(d, x.k, q);
+          if (f.tree) return '<div class="menu left ffpop" role="menu" data-k="m' + valM + '">' + ffSearch(f.label) + '<div class="fflist">' +
+            opts.map(function (o) { return item(o, x.vals.indexOf(o.v) >= 0); }).join('') + (opts.length ? '' : '<p class="ffempty">Keine Treffer</p>') + '</div></div>';
+          var sel = opts.filter(function (o) { return x.vals.indexOf(o.v) >= 0; }), rest = opts.filter(function (o) { return x.vals.indexOf(o.v) < 0; });
           x.vals.forEach(function (v) { if (!sel.some(function (o) { return o.v === v; }) && (!q || ffName(f, v).toLowerCase().indexOf(q) >= 0)) sel.push({ v: v, n: 0 }); });
-          var item = function (o, on) { return '<button class="mi ffopt' + (on ? ' on' : '') + '" role="menuitemcheckbox" aria-checked="' + on + '" data-act="ffVal" data-id="' + x.id + '" data-v="' + esc(o.v) + '"><span class="ffbox">' + (on ? IC.tick : '') + '</span>' + ffValIcon(f, o.v) + '<span class="mt">' + esc(ffName(f, o.v)) + '</span><span class="mono faint">' + o.n + '</span></button>'; };
           return '<div class="menu left ffpop" role="menu" data-k="m' + valM + '">' + ffSearch(f.label) + '<div class="fflist">' +
             sel.map(function (o) { return item(o, true); }).join('') + (sel.length && rest.length ? '<i class="ffsep"></i>' : '') + rest.map(function (o) { return item(o, false); }).join('') +
             (sel.length || rest.length ? '' : '<p class="ffempty">Keine Treffer</p>') + '</div></div>';
@@ -1766,6 +1790,20 @@ function vFilterChips(d) {
   });
   out += '<button class="fc-clear" data-act="ffClear">Zurücksetzen</button>';
   return '<div class="ffbar" data-k="ffbar">' + out + '</div>';
+}
+// sort keys: field on the row, label, default direction (1 ascending, -1 descending)
+var SORTS = [['conf', 'Konfidenz', 1], ['gp', 'Wert (GP)', -1], ['risk', 'Risiko', -1], ['oz', 'OZ', 1], ['kurz', 'Leistung', 1], ['menge', 'Menge', -1], ['ep', 'Einheitspreis', -1]];
+function vSort() {
+  var cur = SORTS.filter(function (x) { return x[0] === S.sort.k; })[0] || SORTS[0], open = S.menu === 'sort', up = S.sort.d > 0;
+  return '<div class="mw"><button class="btn btn-quiet" data-act="menu" data-v="sort" aria-haspopup="true" aria-expanded="' + open + '" title="Sortieren">' + FI.sort + cur[1] + ' ' + (up ? '↑' : '↓') + '</button>' +
+    (open ? '<div class="menu ffpop" role="menu" data-k="msort"><div class="fflist"><div class="menu-h mono">Sortieren nach</div>' + SORTS.map(function (x) {
+      var on = x[0] === cur[0];
+      return '<button class="mi' + (on ? ' on' : '') + '" role="menuitemradio" aria-checked="' + on + '" data-act="sortBy" data-v="' + x[0] + '"><span class="mt">' + x[1] + '</span>' + (on ? '<span class="chk">' + IC.tick + '</span>' : '') + '</button>';
+    }).join('') + '<i class="ffsep"></i>' +
+      [[1, 'Aufsteigend ↑'], [-1, 'Absteigend ↓']].map(function (x) {
+        var on = (x[0] > 0) === up;
+        return '<button class="mi' + (on ? ' on' : '') + '" role="menuitemradio" aria-checked="' + on + '" data-act="sortDir" data-v="' + x[0] + '"><span class="mt">' + x[1] + '</span>' + (on ? '<span class="chk">' + IC.tick + '</span>' : '') + '</button>';
+      }).join('') + '</div></div>' : '') + '</div>';
 }
 function vFilterAdd(d) {  // the "Filter" button: first the facet, then its value
   var q = (S.ffQ || '').trim().toLowerCase(), n = ffN();
@@ -1779,7 +1817,7 @@ function vFilterAdd(d) {  // the "Filter" button: first the facet, then its valu
         if (miss) extra = '<p class="ffnote">' + miss + (miss === 1 ? ' Bauteil im Plan fehlt' : ' Bauteile im Plan fehlen') + ' im LV · im Bauplan markiert</p>';
       }
       body = '<button class="mi ffback" data-act="ffView" data-v="">' + FI.back + '<span class="mt">' + view.label + '</span></button>' +
-        opts.map(function (o) { return '<button class="mi ffopt" data-act="ffAdd" data-v="' + esc(o.v) + '">' + ffValIcon(view, o.v) + '<span class="mt">' + esc(ffName(view, o.v)) + '</span><span class="mono faint">' + o.n + '</span></button>'; }).join('') +
+        opts.map(function (o) { return '<button class="mi ffopt' + (o.sub ? ' ffsub' : '') + '" data-act="ffAdd" data-v="' + esc(o.v) + '">' + ffValIcon(view, o.v) + '<span class="mt">' + esc(ffName(view, o.v)) + '</span><span class="mono faint">' + o.n + '</span></button>'; }).join('') +
         (opts.length ? '' : '<p class="ffempty">Keine Treffer</p>') + extra;
     } else {
       var fs = FACETS.filter(function (f) { return ffOpts(d, f.k, '').length && (!q || f.label.toLowerCase().indexOf(q) >= 0); });
@@ -1990,7 +2028,7 @@ function vTable(d) {
     '<div class="lv-head"><div><div class="mono faint"><span style="color:var(--ink)">03</span> Leistungsverzeichnis</div>' +
       '</div>' +
       '<div class="lv-stats">' + (function () { var sf = safeRows(d); return sf.length ? '<button class="btn btn-primary bulksafe" data-act="bulkSafe" title="Konfidenz ab 75 % und höchstens 2 % des LV-Volumens">' + IC.tick + (sf.length === 1 ? '1 sicheren Preis übernehmen' : sf.length + ' sichere Preise übernehmen') + '</button>' : ''; })() + '<div class="lv-stat"><span class="mono">Bestätigt</span><b>' + okN + '<small> / ' + d.all.length + '</small></b><i class="lv-meter"><i style="width:' + (okN / d.all.length * 100) + '%"></i></i></div></div></div>' +
-    vBulkNote(d) + '<div class="lv-split' + (planShown() ? '' : ' plan-off') + '">' + (planShown() ? vPlan(d) : '') + '<div class="lv-main"><div class="lv-bar"><div class="tools"><label class="search">' + IC.search + '<span class="sr">Positionen filtern</span><input id="q-lv" type="search" data-in="q" value="' + esc(S.q) + '" placeholder="Suchen…" title="OZ, Text, Gewerk oder Kategorie"></label>' + vFilterAdd(d) +
+    vBulkNote(d) + '<div class="lv-split' + (planShown() ? '' : ' plan-off') + '">' + (planShown() ? vPlan(d) : '') + '<div class="lv-main"><div class="lv-bar"><div class="tools"><label class="search">' + IC.search + '<span class="sr">Positionen filtern</span><input id="q-lv" type="search" data-in="q" value="' + esc(S.q) + '" placeholder="Suchen…" title="OZ, Text, Gewerk oder Kategorie"></label>' + vFilterAdd(d) + vSort() +
         '<span class="vsep" aria-hidden="true"></span>' +
         '<div class="seg" role="group" aria-label="Darstellung"><button class="' + (S.density === 'compact' ? 'on' : '') + '" data-act="density" data-v="compact" aria-pressed="' + (S.density === 'compact') + '">Kompakt</button><button class="' + (S.density === 'details' ? 'on' : '') + '" data-act="density" data-v="details" aria-pressed="' + (S.density === 'details') + '">Full</button></div>' +
         (hasPlan() ? '<button class="btn btn-quiet' + (planShown() ? ' on' : '') + '" data-act="planToggle" aria-pressed="' + planShown() + '" title="' + (planShown() ? 'Bauplan ausblenden' : 'Bauplan einblenden') + '">' + IC.panel + 'Bauplan</button>' : '') +
@@ -2487,7 +2525,9 @@ var A = {
   },
   sort: function (ds) { var on = S.sort.k === ds.v; set({ sort: { k: ds.v, d: on ? -S.sort.d : ((ds.v === 'oz' || ds.v === 'kurz' || ds.v === 'conf') ? 1 : -1) } }); },
   filter: function (ds) { set({ filter: ds.v }); },
-  gewerk: function (ds) { var ff = (S.ff || []).filter(function (x) { return x.k !== 'gewerk'; }); if (ds.v) ff.push({ id: 'g' + Date.now(), k: 'gewerk', not: false, vals: [ds.v] }); set({ ff: ff, lvLimit: 60 }); },
+  gewerk: function (ds) { var ff = (S.ff || []).filter(function (x) { return x.k !== 'kat'; }); if (ds.v) ff.push({ id: 'g' + Date.now(), k: 'kat', not: false, vals: ['g:' + ds.v] }); set({ ff: ff, lvLimit: 60 }); },
+  sortBy: function (ds) { set({ sort: { k: ds.v, d: SORTS.filter(function (x) { return x[0] === ds.v; })[0][2] }, menu: null }); },
+  sortDir: function (ds) { set({ sort: { k: S.sort.k, d: +ds.v }, menu: null }); },
   ffMenu: function (ds) { var o = S.menu === ds.v; set({ menu: o ? null : ds.v, ffView: null, ffQ: '', focusFf: !o }); },
   ffView: function (ds) { set({ ffView: ds.v || null, ffQ: '', focusFf: true }); },
   ffAdd: function (ds) {  // a value from the "Filter" menu: joins a positive filter of that facet, else starts one
