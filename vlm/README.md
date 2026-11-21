@@ -26,3 +26,8 @@ ueber den Plan (Umrechnung: `x * breite_px`, `y * hoehe_px`).
 Flaechenpositionen (m2) haben `plan.zuordnung = "Raum"`: Ihre Marker sind Rahmen (`form: "rahmen"`) um die zugeordneten
 Raeume (`plan.raeume`, `plan.menge` = Raumflaeche laut Plan, nur Info, kein Vergleich). Die Raeume liest `extract_plan.py`
 zusammen mit den Bauteilen aus (`raeume` in `out/<plan>_laeufe<N>.json`).
+
+## Uebersicht pro Plan + LV
+`run.py` schreibt bei jedem Lauf mit Plan automatisch `out/<lv>__<plan>_uebersicht.png` (Plan mit allen verorteten Positionen
+durchnummeriert, Raeume als Rahmen, Legende rechts; "P1, P2" = im Plan, nicht im LV) und `.xlsx` (Blatt "Positionen" mit allen
+Positionen inkl. Nr., Status, Verortung, Befunde; Blatt "Plan" mit dem Bild). Manuell: `python overview.py out/<lv>_ergebnis.json plans/<plan>.png`.

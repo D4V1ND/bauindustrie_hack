@@ -14,6 +14,7 @@ from compare import build_result
 from extract_plan import extract_runs, image_size
 from gaeb_llm import extract_positions
 from llm_common import client_and_model
+from overview import make as make_overview
 
 OUT = Path(__file__).parent / "out"
 
@@ -56,6 +57,9 @@ if __name__ == "__main__":
     result = build_result(lv, plan_runs, plan_meta, client, model, rooms)
     dest = OUT / f"{lv_path.stem}_ergebnis.json"
     dest.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+    if a.plan:  # one fixed overview per plan + LV: PNG (plan with all positions numbered) and Excel
+        png, xlsx = make_overview(result, Path(a.plan), OUT, lv_path.stem)
+        print(f"Übersicht: {png.name}, {xlsx.name}")
     z = result["zusammenfassung"]
     print(f"\n{result['eingaben']['lv']['positionen']} Positionen, {z['befunde']} Befunde -> {dest}")
     for f in result["befunde"]:
