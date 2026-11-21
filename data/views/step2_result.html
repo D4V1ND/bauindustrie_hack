@@ -15,27 +15,29 @@ details table{margin:2px 0 10px 40px;width:calc(100% - 40px)}details td{padding:
 mark{background:#d9822b;color:#000;padding:0 6px;border-radius:3px;font-size:12px;font-weight:600}
 tr.flag td{background:#2a2117}.why{color:#e8c268;font-size:13px;margin-top:2px}
 .opt{color:#9aa3ad;border:1px solid #3a3f48;border-radius:3px;padding:0 4px;font-size:11px}
-.scroll{overflow-x:auto}
+.scroll{overflow-x:auto}.rsn{color:#9aa3ad;font-size:12.5px;margin-top:1px}
 </style>
 <h1>Step 2 result: sorting line items into trades and item types</h1>
 <p class=lead>The built step 2 was run for real on two new LVs. Every item got a valid item type and trade.
-Of all 346 assignments, 322 have nothing to object to and
-2 are clear mistakes. The weak spots are the stand-in trade list and how surcharges are counted.</p>
+Of all 346 assignments, 323 have nothing to object to and
+1 is a clear mistake. The weak spots are the stand-in trade list and how surcharges are counted.</p>
 <p><small>P5 is a stream culvert, P4 a road and water pipe project. Result files: <code>data/out/P5.json</code> and
-<code>data/out/P4.json</code>, written by <code>lv price</code>. Models: Opus proposes the item type list, Haiku assigns the items.</small></p>
+<code>data/out/P4.json</code>, written by <code>lv price</code>. Models: Opus proposes the item type list, Sonnet (effort high) assigns the items and gives a reason for each. This is the run the repo's current code produced, with the price library of P1, P2 and P3.</small></p>
+
+<p><b>Jump to the grouping:</b> <a href="#p5" style="color:#8fb8ff">P5</a> &middot; <a href="#p4" style="color:#8fb8ff">P4</a></p>
 
 <h2>Scorecard</h2>
 <div class=scroll><table><tr><th></th><th>P5</th><th>P4</th></tr>
 <tr><td>Line items</td><td class=num>50</td><td class=num>296</td></tr>
-<tr><td>Item types</td><td class=num>20</td><td class=num>73</td></tr>
-<tr><td>Trades</td><td class=num>11</td><td class=num>16</td></tr>
-<tr><td><b>Assignments with nothing to object to</b></td><td class=num><b>47 of 50 (94%)</b></td><td class=num><b>275 of 296 (93%)</b></td></tr>
-<tr><td>Clear mistakes</td><td class=num>0</td><td class=num>2</td></tr>
-<tr><td>Debatable</td><td class=num>2</td><td class=num>3</td></tr>
-<tr><td>Trade list gap (type right, no fitting trade)</td><td class=num>1</td><td class=num>9</td></tr>
-<tr><td>Rule broken (type named after a surcharge)</td><td class=num>0</td><td class=num>7</td></tr>
-<tr><td>Item types with a single item</td><td class=num>8</td><td class=num>17</td></tr>
-<tr><td>Largest item type</td><td class=num>Stundenlohnarbeit, 7 items</td><td class=num>Gerätestunde, 19 items</td></tr>
+<tr><td>Item types</td><td class=num>19</td><td class=num>72</td></tr>
+<tr><td>Trades</td><td class=num>10</td><td class=num>16</td></tr>
+<tr><td><b>Assignments with nothing to object to</b></td><td class=num><b>46 of 50 (92%)</b></td><td class=num><b>277 of 296 (94%)</b></td></tr>
+<tr><td>Clear mistakes</td><td class=num>0</td><td class=num>1</td></tr>
+<tr><td>Debatable</td><td class=num>3</td><td class=num>3</td></tr>
+<tr><td>Trade list gap (type right, no fitting trade)</td><td class=num>1</td><td class=num>15</td></tr>
+<tr><td>Rule broken (type named after a surcharge)</td><td class=num>0</td><td class=num>0</td></tr>
+<tr><td>Item types with a single item</td><td class=num>6</td><td class=num>20</td></tr>
+<tr><td>Largest item type</td><td class=num>Stundenlohnarbeit, 7 items</td><td class=num>Rohrgrabenaushub, 19 items</td></tr>
 <tr><td>AI calls per run (1 for the list, 1 per 25 items)</td><td class=num>3</td><td class=num>13</td></tr>
 </table></div>
 <p><small>"Nothing to object to" comes from one reading of every assignment by the assistant: all short texts, and the long
@@ -45,40 +47,39 @@ texts of the doubtful ones. It is not an estimator's judgement.</small></p>
 <div class=scroll><table><tr><th>Rule</th><th>P5</th><th>P4</th></tr>
 <tr><td>Every item has exactly one item type from the list, with that type's trade</td><td class=ok>pass &middot; 50 of 50</td><td class=ok>pass &middot; 296 of 296</td></tr>
 <tr><td>No item left in the catch-all "Sonstiges" (other)</td><td class=ok>pass &middot; 0 items</td><td class=ok>pass &middot; 0 items</td></tr>
-<tr><td>Number of item types stays within the cap</td><td class=ok>pass &middot; 20 of 20 allowed</td><td class=ok>pass &middot; 73 of 74 allowed</td></tr>
+<tr><td>Number of item types stays within the cap</td><td class=ok>pass &middot; 19 of 20 allowed</td><td class=ok>pass &middot; 72 of 74 allowed</td></tr>
 <tr><td>Identical items (same group) got the same item type</td><td class=na>no repeated items</td><td class=ok>pass &middot; 7 groups, 16 items</td></tr>
-<tr><td>No item type named after a surcharge</td><td class=ok>pass</td><td class=bad>fail &middot; Erschwerniszulage Tiefbau</td></tr>
+<tr><td>No item type named after a surcharge</td><td class=ok>pass</td><td class=ok>pass</td></tr>
 <tr><td>No sizes in item type names</td><td class=ok>pass</td><td class=ok>pass</td></tr>
 </table></div>
-<p>The one failure: P4's list contains the type "Erschwerniszulage Tiefbau", which collects 7 general surcharges.
-The code was changed after this run to drop such a type. P4 has not been run again since, so the fix is not confirmed on real data.</p>
+<p>All rules pass. In the earlier Haiku run, P4's list had a type named after a surcharge; the code now drops such a type,
+and in this run its surcharges went to the work they belong to.</p>
 
 <h2>What the reading found</h2>
 <div class=scroll><table><tr><th>Item</th><th>Short text</th><th>Filed under</th><th>Finding</th><th>Why</th></tr>
-<tr><td class=oz>P5/02.0010</td><td>Betonauflager für Einlaufbauwerk, Stärke 20 cm</td><td>Entwässerungskanalarbeiten &rsaquo; Rohrbettung</td><td class=k-debatable>Debatable</td><td>Concrete bedding for the inlet structure, filed under pipe bedding. The type &quot;Einlaufbauwerk&quot; would fit better.</td></tr>
+<tr><td class=oz>P5/02.0010</td><td>Betonauflager für Einlaufbauwerk, Stärke 20 cm</td><td>Erdarbeiten &rsaquo; Rohrbettung</td><td class=k-debatable>Debatable</td><td>Concrete bedding for the inlet structure, filed under pipe bedding. The type &quot;Einlaufbauwerk&quot; would fit better.</td></tr>
 <tr><td class=oz>P5/02.0004</td><td>Begrünungsarbeiten</td><td>Erdarbeiten &rsaquo; Oberbodenarbeit</td><td class=k-debatable>Debatable</td><td>Greening (seeding), filed under topsoil work.</td></tr>
-<tr><td class=oz>P5/02.0020</td><td>Wasserbausteine C 200/400 liefern und versetzen</td><td>Sonstiges &rsaquo; Wasserbaustein</td><td class=k-trade>Trade list gap</td><td>The type is fine, but its trade is &quot;Sonstiges&quot; (other): the trade list has nothing for hydraulic engineering.</td></tr>
-<tr><td class=oz>P4/04.04.0008</td><td>Flanschnachumhüllung mit Schrumpfmanschette, konfektioniert wie folgt:</td><td>Rohrleitungsbau &rsaquo; Schubsicherung</td><td class=k-mistake>Clear mistake</td><td>A shrink sleeve that wraps a flange against corrosion, filed under thrust restraint.</td></tr>
-<tr><td class=oz>P4/05.01.0025</td><td>Angenommene Stundenlohnarbeiten pauschal.</td><td>Stundenlohnarbeiten &rsaquo; Gerätestunde</td><td class=k-mistake>Clear mistake</td><td>A lump sum for all hourly work, labour and machines, filed under machine hours.</td></tr>
-<tr><td class=oz>P4/03.03.0028</td><td>Hydrantenschacht, Rückbau und Beseitigung wie folgt:</td><td>Demontage und Rückbau &rsaquo; Rohrausbau</td><td class=k-debatable>Debatable</td><td>Removal of a hydrant shaft, filed under pipe removal. Right trade, loose type.</td></tr>
-<tr><td class=oz>P4/02.05.0006</td><td>Erdaushub geböscht für neuen [PERSON_006] DN 1200</td><td>Betonarbeiten &rsaquo; Schachtbauwerk</td><td class=k-debatable>Debatable</td><td>Excavation for a shaft, filed with the shaft under concrete works, not under earthworks.</td></tr>
-<tr><td class=oz>P4/03.02.0024</td><td>Zulage zu allen Rohrverlegepositionen für die maßgenaue Rohrverlegung </td><td>Planung und Dokumentation &rsaquo; Vermessung</td><td class=k-debatable>Debatable</td><td>A surcharge on pipe laying for exact positioning, filed under surveying, not with the pipe it belongs to.</td></tr>
+<tr><td class=oz>P5/02.0026</td><td>Kiesbankette herstellen</td><td>Straßenbau &rsaquo; Frostschutzschicht</td><td class=k-debatable>Debatable</td><td>Gravel shoulders, filed under the frost protection layer.</td></tr>
+<tr><td class=oz>P5/02.0020</td><td>Wasserbausteine C 200/400 liefern und versetzen</td><td>Erdarbeiten &rsaquo; Wasserbaustein</td><td class=k-trade>Trade list gap</td><td>The type is fine, but it sits under earthworks: the trade list has nothing for hydraulic engineering.</td></tr>
+<tr><td class=oz>P4/03.02.0025</td><td>Druckrohr aus duktilem Gusseisen, innen zementiert</td><td>Rohrleitungsbau &rsaquo; Rohrleitungsanschluss</td><td class=k-mistake>Clear mistake</td><td>Cleaning the new pipe with a sponge ball during laying, filed under the tie-in to the existing main. The same cleaning for the PE pipe went to the pipe itself.</td></tr>
+<tr><td class=oz>P4/03.02.0024</td><td>Zulage zu allen Rohrverlegepositionen für die maßgenaue Rohrverlegung </td><td>Rohrleitungsbau &rsaquo; Rohrleitungsanschluss</td><td class=k-debatable>Debatable</td><td>A surcharge for exact pipe laying, filed under the tie-in to the existing main, not with the pipe it belongs to.</td></tr>
+<tr><td class=oz>P4/03.03.0028</td><td>Hydrantenschacht, Rückbau und Beseitigung wie folgt:</td><td>Demontage und Rückbau &rsaquo; Rückbau Rohrleitung</td><td class=k-debatable>Debatable</td><td>Removal of a hydrant shaft, filed under pipe removal. Right trade, loose type.</td></tr>
+<tr><td class=oz>P4/05.01.0025</td><td>Angenommene Stundenlohnarbeiten pauschal.</td><td>Stundenlohnarbeiten &rsaquo; Stundenlohn Personal</td><td class=k-debatable>Debatable</td><td>A lump sum for all hourly work, labour and machines, filed under labour hours.</td></tr>
 <tr><td class=oz>P4/02.03.0055</td><td>[PERSON_172]. Kl.D Gr.IV L/B 900/800mm H 820mm</td><td>Entwässerungskanalarbeiten &rsaquo; Kabelzugschacht</td><td class=k-trade>Trade list gap</td><td>A cable pull shaft under drainage sewer works: the trade list has no trade for cable works.</td></tr>
-<tr><td class=oz>P4/02.05.0020</td><td>Schachtabdeckung Klasse D 400, lichte Weite 800 mm,</td><td>Entwässerungskanalarbeiten &rsaquo; Schachtabdeckung</td><td class=k-trade>Trade list gap</td><td>Cover of a water-pipe shaft under drainage sewer works, while the shafts themselves are under concrete works.</td></tr>
-<tr><td class=oz>P4/02.05.0021</td><td>Schachtabdeckung Klasse D 400, lichte Weite 800 mm,</td><td>Entwässerungskanalarbeiten &rsaquo; Schachtabdeckung</td><td class=k-trade>Trade list gap</td><td>Cover of a water-pipe shaft under drainage sewer works, while the shafts themselves are under concrete works.</td></tr>
-<tr><td class=oz>P4/02.05.0022</td><td>Zulage zur Schachtabdeckung DN 800 mit Flanschrahmen,</td><td>Entwässerungskanalarbeiten &rsaquo; Schachtabdeckung</td><td class=k-trade>Trade list gap</td><td>Cover of a water-pipe shaft under drainage sewer works, while the shafts themselves are under concrete works.</td></tr>
-<tr><td class=oz>P4/02.05.0023</td><td>Zulage zur Schachtabdeckung DN 800 mit Flanschrahmen,</td><td>Entwässerungskanalarbeiten &rsaquo; Schachtabdeckung</td><td class=k-trade>Trade list gap</td><td>Cover of a water-pipe shaft under drainage sewer works, while the shafts themselves are under concrete works.</td></tr>
-<tr><td class=oz>P4/02.05.0024</td><td>[PERSON_163] neu, schwere Ausführung aus verzinktem [PERSON_089],</td><td>Entwässerungskanalarbeiten &rsaquo; Schachtabdeckung</td><td class=k-trade>Trade list gap</td><td>Cover of a water-pipe shaft under drainage sewer works, while the shafts themselves are under concrete works.</td></tr>
-<tr><td class=oz>P4/02.05.0025</td><td>Schachtabdeckung Klasse D 400, lichte Weite 450 mm,</td><td>Entwässerungskanalarbeiten &rsaquo; Schachtabdeckung</td><td class=k-trade>Trade list gap</td><td>Cover of a water-pipe shaft under drainage sewer works, while the shafts themselves are under concrete works.</td></tr>
-<tr><td class=oz>P4/02.05.0026</td><td>Schachtabdeckung Klasse D 400 MEILEVEL®-A</td><td>Entwässerungskanalarbeiten &rsaquo; Schachtabdeckung</td><td class=k-trade>Trade list gap</td><td>Cover of a water-pipe shaft under drainage sewer works, while the shafts themselves are under concrete works.</td></tr>
-<tr><td class=oz>P4/02.05.0027</td><td>Schachtabdeckung VIATOP M NIVEAU 140 Klasse D 400 einwalzbar,</td><td>Entwässerungskanalarbeiten &rsaquo; Schachtabdeckung</td><td class=k-trade>Trade list gap</td><td>Cover of a water-pipe shaft under drainage sewer works, while the shafts themselves are under concrete works.</td></tr>
-<tr><td class=oz>P4/02.03.0001</td><td>Erschwerniszulage zu allen Straßen- und Tiefbaupositionen in allen Gew</td><td>Erdarbeiten &rsaquo; Erschwerniszulage Tiefbau</td><td class=k-rule>Rule broken</td><td>Sits in a type named after a surcharge, which the rules forbid.</td></tr>
-<tr><td class=oz>P4/02.03.0002</td><td>Zulage - Position für alle Tiefbauarbeiten im Anschlussbereich neue Le</td><td>Erdarbeiten &rsaquo; Erschwerniszulage Tiefbau</td><td class=k-rule>Rule broken</td><td>Sits in a type named after a surcharge, which the rules forbid.</td></tr>
-<tr><td class=oz>P4/02.03.0003</td><td>Zulage - Position für alle Tiefbauarbeiten im Anschlussbereich neue Le</td><td>Erdarbeiten &rsaquo; Erschwerniszulage Tiefbau</td><td class=k-rule>Rule broken</td><td>Sits in a type named after a surcharge, which the rules forbid.</td></tr>
-<tr><td class=oz>P4/02.03.0022</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,</td><td>Erdarbeiten &rsaquo; Erschwerniszulage Tiefbau</td><td class=k-rule>Rule broken</td><td>Sits in a type named after a surcharge, which the rules forbid.</td></tr>
-<tr><td class=oz>P4/03.02.0001</td><td>Zulage - Position für alle Rohrverlege- und Montagearbeiten</td><td>Erdarbeiten &rsaquo; Erschwerniszulage Tiefbau</td><td class=k-rule>Rule broken</td><td>Sits in a type named after a surcharge, which the rules forbid. This one is a surcharge on pipe laying, yet sits in the earthworks trade.</td></tr>
-<tr><td class=oz>P4/03.02.0002</td><td>Zulage - Position für alle Tiefbauarbeiten im Anschlussbereich neue Le</td><td>Erdarbeiten &rsaquo; Erschwerniszulage Tiefbau</td><td class=k-rule>Rule broken</td><td>Sits in a type named after a surcharge, which the rules forbid.</td></tr>
-<tr><td class=oz>P4/04.03.0007</td><td>Zulage für Mehraufwand Abstimmung Betreiber von Medienleitungen</td><td>Erdarbeiten &rsaquo; Erschwerniszulage Tiefbau</td><td class=k-rule>Rule broken</td><td>Sits in a type named after a surcharge, which the rules forbid.</td></tr>
+<tr><td class=oz>P4/02.05.0005</td><td>[PERSON_006] rund DN 1200</td><td>Entwässerungskanalarbeiten &rsaquo; Schachtbauwerk</td><td class=k-trade>Trade list gap</td><td>A shaft of the water pipe (section 02.05), filed under drainage sewer works. The stand-in trade list has no trade for water-pipe structures.</td></tr>
+<tr><td class=oz>P4/02.05.0007</td><td>[PERSON_006] DN 2500</td><td>Entwässerungskanalarbeiten &rsaquo; Schachtbauwerk</td><td class=k-trade>Trade list gap</td><td>A shaft of the water pipe (section 02.05), filed under drainage sewer works. The stand-in trade list has no trade for water-pipe structures.</td></tr>
+<tr><td class=oz>P4/02.05.0009</td><td>[PERSON_006] DN 2500</td><td>Entwässerungskanalarbeiten &rsaquo; Schachtbauwerk</td><td class=k-trade>Trade list gap</td><td>A shaft of the water pipe (section 02.05), filed under drainage sewer works. The stand-in trade list has no trade for water-pipe structures.</td></tr>
+<tr><td class=oz>P4/02.05.0012</td><td>[PERSON_006] eckig</td><td>Entwässerungskanalarbeiten &rsaquo; Schachtbauwerk</td><td class=k-trade>Trade list gap</td><td>A shaft of the water pipe (section 02.05), filed under drainage sewer works. The stand-in trade list has no trade for water-pipe structures.</td></tr>
+<tr><td class=oz>P4/02.05.0013</td><td>Zulage zur Position [PERSON_006] eckig lichte Maße 2,00 x 3,00 m</td><td>Entwässerungskanalarbeiten &rsaquo; Schachtbauwerk</td><td class=k-trade>Trade list gap</td><td>A shaft of the water pipe (section 02.05), filed under drainage sewer works. The stand-in trade list has no trade for water-pipe structures.</td></tr>
+<tr><td class=oz>P4/02.05.0015</td><td>Zulage zu den Positionen Wasserleitungsschächte für</td><td>Entwässerungskanalarbeiten &rsaquo; Schachtbauwerk</td><td class=k-trade>Trade list gap</td><td>A shaft of the water pipe (section 02.05), filed under drainage sewer works. The stand-in trade list has no trade for water-pipe structures.</td></tr>
+<tr><td class=oz>P4/02.05.0020</td><td>Schachtabdeckung Klasse D 400, lichte Weite 800 mm,</td><td>Entwässerungskanalarbeiten &rsaquo; Schachtabdeckung</td><td class=k-trade>Trade list gap</td><td>Cover of a water-pipe shaft, filed under drainage sewer works like the shafts themselves. The stand-in trade list has no trade for water-pipe structures.</td></tr>
+<tr><td class=oz>P4/02.05.0021</td><td>Schachtabdeckung Klasse D 400, lichte Weite 800 mm,</td><td>Entwässerungskanalarbeiten &rsaquo; Schachtabdeckung</td><td class=k-trade>Trade list gap</td><td>Cover of a water-pipe shaft, filed under drainage sewer works like the shafts themselves. The stand-in trade list has no trade for water-pipe structures.</td></tr>
+<tr><td class=oz>P4/02.05.0022</td><td>Zulage zur Schachtabdeckung DN 800 mit Flanschrahmen,</td><td>Entwässerungskanalarbeiten &rsaquo; Schachtabdeckung</td><td class=k-trade>Trade list gap</td><td>Cover of a water-pipe shaft, filed under drainage sewer works like the shafts themselves. The stand-in trade list has no trade for water-pipe structures.</td></tr>
+<tr><td class=oz>P4/02.05.0023</td><td>Zulage zur Schachtabdeckung DN 800 mit Flanschrahmen,</td><td>Entwässerungskanalarbeiten &rsaquo; Schachtabdeckung</td><td class=k-trade>Trade list gap</td><td>Cover of a water-pipe shaft, filed under drainage sewer works like the shafts themselves. The stand-in trade list has no trade for water-pipe structures.</td></tr>
+<tr><td class=oz>P4/02.05.0024</td><td>[PERSON_163] neu, schwere Ausführung aus verzinktem [PERSON_089],</td><td>Entwässerungskanalarbeiten &rsaquo; Schachtabdeckung</td><td class=k-trade>Trade list gap</td><td>Cover of a water-pipe shaft, filed under drainage sewer works like the shafts themselves. The stand-in trade list has no trade for water-pipe structures.</td></tr>
+<tr><td class=oz>P4/02.05.0025</td><td>Schachtabdeckung Klasse D 400, lichte Weite 450 mm,</td><td>Entwässerungskanalarbeiten &rsaquo; Schachtabdeckung</td><td class=k-trade>Trade list gap</td><td>Cover of a water-pipe shaft, filed under drainage sewer works like the shafts themselves. The stand-in trade list has no trade for water-pipe structures.</td></tr>
+<tr><td class=oz>P4/02.05.0026</td><td>Schachtabdeckung Klasse D 400 MEILEVEL®-A</td><td>Entwässerungskanalarbeiten &rsaquo; Schachtabdeckung</td><td class=k-trade>Trade list gap</td><td>Cover of a water-pipe shaft, filed under drainage sewer works like the shafts themselves. The stand-in trade list has no trade for water-pipe structures.</td></tr>
+<tr><td class=oz>P4/02.05.0027</td><td>Schachtabdeckung VIATOP M NIVEAU 140 Klasse D 400 einwalzbar,</td><td>Entwässerungskanalarbeiten &rsaquo; Schachtabdeckung</td><td class=k-trade>Trade list gap</td><td>Cover of a water-pipe shaft, filed under drainage sewer works like the shafts themselves. The stand-in trade list has no trade for water-pipe structures.</td></tr>
 </table></div>
 
 <h3>Where it did well</h3>
@@ -87,11 +88,11 @@ The code was changed after this run to drop such a type. P4 has not been run aga
 pressure pipe), but its long text describes a protection pipe for power cables. It was filed under "Kabelschutzrohr"
 (cable protection pipe).</li>
 <li><b>It resolves "as before" items.</b> P4/03.02.0023 is titled only "Leistung wie Position zuletzt in vollem Wortlaut
-beschrieben". Its long text adds "but removal of a ductile iron pipe DN 300", and it was filed under "Rohrausbau" (pipe removal).</li>
+beschrieben". Its long text adds "but removal of a ductile iron pipe DN 300", and it was filed under "Rückbau Rohrleitung" (pipe removal).</li>
 <li><b>Identical items stay together.</b> All 7 groups of repeated items in P4
 (16 items) got one type each.</li>
 <li><b>It agrees with the first test.</b> For P5, the built version and the test run before the build proposed their type
-lists independently. They put 46 of 50 items in the same trade and gave 34 of 50 the same type name.</li>
+lists independently. They put 48 of 50 items in the same trade and gave 35 of 50 the same type name.</li>
 </ul>
 
 <h3>Limits to know</h3>
@@ -99,600 +100,594 @@ lists independently. They put 46 of 50 items in the same trade and gave 34 of 50
 <li><b>Surcharges are added into the quantity sums.</b> A surcharge takes the type of the item it belongs to. P4 has about
 91 surcharge items among 296. Example: "Rohrgrabenaushub" adds the metres of trench and
 the metres of a surcharge on the same trench. The sums per type are too high wherever a surcharge shares the unit of its base item.</li>
-<li><b>The trade list is a stand-in.</b> 10 items have a sensible type but no fitting
+<li><b>The trade list is a stand-in.</b> 16 items have a sensible type but no fitting
 trade, because the 17 trades were made up for the first test.</li>
-<li><b>One run each.</b> How much the result changes between two runs of the built version has not been measured.</li>
+<li><b>The type list changes from run to run.</b> Three P4 runs proposed 73, 74 and 72 types. One of them had no type for hourly rates and put 25 items in "Sonstiges"; this run put none there.</li>
 <li><b>Optional items are listed but not summed.</b> P4 has 24; they carry an "optional" label below.</li>
 </ul>
 
-<h2>P5: 50 line items &rarr; 20 item types &rarr; 11 trades</h2>
-<p><small>Quantities are added per unit, normal items only. Flagged rows carry the finding. Click a trade, then a type.</small></p>
-<details><summary class=trade>Entwässerungskanalarbeiten <small>12 items, 3 types</small> <mark>1 flagged</mark></summary>
-<details><summary class=type>Stahlbetonrohr <small>6 items &middot; 120 m &middot; 6 St</small></summary><table>
-<tr><td class=oz>P5/03.0001</td><td>UHPC-Stahlbetonrohre DN 800 mm liefern und verlegen</td><td class=q>10 m</td></tr>
-<tr><td class=oz>P5/03.0002</td><td>UHPC-Stahlbetonrohre DN 900 mm liefern und verlegen</td><td class=q>110 m</td></tr>
-<tr><td class=oz>P5/03.0003</td><td>FBS - Pass- und Gelenkstück DN 800 mm</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P5/03.0004</td><td>FBS - Pass- und Gelenkstück DN 900 mm</td><td class=q>2 St</td></tr>
-<tr><td class=oz>P5/03.0005</td><td>FBS - Böschungsstück DN 900 mm</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P5/03.0007</td><td>VPC-Kupplung 995</td><td class=q>2 St</td></tr>
+<h2 id=p5>P5: 50 line items &rarr; 19 item types &rarr; 10 trades</h2>
+<p><small>Quantities are added per unit, normal items only. Each item shows the AI's saved reason; flagged rows also carry the finding. Everything is open; click a trade or a type to fold it.</small></p>
+<details open><summary class=trade>Erdarbeiten <small>14 items, 6 types</small> <mark>3 flagged</mark></summary>
+<details open><summary class=type>Rohrgrabenaushub <small>4 items &middot; 630 m3</small></summary><table>
+<tr><td class=oz>P5/02.0005</td><td>Rohrgrabenaushub, bis 2m, seitlich lagern, wieder einbauen<div class=rsn>AI reason: Trench excavation for sewers, stored beside the trench, backfilled and compacted.</div></td><td class=q>270 m3</td></tr>
+<tr><td class=oz>P5/02.0006</td><td>Rohrgrabenaushub, Abfuhr auf AG-Zwischenlager<div class=rsn>AI reason: Wie vor item for trench excavation, with haulage to the client&#x27;s interim storage.</div></td><td class=q>130 m3</td></tr>
+<tr><td class=oz>P5/02.0007</td><td>Rohrgrabenaushub, Z0, auf AN-Kippe abfahren<div class=rsn>AI reason: Wie vor item for trench excavation, with Z0 soil hauled to the contractor&#x27;s dump.</div></td><td class=q>100 m3</td></tr>
+<tr><td class=oz>P5/02.0008</td><td>Aushub von Lager aufnehmen, Abfuhr Z 0 auf AN-Kippe<div class=rsn>AI reason: Loading excavated soil from interim storage and hauling it to the dump, incl. dumping fee.</div></td><td class=q>130 m3</td></tr>
 </table></details>
-<details><summary class=type>Schacht <small>4 items &middot; 4 St</small></summary><table>
-<tr><td class=oz>P5/03.0008</td><td>Tangentialschacht 1, Tiefe bis 1,50 m</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P5/03.0009</td><td>Tangentialschacht 2, Tiefe bis 1,65 m</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P5/03.0010</td><td>Schachtabdeckung Klasse B 125 liefern und versetzen</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P5/03.0011</td><td>Schachtabdeckung Klasse D 400 liefern und versetzen</td><td class=q>1 St</td></tr>
+<details open><summary class=type>Leitungskreuzung <small>3 items &middot; 40 m</small></summary><table>
+<tr><td class=oz>P5/02.0013</td><td>Zuschlag für [PERSON_121]<div class=rsn>AI reason: Surcharge for carefully exposing crossing pipes, cables and sewers by hand excavation.</div></td><td class=q>10 m</td></tr>
+<tr><td class=oz>P5/02.0014</td><td>Unterfahren von Leitungen, Kabel und Kanälen, quer<div class=rsn>AI reason: Passing under exposed pipes, cables and sewers, securing the obstacles transversely.</div></td><td class=q>10 m</td></tr>
+<tr><td class=oz>P5/02.0015</td><td>Unterfahren von Leitungen, Kabel und Kanälen, längs<div class=rsn>AI reason: Wie vor item for passing under pipes, cables and sewers, here lengthwise.</div></td><td class=q>20 m</td></tr>
 </table></details>
-<details><summary class=type>Rohrbettung <small>2 items &middot; 233 m3</small> <mark>1</mark></summary><table>
-<tr><td class=oz>P5/02.0009</td><td>Rohrauflager und -einbettung, Feinkies 0/32 mm, bis DN 900 mm</td><td class=q>230 m3</td></tr>
-<tr class=flag><td class=oz>P5/02.0010</td><td>Betonauflager für Einlaufbauwerk, Stärke 20 cm<div class=why><b>Debatable.</b> Concrete bedding for the inlet structure, filed under pipe bedding. The type &quot;Einlaufbauwerk&quot; would fit better.</div></td><td class=q>3 m3</td></tr>
+<details open><summary class=type>Bodenaustausch <small>2 items &middot; 85 m3</small></summary><table>
+<tr><td class=oz>P5/02.0011</td><td>Bodenaustausch Rohrgraben - Rollkies 16/32 mm<div class=rsn>AI reason: Soil replacement in the pipe trench with Rollkies 16/32 mm.</div></td><td class=q>35 m3</td></tr>
+<tr><td class=oz>P5/02.0012</td><td>Bodenaustausch Rohrgraben - Grubenkies<div class=rsn>AI reason: Wie vor item for soil replacement in the trench, using Grubenkies.</div></td><td class=q>50 m3</td></tr>
 </table></details>
-</details>
-<details><summary class=trade>Erdarbeiten <small>11 items, 4 types</small> <mark>1 flagged</mark></summary>
-<details><summary class=type>Rohrgrabenaushub <small>4 items &middot; 630 m3</small></summary><table>
-<tr><td class=oz>P5/02.0005</td><td>Rohrgrabenaushub, bis 2m, seitlich lagern, wieder einbauen</td><td class=q>270 m3</td></tr>
-<tr><td class=oz>P5/02.0006</td><td>Rohrgrabenaushub, Abfuhr auf AG-Zwischenlager</td><td class=q>130 m3</td></tr>
-<tr><td class=oz>P5/02.0007</td><td>Rohrgrabenaushub, Z0, auf AN-Kippe abfahren</td><td class=q>100 m3</td></tr>
-<tr><td class=oz>P5/02.0008</td><td>Aushub von Lager aufnehmen, Abfuhr Z 0 auf AN-Kippe</td><td class=q>130 m3</td></tr>
+<details open><summary class=type>Oberbodenarbeit <small>2 items &middot; 260 m3 &middot; 1 300 m2</small> <mark>1</mark></summary><table>
+<tr><td class=oz>P5/02.0003</td><td>Oberbodenabtrag- und auftrag<div class=rsn>AI reason: Stripping topsoil, storing it in heaps, re-spreading and levelling it.</div></td><td class=q>260 m3</td></tr>
+<tr class=flag><td class=oz>P5/02.0004</td><td>Begrünungsarbeiten<div class=rsn>AI reason: Loosening meadow areas and sowing grass seed mixture.</div><div class=why><b>Debatable.</b> Greening (seeding), filed under topsoil work.</div></td><td class=q>1 300 m2</td></tr>
 </table></details>
-<details><summary class=type>Leitungskreuzung <small>3 items &middot; 40 m</small></summary><table>
-<tr><td class=oz>P5/02.0013</td><td>Zuschlag für [PERSON_121]</td><td class=q>10 m</td></tr>
-<tr><td class=oz>P5/02.0014</td><td>Unterfahren von Leitungen, Kabel und Kanälen, quer</td><td class=q>10 m</td></tr>
-<tr><td class=oz>P5/02.0015</td><td>Unterfahren von Leitungen, Kabel und Kanälen, längs</td><td class=q>20 m</td></tr>
+<details open><summary class=type>Rohrbettung <small>2 items &middot; 233 m3</small> <mark>1</mark></summary><table>
+<tr><td class=oz>P5/02.0009</td><td>Rohrauflager und -einbettung, Feinkies 0/32 mm, bis DN 900 mm<div class=rsn>AI reason: Pipe bearing and embedment with fine gravel 0/32 per DIN EN 1610.</div></td><td class=q>230 m3</td></tr>
+<tr class=flag><td class=oz>P5/02.0010</td><td>Betonauflager für Einlaufbauwerk, Stärke 20 cm<div class=rsn>AI reason: Concrete bedding C 12/15 for the inlet structure, 20 cm thick.</div><div class=why><b>Debatable.</b> Concrete bedding for the inlet structure, filed under pipe bedding. The type &quot;Einlaufbauwerk&quot; would fit better.</div></td><td class=q>3 m3</td></tr>
 </table></details>
-<details><summary class=type>Bodenaustausch <small>2 items &middot; 85 m3</small></summary><table>
-<tr><td class=oz>P5/02.0011</td><td>Bodenaustausch Rohrgraben - Rollkies 16/32 mm</td><td class=q>35 m3</td></tr>
-<tr><td class=oz>P5/02.0012</td><td>Bodenaustausch Rohrgraben - Grubenkies</td><td class=q>50 m3</td></tr>
-</table></details>
-<details><summary class=type>Oberbodenarbeit <small>2 items &middot; 260 m3 &middot; 1 300 m2</small> <mark>1</mark></summary><table>
-<tr><td class=oz>P5/02.0003</td><td>Oberbodenabtrag- und auftrag</td><td class=q>260 m3</td></tr>
-<tr class=flag><td class=oz>P5/02.0004</td><td>Begrünungsarbeiten<div class=why><b>Debatable.</b> Greening (seeding), filed under topsoil work.</div></td><td class=q>1 300 m2</td></tr>
+<details open><summary class=type>Wasserbaustein <small>1 items &middot; 25 t</small> <mark>1</mark></summary><table>
+<tr class=flag><td class=oz>P5/02.0020</td><td>Wasserbausteine C 200/400 liefern und versetzen<div class=rsn>AI reason: Supplying and placing armour stones C 200/400 to secure the stream embankment.</div><div class=why><b>Trade list gap.</b> The type is fine, but it sits under earthworks: the trade list has nothing for hydraulic engineering.</div></td><td class=q>25 t</td></tr>
 </table></details>
 </details>
-<details><summary class=trade>Straßenbau <small>8 items, 4 types</small></summary>
-<details><summary class=type>Asphaltaufbruch <small>3 items &middot; 70 m &middot; 15 m3</small></summary><table>
-<tr><td class=oz>P5/02.0001</td><td>Asphalt schneiden, bis 15 cm</td><td class=q>70 m</td></tr>
-<tr><td class=oz>P5/02.0002</td><td>Asphaltaufbruch bis 15 cm</td><td class=q>12 m3</td></tr>
-<tr><td class=oz>P5/02.0023</td><td>Asphalt fräsen, 4 cm - Fräsgut auf AG-Lagerplatz</td><td class=q>3 m3</td></tr>
+<details open><summary class=trade>Entwässerungskanalarbeiten <small>10 items, 2 types</small></summary>
+<details open><summary class=type>Stahlbetonrohr <small>6 items &middot; 120 m &middot; 6 St</small></summary><table>
+<tr><td class=oz>P5/03.0001</td><td>UHPC-Stahlbetonrohre DN 800 mm liefern und verlegen<div class=rsn>AI reason: UHPC reinforced concrete pipes DN 800 supplied and laid per EN 1916.</div></td><td class=q>10 m</td></tr>
+<tr><td class=oz>P5/03.0002</td><td>UHPC-Stahlbetonrohre DN 900 mm liefern und verlegen<div class=rsn>AI reason: &#x27;Wie vor&#x27; item referring to the UHPC reinforced concrete pipe DN 800, here DN 900.</div></td><td class=q>110 m</td></tr>
+<tr><td class=oz>P5/03.0003</td><td>FBS - Pass- und Gelenkstück DN 800 mm<div class=rsn>AI reason: Surcharge for FBS adaptor and articulated piece for UHPC reinforced concrete pipes.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P5/03.0004</td><td>FBS - Pass- und Gelenkstück DN 900 mm<div class=rsn>AI reason: &#x27;Wie vor&#x27; for the FBS adaptor/articulated piece DN 800, here DN 900.</div></td><td class=q>2 St</td></tr>
+<tr><td class=oz>P5/03.0005</td><td>FBS - Böschungsstück DN 900 mm<div class=rsn>AI reason: Surcharge for FBS slope piece for UHPC reinforced concrete pipes.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P5/03.0007</td><td>VPC-Kupplung 995<div class=rsn>AI reason: VPC coupling supplied and mounted for pipe connection.</div></td><td class=q>2 St</td></tr>
 </table></details>
-<details><summary class=type>Asphaltschicht <small>3 items &middot; 160 m2 &middot; 30 m</small></summary><table>
-<tr><td class=oz>P5/02.0022</td><td>Bitukies AC 32 TN - Stärke 10 cm</td><td class=q>70 m2</td></tr>
-<tr><td class=oz>P5/02.0024</td><td>Asphaltbeton 0/11 mm, Stärke 4 cm</td><td class=q>90 m2</td></tr>
-<tr><td class=oz>P5/02.0025</td><td>TOK-Band 40 mm</td><td class=q>30 m</td></tr>
-</table></details>
-<details><summary class=type>Bankett <small>1 items &middot; 3 m3</small></summary><table>
-<tr><td class=oz>P5/02.0026</td><td>Kiesbankette herstellen</td><td class=q>3 m3</td></tr>
-</table></details>
-<details><summary class=type>Frostschutzschicht <small>1 items &middot; 50 m3</small></summary><table>
-<tr><td class=oz>P5/02.0021</td><td>Frostschutzschicht herstellen, Stärke bis 52 cm</td><td class=q>50 m3</td></tr>
+<details open><summary class=type>Schacht <small>4 items &middot; 4 St</small></summary><table>
+<tr><td class=oz>P5/03.0008</td><td>Tangentialschacht 1, Tiefe bis 1,50 m<div class=rsn>AI reason: Tangential manhole formed onto reinforced concrete pipes with cover plate and manhole opening.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P5/03.0009</td><td>Tangentialschacht 2, Tiefe bis 1,65 m<div class=rsn>AI reason: &#x27;Wie vor&#x27; item referring to Tangentialschacht 1, here manhole 2.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P5/03.0010</td><td>Schachtabdeckung Klasse B 125 liefern und versetzen<div class=rsn>AI reason: Cast iron manhole cover class B 125 supplied and set.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P5/03.0011</td><td>Schachtabdeckung Klasse D 400 liefern und versetzen<div class=rsn>AI reason: &#x27;Wie vor&#x27; item referring to manhole cover class B 125, here D 400.</div></td><td class=q>1 St</td></tr>
 </table></details>
 </details>
-<details><summary class=trade>Stundenlohnarbeiten <small>7 items, 1 types</small></summary>
-<details><summary class=type>Stundenlohnarbeit <small>7 items &middot; 80 h</small></summary><table>
-<tr><td class=oz>P5/04.0001</td><td>Vorarbeiter (Polier)</td><td class=q>10 h</td></tr>
-<tr><td class=oz>P5/04.0002</td><td>Gehobener [PERSON_020]</td><td class=q>20 h</td></tr>
-<tr><td class=oz>P5/04.0003</td><td>Facharbeiter</td><td class=q>20 h</td></tr>
-<tr><td class=oz>P5/04.0004</td><td>Transporter</td><td class=q>5 h</td></tr>
-<tr><td class=oz>P5/04.0005</td><td>Minibagger</td><td class=q>10 h</td></tr>
-<tr><td class=oz>P5/04.0006</td><td>Bagger bis 1 m3</td><td class=q>10 h</td></tr>
-<tr><td class=oz>P5/04.0007</td><td>LKW bis 12 to Nutzlast</td><td class=q>5 h</td></tr>
+<details open><summary class=trade>Demontage und Rückbau <small>7 items, 2 types</small></summary>
+<details open><summary class=type>Abbruch Bauwerk <small>4 items &middot; 100 m &middot; 4 m3 &middot; 10 t &middot; 2 St</small></summary><table>
+<tr><td class=oz>P5/02.0017</td><td>Bestehende Bachverrohrung DN 600 Beton ausbauen, entsorgen<div class=rsn>AI reason: Removing and disposing of the existing DN 600 concrete stream pipe.</div></td><td class=q>100 m</td></tr>
+<tr><td class=oz>P5/02.0018</td><td>Bauwerk abbrechen, Schutt zwischenlagern<div class=rsn>AI reason: Demolishing an existing reinforced concrete intermediate manhole structure and storing the rubble.</div></td><td class=q>4 m3</td></tr>
+<tr><td class=oz>P5/02.0019</td><td>[PERSON_047] aufnehmen und entsorgen - Einstufung : RW 1<div class=rsn>AI reason: Picking up stored concrete rubble and disposing of it according to the RC guideline.</div></td><td class=q>10 t</td></tr>
+<tr><td class=oz>P5/03.0006</td><td>Bestehende Betonrohre DN 800 schneiden<div class=rsn>AI reason: Cutting existing concrete pipes and removing them from the site.</div></td><td class=q>2 St</td></tr>
+</table></details>
+<details open><summary class=type>Asphaltaufbruch <small>3 items &middot; 70 m &middot; 15 m3</small></summary><table>
+<tr><td class=oz>P5/02.0001</td><td>Asphalt schneiden, bis 15 cm<div class=rsn>AI reason: Cutting asphalt with a joint cutter, vertical cut, asphalt up to 15 cm.</div></td><td class=q>70 m</td></tr>
+<tr><td class=oz>P5/02.0002</td><td>Asphaltaufbruch bis 15 cm<div class=rsn>AI reason: Breaking up asphalt with an excavator and removing the asphalt rubble.</div></td><td class=q>12 m3</td></tr>
+<tr><td class=oz>P5/02.0023</td><td>Asphalt fräsen, 4 cm - Fräsgut auf AG-Lagerplatz<div class=rsn>AI reason: Milling the existing asphalt surface 4 cm deep and hauling the milled material.</div></td><td class=q>3 m3</td></tr>
 </table></details>
 </details>
-<details><summary class=trade>Demontage und Rückbau <small>4 items, 1 types</small></summary>
-<details><summary class=type>Abbruch Bestandsbauteil <small>4 items &middot; 100 m &middot; 4 m3 &middot; 10 t &middot; 2 St</small></summary><table>
-<tr><td class=oz>P5/02.0017</td><td>Bestehende Bachverrohrung DN 600 Beton ausbauen, entsorgen</td><td class=q>100 m</td></tr>
-<tr><td class=oz>P5/02.0018</td><td>Bauwerk abbrechen, Schutt zwischenlagern</td><td class=q>4 m3</td></tr>
-<tr><td class=oz>P5/02.0019</td><td>[PERSON_047] aufnehmen und entsorgen - Einstufung : RW 1</td><td class=q>10 t</td></tr>
-<tr><td class=oz>P5/03.0006</td><td>Bestehende Betonrohre DN 800 schneiden</td><td class=q>2 St</td></tr>
+<details open><summary class=trade>Stundenlohnarbeiten <small>7 items, 1 types</small></summary>
+<details open><summary class=type>Stundenlohnarbeit <small>7 items &middot; 80 h</small></summary><table>
+<tr><td class=oz>P5/04.0001</td><td>Vorarbeiter (Polier)<div class=rsn>AI reason: Hourly rate for foreman in the Regie section.</div></td><td class=q>10 h</td></tr>
+<tr><td class=oz>P5/04.0002</td><td>Gehobener [PERSON_020]<div class=rsn>AI reason: Hourly rate for skilled worker (higher grade) in the Regie section.</div></td><td class=q>20 h</td></tr>
+<tr><td class=oz>P5/04.0003</td><td>Facharbeiter<div class=rsn>AI reason: Hourly rate for skilled worker in the Regie section.</div></td><td class=q>20 h</td></tr>
+<tr><td class=oz>P5/04.0004</td><td>Transporter<div class=rsn>AI reason: Hourly equipment rate for a transporter in the Regie section.</div></td><td class=q>5 h</td></tr>
+<tr><td class=oz>P5/04.0005</td><td>Minibagger<div class=rsn>AI reason: Hourly equipment rate for a mini excavator in the Regie section.</div></td><td class=q>10 h</td></tr>
+<tr><td class=oz>P5/04.0006</td><td>Bagger bis 1 m3<div class=rsn>AI reason: Hourly equipment rate for an excavator up to 1 m3 in the Regie section.</div></td><td class=q>10 h</td></tr>
+<tr><td class=oz>P5/04.0007</td><td>LKW bis 12 to Nutzlast<div class=rsn>AI reason: Hourly equipment rate for a truck up to 12 t in the Regie section.</div></td><td class=q>5 h</td></tr>
 </table></details>
 </details>
-<details><summary class=trade>Planung und Dokumentation <small>2 items, 2 types</small></summary>
-<details><summary class=type>Abrechnungsunterlage <small>1 items &middot; 1 psch</small></summary><table>
-<tr><td class=oz>P5/01.0004</td><td>Abrechnungsunterlagen erstellen</td><td class=q>1 psch</td></tr>
+<details open><summary class=trade>Straßenbau <small>5 items, 2 types</small> <mark>1 flagged</mark></summary>
+<details open><summary class=type>Asphaltschicht <small>3 items &middot; 160 m2 &middot; 30 m</small></summary><table>
+<tr><td class=oz>P5/02.0022</td><td>Bitukies AC 32 TN - Stärke 10 cm<div class=rsn>AI reason: Asphalt base course AC 32 TN laid by paver on frost protection layers.</div></td><td class=q>70 m2</td></tr>
+<tr><td class=oz>P5/02.0024</td><td>Asphaltbeton 0/11 mm, Stärke 4 cm<div class=rsn>AI reason: Asphalt surface course AC 11 DN supplied and compacted with a paver.</div></td><td class=q>90 m2</td></tr>
+<tr><td class=oz>P5/02.0025</td><td>TOK-Band 40 mm<div class=rsn>AI reason: Meltable TOK joint sealing tape at the connection to existing asphalt surface.</div></td><td class=q>30 m</td></tr>
 </table></details>
-<details><summary class=type>Statische Berechnung <small>1 items &middot; 1 psch</small></summary><table>
-<tr><td class=oz>P5/03.0012</td><td>Statische Berechnung</td><td class=q>1 psch</td></tr>
-</table></details>
-</details>
-<details><summary class=trade>Verkehrssicherung <small>2 items, 1 types</small></summary>
-<details><summary class=type>Verkehrssicherung <small>2 items &middot; 2 psch</small></summary><table>
-<tr><td class=oz>P5/01.0002</td><td>Verkehrsregelung und -sicherung</td><td class=q>1 psch</td></tr>
-<tr><td class=oz>P5/01.0003</td><td>Verkehrssicherung</td><td class=q>1 psch</td></tr>
+<details open><summary class=type>Frostschutzschicht <small>2 items &middot; 53 m3</small> <mark>1</mark></summary><table>
+<tr><td class=oz>P5/02.0021</td><td>Frostschutzschicht herstellen, Stärke bis 52 cm<div class=rsn>AI reason: Placing the frost protection layer with Frostschutzkies 0/56 and a fine levelling course.</div></td><td class=q>50 m3</td></tr>
+<tr class=flag><td class=oz>P5/02.0026</td><td>Kiesbankette herstellen<div class=rsn>AI reason: Gravel shoulders made from Bankettkies 0/22 mm.</div><div class=why><b>Debatable.</b> Gravel shoulders, filed under the frost protection layer.</div></td><td class=q>3 m3</td></tr>
 </table></details>
 </details>
-<details><summary class=trade>Baustelleneinrichtung <small>1 items, 1 types</small></summary>
-<details><summary class=type>Baustelleneinrichtung <small>1 items &middot; 1 psch</small></summary><table>
-<tr><td class=oz>P5/01.0001</td><td>Baustelleneinrichtung und -räumung</td><td class=q>1 psch</td></tr>
+<details open><summary class=trade>Planung und Dokumentation <small>2 items, 2 types</small></summary>
+<details open><summary class=type>Abrechnungsunterlage <small>1 items &middot; 1 psch</small></summary><table>
+<tr><td class=oz>P5/01.0004</td><td>Abrechnungsunterlagen erstellen<div class=rsn>AI reason: Creating verifiable billing documents and a billing site plan with UTM coordinates.</div></td><td class=q>1 psch</td></tr>
+</table></details>
+<details open><summary class=type>Statische Berechnung <small>1 items &middot; 1 psch</small></summary><table>
+<tr><td class=oz>P5/03.0012</td><td>Statische Berechnung<div class=rsn>AI reason: Verifiable structural calculation and execution drawings for the inlet structure.</div></td><td class=q>1 psch</td></tr>
 </table></details>
 </details>
-<details><summary class=trade>Betonarbeiten <small>1 items, 1 types</small></summary>
-<details><summary class=type>Einlaufbauwerk <small>1 items &middot; 1 St</small></summary><table>
-<tr><td class=oz>P5/03.0013</td><td>Einlaufbauwerk, Fertigteil</td><td class=q>1 St</td></tr>
+<details open><summary class=trade>Verkehrssicherung <small>2 items, 1 types</small></summary>
+<details open><summary class=type>Verkehrssicherung <small>2 items &middot; 2 psch</small></summary><table>
+<tr><td class=oz>P5/01.0002</td><td>Verkehrsregelung und -sicherung<div class=rsn>AI reason: Traffic signs, signage per traffic order and securing the site; it is traffic regulation.</div></td><td class=q>1 psch</td></tr>
+<tr><td class=oz>P5/01.0003</td><td>Verkehrssicherung<div class=rsn>AI reason: Cleaning soiled access roads and fencing open trenches; titled Verkehrssicherung.</div></td><td class=q>1 psch</td></tr>
 </table></details>
 </details>
-<details><summary class=trade>Sonstiges <small>1 items, 1 types</small> <mark>1 flagged</mark></summary>
-<details><summary class=type>Wasserbaustein <small>1 items &middot; 25 t</small> <mark>1</mark></summary><table>
-<tr class=flag><td class=oz>P5/02.0020</td><td>Wasserbausteine C 200/400 liefern und versetzen<div class=why><b>Trade list gap.</b> The type is fine, but its trade is &quot;Sonstiges&quot; (other): the trade list has nothing for hydraulic engineering.</div></td><td class=q>25 t</td></tr>
+<details open><summary class=trade>Baustelleneinrichtung <small>1 items, 1 types</small></summary>
+<details open><summary class=type>Baustelleneinrichtung <small>1 items &middot; 1 psch</small></summary><table>
+<tr><td class=oz>P5/01.0001</td><td>Baustelleneinrichtung und -räumung<div class=rsn>AI reason: Lump sum for setting up and clearing the site, transporting equipment, site offices and utility connections.</div></td><td class=q>1 psch</td></tr>
 </table></details>
 </details>
-<details><summary class=trade>Wasserhaltung <small>1 items, 1 types</small></summary>
-<details><summary class=type>Wasserhaltung <small>1 items &middot; 1 psch</small></summary><table>
-<tr><td class=oz>P5/02.0016</td><td>Wasserhaltung Bach bis 150 l/s</td><td class=q>1 psch</td></tr>
+<details open><summary class=trade>Betonarbeiten <small>1 items, 1 types</small></summary>
+<details open><summary class=type>Einlaufbauwerk <small>1 items &middot; 1 St</small></summary><table>
+<tr><td class=oz>P5/03.0013</td><td>Einlaufbauwerk, Fertigteil<div class=rsn>AI reason: Precast reinforced concrete inlet structure supplied and set per drawing.</div></td><td class=q>1 St</td></tr>
+</table></details>
+</details>
+<details open><summary class=trade>Wasserhaltung <small>1 items, 1 types</small></summary>
+<details open><summary class=type>Wasserhaltung <small>1 items &middot; 1 psch</small></summary><table>
+<tr><td class=oz>P5/02.0016</td><td>Wasserhaltung Bach bis 150 l/s<div class=rsn>AI reason: Stream water diversion via a diversion channel, up to 150 l/s.</div></td><td class=q>1 psch</td></tr>
 </table></details>
 </details>
 
-<h2>P4: 296 line items &rarr; 73 item types &rarr; 16 trades</h2>
-<p><small>Quantities are added per unit, normal items only. Flagged rows carry the finding. Click a trade, then a type.</small></p>
-<details><summary class=trade>Rohrleitungsbau <small>80 items, 14 types</small> <mark>1 flagged</mark></summary>
-<details><summary class=type>Gussformstück <small>16 items &middot; 46 St</small></summary><table>
-<tr><td class=oz>P4/03.02.0013</td><td>Doppelmuffenbogen dukt.Guss 11Grad MMK-Stück Steckmuffe 16bar DN300</td><td class=q>8 St</td></tr>
-<tr><td class=oz>P4/03.02.0014</td><td>Doppelmuffenbogen dukt.Guss 22Grad MMK-Stück Steckmuffe 16bar DN300</td><td class=q>3 St</td></tr>
-<tr><td class=oz>P4/03.02.0015</td><td>Doppelmuffenbogen dukt.Guss 30Grad MMK-Stück Steckmuffe 16bar DN300</td><td class=q>8 St</td></tr>
-<tr><td class=oz>P4/03.02.0016</td><td>Doppelmuffenbogen dukt.Guss 45Grad MMK-Stück Steckmuffe 16bar DN300</td><td class=q>5 St</td></tr>
-<tr><td class=oz>P4/03.02.0017</td><td>Muffenbogen dukt.Guss 11Grad MK-Stück Steckmuffe 16bar DN300</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/03.02.0018</td><td>Muffenbogen dukt.Guss 22Grad MK-Stück Steckmuffe 16bar DN300</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/03.02.0019</td><td>Muffenbogen dukt.Guss 30Grad MK-Stück Steckmuffe 16bar DN300</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/03.02.0020</td><td>Zugfeste Kupplung - DN 300</td><td class=q>3 St</td></tr>
-<tr><td class=oz>P4/03.02.0022</td><td>U-Stück dukt.Guss 16bar DN300</td><td class=q>2 St</td></tr>
-<tr><td class=oz>P4/03.03.0010</td><td>EU-Stück dukt.Guss PN16 Steckmuffe 16bar DN300</td><td class=q>6 St</td></tr>
-<tr><td class=oz>P4/03.03.0012</td><td>X-Stück dukt.Guss PN16 DN300</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/03.03.0013</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,</td><td class=q>3 St</td></tr>
-<tr><td class=oz>P4/03.03.0019</td><td>Kugelformstück, 2 - teilig als D - Kugel DN 100/100</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/03.03.0020</td><td>X-Stück dukt.Guss PN16 DN100</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/03.03.0021</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/04.04.0009</td><td>EU-Stück dukt.Guss PN16 Steckmuffe 16bar DN300</td><td class=q>1 St</td></tr>
+<h2 id=p4>P4: 296 line items &rarr; 72 item types &rarr; 16 trades</h2>
+<p><small>Quantities are added per unit, normal items only. Each item shows the AI's saved reason; flagged rows also carry the finding. Everything is open; click a trade or a type to fold it.</small></p>
+<details open><summary class=trade>Rohrleitungsbau <small>84 items, 13 types</small> <mark>2 flagged</mark></summary>
+<details open><summary class=type>Gussformstück <small>16 items &middot; 46 St</small></summary><table>
+<tr><td class=oz>P4/03.02.0013</td><td>Doppelmuffenbogen dukt.Guss 11Grad MMK-Stück Steckmuffe 16bar DN300<div class=rsn>AI reason: Double-socket bend 11° in ductile iron, a fitting for a pressure pipe.</div></td><td class=q>8 St</td></tr>
+<tr><td class=oz>P4/03.02.0014</td><td>Doppelmuffenbogen dukt.Guss 22Grad MMK-Stück Steckmuffe 16bar DN300<div class=rsn>AI reason: Double-socket bend 22° in ductile iron, a fitting for a pressure pipe.</div></td><td class=q>3 St</td></tr>
+<tr><td class=oz>P4/03.02.0015</td><td>Doppelmuffenbogen dukt.Guss 30Grad MMK-Stück Steckmuffe 16bar DN300<div class=rsn>AI reason: Double-socket bend 30° in ductile iron, a fitting for a pressure pipe.</div></td><td class=q>8 St</td></tr>
+<tr><td class=oz>P4/03.02.0016</td><td>Doppelmuffenbogen dukt.Guss 45Grad MMK-Stück Steckmuffe 16bar DN300<div class=rsn>AI reason: Double-socket bend 45° in ductile iron, a fitting for a pressure pipe.</div></td><td class=q>5 St</td></tr>
+<tr><td class=oz>P4/03.02.0017</td><td>Muffenbogen dukt.Guss 11Grad MK-Stück Steckmuffe 16bar DN300<div class=rsn>AI reason: Socket bend 11° in ductile iron, a fitting.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/03.02.0018</td><td>Muffenbogen dukt.Guss 22Grad MK-Stück Steckmuffe 16bar DN300<div class=rsn>AI reason: Socket bend 22° in ductile iron, a fitting.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/03.02.0019</td><td>Muffenbogen dukt.Guss 30Grad MK-Stück Steckmuffe 16bar DN300<div class=rsn>AI reason: Socket bend 30° in ductile iron, a fitting.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/03.02.0020</td><td>Zugfeste Kupplung - DN 300<div class=rsn>AI reason: Restrained coupling DN 300 in ductile iron GGG45, a coupling fitting.</div></td><td class=q>3 St</td></tr>
+<tr><td class=oz>P4/03.02.0022</td><td>U-Stück dukt.Guss 16bar DN300<div class=rsn>AI reason: U-piece overlap sleeve in ductile iron DN300, a fitting.</div></td><td class=q>2 St</td></tr>
+<tr><td class=oz>P4/03.03.0010</td><td>EU-Stück dukt.Guss PN16 Steckmuffe 16bar DN300<div class=rsn>AI reason: EU-Stück flange-socket fitting made of ductile cast iron with push-in socket.</div></td><td class=q>6 St</td></tr>
+<tr><td class=oz>P4/03.03.0012</td><td>X-Stück dukt.Guss PN16 DN300<div class=rsn>AI reason: X-Stück blind flange fitting made of ductile cast iron DN 300.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/03.03.0013</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,<div class=rsn>AI reason: Wie vor item referring to the X-Stück ductile iron fitting; XG-Stück variant DN 80.</div></td><td class=q>3 St</td></tr>
+<tr><td class=oz>P4/03.03.0019</td><td>Kugelformstück, 2 - teilig als D - Kugel DN 100/100<div class=rsn>AI reason: Two-part ball fitting (D-Kugel) of ductile cast iron with hydrant outlet.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/03.03.0020</td><td>X-Stück dukt.Guss PN16 DN100<div class=rsn>AI reason: X-Stück blind flange fitting made of ductile cast iron DN 100.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/03.03.0021</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,<div class=rsn>AI reason: Wie vor item referring to the DN 100 X-Stück ductile iron fitting; XG-Stück variant.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/04.04.0009</td><td>EU-Stück dukt.Guss PN16 Steckmuffe 16bar DN300<div class=rsn>AI reason: EU-Stück flange-socket fitting made of ductile cast iron with push-in socket.</div></td><td class=q>1 St</td></tr>
 </table></details>
-<details><summary class=type>PE-Formteil <small>11 items &middot; 25 St</small></summary><table>
-<tr><td class=oz>P4/02.05.0037</td><td>Muffe PE DN/OD110 SDR11</td><td class=q>6 St</td></tr>
-<tr><td class=oz>P4/02.05.0038</td><td>Winkel 45Grad PE DN/OD110 SDR11</td><td class=q>3 St</td></tr>
-<tr><td class=oz>P4/03.02.0004</td><td>Muffe aus PE, zum Heizelementmuffenschweißen, für Druckrohrleitung aus PE, für Trinkwasser DIN </td><td class=q>5 St</td></tr>
-<tr><td class=oz>P4/03.03.0011</td><td>PE100 Sonderflansch, PN 16 gebohrt</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/03.03.0032</td><td>Kupplung PP DN40 PN16</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/03.03.0033</td><td>Kupplung PP DN63 PN16</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/03.03.0034</td><td>Kupplung reduziert PP DN50/40 PN16</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/03.03.0035</td><td>Muffe PE DN/OD40 SDR11</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/03.03.0036</td><td>Muffe PE DN/OD63 SDR11</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/04.04.0006</td><td>Verschlussstopfen PE Heizwendelschweißen DN/OD355 SDR11</td><td class=q>4 St</td></tr>
-<tr><td class=oz>P4/04.04.0007</td><td>PE100 Sonderflansch, PN 16 gebohrt</td><td class=q>1 St</td></tr>
+<details open><summary class=type>Horizontalspülbohrung <small>9 items &middot; 1 420 m &middot; 8 St &middot; 1 psch</small></summary><table>
+<tr><td class=oz>P4/04.03.0008</td><td>Pilotbohrung 1 Rohre PE DA 355.<div class=rsn>AI reason: Pilot bore 1 for PE pipe DA 355 along the planned bore axis.</div></td><td class=q>165 m</td></tr>
+<tr><td class=oz>P4/04.03.0009</td><td>Zulage zu Pilotbohrung 1 für Fehlbohrung PE DA 355,<div class=rsn>AI reason: Surcharge for misdrill on Pilotbohrung 1, a drilling item.</div></td><td class=q>85 m</td></tr>
+<tr><td class=oz>P4/04.03.0010</td><td>Horizontale Spülbohrung 1 für PE100RC TW AD/WD 355/32,2 mm<div class=rsn>AI reason: Horizontal directional drilling 1 with reaming and pullback of PE100RC pipe 355/32.2.</div></td><td class=q>165 m</td></tr>
+<tr><td class=oz>P4/04.03.0011</td><td>Pilotbohrung 2 Rohre PE DA 355.<div class=rsn>AI reason: Pilot bore 2 for PE pipe DA 355 along the planned bore axis.</div></td><td class=q>240 m</td></tr>
+<tr><td class=oz>P4/04.03.0012</td><td>Zulage zu Pilotbohrung 2 für Fehlbohrung PE DA 355,<div class=rsn>AI reason: Surcharge for misdrill on Pilotbohrung 2, a drilling item.</div></td><td class=q>120 m</td></tr>
+<tr><td class=oz>P4/04.03.0013</td><td>Horizontale Spülbohrung 2 für PE100RC TW AD/WD 355/32,2 mm<div class=rsn>AI reason: Horizontal directional drilling 2 with pullback of PE100RC pipe 355/32.2.</div></td><td class=q>240 m</td></tr>
+<tr><td class=oz>P4/04.03.0014</td><td>Erschwerniszulage zur Position Spülbohrung 1 und 2 PE DA 355 für:<div class=rsn>AI reason: Hardship surcharge to Spülbohrung 1 and 2 for blowout risk at low cover.</div></td><td class=q>8 St</td></tr>
+<tr><td class=oz>P4/04.03.0015</td><td>Zulage Horizontale Spülbohrung PE DA 355 für Bohrprotokolle Zugkraft<div class=rsn>AI reason: Surcharge to the horizontal drillings for pulling force drilling logs.</div></td><td class=q>405 m</td></tr>
+<tr><td class=oz>P4/04.03.0019</td><td>Bagger Horizontale Spülbohrung PE DA 355,<div class=rsn>AI reason: Support excavator kept on hand for the HDD drilling work, listed in the HDD section.</div></td><td class=q>1 psch</td></tr>
 </table></details>
-<details><summary class=type>Horizontalspülbohrung <small>9 items &middot; 1 420 m &middot; 8 St &middot; 1 psch</small></summary><table>
-<tr><td class=oz>P4/04.03.0008</td><td>Pilotbohrung 1 Rohre PE DA 355.</td><td class=q>165 m</td></tr>
-<tr><td class=oz>P4/04.03.0009</td><td>Zulage zu Pilotbohrung 1 für Fehlbohrung PE DA 355,</td><td class=q>85 m</td></tr>
-<tr><td class=oz>P4/04.03.0010</td><td>Horizontale Spülbohrung 1 für PE100RC TW AD/WD 355/32,2 mm</td><td class=q>165 m</td></tr>
-<tr><td class=oz>P4/04.03.0011</td><td>Pilotbohrung 2 Rohre PE DA 355.</td><td class=q>240 m</td></tr>
-<tr><td class=oz>P4/04.03.0012</td><td>Zulage zu Pilotbohrung 2 für Fehlbohrung PE DA 355,</td><td class=q>120 m</td></tr>
-<tr><td class=oz>P4/04.03.0013</td><td>Horizontale Spülbohrung 2 für PE100RC TW AD/WD 355/32,2 mm</td><td class=q>240 m</td></tr>
-<tr><td class=oz>P4/04.03.0014</td><td>Erschwerniszulage zur Position Spülbohrung 1 und 2 PE DA 355 für:</td><td class=q>8 St</td></tr>
-<tr><td class=oz>P4/04.03.0015</td><td>Zulage Horizontale Spülbohrung PE DA 355 für Bohrprotokolle Zugkraft</td><td class=q>405 m</td></tr>
-<tr><td class=oz>P4/04.03.0019</td><td>Bagger Horizontale Spülbohrung PE DA 355,</td><td class=q>1 psch</td></tr>
+<details open><summary class=type>Rohrverbindung PE <small>9 items &middot; 84 St</small></summary><table>
+<tr><td class=oz>P4/03.02.0004</td><td>Muffe aus PE, zum Heizelementmuffenschweißen, für Druckrohrleitung aus PE, für Trinkwasser DIN <div class=rsn>AI reason: PE electrofusion socket for drinking water pressure pipe DN/OD 355.</div></td><td class=q>5 St</td></tr>
+<tr><td class=oz>P4/03.03.0032</td><td>Kupplung PP DN40 PN16<div class=rsn>AI reason: PP coupling DN40 for PE pressure pipe.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/03.03.0033</td><td>Kupplung PP DN63 PN16<div class=rsn>AI reason: PP coupling DN63 for PE pressure pipe.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/03.03.0034</td><td>Kupplung reduziert PP DN50/40 PN16<div class=rsn>AI reason: Reduced PP coupling DN50/40 for PE pressure pipe.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/03.03.0035</td><td>Muffe PE DN/OD40 SDR11<div class=rsn>AI reason: PE socket for heating element socket welding, DN/OD40.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/03.03.0036</td><td>Muffe PE DN/OD63 SDR11<div class=rsn>AI reason: PE socket for heating element socket welding, DN/OD63.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/04.04.0002</td><td>Schweißverbindung Heizelement - Stumpfschweißung PE AD/WD 355/32,2 mm<div class=rsn>AI reason: Heating element butt weld connection for PE pipe 355 mm.</div></td><td class=q>35 St</td></tr>
+<tr><td class=oz>P4/04.04.0003</td><td>Zulage zur Position Schweißverbindung Heizelement - Stumpfschweißung<div class=rsn>AI reason: Surcharge for internal bead removal belonging to the PE butt weld item.</div></td><td class=q>35 St</td></tr>
+<tr><td class=oz>P4/04.04.0006</td><td>Verschlussstopfen PE Heizwendelschweißen DN/OD355 SDR11<div class=rsn>AI reason: PE end plug with electrofusion welding ends for the pressure pipe.</div></td><td class=q>4 St</td></tr>
 </table></details>
-<details><summary class=type>Edelstahlformstück <small>8 items &middot; 12 St</small></summary><table>
-<tr><td class=oz>P4/03.03.0001</td><td>Hosenbogen/ Hosen-T-Stück DN 300 mit Sattelstutzen DN 80</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/03.03.0002</td><td>FF-Stück DN 300 PN 16, L: ca. 300mm</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/03.03.0003</td><td>FF-Stück DN 300 PN 16, L: ca. 200mm</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/03.03.0004</td><td>Formstück T - T Stück DN 300/300/80/80 mm</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/03.03.0005</td><td>Formstück T - T Stück DN 300/300/300/80/80 mm</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/03.03.0006</td><td>Bogen DN 80, 90 Grad</td><td class=q>3 St</td></tr>
-<tr><td class=oz>P4/03.03.0007</td><td>Pass- und Ausbaustück</td><td class=q>3 St</td></tr>
-<tr><td class=oz>P4/03.03.0008</td><td>Formstück T - Stück DN 80/65/80 mm</td><td class=q>1 St</td></tr>
+<details open><summary class=type>Edelstahlformstück <small>8 items &middot; 12 St</small></summary><table>
+<tr><td class=oz>P4/03.03.0001</td><td>Hosenbogen/ Hosen-T-Stück DN 300 mit Sattelstutzen DN 80<div class=rsn>AI reason: Hosenbogen/Hosen-T-Stück in stainless steel 1.4571 with flange connections for shaft piping.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/03.03.0002</td><td>FF-Stück DN 300 PN 16, L: ca. 300mm<div class=rsn>AI reason: FF-Stück spool piece in stainless steel 1.4571 for shaft piping.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/03.03.0003</td><td>FF-Stück DN 300 PN 16, L: ca. 200mm<div class=rsn>AI reason: FF-Stück spool piece in stainless steel 1.4571, 200 mm length, for shaft piping.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/03.03.0004</td><td>Formstück T - T Stück DN 300/300/80/80 mm<div class=rsn>AI reason: T-piece fitting made of stainless steel 1.4571 with loose flanges.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/03.03.0005</td><td>Formstück T - T Stück DN 300/300/300/80/80 mm<div class=rsn>AI reason: T-piece fitting made of stainless steel 1.4571 with three loose flanges.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/03.03.0006</td><td>Bogen DN 80, 90 Grad<div class=rsn>AI reason: 90-degree bend DN 80 made of stainless steel 1.4571 with loose flanges.</div></td><td class=q>3 St</td></tr>
+<tr><td class=oz>P4/03.03.0007</td><td>Pass- und Ausbaustück<div class=rsn>AI reason: Pass- und Ausbaustück (spool and dismantling piece) in stainless steel 1.4571 with flanges.</div></td><td class=q>3 St</td></tr>
+<tr><td class=oz>P4/03.03.0008</td><td>Formstück T - Stück DN 80/65/80 mm<div class=rsn>AI reason: T-piece DN 80/65/80 made of stainless steel 1.4571 with loose flanges.</div></td><td class=q>1 St</td></tr>
 </table></details>
-<details><summary class=type>PE-Druckrohr <small>7 items &middot; 710 m &middot; 2 St</small></summary><table>
-<tr><td class=oz>P4/03.02.0003</td><td>Druckrohr PE100RC TW AD/WD 355/32,2 mm PAS 1075 [PERSON_129] 3</td><td class=q>20 m</td></tr>
-<tr><td class=oz>P4/03.02.0005</td><td>Zulage zur Position PE Rohr DA 355 für:</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/03.02.0006</td><td>Zulage zur Position PE Rohr DA 355 für:</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/03.03.0029</td><td>Druckrohr PE100-RC TW DN/OD40 SDR11 Graben abgeböscht T 1,25-1,75m</td><td class=q>5 m</td></tr>
-<tr><td class=oz>P4/03.03.0030</td><td>Druckrohr PE100-RC TW DN/OD63 SDR11</td><td class=q>140 m</td></tr>
-<tr><td class=oz>P4/03.03.0031</td><td>Zulage zur Position Verlegung PE 100 RC DN/OD 63 SDR 11 für:</td><td class=q>140 m</td></tr>
-<tr><td class=oz>P4/04.04.0001</td><td>Druckrohr PE100RC TW AD/WD 355/32,2 mm PAS 1075 [PERSON_129] 3</td><td class=q>405 m</td></tr>
+<details open><summary class=type>PE-Druckrohr <small>8 items &middot; 1 115 m &middot; 2 St</small></summary><table>
+<tr><td class=oz>P4/03.02.0003</td><td>Druckrohr PE100RC TW AD/WD 355/32,2 mm PAS 1075 [PERSON_129] 3<div class=rsn>AI reason: PE100RC drinking water pressure pipe AD/WD 355/32.2 with protective jacket.</div></td><td class=q>20 m</td></tr>
+<tr><td class=oz>P4/03.02.0005</td><td>Zulage zur Position PE Rohr DA 355 für:<div class=rsn>AI reason: Surcharge to the PE pipe DA 355 item for a 30° PE long bend drawn from pipe.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/03.02.0006</td><td>Zulage zur Position PE Rohr DA 355 für:<div class=rsn>AI reason: Surcharge to the PE pipe DA 355 item for a 45° long bend drawn from pipe, so it follows the PE pipe type.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/03.03.0029</td><td>Druckrohr PE100-RC TW DN/OD40 SDR11 Graben abgeböscht T 1,25-1,75m<div class=rsn>AI reason: PE100-RC drinking water pressure pipe DN/OD40 laid in an existing trench.</div></td><td class=q>5 m</td></tr>
+<tr><td class=oz>P4/03.03.0030</td><td>Druckrohr PE100-RC TW DN/OD63 SDR11<div class=rsn>AI reason: PE100-RC drinking water pressure pipe DN/OD63 SDR11 on drums.</div></td><td class=q>140 m</td></tr>
+<tr><td class=oz>P4/03.03.0031</td><td>Zulage zur Position Verlegung PE 100 RC DN/OD 63 SDR 11 für:<div class=rsn>AI reason: Surcharge to PE 100 RC DN/OD 63 pipe laying for pulling the new pipe into an existing AZ line.</div></td><td class=q>140 m</td></tr>
+<tr><td class=oz>P4/04.04.0001</td><td>Druckrohr PE100RC TW AD/WD 355/32,2 mm PAS 1075 [PERSON_129] 3<div class=rsn>AI reason: PE100-RC potable water pressure pipe 355/32.2 mm with protective jacket.</div></td><td class=q>405 m</td></tr>
+<tr><td class=oz>P4/04.04.0004</td><td>Zulage zur Position Rohre PE AD/WD 355/32,2 mm für:<div class=rsn>AI reason: Surcharge for pigging the PE pipe, belonging to the PE pipe item.</div></td><td class=q>405 m</td></tr>
 </table></details>
-<details><summary class=type>Gussdruckrohr <small>6 items &middot; 655 m &middot; 391 St</small></summary><table>
-<tr><td class=oz>P4/03.02.0008</td><td>Druckrohr dukt.Guss TW DN300 Muffenverb. PFA 16 bar Graben abgeböscht T 1,75-4m</td><td class=q>655 m</td></tr>
-<tr><td class=oz>P4/03.02.0009</td><td>Zulage zur Position GGG Rohr DN 300</td><td class=q>160 St</td></tr>
-<tr><td class=oz>P4/03.02.0010</td><td>Zulage zur Rohrposition GGG ZMU DN 300 für</td><td class=q>165 St</td></tr>
-<tr><td class=oz>P4/03.02.0011</td><td>Zulage zur Rohrposition GGG ZMU DN 300, Muffenverbindung für Rohre mit ZM - Umhüllung herstelle</td><td class=q>55 St</td></tr>
-<tr><td class=oz>P4/03.02.0012</td><td>Zulage zur Rohrposition GGG ZMU DN 300 für</td><td class=q>10 St</td></tr>
-<tr><td class=oz>P4/04.04.0010</td><td>Zulage zur Position GGG Rohr DN 300</td><td class=q>1 St</td></tr>
+<details open><summary class=type>Rohrleitungsanschluss <small>7 items &middot; 5 psch &middot; 1 350 m</small> <mark>2</mark></summary><table>
+<tr><td class=oz>P4/02.03.0002</td><td>Zulage - Position für alle Tiefbauarbeiten im Anschlussbereich neue Leitung/<div class=rsn>AI reason: Surcharge for civil works at the tie-in to the existing DN 300 main at construction start.</div></td><td class=q>1 psch</td></tr>
+<tr><td class=oz>P4/02.03.0003</td><td>Zulage - Position für alle Tiefbauarbeiten im Anschlussbereich neue Leitung/<div class=rsn>AI reason: Surcharge for civil works at the tie-in to the existing DN 300 main at construction end.</div></td><td class=q>1 psch</td></tr>
+<tr><td class=oz>P4/03.02.0001</td><td>Zulage - Position für alle Rohrverlege- und Montagearbeiten<div class=rsn>AI reason: Lump-sum surcharge for pipe laying and assembly at the tie-in to the existing GGG DN 300 main.</div></td><td class=q>1 psch</td></tr>
+<tr><td class=oz>P4/03.02.0002</td><td>Zulage - Position für alle Tiefbauarbeiten im Anschlussbereich neue Leitung/<div class=rsn>AI reason: Lump-sum surcharge for civil works at the tie-in to the existing GGG DN 300 main.</div></td><td class=q>1 psch</td></tr>
+<tr class=flag><td class=oz>P4/03.02.0024</td><td>Zulage zu allen Rohrverlegepositionen für die maßgenaue Rohrverlegung für die Gussrohr- und PE <div class=rsn>AI reason: Surcharge for precise pipe laying (±1 cm) for cast iron and PE lines, matching precise laying.</div><div class=why><b>Debatable.</b> A surcharge for exact pipe laying, filed under the tie-in to the existing main, not with the pipe it belongs to.</div></td><td class=q>675 m</td></tr>
+<tr class=flag><td class=oz>P4/03.02.0025</td><td>Druckrohr aus duktilem Gusseisen, innen zementiert<div class=rsn>AI reason: Surcharge for cleaning the DN 300 pipeline with sponge ball or pig during laying, i.e. cleaning work.</div><div class=why><b>Clear mistake.</b> Cleaning the new pipe with a sponge ball during laying, filed under the tie-in to the existing main. The same cleaning for the PE pipe went to the pipe itself.</div></td><td class=q>675 m</td></tr>
+<tr><td class=oz>P4/03.02.0026</td><td>Zulage für das Setzen einer jeweiligen Rohrabsperrblase DN 300 und eines Abschlussdeckels mit D<div class=rsn>AI reason: Lump-sum surcharge for setting pipe plugs (Rohrabsperrblase) and end cover, matching pipe plugs.</div></td><td class=q>1 psch</td></tr>
 </table></details>
-<details><summary class=type>Kabelschutzrohr <small>5 items &middot; 300 m &middot; 3 St</small></summary><table>
-<tr><td class=oz>P4/02.03.0048</td><td>Zulage zu allen Grabenpositionen der Wasserleitung DN 300</td><td class=q>100 m</td></tr>
-<tr><td class=oz>P4/02.03.0051</td><td>Druckrohr PE100-RC TW Graben verbaut T 1,25-1,75m</td><td class=q>100 m</td></tr>
-<tr><td class=oz>P4/02.03.0052</td><td>Zulage zur Position Leerrohrleitung DN/OD 110 mm für Liefern und Einziehen</td><td class=q>100 m</td></tr>
-<tr><td class=oz>P4/02.03.0053</td><td>Muffe aus PE, zum Heizelementmuffenschweißen, für Schutzrohrleitung aus PE, DN/OD 110, SDR 11.</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/02.03.0054</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,</td><td class=q>2 St</td></tr>
+<details open><summary class=type>Gussdruckrohr <small>6 items &middot; 655 m &middot; 391 St</small></summary><table>
+<tr><td class=oz>P4/03.02.0008</td><td>Druckrohr dukt.Guss TW DN300 Muffenverb. PFA 16 bar Graben abgeböscht T 1,75-4m<div class=rsn>AI reason: Ductile iron pressure pipe DN300 for drinking water with socket joint, laid in a trench.</div></td><td class=q>655 m</td></tr>
+<tr><td class=oz>P4/03.02.0009</td><td>Zulage zur Position GGG Rohr DN 300<div class=rsn>AI reason: Surcharge to the GGG pipe DN 300 item for restrained socket joints with sealing.</div></td><td class=q>160 St</td></tr>
+<tr><td class=oz>P4/03.02.0010</td><td>Zulage zur Rohrposition GGG ZMU DN 300 für<div class=rsn>AI reason: Surcharge to the GGG ZMU pipe position for a protective sleeve on cement-mortar coated pipes.</div></td><td class=q>165 St</td></tr>
+<tr><td class=oz>P4/03.02.0011</td><td>Zulage zur Rohrposition GGG ZMU DN 300, Muffenverbindung für Rohre mit ZM - Umhüllung herstelle<div class=rsn>AI reason: Surcharge to the GGG ZMU pipe position for making socket joints on cement-mortar coated pipes.</div></td><td class=q>55 St</td></tr>
+<tr><td class=oz>P4/03.02.0012</td><td>Zulage zur Rohrposition GGG ZMU DN 300 für<div class=rsn>AI reason: Surcharge to the GGG ZMU pipe position for a Tyton shrink sleeve on cement-mortar coated pipes.</div></td><td class=q>10 St</td></tr>
+<tr><td class=oz>P4/04.04.0010</td><td>Zulage zur Position GGG Rohr DN 300<div class=rsn>AI reason: Surcharge to the GGG pipe DN 300 item for restrained socket joints with sealing.</div></td><td class=q>1 St</td></tr>
 </table></details>
-<details><summary class=type>Bohrschlammentsorgung <small>3 items &middot; 40 t</small></summary><table>
-<tr><td class=oz>P4/04.03.0016</td><td>Zulage Horizontale Spülbohrung PE DA 355 für</td><td class=q>20 t</td></tr>
-<tr><td class=oz>P4/04.03.0017</td><td>Zulage Horizontale Spülbohrung PE DA 355 für</td><td class=q>10 t</td></tr>
-<tr><td class=oz>P4/04.03.0018</td><td>Zulage Horizontale Spülbohrung PE DA 355 für</td><td class=q>10 t</td></tr>
+<details open><summary class=type>Kabelschutzrohr <small>5 items &middot; 300 m &middot; 3 St</small></summary><table>
+<tr><td class=oz>P4/02.03.0048</td><td>Zulage zu allen Grabenpositionen der Wasserleitung DN 300<div class=rsn>AI reason: Surcharge for trench work to co-lay a PE cable duct DN/OD 110 parallel to the water main.</div></td><td class=q>100 m</td></tr>
+<tr><td class=oz>P4/02.03.0051</td><td>Druckrohr PE100-RC TW Graben verbaut T 1,25-1,75m<div class=rsn>AI reason: PE100-RC protection pipe DN/OD 110 for power cables laid in the trench.</div></td><td class=q>100 m</td></tr>
+<tr><td class=oz>P4/02.03.0052</td><td>Zulage zur Position Leerrohrleitung DN/OD 110 mm für Liefern und Einziehen<div class=rsn>AI reason: Surcharge to the empty conduit DN/OD 110 item for supplying and pulling in a draw wire.</div></td><td class=q>100 m</td></tr>
+<tr><td class=oz>P4/02.03.0053</td><td>Muffe aus PE, zum Heizelementmuffenschweißen, für Schutzrohrleitung aus PE, DN/OD 110, SDR 11.<div class=rsn>AI reason: PE electrofusion coupling for the DN/OD 110 protection pipe line, belonging to the cable duct system.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/02.03.0054</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,<div class=rsn>AI reason: Refers to the previous PE coupling item for the DN 110 duct; supplies end caps for it.</div></td><td class=q>2 St</td></tr>
 </table></details>
-<details><summary class=type>Rohrleitungsreinigung <small>3 items &middot; 1 080 m &middot; 1 psch</small></summary><table>
-<tr><td class=oz>P4/03.02.0025</td><td>Druckrohr aus duktilem Gusseisen, innen zementiert</td><td class=q>675 m</td></tr>
-<tr><td class=oz>P4/03.02.0026</td><td>Zulage für das Setzen einer jeweiligen Rohrabsperrblase DN 300 und eines Abschlussdeckels mit D</td><td class=q>1 psch</td></tr>
-<tr><td class=oz>P4/04.04.0004</td><td>Zulage zur Position Rohre PE AD/WD 355/32,2 mm für:</td><td class=q>405 m</td></tr>
+<details open><summary class=type>Flanschverbindung <small>4 items &middot; 4 St</small></summary><table>
+<tr><td class=oz>P4/03.03.0011</td><td>PE100 Sonderflansch, PN 16 gebohrt<div class=rsn>AI reason: PE100 special flange with backing flange for connecting to valves.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/03.03.0018</td><td>Schubsicherung Eingangsflansch DN 300 PN 16<div class=rsn>AI reason: Additional thrust restraint of the first flange at the shaft wall using threaded rods.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/04.04.0007</td><td>PE100 Sonderflansch, PN 16 gebohrt<div class=rsn>AI reason: PE100 special flange with backing flange for connecting to valves.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/04.04.0008</td><td>Flanschnachumhüllung mit Schrumpfmanschette, konfektioniert wie folgt:<div class=rsn>AI reason: Shrink sleeve flange wrapping for DN 300 flanges.</div></td><td class=q>1 St</td></tr>
 </table></details>
-<details><summary class=type>Rohrschnitt <small>3 items &middot; 12 St</small></summary><table>
-<tr><td class=oz>P4/03.02.0007</td><td>Rohrschnitt anschrägen PE DN/OD355</td><td class=q>5 St</td></tr>
-<tr><td class=oz>P4/03.02.0021</td><td>Rohrschnitt anschrägen dukt.Guss DN300</td><td class=q>3 St</td></tr>
-<tr><td class=oz>P4/04.04.0005</td><td>Rohrschnitt anschrägen PE DN/OD355</td><td class=q>4 St</td></tr>
+<details open><summary class=type>Bohrschlammentsorgung <small>3 items &middot; 40 t</small></summary><table>
+<tr><td class=oz>P4/04.03.0016</td><td>Zulage Horizontale Spülbohrung PE DA 355 für<div class=rsn>AI reason: Surcharge for drilling mud disposal per EBV Z1.1 classification, waste code 010504, in the HDD section.</div></td><td class=q>20 t</td></tr>
+<tr><td class=oz>P4/04.03.0017</td><td>Zulage Horizontale Spülbohrung PE DA 355 für<div class=rsn>AI reason: Surcharge for drilling mud disposal per EBV BM F1-2 (Z1.2) classification.</div></td><td class=q>10 t</td></tr>
+<tr><td class=oz>P4/04.03.0018</td><td>Zulage Horizontale Spülbohrung PE DA 355 für<div class=rsn>AI reason: Surcharge for drilling mud disposal per EBV Z 2 classification.</div></td><td class=q>10 t</td></tr>
 </table></details>
-<details><summary class=type>Warnband <small>3 items &middot; 1 145 m</small></summary><table>
-<tr><td class=oz>P4/02.03.0038</td><td>Warn- und Ortungsband mit Aufdruck</td><td class=q>675 m</td></tr>
-<tr><td class=oz>P4/02.03.0049</td><td>Liefern und einbauen von Trassenband Breite 40 mm,</td><td class=q>100 m</td></tr>
-<tr><td class=oz>P4/02.05.0035</td><td>Warnband mit Aufdruck</td><td class=q>370 m</td></tr>
+<details open><summary class=type>Notversorgung <small>3 items &middot; 20 m &middot; 1 psch &middot; 1 St</small></summary><table>
+<tr><td class=oz>P4/02.03.0027</td><td>Ein- und Wiederausgraben,<div class=rsn>AI reason: Digging out and re-covering temporary emergency supply lines, including supply and removal of the cover material.</div></td><td class=q>20 m</td></tr>
+<tr><td class=oz>P4/03.05.0001</td><td>Notleitungen (Notversorgung) mit PE - Rohren DN 32 - 40 aufbauen,<div class=rsn>AI reason: Emergency supply lines of PE pipe built, maintained and removed after the works.</div></td><td class=q>1 psch</td></tr>
+<tr><td class=oz>P4/03.05.0002</td><td>Nach Abbau der Notversorgungen/Überleitungen und wieder Inbetriebnahme<div class=rsn>AI reason: Cleaning and reinstalling strainer inserts in house connections after dismantling the emergency supply.</div></td><td class=q>1 St</td></tr>
 </table></details>
-<details><summary class=type>Notversorgungsleitung <small>2 items &middot; 20 m &middot; 1 psch</small></summary><table>
-<tr><td class=oz>P4/02.03.0027</td><td>Ein- und Wiederausgraben,</td><td class=q>20 m</td></tr>
-<tr><td class=oz>P4/03.05.0001</td><td>Notleitungen (Notversorgung) mit PE - Rohren DN 32 - 40 aufbauen,</td><td class=q>1 psch</td></tr>
+<details open><summary class=type>Rohrschnitt <small>3 items &middot; 12 St</small></summary><table>
+<tr><td class=oz>P4/03.02.0007</td><td>Rohrschnitt anschrägen PE DN/OD355<div class=rsn>AI reason: Cutting and bevelling of PE pipe DN/OD355 per DIN EN ISO 9692-1.</div></td><td class=q>5 St</td></tr>
+<tr><td class=oz>P4/03.02.0021</td><td>Rohrschnitt anschrägen dukt.Guss DN300<div class=rsn>AI reason: Pipe cutting and bevelling of ductile iron pipe DN300 incl. removing coating.</div></td><td class=q>3 St</td></tr>
+<tr><td class=oz>P4/04.04.0005</td><td>Rohrschnitt anschrägen PE DN/OD355<div class=rsn>AI reason: Cutting and bevelling of PE pipe DN/OD355 per DIN EN ISO 9692-1.</div></td><td class=q>4 St</td></tr>
 </table></details>
-<details><summary class=type>Schubsicherung <small>2 items &middot; 2 St</small> <mark>1</mark></summary><table>
-<tr><td class=oz>P4/03.03.0018</td><td>Schubsicherung Eingangsflansch DN 300 PN 16</td><td class=q>1 St</td></tr>
-<tr class=flag><td class=oz>P4/04.04.0008</td><td>Flanschnachumhüllung mit Schrumpfmanschette, konfektioniert wie folgt:<div class=why><b>Clear mistake.</b> A shrink sleeve that wraps a flange against corrosion, filed under thrust restraint.</div></td><td class=q>1 St</td></tr>
-</table></details>
-<details><summary class=type>Schweißverbindung <small>2 items &middot; 70 St</small></summary><table>
-<tr><td class=oz>P4/04.04.0002</td><td>Schweißverbindung Heizelement - Stumpfschweißung PE AD/WD 355/32,2 mm</td><td class=q>35 St</td></tr>
-<tr><td class=oz>P4/04.04.0003</td><td>Zulage zur Position Schweißverbindung Heizelement - Stumpfschweißung</td><td class=q>35 St</td></tr>
-</table></details>
-</details>
-<details><summary class=trade>Erdarbeiten <small>62 items, 14 types</small> <mark>7 flagged</mark></summary>
-<details><summary class=type>Rohrgrabenaushub <small>13 items &middot; 1 615 m &middot; 5 m3 &middot; 4 psch &middot; 2 St</small></summary><table>
-<tr><td class=oz>P4/02.03.0013</td><td>Grabenaushub Neubau [PROJEKT_001]</td><td class=q>95 m</td></tr>
-<tr><td class=oz>P4/02.03.0014</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,</td><td class=q>580 m</td></tr>
-<tr><td class=oz>P4/02.03.0015</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,</td><td class=q>5 m3</td></tr>
-<tr><td class=oz>P4/02.03.0016</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,</td><td class=q>1 psch</td></tr>
-<tr><td class=oz>P4/02.03.0017</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,</td><td class=q>1 psch</td></tr>
-<tr><td class=oz>P4/02.03.0018</td><td>Zulage zur Bodenbewegung den Positionen Bodenaushub mit Wiederverfüllung</td><td class=q>1 psch</td></tr>
-<tr><td class=oz>P4/02.03.0019</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,</td><td class=q>25 m</td></tr>
-<tr><td class=oz>P4/02.03.0020</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,</td><td class=q>40 m</td></tr>
-<tr><td class=oz>P4/02.03.0021</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,</td><td class=q>200 m</td></tr>
-<tr><td class=oz>P4/02.03.0024</td><td>Zulage zu allen Grabenpositionen für das maßgenaue Erstellen des Rohrgrabens für die PE Rohre D</td><td class=q>675 m</td></tr>
-<tr><td class=oz>P4/02.05.0008</td><td>Zulage zur Position Grabenaushub Wasserleitung Hauptleitung</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/02.05.0010</td><td>Zulage Grabenaushub Hauptwasserleitung für Erdaushub und Verbau für [PERSON_006] DN 2500 bei ca</td><td class=q>1 psch</td></tr>
-<tr><td class=oz>P4/02.05.0014</td><td>Zulage zur Position Grabenaushub Wasserleitung Hauptleitung</td><td class=q>1 St</td></tr>
-</table></details>
-<details><summary class=type>Erschwerniszulage Tiefbau <small>7 items &middot; 6 psch &middot; 1 St</small> <mark>7</mark></summary><table>
-<tr class=flag><td class=oz>P4/02.03.0001</td><td>Erschwerniszulage zu allen Straßen- und Tiefbaupositionen in allen Gewerken für die Einhaltung <div class=why><b>Rule broken.</b> Sits in a type named after a surcharge, which the rules forbid.</div></td><td class=q>1 psch</td></tr>
-<tr class=flag><td class=oz>P4/02.03.0002</td><td>Zulage - Position für alle Tiefbauarbeiten im Anschlussbereich neue Leitung/<div class=why><b>Rule broken.</b> Sits in a type named after a surcharge, which the rules forbid.</div></td><td class=q>1 psch</td></tr>
-<tr class=flag><td class=oz>P4/02.03.0003</td><td>Zulage - Position für alle Tiefbauarbeiten im Anschlussbereich neue Leitung/<div class=why><b>Rule broken.</b> Sits in a type named after a surcharge, which the rules forbid.</div></td><td class=q>1 psch</td></tr>
-<tr class=flag><td class=oz>P4/02.03.0022</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,<div class=why><b>Rule broken.</b> Sits in a type named after a surcharge, which the rules forbid.</div></td><td class=q>1 St</td></tr>
-<tr class=flag><td class=oz>P4/03.02.0001</td><td>Zulage - Position für alle Rohrverlege- und Montagearbeiten<div class=why><b>Rule broken.</b> Sits in a type named after a surcharge, which the rules forbid. This one is a surcharge on pipe laying, yet sits in the earthworks trade.</div></td><td class=q>1 psch</td></tr>
-<tr class=flag><td class=oz>P4/03.02.0002</td><td>Zulage - Position für alle Tiefbauarbeiten im Anschlussbereich neue Leitung/<div class=why><b>Rule broken.</b> Sits in a type named after a surcharge, which the rules forbid.</div></td><td class=q>1 psch</td></tr>
-<tr class=flag><td class=oz>P4/04.03.0007</td><td>Zulage für Mehraufwand Abstimmung Betreiber von Medienleitungen<div class=why><b>Rule broken.</b> Sits in a type named after a surcharge, which the rules forbid.</div></td><td class=q>1 psch</td></tr>
-</table></details>
-<details><summary class=type>Bodenverwertung und Entsorgung <small>6 items &middot; 1 050 m3 &middot; 100 t</small></summary><table>
-<tr><td class=oz>P4/02.03.0028</td><td>Zulage zur Bodenbewegung der Positionen Bodenaushub Wasserleitung</td><td class=q>500 m3</td></tr>
-<tr><td class=oz>P4/02.03.0029</td><td>Zulage zur Bodenbewegung der Position Bodenaushub Wasserleitungen</td><td class=q>550 m3</td></tr>
-<tr><td class=oz>P4/02.03.0030</td><td>Zulage zur Bodenbewegung der Position Bodenaushub Wasserleitungen</td><td class=q>25 t</td></tr>
-<tr><td class=oz>P4/02.03.0031</td><td>Zulage zur Bodenbewegung der Position Bodenaushub Wasserleitungen</td><td class=q>25 t</td></tr>
-<tr><td class=oz>P4/02.03.0032</td><td>Zulage zur Bodenbewegung der Position Bodenaushub Wasserleitungen</td><td class=q>25 t</td></tr>
-<tr><td class=oz>P4/02.03.0033</td><td>Zulage zur Bodenbewegung der Position Bodenaushub Wasserleitungen</td><td class=q>25 t</td></tr>
-</table></details>
-<details><summary class=type>Verfüllmaterial <small>6 items &middot; 350 m3</small></summary><table>
-<tr><td class=oz>P4/02.03.0041</td><td>Liefern Kies-Sand-Gemisch 0/16</td><td class=q>55 m3</td></tr>
-<tr><td class=oz>P4/02.03.0042</td><td>Liefern Kies 8/16</td><td class=q>25 m3</td></tr>
-<tr><td class=oz>P4/02.03.0043</td><td>Liefern von Stoffen, frei Baustelle,</td><td class=q>200 m3</td></tr>
-<tr><td class=oz>P4/02.03.0044</td><td>Liefern Schotter 45/56</td><td class=q>40 m3</td></tr>
-<tr><td class=oz>P4/02.03.0045</td><td>Liefern Kies 16/32</td><td class=q>15 m3</td></tr>
-<tr><td class=oz>P4/02.03.0046</td><td>Liefern Kies</td><td class=q>15 m3</td></tr>
-</table></details>
-<details><summary class=type>Oberbodenarbeiten <small>5 items &middot; 21 700 m2 &middot; 300 m3</small></summary><table>
-<tr><td class=oz>P4/02.03.0008</td><td>Oberboden aus Mutterboden, [PERSON_033],</td><td class=q>6 200 m2</td></tr>
-<tr><td class=oz>P4/02.03.0009</td><td>Zulage zur Position Oberboden 30 bis 50 cm = im Mittel 40 cm stark abtragen, seitlich lagern un</td><td class=q>100 m3</td></tr>
-<tr><td class=oz>P4/02.03.0010</td><td>Reine Zulage zur Position Oberboden ab- und wieder auftragen für:</td><td class=q>9 300 m2</td></tr>
-<tr><td class=oz>P4/02.03.0011</td><td>Reine Zulage zur Position Oberboden ab- und wieder auftragen für:</td><td class=q>6 200 m2</td></tr>
-<tr><td class=oz>P4/02.03.0012</td><td>Mutterboden, Bodengruppe 1 DIN 18915, liefern und auftragen,</td><td class=q>200 m3</td></tr>
-</table></details>
-<details><summary class=type>Start- und Zielgrube <small>5 items &middot; 6 St</small></summary><table>
-<tr><td class=oz>P4/04.03.0001</td><td>[PERSON_073] für Rohr DA 355</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/04.03.0002</td><td>[PERSON_073] für Rohr DA 355</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/04.03.0003</td><td>[PERSON_034] für Rohr DA 355</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/04.03.0004</td><td>[PERSON_034] für Rohr DA 355</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/04.03.0005</td><td>Zulage zu den Positionen Start- und Zielgruben für notwendige Zwischengruben, die der AN nicht </td><td class=q>2 St</td></tr>
-</table></details>
-<details><summary class=type>Leitungsfreilegung <small>4 items &middot; 20 m3 &middot; 3 St &middot; 10 m</small></summary><table>
-<tr><td class=oz>P4/02.03.0035</td><td>Boden für [PERSON_121] als Zulage zu allen Aushubpositionen,</td><td class=q>10 m3</td></tr>
-<tr><td class=oz>P4/02.03.0036</td><td>Unterquerung bestehender Leitungen und Kabel</td><td class=q>3 St</td></tr>
-<tr><td class=oz>P4/02.03.0037</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,</td><td class=q>10 m</td></tr>
-<tr><td class=oz>P4/04.03.0006</td><td>Zulage zu den [ORT_030] Boden für [PERSON_121],</td><td class=q>10 m3</td></tr>
-</table></details>
-<details><summary class=type>Wurzelstock roden <small>4 items &middot; 8 St</small></summary><table>
-<tr><td class=oz>P4/02.03.0004</td><td>Wurzelstock roden fräsen T 50-100cm Durchm. 50-60cm Direktbeladung laden transp. LKW AN</td><td class=q>2 St</td></tr>
-<tr><td class=oz>P4/02.03.0005</td><td>Zulage fachgerechte Entsorgung für vorbeschriebenen Wurzelstock.</td><td class=q>2 St</td></tr>
-<tr><td class=oz>P4/02.03.0006</td><td>Wurzelstock roden fräsen T 50-100cm Durchm. 30-40cm Direktbeladung laden transp. LKW AN</td><td class=q>2 St</td></tr>
-<tr><td class=oz>P4/02.03.0007</td><td>Zulage fachgerechte Entsorgung für vorbeschriebenen Wurzelstock.</td><td class=q>2 St</td></tr>
-</table></details>
-<details><summary class=type>Bodenabtrag Verkehrsfläche <small>3 items &middot; 185 m3 &middot; 15 m</small></summary><table>
-<tr><td class=oz>P4/01.02.0001</td><td>Boden Verkehrsfläche lösen mit Gerät laden transp. LKW AN entsorgen Vergüt.Entsorg. AN AVV17050</td><td class=q>100 m3</td></tr>
-<tr><td class=oz>P4/01.02.0002</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,</td><td class=q>85 m3</td></tr>
-<tr><td class=oz>P4/01.02.0004</td><td>Freilegen von Leitungen aller Art, bis zum Erdplanum der Straße als</td><td class=q>15 m</td></tr>
-</table></details>
-<details><summary class=type>Kopfloch <small>3 items &middot; 3 St</small></summary><table>
-<tr><td class=oz>P4/02.03.0023</td><td>Zulage zum Grabenaushub für das Herstellen von Kopfloch zum Trennen der vorhandenen Hauptwasser</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/02.03.0025</td><td>Zulage zur Position Grabenaushub GGG DN 300 ZMU geböscht für:</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/02.03.0026</td><td>Herstellen eines Kopfloches Grabenaushub im Verbau,</td><td class=q>1 St</td></tr>
-</table></details>
-<details><summary class=type>Geotextil <small>2 items &middot; 1 250 m2</small></summary><table>
-<tr><td class=oz>P4/01.02.0003</td><td>Geotextil Vliesstoff Trennen Robusth.-kl.4 Überlappungs-B 20cm</td><td class=q>550 m2</td></tr>
-<tr><td class=oz>P4/02.03.0034</td><td>Geotextil Robustheitsklasse 3</td><td class=q>700 m2</td></tr>
-</table></details>
-<details><summary class=type>Sickerpackung <small>2 items &middot; 2 St</small></summary><table>
-<tr><td class=oz>P4/02.05.0028</td><td>Sickerpackung zur Wasserleitungsschachtentwässerung wie folgt:</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/02.05.0029</td><td>Sickerpackung zur Wasserleitungsschachtentwässerung wie folgt:</td><td class=q>1 St</td></tr>
-</table></details>
-<details><summary class=type>Kabelgraben <small>1 items &middot; 5 m</small></summary><table>
-<tr><td class=oz>P4/02.03.0056</td><td>Boden Graben Kabel BK3+4 lösen lagern verfüllen verdichten T bis 0,7m Sohlen-B bis 0,3m</td><td class=q>5 m</td></tr>
-</table></details>
-<details><summary class=type>Lehmriegel <small>1 items &middot; 12 m3</small></summary><table>
-<tr><td class=oz>P4/02.03.0047</td><td>Zulage zur Position Grabenaushub und Verlegung der Wasserleitung</td><td class=q>12 m3</td></tr>
+<details open><summary class=type>Warnband <small>3 items &middot; 1 145 m</small></summary><table>
+<tr><td class=oz>P4/02.03.0038</td><td>Warn- und Ortungsband mit Aufdruck<div class=rsn>AI reason: Warning and locating tape printed &#x27;Achtung Wasserleitung&#x27; with metal strip, supplied and laid.</div></td><td class=q>675 m</td></tr>
+<tr><td class=oz>P4/02.03.0049</td><td>Liefern und einbauen von Trassenband Breite 40 mm,<div class=rsn>AI reason: Supply and installation of yellow Trassenband warning tape 30 cm above the line.</div></td><td class=q>100 m</td></tr>
+<tr><td class=oz>P4/02.05.0035</td><td>Warnband mit Aufdruck<div class=rsn>AI reason: Warning tape printed &#x27;Achtung Abwasserleitung&#x27;, laid 30 cm above the pipe.</div></td><td class=q>370 m</td></tr>
 </table></details>
 </details>
-<details><summary class=trade>Stundenlohnarbeiten <small>27 items, 3 types</small> <mark>1 flagged</mark></summary>
-<details><summary class=type>Gerätestunde <small>19 items &middot; 1 psch</small> <mark>1</mark></summary><table>
-<tr><td class=oz>P4/05.01.0007</td><td>Explosionsstampfer Bedienungspersonal <span class=opt>optional</span></td><td class=q>1 h</td></tr>
-<tr><td class=oz>P4/05.01.0008</td><td>Rüttelpl. Bedienungspersonal 10-12kN <span class=opt>optional</span></td><td class=q>1 h</td></tr>
-<tr><td class=oz>P4/05.01.0009</td><td>Kompressor Bedienungspersonal 5-10m3/min <span class=opt>optional</span></td><td class=q>1 h</td></tr>
-<tr><td class=oz>P4/05.01.0010</td><td>Minibagger Fahrer-in <span class=opt>optional</span></td><td class=q>1 h</td></tr>
-<tr><td class=oz>P4/05.01.0011</td><td>Hydraulikbagger Fahrer-in Löffel 1-1,5m3 <span class=opt>optional</span></td><td class=q>1 h</td></tr>
-<tr><td class=oz>P4/05.01.0012</td><td>Hydraulikbagger Fahrer-in Löffel 1-1,5m3 <span class=opt>optional</span></td><td class=q>1 h</td></tr>
-<tr><td class=oz>P4/05.01.0013</td><td>LKW Fahrer-in 1-3,5t <span class=opt>optional</span></td><td class=q>1 h</td></tr>
-<tr><td class=oz>P4/05.01.0014</td><td>LKW Fahrer-in 8-12t <span class=opt>optional</span></td><td class=q>1 h</td></tr>
-<tr><td class=oz>P4/05.01.0015</td><td>LKW Fahrer-in 12-20t <span class=opt>optional</span></td><td class=q>1 h</td></tr>
-<tr><td class=oz>P4/05.01.0016</td><td>Leistung wie Pos. zuletzt in vollem Wortlaut beschrieben, <span class=opt>optional</span></td><td class=q>1 h</td></tr>
-<tr><td class=oz>P4/05.01.0017</td><td>Kombi als Werkzeug- und Materialwagen <span class=opt>optional</span></td><td class=q>1 h</td></tr>
-<tr><td class=oz>P4/05.01.0018</td><td>Walze Bedienungspersonal Glattmantel 5-10t <span class=opt>optional</span></td><td class=q>1 h</td></tr>
-<tr><td class=oz>P4/05.01.0019</td><td>Radlader Fahrer-in 37-55kW <span class=opt>optional</span></td><td class=q>1 h</td></tr>
-<tr><td class=oz>P4/05.01.0020</td><td>Grader Fahrer-in B 2,5-3m <span class=opt>optional</span></td><td class=q>1 h</td></tr>
-<tr><td class=oz>P4/05.01.0021</td><td>Kernbohrgerät Bedienungspersonal <span class=opt>optional</span></td><td class=q>1 h</td></tr>
-<tr><td class=oz>P4/05.01.0022</td><td>Trennschleifer Trennscheiben Bedienungspersonal Stein <span class=opt>optional</span></td><td class=q>1 h</td></tr>
-<tr><td class=oz>P4/05.01.0023</td><td>Antriebsaggregat elektr.Geräte 5-8kVA <span class=opt>optional</span></td><td class=q>1 h</td></tr>
-<tr><td class=oz>P4/05.01.0024</td><td>Bohrhammer Werkzeug Bedienungspersonal 0,25-1kW <span class=opt>optional</span></td><td class=q>1 h</td></tr>
-<tr class=flag><td class=oz>P4/05.01.0025</td><td>Angenommene Stundenlohnarbeiten pauschal.<div class=why><b>Clear mistake.</b> A lump sum for all hourly work, labour and machines, filed under machine hours.</div></td><td class=q>1 psch</td></tr>
+<details open><summary class=trade>Erdarbeiten <small>62 items, 13 types</small></summary>
+<details open><summary class=type>Rohrgrabenaushub <small>19 items &middot; 1 985 m &middot; 5 m3 &middot; 4 psch &middot; 3 St</small></summary><table>
+<tr><td class=oz>P4/02.03.0013</td><td>Grabenaushub Neubau [PROJEKT_001]<div class=rsn>AI reason: Trench excavation with shoring for the water pipeline DN 300 and shafts.</div></td><td class=q>95 m</td></tr>
+<tr><td class=oz>P4/02.03.0014</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,<div class=rsn>AI reason: Same as the trench excavation item, but sloped 45° without shoring.</div></td><td class=q>580 m</td></tr>
+<tr><td class=oz>P4/02.03.0015</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,<div class=rsn>AI reason: Surcharge to trench excavation item for soil class 6 excavation and transport.</div></td><td class=q>5 m3</td></tr>
+<tr><td class=oz>P4/02.03.0016</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,<div class=rsn>AI reason: Surcharge to trench excavation and pipe laying for difficult work near a tree.</div></td><td class=q>1 psch</td></tr>
+<tr><td class=oz>P4/02.03.0017</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,<div class=rsn>AI reason: Surcharge to trench excavation work for difficult working near a birch tree at old shaft.</div></td><td class=q>1 psch</td></tr>
+<tr><td class=oz>P4/02.03.0018</td><td>Zulage zur Bodenbewegung den Positionen Bodenaushub mit Wiederverfüllung<div class=rsn>AI reason: Surcharge to soil handling in trench excavation and backfill for sorting out oversize grains.</div></td><td class=q>1 psch</td></tr>
+<tr><td class=oz>P4/02.03.0019</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,<div class=rsn>AI reason: Surcharge to shored trench excavation for extra excavation up to 25 cm for subsoil improvement.</div></td><td class=q>25 m</td></tr>
+<tr><td class=oz>P4/02.03.0020</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,<div class=rsn>AI reason: Surcharge to shored trench excavation for extra excavation of 25-50 cm for subsoil improvement.</div></td><td class=q>40 m</td></tr>
+<tr><td class=oz>P4/02.03.0021</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,<div class=rsn>AI reason: Surcharge to sloped trench excavation for extra vertical excavation up to 30 cm for subsoil improvement.</div></td><td class=q>200 m</td></tr>
+<tr><td class=oz>P4/02.03.0022</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,<div class=rsn>AI reason: Surcharge for trench excavation and pipe laying near overhead power line; refers to the soil excavation with backfill item for the water main.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/02.03.0024</td><td>Zulage zu allen Grabenpositionen für das maßgenaue Erstellen des Rohrgrabens für die PE Rohre D<div class=rsn>AI reason: Surcharge to all trench items for dimensionally accurate pipe trench for PE and cast iron pipes.</div></td><td class=q>675 m</td></tr>
+<tr><td class=oz>P4/02.05.0008</td><td>Zulage zur Position Grabenaushub Wasserleitung Hauptleitung<div class=rsn>AI reason: Surcharge to the trench excavation item for the water main near the shaft.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/02.05.0010</td><td>Zulage Grabenaushub Hauptwasserleitung für Erdaushub und Verbau für [PERSON_006] DN 2500 bei ca<div class=rsn>AI reason: Surcharge to main water line trench excavation and shoring for the DN 2500 shaft.</div></td><td class=q>1 psch</td></tr>
+<tr><td class=oz>P4/02.05.0014</td><td>Zulage zur Position Grabenaushub Wasserleitung Hauptleitung<div class=rsn>AI reason: Surcharge to the trench excavation item for the water main near the shaft.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/02.05.0030</td><td>Aushub und Wiederverfüllung mit Verdichtung,<div class=rsn>AI reason: Excavation and backfill with compaction of a separate drainage trench next to the water main trench.</div></td><td class=q>25 m</td></tr>
+<tr><td class=oz>P4/02.05.0031</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,<div class=rsn>AI reason: Surcharge for extra excavation depth; refers to the previous item on trench excavation and backfill for drainage.</div></td><td class=q>25 m</td></tr>
+<tr><td class=oz>P4/02.05.0032</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,<div class=rsn>AI reason: Same as the trench excavation and backfill item, but laid together with the main trench in steps.</div></td><td class=q>40 m</td></tr>
+<tr><td class=oz>P4/02.05.0033</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,<div class=rsn>AI reason: Same as the trench excavation item, with extra depth in a 45% sloped trench.</div></td><td class=q>30 m</td></tr>
+<tr><td class=oz>P4/02.05.0034</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,<div class=rsn>AI reason: Same as the trench excavation item, but as a stepped sloped trench laid alongside the DN 300 trench.</div></td><td class=q>250 m</td></tr>
 </table></details>
-<details><summary class=type>Lohnstunde <small>6 items &middot; no normal items</small></summary><table>
-<tr><td class=oz>P4/05.01.0001</td><td>Polier-in sämtliche Kosten/Zuschläge <span class=opt>optional</span></td><td class=q>1 h</td></tr>
-<tr><td class=oz>P4/05.01.0002</td><td>Baufacharbeiter-in sämtliche Kosten/Zuschläge <span class=opt>optional</span></td><td class=q>1 h</td></tr>
-<tr><td class=oz>P4/05.01.0003</td><td>Bauhelfer-in sämtliche Kosten/Zuschläge <span class=opt>optional</span></td><td class=q>1 h</td></tr>
-<tr><td class=oz>P4/05.01.0004</td><td>Maschinenführer-in Fahrer-in sämtliche Kosten/Zuschläge <span class=opt>optional</span></td><td class=q>1 h</td></tr>
-<tr><td class=oz>P4/05.01.0005</td><td>Obermonteur-in sämtliche Kosten/Zuschläge <span class=opt>optional</span></td><td class=q>1 h</td></tr>
-<tr><td class=oz>P4/05.01.0006</td><td>Monteur-in sämtliche Kosten/Zuschläge <span class=opt>optional</span></td><td class=q>1 h</td></tr>
+<details open><summary class=type>Bodenverwertung <small>6 items &middot; 1 050 m3 &middot; 100 t</small></summary><table>
+<tr><td class=oz>P4/02.03.0028</td><td>Zulage zur Bodenbewegung der Positionen Bodenaushub Wasserleitung<div class=rsn>AI reason: Surcharge for loading, hauling and storing displaced soil in piles at the contractor&#x27;s storage site for sampling.</div></td><td class=q>500 m3</td></tr>
+<tr><td class=oz>P4/02.03.0029</td><td>Zulage zur Bodenbewegung der Position Bodenaushub Wasserleitungen<div class=rsn>AI reason: Surcharge for loading and hauling intermediate-stored soil to recycling as Z 0 soil, including fees.</div></td><td class=q>550 m3</td></tr>
+<tr><td class=oz>P4/02.03.0030</td><td>Zulage zur Bodenbewegung der Position Bodenaushub Wasserleitungen<div class=rsn>AI reason: Surcharge for hauling soil to recycling as BM 0* (Z 0*), including recycling fees.</div></td><td class=q>25 t</td></tr>
+<tr><td class=oz>P4/02.03.0031</td><td>Zulage zur Bodenbewegung der Position Bodenaushub Wasserleitungen<div class=rsn>AI reason: Surcharge for hauling soil to recycling as Z 1.1 class soil, including recycling fees.</div></td><td class=q>25 t</td></tr>
+<tr><td class=oz>P4/02.03.0032</td><td>Zulage zur Bodenbewegung der Position Bodenaushub Wasserleitungen<div class=rsn>AI reason: Surcharge for hauling soil to recycling as BM F 1-2 (Z 1.2), including recycling fees.</div></td><td class=q>25 t</td></tr>
+<tr><td class=oz>P4/02.03.0033</td><td>Zulage zur Bodenbewegung der Position Bodenaushub Wasserleitungen<div class=rsn>AI reason: Surcharge for hauling soil to recycling as BM F 3 (Z 2), including recycling fees.</div></td><td class=q>25 t</td></tr>
 </table></details>
-<details><summary class=type>Stillstandszeit <small>2 items &middot; 10 h</small></summary><table>
-<tr><td class=oz>P4/04.03.0020</td><td>Stillstand Vortriebsanlage</td><td class=q>5 h</td></tr>
-<tr><td class=oz>P4/04.03.0021</td><td>[PERSON_105]</td><td class=q>5 h</td></tr>
+<details open><summary class=type>Leitungsfreilegung <small>6 items &middot; 25 m &middot; 20 m3 &middot; 3 St &middot; 1 psch</small></summary><table>
+<tr><td class=oz>P4/01.02.0004</td><td>Freilegen von Leitungen aller Art, bis zum Erdplanum der Straße als<div class=rsn>AI reason: Exposing utilities of all kinds down to the road subgrade as a difficulty surcharge.</div></td><td class=q>15 m</td></tr>
+<tr><td class=oz>P4/02.03.0035</td><td>Boden für [PERSON_121] als Zulage zu allen Aushubpositionen,<div class=rsn>AI reason: Hand excavation and search slots to expose existing utilities, backfilled and compacted, as a surcharge to excavation items.</div></td><td class=q>10 m3</td></tr>
+<tr><td class=oz>P4/02.03.0036</td><td>Unterquerung bestehender Leitungen und Kabel<div class=rsn>AI reason: Crossing beneath existing lines and cables with searching, securing and exposing work, as a surcharge to excavation items.</div></td><td class=q>3 St</td></tr>
+<tr><td class=oz>P4/02.03.0037</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,<div class=rsn>AI reason: Refers to the crossing of existing lines and cables item; here for parallel lines to be exposed and secured.</div></td><td class=q>10 m</td></tr>
+<tr><td class=oz>P4/04.03.0006</td><td>Zulage zu den [ORT_030] Boden für [PERSON_121],<div class=rsn>AI reason: Surcharge for hand excavation to expose utilities with unknown or inexact location, then backfill.</div></td><td class=q>10 m3</td></tr>
+<tr><td class=oz>P4/04.03.0007</td><td>Zulage für Mehraufwand Abstimmung Betreiber von Medienleitungen<div class=rsn>AI reason: Surcharge for coordinating with utility operators, checking depth and damage-free drilling; search trenches mentioned.</div></td><td class=q>1 psch</td></tr>
 </table></details>
-</details>
-<details><summary class=trade>Entwässerungskanalarbeiten <small>24 items, 4 types</small> <mark>9 flagged</mark></summary>
-<details><summary class=type>Entwässerungsleitung <small>13 items &middot; 747 m &middot; 13 St</small></summary><table>
-<tr><td class=oz>P4/02.05.0030</td><td>Aushub und Wiederverfüllung mit Verdichtung,</td><td class=q>25 m</td></tr>
-<tr><td class=oz>P4/02.05.0031</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,</td><td class=q>25 m</td></tr>
-<tr><td class=oz>P4/02.05.0032</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,</td><td class=q>40 m</td></tr>
-<tr><td class=oz>P4/02.05.0033</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,</td><td class=q>30 m</td></tr>
-<tr><td class=oz>P4/02.05.0034</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,</td><td class=q>250 m</td></tr>
-<tr><td class=oz>P4/02.05.0036</td><td>Druckrohr PE100-RC Abwasser DN/OD110 SDR11 Graben abgeböscht Heizwendelschweißen</td><td class=q>370 m</td></tr>
-<tr><td class=oz>P4/02.05.0039</td><td>[PERSON_117] OD 110 (110 x 3,6 mm),</td><td class=q>7 m</td></tr>
-<tr><td class=oz>P4/02.05.0040</td><td>HS-Formteile Bogen 15 - 45° OD 110, als Zulage</td><td class=q>5 St</td></tr>
-<tr><td class=oz>P4/02.05.0041</td><td>HS-Formteile Überschiebmuffe OD 110, als Zulage</td><td class=q>2 St</td></tr>
-<tr><td class=oz>P4/02.05.0042</td><td>HS-Formteile Abzweig OD 110/110, als Zulage</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/02.05.0043</td><td>Zulage Rohr OD 110 für Froschklappe liefern und einbauen.</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/02.05.0044</td><td>Zulage Rohr OD 110 für Übergangsstück PE DA 110 und PVC DA 110 wasserdichte Ausführung, liefern</td><td class=q>2 St</td></tr>
-<tr><td class=oz>P4/02.05.0045</td><td>Zulage Rohr OD/DA 110 für Übergangsstück Betonrohr DN 100 und PVC OD/DA 110, liefern und einbau</td><td class=q>2 St</td></tr>
+<details open><summary class=type>Liefern Schüttgut <small>6 items &middot; 350 m3</small></summary><table>
+<tr><td class=oz>P4/02.03.0041</td><td>Liefern Kies-Sand-Gemisch 0/16<div class=rsn>AI reason: Supply of sand-gravel mix 0/16 delivered to site, used as lower bedding layer.</div></td><td class=q>55 m3</td></tr>
+<tr><td class=oz>P4/02.03.0042</td><td>Liefern Kies 8/16<div class=rsn>AI reason: Supply of gravel 8/16 delivered to site, used as lower bedding layer.</div></td><td class=q>25 m3</td></tr>
+<tr><td class=oz>P4/02.03.0043</td><td>Liefern von Stoffen, frei Baustelle,<div class=rsn>AI reason: Supply of sand-gravel mix 0/X for residual trench backfill and working spaces.</div></td><td class=q>200 m3</td></tr>
+<tr><td class=oz>P4/02.03.0044</td><td>Liefern Schotter 45/56<div class=rsn>AI reason: Supply of crushed stone 45/56 for ground improvement in water pipe trenches.</div></td><td class=q>40 m3</td></tr>
+<tr><td class=oz>P4/02.03.0045</td><td>Liefern Kies 16/32<div class=rsn>AI reason: Supply of gravel 16/32 delivered to site, with weighing slip proof.</div></td><td class=q>15 m3</td></tr>
+<tr><td class=oz>P4/02.03.0046</td><td>Liefern Kies<div class=rsn>AI reason: Supply of gravel delivered to site, executed with cobble material, with weighing slip proof.</div></td><td class=q>15 m3</td></tr>
 </table></details>
-<details><summary class=type>Schachtabdeckung <small>8 items &middot; 12 St</small> <mark>8</mark></summary><table>
-<tr class=flag><td class=oz>P4/02.05.0020</td><td>Schachtabdeckung Klasse D 400, lichte Weite 800 mm,<div class=why><b>Trade list gap.</b> Cover of a water-pipe shaft under drainage sewer works, while the shafts themselves are under concrete works.</div></td><td class=q>2 St</td></tr>
-<tr class=flag><td class=oz>P4/02.05.0021</td><td>Schachtabdeckung Klasse D 400, lichte Weite 800 mm,<div class=why><b>Trade list gap.</b> Cover of a water-pipe shaft under drainage sewer works, while the shafts themselves are under concrete works.</div></td><td class=q>1 St</td></tr>
-<tr class=flag><td class=oz>P4/02.05.0022</td><td>Zulage zur Schachtabdeckung DN 800 mit Flanschrahmen,<div class=why><b>Trade list gap.</b> Cover of a water-pipe shaft under drainage sewer works, while the shafts themselves are under concrete works.</div></td><td class=q>3 St</td></tr>
-<tr class=flag><td class=oz>P4/02.05.0023</td><td>Zulage zur Schachtabdeckung DN 800 mit Flanschrahmen,<div class=why><b>Trade list gap.</b> Cover of a water-pipe shaft under drainage sewer works, while the shafts themselves are under concrete works.</div></td><td class=q>2 St</td></tr>
-<tr class=flag><td class=oz>P4/02.05.0024</td><td>[PERSON_163] neu, schwere Ausführung aus verzinktem [PERSON_089],<div class=why><b>Trade list gap.</b> Cover of a water-pipe shaft under drainage sewer works, while the shafts themselves are under concrete works.</div></td><td class=q>1 St</td></tr>
-<tr class=flag><td class=oz>P4/02.05.0025</td><td>Schachtabdeckung Klasse D 400, lichte Weite 450 mm,<div class=why><b>Trade list gap.</b> Cover of a water-pipe shaft under drainage sewer works, while the shafts themselves are under concrete works.</div></td><td class=q>1 St</td></tr>
-<tr class=flag><td class=oz>P4/02.05.0026</td><td>Schachtabdeckung Klasse D 400 MEILEVEL®-A<div class=why><b>Trade list gap.</b> Cover of a water-pipe shaft under drainage sewer works, while the shafts themselves are under concrete works.</div></td><td class=q>1 St</td></tr>
-<tr class=flag><td class=oz>P4/02.05.0027</td><td>Schachtabdeckung VIATOP M NIVEAU 140 Klasse D 400 einwalzbar,<div class=why><b>Trade list gap.</b> Cover of a water-pipe shaft under drainage sewer works, while the shafts themselves are under concrete works.</div></td><td class=q>1 St</td></tr>
+<details open><summary class=type>Oberbodenarbeit <small>6 items &middot; 1 psch &middot; 21 700 m2 &middot; 300 m3</small></summary><table>
+<tr><td class=oz>P4/02.03.0001</td><td>Erschwerniszulage zu allen Straßen- und Tiefbaupositionen in allen Gewerken für die Einhaltung <div class=rsn>AI reason: Surcharge for soil protection concept: topsoil stripping and reapplication handled properly across all works.</div></td><td class=q>1 psch</td></tr>
+<tr><td class=oz>P4/02.03.0008</td><td>Oberboden aus Mutterboden, [PERSON_033],<div class=rsn>AI reason: Stripping topsoil 30-50 cm and storing it in windrows.</div></td><td class=q>6 200 m2</td></tr>
+<tr><td class=oz>P4/02.03.0009</td><td>Zulage zur Position Oberboden 30 bis 50 cm = im Mittel 40 cm stark abtragen, seitlich lagern un<div class=rsn>AI reason: Surcharge to the topsoil strip, store and reapply item for additional topsoil transfer and interim storage.</div></td><td class=q>100 m3</td></tr>
+<tr><td class=oz>P4/02.03.0010</td><td>Reine Zulage zur Position Oberboden ab- und wieder auftragen für:<div class=rsn>AI reason: Surcharge to topsoil item for fine grading and loosening of areas before seeding.</div></td><td class=q>9 300 m2</td></tr>
+<tr><td class=oz>P4/02.03.0011</td><td>Reine Zulage zur Position Oberboden ab- und wieder auftragen für:<div class=rsn>AI reason: Surcharge to topsoil item for loosening subsoil of meadows before topsoil reapplication.</div></td><td class=q>6 200 m2</td></tr>
+<tr><td class=oz>P4/02.03.0012</td><td>Mutterboden, Bodengruppe 1 DIN 18915, liefern und auftragen,<div class=rsn>AI reason: Supplying and applying topsoil per DIN 18915, billed by delivery notes.</div></td><td class=q>200 m3</td></tr>
 </table></details>
-<details><summary class=type>Drainagewiederherstellung <small>2 items &middot; 15 St &middot; 50 m</small></summary><table>
-<tr><td class=oz>P4/02.03.0057</td><td>Wiederherstellung von Felddrainagen</td><td class=q>15 St</td></tr>
-<tr><td class=oz>P4/02.03.0058</td><td>Zulage zur Pos. Wiederherstellung von Felddrainagen</td><td class=q>50 m</td></tr>
+<details open><summary class=type>Start- und Zielgrube <small>5 items &middot; 6 St</small></summary><table>
+<tr><td class=oz>P4/04.03.0001</td><td>[PERSON_073] für Rohr DA 355<div class=rsn>AI reason: Open pit made and removed as launch/target pit for the horizontal bore, pipe DA 355.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/04.03.0002</td><td>[PERSON_073] für Rohr DA 355<div class=rsn>AI reason: Open pit made and removed as launch/target pit for the horizontal bore, pipe DA 355.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/04.03.0003</td><td>[PERSON_034] für Rohr DA 355<div class=rsn>AI reason: Open pit made and removed as launch/target pit for the horizontal bore, pipe DA 355.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/04.03.0004</td><td>[PERSON_034] für Rohr DA 355<div class=rsn>AI reason: Open pit made and removed as launch/target pit for the horizontal bore, pipe DA 355.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/04.03.0005</td><td>Zulage zu den Positionen Start- und Zielgruben für notwendige Zwischengruben, die der AN nicht <div class=rsn>AI reason: Surcharge to the launch and target pit items for necessary intermediate pits.</div></td><td class=q>2 St</td></tr>
 </table></details>
-<details><summary class=type>Kabelzugschacht <small>1 items &middot; 1 St</small> <mark>1</mark></summary><table>
-<tr class=flag><td class=oz>P4/02.03.0055</td><td>[PERSON_172]. Kl.D Gr.IV L/B 900/800mm H 820mm<div class=why><b>Trade list gap.</b> A cable pull shaft under drainage sewer works: the trade list has no trade for cable works.</div></td><td class=q>1 St</td></tr>
+<details open><summary class=type>Wurzelstock roden <small>4 items &middot; 8 St</small></summary><table>
+<tr><td class=oz>P4/02.03.0004</td><td>Wurzelstock roden fräsen T 50-100cm Durchm. 50-60cm Direktbeladung laden transp. LKW AN<div class=rsn>AI reason: Grubbing and milling a tree stump, 50-60 cm diameter, loaded and transported.</div></td><td class=q>2 St</td></tr>
+<tr><td class=oz>P4/02.03.0005</td><td>Zulage fachgerechte Entsorgung für vorbeschriebenen Wurzelstock.<div class=rsn>AI reason: Disposal surcharge for the previously described tree stump.</div></td><td class=q>2 St</td></tr>
+<tr><td class=oz>P4/02.03.0006</td><td>Wurzelstock roden fräsen T 50-100cm Durchm. 30-40cm Direktbeladung laden transp. LKW AN<div class=rsn>AI reason: Grubbing and milling a tree stump, 30-40 cm diameter, loaded and transported.</div></td><td class=q>2 St</td></tr>
+<tr><td class=oz>P4/02.03.0007</td><td>Zulage fachgerechte Entsorgung für vorbeschriebenen Wurzelstock.<div class=rsn>AI reason: Disposal surcharge for the previously described tree stump.</div></td><td class=q>2 St</td></tr>
 </table></details>
-</details>
-<details><summary class=trade>Straßenbau <small>15 items, 8 types</small></summary>
-<details><summary class=type>Tragschicht <small>5 items &middot; 275 m3 &middot; 40 t &middot; 60 m2</small></summary><table>
-<tr><td class=oz>P4/01.04.0001</td><td>Liefern und Einbauen einer kombinierten Frostschutz-, Kiestragschicht,</td><td class=q>35 m3</td></tr>
-<tr><td class=oz>P4/01.04.0002</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,</td><td class=q>240 m3</td></tr>
-<tr><td class=oz>P4/01.04.0003</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,</td><td class=q>25 t</td></tr>
-<tr><td class=oz>P4/01.04.0004</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,</td><td class=q>15 t</td></tr>
-<tr><td class=oz>P4/01.04.0005</td><td>Zulage zu der Position Kies- und Schottertragschicht für Feinplanum einschl.</td><td class=q>60 m2</td></tr>
+<details open><summary class=type>Kopfloch <small>3 items &middot; 3 St</small></summary><table>
+<tr><td class=oz>P4/02.03.0023</td><td>Zulage zum Grabenaushub für das Herstellen von Kopfloch zum Trennen der vorhandenen Hauptwasser<div class=rsn>AI reason: Surcharge for producing a pit to cut or connect the existing main, including locating and exposing the pipe.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/02.03.0025</td><td>Zulage zur Position Grabenaushub GGG DN 300 ZMU geböscht für:<div class=rsn>AI reason: Surcharge for a pit (extra excavation beyond standard trench) to cut an existing AC pipe for a house connection.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/02.03.0026</td><td>Herstellen eines Kopfloches Grabenaushub im Verbau,<div class=rsn>AI reason: Producing a pit with shoring to cut the existing AC water pipe for a house connection.</div></td><td class=q>1 St</td></tr>
 </table></details>
-<details><summary class=type>Asphaltdeckschicht <small>2 items &middot; 70 m2</small></summary><table>
-<tr><td class=oz>P4/01.04.0011</td><td>Asphaltbetondeckschicht ländl. Weg AC8DN D 3cm Bindem. 70/100</td><td class=q>60 m2</td></tr>
-<tr><td class=oz>P4/01.04.0012</td><td>Zulage zu den Positionen Asphaltbetondeckschicht für [PERSON_015] in Kleinflächen, Hofflächen u</td><td class=q>10 m2</td></tr>
+<details open><summary class=type>Bodenabtrag Verkehrsfläche <small>2 items &middot; 185 m3</small></summary><table>
+<tr><td class=oz>P4/01.02.0001</td><td>Boden Verkehrsfläche lösen mit Gerät laden transp. LKW AN entsorgen Vergüt.Entsorg. AN AVV17050<div class=rsn>AI reason: Excavating soil for traffic areas, loading, transporting and disposing of it by the contractor.</div></td><td class=q>100 m3</td></tr>
+<tr><td class=oz>P4/01.02.0002</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,<div class=rsn>AI reason: Wie vor item referring to the soil excavation item for traffic areas, here reusable soil reused on site.</div></td><td class=q>85 m3</td></tr>
 </table></details>
-<details><summary class=type>Asphalttragschicht <small>2 items &middot; 70 m2</small></summary><table>
-<tr><td class=oz>P4/01.04.0009</td><td>TS Asphalt ländl. Weg AC32TN Bindem. 70/100 D 10cm</td><td class=q>60 m2</td></tr>
-<tr><td class=oz>P4/01.04.0010</td><td>Zulage zu den Positionen Asphalttragschicht für [PERSON_015] in Hofflächen, Kleinflächen und St</td><td class=q>10 m2</td></tr>
+<details open><summary class=type>Geotextil <small>2 items &middot; 1 250 m2</small></summary><table>
+<tr><td class=oz>P4/01.02.0003</td><td>Geotextil Vliesstoff Trennen Robusth.-kl.4 Überlappungs-B 20cm<div class=rsn>AI reason: Separating nonwoven geotextile of robustness class 4 with 20 cm overlap.</div></td><td class=q>550 m2</td></tr>
+<tr><td class=oz>P4/02.03.0034</td><td>Geotextil Robustheitsklasse 3<div class=rsn>AI reason: Geotextile of robustness class 3, polypropylene nonwoven, separating the soil replacement body from surrounding ground.</div></td><td class=q>700 m2</td></tr>
 </table></details>
-<details><summary class=type>Unterlage reinigen <small>2 items &middot; 120 m2</small></summary><table>
-<tr><td class=oz>P4/01.04.0006</td><td>Unterlage reinigen TSmB bitumenhaltig komb.Saug-Kehrmaschinen</td><td class=q>60 m2</td></tr>
-<tr><td class=oz>P4/01.04.0007</td><td>Zulage reinigen Tragschicht- und Binderschicht, für fachgerechte Entsorgung anfallender Stoffe,</td><td class=q>60 m2</td></tr>
+<details open><summary class=type>Baugrubenaushub Schacht <small>1 items &middot; 1 psch</small></summary><table>
+<tr><td class=oz>P4/02.05.0006</td><td>Erdaushub geböscht für neuen [PERSON_006] DN 1200<div class=rsn>AI reason: Sloped excavation for new DN 1200 house connection shaft pit.</div></td><td class=q>1 psch</td></tr>
 </table></details>
-<details><summary class=type>Asphaltschneiden <small>1 items &middot; 30 m</small></summary><table>
-<tr><td class=oz>P4/01.03.0001</td><td>Asphaltoberbau schneiden D 5-10cm T 100mm</td><td class=q>30 m</td></tr>
+<details open><summary class=type>Kabelgraben <small>1 items &middot; 5 m</small></summary><table>
+<tr><td class=oz>P4/02.03.0056</td><td>Boden Graben Kabel BK3+4 lösen lagern verfüllen verdichten T bis 0,7m Sohlen-B bis 0,3m<div class=rsn>AI reason: Excavating, storing, backfilling and compacting soil for cable trenches.</div></td><td class=q>5 m</td></tr>
 </table></details>
-<details><summary class=type>Böschungspflaster <small>1 items &middot; 1 t</small></summary><table>
-<tr><td class=oz>P4/02.03.0059</td><td>Böschungs- und Sohlpflaster im Bereich Verdolungen</td><td class=q>1 t</td></tr>
-</table></details>
-<details><summary class=type>Fuge <small>1 items &middot; 15 m</small></summary><table>
-<tr><td class=oz>P4/01.04.0013</td><td>Fuge anlegen Deckschicht Asphaltbeton Längs-Querfuge Anschlüsse B 10mm T 40mm</td><td class=q>15 m</td></tr>
-</table></details>
-<details><summary class=type>Haftkleber <small>1 items &middot; 60 m2</small></summary><table>
-<tr><td class=oz>P4/01.04.0008</td><td>Bitumenh.Bindem. aufsprühen 0,2-0,3kg/m2 C40B5-S frisch TS Asphalt</td><td class=q>60 m2</td></tr>
+<details open><summary class=type>Lehmriegel <small>1 items &middot; 12 m3</small></summary><table>
+<tr><td class=oz>P4/02.03.0047</td><td>Zulage zur Position Grabenaushub und Verlegung der Wasserleitung<div class=rsn>AI reason: Surcharge for supplying and installing clay plugs across the trench width; the long text names Lehmriegel.</div></td><td class=q>12 m3</td></tr>
 </table></details>
 </details>
-<details><summary class=trade>Betonarbeiten <small>14 items, 3 types</small> <mark>1 flagged</mark></summary>
-<details><summary class=type>Schachtbauwerk <small>8 items &middot; 9 St &middot; 2 psch</small> <mark>1</mark></summary><table>
-<tr><td class=oz>P4/02.05.0004</td><td>Sickerschacht für Entwässerungsleitung von Wasserleitungsschächten</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/02.05.0005</td><td>[PERSON_006] rund DN 1200</td><td class=q>1 St</td></tr>
-<tr class=flag><td class=oz>P4/02.05.0006</td><td>Erdaushub geböscht für neuen [PERSON_006] DN 1200<div class=why><b>Debatable.</b> Excavation for a shaft, filed with the shaft under concrete works, not under earthworks.</div></td><td class=q>1 psch</td></tr>
-<tr><td class=oz>P4/02.05.0007</td><td>[PERSON_006] DN 2500</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/02.05.0009</td><td>[PERSON_006] DN 2500</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/02.05.0012</td><td>[PERSON_006] eckig</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/02.05.0013</td><td>Zulage zur Position [PERSON_006] eckig lichte Maße 2,00 x 3,00 m</td><td class=q>1 psch</td></tr>
-<tr><td class=oz>P4/02.05.0015</td><td>Zulage zu den Positionen Wasserleitungsschächte für</td><td class=q>4 St</td></tr>
+<details open><summary class=trade>Entwässerungskanalarbeiten <small>30 items, 6 types</small> <mark>15 flagged</mark></summary>
+<details open><summary class=type>Entwässerungsleitung <small>10 items &middot; 377 m &middot; 22 St</small></summary><table>
+<tr><td class=oz>P4/02.05.0036</td><td>Druckrohr PE100-RC Abwasser DN/OD110 SDR11 Graben abgeböscht Heizwendelschweißen<div class=rsn>AI reason: PE100-RC DN/OD110 pipe for sewage in a shaft drainage trench, laid with electrofusion.</div></td><td class=q>370 m</td></tr>
+<tr><td class=oz>P4/02.05.0037</td><td>Muffe PE DN/OD110 SDR11<div class=rsn>AI reason: PE sleeve DN/OD110 for the sewage pressure pipe, a fitting of the drainage line.</div></td><td class=q>6 St</td></tr>
+<tr><td class=oz>P4/02.05.0038</td><td>Winkel 45Grad PE DN/OD110 SDR11<div class=rsn>AI reason: 45-degree PE bend DN/OD110 for the sewage pressure pipe, a fitting of the drainage line.</div></td><td class=q>3 St</td></tr>
+<tr><td class=oz>P4/02.05.0039</td><td>[PERSON_117] OD 110 (110 x 3,6 mm),<div class=rsn>AI reason: PVC-U HS pipe OD 110 for drainage, laid in the trench.</div></td><td class=q>7 m</td></tr>
+<tr><td class=oz>P4/02.05.0040</td><td>HS-Formteile Bogen 15 - 45° OD 110, als Zulage<div class=rsn>AI reason: Surcharge for HS PVC-U bend OD 110, a fitting of the drainage pipe.</div></td><td class=q>5 St</td></tr>
+<tr><td class=oz>P4/02.05.0041</td><td>HS-Formteile Überschiebmuffe OD 110, als Zulage<div class=rsn>AI reason: Surcharge for HS PVC-U push-over sleeve OD 110, a fitting of the drainage pipe.</div></td><td class=q>2 St</td></tr>
+<tr><td class=oz>P4/02.05.0042</td><td>HS-Formteile Abzweig OD 110/110, als Zulage<div class=rsn>AI reason: Surcharge for HS PVC-U branch OD 110/110, a fitting of the drainage pipe.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/02.05.0043</td><td>Zulage Rohr OD 110 für Froschklappe liefern und einbauen.<div class=rsn>AI reason: Surcharge for OD 110 pipe with backflow flap (Froschklappe) for the drainage line.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/02.05.0044</td><td>Zulage Rohr OD 110 für Übergangsstück PE DA 110 und PVC DA 110 wasserdichte Ausführung, liefern<div class=rsn>AI reason: Surcharge for watertight PE/PVC DA 110 transition piece on the drainage pipe.</div></td><td class=q>2 St</td></tr>
+<tr><td class=oz>P4/02.05.0045</td><td>Zulage Rohr OD/DA 110 für Übergangsstück Betonrohr DN 100 und PVC OD/DA 110, liefern und einbau<div class=rsn>AI reason: Surcharge for transition piece from concrete pipe DN 100 to PVC OD 110 drainage pipe.</div></td><td class=q>2 St</td></tr>
 </table></details>
-<details><summary class=type>Kernbohrung <small>5 items &middot; 6 St</small></summary><table>
-<tr><td class=oz>P4/02.03.0050</td><td>Komplette Kernlochbohrung DN 120 - 140 zur Herstellung von</td><td class=q>2 St</td></tr>
-<tr><td class=oz>P4/02.05.0016</td><td>Zulage zu den Positionen Wasserleitungsschächte für</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/02.05.0017</td><td>Zulage zu den Positionen Hydrantenschächte für</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/02.05.0018</td><td>Zulage zu den Positionen Hydrantenschächte für</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/02.05.0019</td><td>Zulage zu den Positionen Hydranten- oder Sickerschächte für</td><td class=q>1 St</td></tr>
+<details open><summary class=type>Schachtabdeckung <small>8 items &middot; 12 St</small> <mark>8</mark></summary><table>
+<tr class=flag><td class=oz>P4/02.05.0020</td><td>Schachtabdeckung Klasse D 400, lichte Weite 800 mm,<div class=rsn>AI reason: Class D 400 cast iron manhole cover DN 800 with flange frame.</div><div class=why><b>Trade list gap.</b> Cover of a water-pipe shaft, filed under drainage sewer works like the shafts themselves. The stand-in trade list has no trade for water-pipe structures.</div></td><td class=q>2 St</td></tr>
+<tr class=flag><td class=oz>P4/02.05.0021</td><td>Schachtabdeckung Klasse D 400, lichte Weite 800 mm,<div class=rsn>AI reason: Class D 400 cast iron manhole cover DN 800 with ventilation opening.</div><div class=why><b>Trade list gap.</b> Cover of a water-pipe shaft, filed under drainage sewer works like the shafts themselves. The stand-in trade list has no trade for water-pipe structures.</div></td><td class=q>1 St</td></tr>
+<tr class=flag><td class=oz>P4/02.05.0022</td><td>Zulage zur Schachtabdeckung DN 800 mit Flanschrahmen,<div class=rsn>AI reason: Surcharge to the DN 800 manhole cover for stainless bolting.</div><div class=why><b>Trade list gap.</b> Cover of a water-pipe shaft, filed under drainage sewer works like the shafts themselves. The stand-in trade list has no trade for water-pipe structures.</div></td><td class=q>3 St</td></tr>
+<tr class=flag><td class=oz>P4/02.05.0023</td><td>Zulage zur Schachtabdeckung DN 800 mit Flanschrahmen,<div class=rsn>AI reason: Surcharge to the DN 800 manhole cover for granite paving surround.</div><div class=why><b>Trade list gap.</b> Cover of a water-pipe shaft, filed under drainage sewer works like the shafts themselves. The stand-in trade list has no trade for water-pipe structures.</div></td><td class=q>2 St</td></tr>
+<tr class=flag><td class=oz>P4/02.05.0024</td><td>[PERSON_163] neu, schwere Ausführung aus verzinktem [PERSON_089],<div class=rsn>AI reason: Galvanized heavy-duty safety grid for a Class D manhole cover with ventilation openings.</div><div class=why><b>Trade list gap.</b> Cover of a water-pipe shaft, filed under drainage sewer works like the shafts themselves. The stand-in trade list has no trade for water-pipe structures.</div></td><td class=q>1 St</td></tr>
+<tr class=flag><td class=oz>P4/02.05.0025</td><td>Schachtabdeckung Klasse D 400, lichte Weite 450 mm,<div class=rsn>AI reason: Class D 400 cast manhole cover, clear width 450 mm, with frame and sand seal.</div><div class=why><b>Trade list gap.</b> Cover of a water-pipe shaft, filed under drainage sewer works like the shafts themselves. The stand-in trade list has no trade for water-pipe structures.</div></td><td class=q>1 St</td></tr>
+<tr class=flag><td class=oz>P4/02.05.0026</td><td>Schachtabdeckung Klasse D 400 MEILEVEL®-A<div class=rsn>AI reason: Manhole cover class D 400, DN 600, per DIN EN 124, as the short text states.</div><div class=why><b>Trade list gap.</b> Cover of a water-pipe shaft, filed under drainage sewer works like the shafts themselves. The stand-in trade list has no trade for water-pipe structures.</div></td><td class=q>1 St</td></tr>
+<tr class=flag><td class=oz>P4/02.05.0027</td><td>Schachtabdeckung VIATOP M NIVEAU 140 Klasse D 400 einwalzbar,<div class=rsn>AI reason: Manhole cover VIATOP class D 400 with frame for installation in bituminous road surfaces.</div><div class=why><b>Trade list gap.</b> Cover of a water-pipe shaft, filed under drainage sewer works like the shafts themselves. The stand-in trade list has no trade for water-pipe structures.</div></td><td class=q>1 St</td></tr>
 </table></details>
-<details><summary class=type>Betonfestpunkt <small>1 items &middot; 2 m3</small></summary><table>
-<tr><td class=oz>P4/02.03.0039</td><td>Festpunkte für Wasserleitungsrohre bis GGG DN 300 ZMU,</td><td class=q>2 m3</td></tr>
+<details open><summary class=type>Schachtbauwerk <small>7 items &middot; 9 St &middot; 1 psch</small> <mark>6</mark></summary><table>
+<tr><td class=oz>P4/02.05.0004</td><td>Sickerschacht für Entwässerungsleitung von Wasserleitungsschächten<div class=rsn>AI reason: Precast round seepage shaft DN 1000 supplied and installed without cover, in the shaft structures section; Schachtbauwerk covers seepage shafts.</div></td><td class=q>1 St</td></tr>
+<tr class=flag><td class=oz>P4/02.05.0005</td><td>[PERSON_006] rund DN 1200<div class=rsn>AI reason: Round precast shaft DN 1200 supplied and installed without cover, with backflow valve base.</div><div class=why><b>Trade list gap.</b> A shaft of the water pipe (section 02.05), filed under drainage sewer works. The stand-in trade list has no trade for water-pipe structures.</div></td><td class=q>1 St</td></tr>
+<tr class=flag><td class=oz>P4/02.05.0007</td><td>[PERSON_006] DN 2500<div class=rsn>AI reason: Precast shaft DN 2500 with monolithic base and separate cover slab.</div><div class=why><b>Trade list gap.</b> A shaft of the water pipe (section 02.05), filed under drainage sewer works. The stand-in trade list has no trade for water-pipe structures.</div></td><td class=q>1 St</td></tr>
+<tr class=flag><td class=oz>P4/02.05.0009</td><td>[PERSON_006] DN 2500<div class=rsn>AI reason: Precast shaft DN 2500 with monolithic base and separate cover slab.</div><div class=why><b>Trade list gap.</b> A shaft of the water pipe (section 02.05), filed under drainage sewer works. The stand-in trade list has no trade for water-pipe structures.</div></td><td class=q>1 St</td></tr>
+<tr class=flag><td class=oz>P4/02.05.0012</td><td>[PERSON_006] eckig<div class=rsn>AI reason: Rectangular precast shaft 200x300 cm supplied and installed without cover.</div><div class=why><b>Trade list gap.</b> A shaft of the water pipe (section 02.05), filed under drainage sewer works. The stand-in trade list has no trade for water-pipe structures.</div></td><td class=q>1 St</td></tr>
+<tr class=flag><td class=oz>P4/02.05.0013</td><td>Zulage zur Position [PERSON_006] eckig lichte Maße 2,00 x 3,00 m<div class=rsn>AI reason: Surcharge to the rectangular shaft item, covering a heavy-crane access road.</div><div class=why><b>Trade list gap.</b> A shaft of the water pipe (section 02.05), filed under drainage sewer works. The stand-in trade list has no trade for water-pipe structures.</div></td><td class=q>1 psch</td></tr>
+<tr class=flag><td class=oz>P4/02.05.0015</td><td>Zulage zu den Positionen Wasserleitungsschächte für<div class=rsn>AI reason: Surcharge to the water shaft items for pipe and valve supports.</div><div class=why><b>Trade list gap.</b> A shaft of the water pipe (section 02.05), filed under drainage sewer works. The stand-in trade list has no trade for water-pipe structures.</div></td><td class=q>4 St</td></tr>
 </table></details>
-</details>
-<details><summary class=trade>Prüfung und Inbetriebnahme <small>14 items, 5 types</small></summary>
-<details><summary class=type>Druckprüfung <small>4 items &middot; 1 220 m &middot; 1 psch</small></summary><table>
-<tr><td class=oz>P4/03.03.0038</td><td>Druckprüfung Wasserverlustverfahren Druckrohr [PERSON_029] bis DN/OD63 maxRohr-L 150 m [PERSON_</td><td class=q>140 m</td></tr>
-<tr><td class=oz>P4/03.06.0004</td><td>Druckprüfung Wasserverlustverfahren Druckrohr [PERSON_029] DN/OD355 maxRohr-L 430 m [PERSON_029</td><td class=q>425 m</td></tr>
-<tr><td class=oz>P4/03.06.0005</td><td>Druckprüfung Wasserverlustverfahren Druckrohr [PERSON_029] DN300 maxRohr-L 700 m [PERSON_029] b</td><td class=q>655 m</td></tr>
-<tr><td class=oz>P4/03.06.0006</td><td>Zulage zu den Positionen Druckprüfung für:</td><td class=q>1 psch</td></tr>
+<details open><summary class=type>Felddrainage <small>2 items &middot; 15 St &middot; 50 m</small></summary><table>
+<tr><td class=oz>P4/02.03.0057</td><td>Wiederherstellung von Felddrainagen<div class=rsn>AI reason: Restoring field drainage pipes crossed by the trench; the title says Wiederherstellung von Felddrainagen.</div></td><td class=q>15 St</td></tr>
+<tr><td class=oz>P4/02.03.0058</td><td>Zulage zur Pos. Wiederherstellung von Felddrainagen<div class=rsn>AI reason: Surcharge to the item Wiederherstellung von Felddrainagen for pipe over 3.50 m length.</div></td><td class=q>50 m</td></tr>
 </table></details>
-<details><summary class=type>Spülung und Desinfektion <small>4 items &middot; 1 875 m</small></summary><table>
-<tr><td class=oz>P4/03.03.0037</td><td>Druckrohr spülen desinfizieren TW [PERSON_029] Wasserstoffperoxid Desinfektionsm. bis DN65</td><td class=q>140 m</td></tr>
-<tr><td class=oz>P4/03.06.0001</td><td>Druckrohr spülen desinfizieren TW [PERSON_029] Wasserstoffperoxid Desinfektionsm. DN355</td><td class=q>425 m</td></tr>
-<tr><td class=oz>P4/03.06.0002</td><td>Druckrohr aus duktilem Gusseisen, innen zementiert</td><td class=q>655 m</td></tr>
-<tr><td class=oz>P4/03.06.0003</td><td>Druckrohr aus duktilem Gusseisen, innen zementiert</td><td class=q>655 m</td></tr>
+<details open><summary class=type>Sickerpackung <small>2 items &middot; 2 St</small></summary><table>
+<tr><td class=oz>P4/02.05.0028</td><td>Sickerpackung zur Wasserleitungsschachtentwässerung wie folgt:<div class=rsn>AI reason: Gravel soakaway pack for shaft drainage with excavation, Sickerkies 16/32 and drainage hose.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/02.05.0029</td><td>Sickerpackung zur Wasserleitungsschachtentwässerung wie folgt:<div class=rsn>AI reason: Soakaway pack for shaft drainage with excavation, Sickerkies and drainage hose, smaller volume.</div></td><td class=q>1 St</td></tr>
 </table></details>
-<details><summary class=type>Plattendruckversuch <small>3 items &middot; 6 St</small></summary><table>
-<tr><td class=oz>P4/01.04.0014</td><td>Plattendruckversuche</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/01.04.0015</td><td>Leistung wie Position vor,</td><td class=q>2 St</td></tr>
-<tr><td class=oz>P4/02.03.0040</td><td>Dynamischer Plattendruckversuch nach TP-BF [ORT_016] B 8.3</td><td class=q>3 St</td></tr>
-</table></details>
-<details><summary class=type>Inbetriebnahme <small>2 items &middot; 1 St &middot; 1 psch</small></summary><table>
-<tr><td class=oz>P4/03.05.0002</td><td>Nach Abbau der Notversorgungen/Überleitungen und wieder Inbetriebnahme</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/03.06.0008</td><td>Inbetriebnahme, Funktionsprüfung und Abnahme</td><td class=q>1 psch</td></tr>
-</table></details>
-<details><summary class=type>Trinkwasseruntersuchung <small>1 items &middot; 5 St</small></summary><table>
-<tr><td class=oz>P4/03.06.0007</td><td>Mikrobiologische Trinkwasseruntersuchung nach der Trinkwasserverordnung V, Anlage 1,2,5 (E-Coli</td><td class=q>5 St</td></tr>
+<details open><summary class=type>Kabelzugschacht <small>1 items &middot; 1 St</small> <mark>1</mark></summary><table>
+<tr class=flag><td class=oz>P4/02.03.0055</td><td>[PERSON_172]. Kl.D Gr.IV L/B 900/800mm H 820mm<div class=rsn>AI reason: Precast reinforced concrete cable pull chamber supplied and installed, per the long text.</div><div class=why><b>Trade list gap.</b> A cable pull shaft under drainage sewer works: the trade list has no trade for cable works.</div></td><td class=q>1 St</td></tr>
 </table></details>
 </details>
-<details><summary class=trade>Wasserhaltung <small>12 items, 5 types</small></summary>
-<details><summary class=type>Offene Wasserhaltung <small>4 items &middot; 280 m &middot; 1 psch</small></summary><table>
-<tr><td class=oz>P4/02.04.0005</td><td>Offene Wasserhaltung nach freier [PERSON_125] des Unternehmers für die Einlegung der kompletten</td><td class=q>80 m</td></tr>
-<tr><td class=oz>P4/02.04.0006</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,</td><td class=q>170 m</td></tr>
-<tr><td class=oz>P4/02.04.0007</td><td>Zulage zur Position offene Wasserhaltung bis 5 l/s für</td><td class=q>30 m</td></tr>
-<tr><td class=oz>P4/02.04.0008</td><td>Zulage zur gesamten Wasserhaltung für 2 mal tägliches Messen und</td><td class=q>1 psch</td></tr>
+<details open><summary class=trade>Stundenlohnarbeiten <small>27 items, 3 types</small> <mark>1 flagged</mark></summary>
+<details open><summary class=type>Stundenlohn Gerät <small>18 items &middot; no normal items</small></summary><table>
+<tr><td class=oz>P4/05.01.0007</td><td>Explosionsstampfer Bedienungspersonal <span class=opt>optional</span><div class=rsn>AI reason: Hourly rate for explosion rammer with operating personnel.</div></td><td class=q>1 h</td></tr>
+<tr><td class=oz>P4/05.01.0008</td><td>Rüttelpl. Bedienungspersonal 10-12kN <span class=opt>optional</span><div class=rsn>AI reason: Hourly rate for vibrating plate with operating personnel.</div></td><td class=q>1 h</td></tr>
+<tr><td class=oz>P4/05.01.0009</td><td>Kompressor Bedienungspersonal 5-10m3/min <span class=opt>optional</span><div class=rsn>AI reason: Hourly rate for compressor with operating personnel.</div></td><td class=q>1 h</td></tr>
+<tr><td class=oz>P4/05.01.0010</td><td>Minibagger Fahrer-in <span class=opt>optional</span><div class=rsn>AI reason: Hourly rate for mini excavator with driver.</div></td><td class=q>1 h</td></tr>
+<tr><td class=oz>P4/05.01.0011</td><td>Hydraulikbagger Fahrer-in Löffel 1-1,5m3 <span class=opt>optional</span><div class=rsn>AI reason: Hourly rate for hydraulic excavator with driver.</div></td><td class=q>1 h</td></tr>
+<tr><td class=oz>P4/05.01.0012</td><td>Hydraulikbagger Fahrer-in Löffel 1-1,5m3 <span class=opt>optional</span><div class=rsn>AI reason: Hourly rate for hydraulic excavator with driver.</div></td><td class=q>1 h</td></tr>
+<tr><td class=oz>P4/05.01.0013</td><td>LKW Fahrer-in 1-3,5t <span class=opt>optional</span><div class=rsn>AI reason: Hourly rate for truck with driver.</div></td><td class=q>1 h</td></tr>
+<tr><td class=oz>P4/05.01.0014</td><td>LKW Fahrer-in 8-12t <span class=opt>optional</span><div class=rsn>AI reason: Hourly rate for a truck with driver (8-12t), which is equipment with operator.</div></td><td class=q>1 h</td></tr>
+<tr><td class=oz>P4/05.01.0015</td><td>LKW Fahrer-in 12-20t <span class=opt>optional</span><div class=rsn>AI reason: Hourly rate for a truck with driver (12-20t), equipment with operator.</div></td><td class=q>1 h</td></tr>
+<tr><td class=oz>P4/05.01.0016</td><td>Leistung wie Pos. zuletzt in vollem Wortlaut beschrieben, <span class=opt>optional</span><div class=rsn>AI reason: Wie-vor item referring to the 12-20t truck with driver, here with a low-loader unit.</div></td><td class=q>1 h</td></tr>
+<tr><td class=oz>P4/05.01.0017</td><td>Kombi als Werkzeug- und Materialwagen <span class=opt>optional</span><div class=rsn>AI reason: Estate car as tool and material wagon including operation, an hourly vehicle rate.</div></td><td class=q>1 h</td></tr>
+<tr><td class=oz>P4/05.01.0018</td><td>Walze Bedienungspersonal Glattmantel 5-10t <span class=opt>optional</span><div class=rsn>AI reason: Roller with operating staff, 5-10t smooth drum, hourly equipment rate.</div></td><td class=q>1 h</td></tr>
+<tr><td class=oz>P4/05.01.0019</td><td>Radlader Fahrer-in 37-55kW <span class=opt>optional</span><div class=rsn>AI reason: Wheel loader with driver, 37-55kW, hourly equipment rate.</div></td><td class=q>1 h</td></tr>
+<tr><td class=oz>P4/05.01.0020</td><td>Grader Fahrer-in B 2,5-3m <span class=opt>optional</span><div class=rsn>AI reason: Grader with driver, hourly equipment rate.</div></td><td class=q>1 h</td></tr>
+<tr><td class=oz>P4/05.01.0021</td><td>Kernbohrgerät Bedienungspersonal <span class=opt>optional</span><div class=rsn>AI reason: Core drilling rig with operating staff, hourly equipment rate.</div></td><td class=q>1 h</td></tr>
+<tr><td class=oz>P4/05.01.0022</td><td>Trennschleifer Trennscheiben Bedienungspersonal Stein <span class=opt>optional</span><div class=rsn>AI reason: Cut-off grinder with discs and operator, hourly tool rate.</div></td><td class=q>1 h</td></tr>
+<tr><td class=oz>P4/05.01.0023</td><td>Antriebsaggregat elektr.Geräte 5-8kVA <span class=opt>optional</span><div class=rsn>AI reason: Power generator unit 5-8kVA used as equipment, hourly rate.</div></td><td class=q>1 h</td></tr>
+<tr><td class=oz>P4/05.01.0024</td><td>Bohrhammer Werkzeug Bedienungspersonal 0,25-1kW <span class=opt>optional</span><div class=rsn>AI reason: Hammer drill with tools and operator, hourly equipment rate.</div></td><td class=q>1 h</td></tr>
 </table></details>
-<details><summary class=type>Absetzbecken <small>3 items &middot; 7 St</small></summary><table>
-<tr><td class=oz>P4/02.04.0009</td><td>Absetzbecken Container bis 5m3 ein- ausbauen</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/02.04.0010</td><td>Zulage zur Position Absetzbecken für eine weitere Vorhaltezeit</td><td class=q>3 St</td></tr>
-<tr><td class=oz>P4/02.04.0011</td><td>Zulage zur Position Absetzbecken für Umsetzen bei Bedarf im gesamten Baufeld vor Ort.</td><td class=q>3 St</td></tr>
+<details open><summary class=type>Stundenlohn Personal <small>7 items &middot; 1 psch</small> <mark>1</mark></summary><table>
+<tr><td class=oz>P4/05.01.0001</td><td>Polier-in sämtliche Kosten/Zuschläge <span class=opt>optional</span><div class=rsn>AI reason: Hourly rate for foreman (Polier) labour.</div></td><td class=q>1 h</td></tr>
+<tr><td class=oz>P4/05.01.0002</td><td>Baufacharbeiter-in sämtliche Kosten/Zuschläge <span class=opt>optional</span><div class=rsn>AI reason: Hourly rate for skilled construction worker.</div></td><td class=q>1 h</td></tr>
+<tr><td class=oz>P4/05.01.0003</td><td>Bauhelfer-in sämtliche Kosten/Zuschläge <span class=opt>optional</span><div class=rsn>AI reason: Hourly rate for construction helper.</div></td><td class=q>1 h</td></tr>
+<tr><td class=oz>P4/05.01.0004</td><td>Maschinenführer-in Fahrer-in sämtliche Kosten/Zuschläge <span class=opt>optional</span><div class=rsn>AI reason: Hourly rate for machine operator or driver as labour.</div></td><td class=q>1 h</td></tr>
+<tr><td class=oz>P4/05.01.0005</td><td>Obermonteur-in sämtliche Kosten/Zuschläge <span class=opt>optional</span><div class=rsn>AI reason: Hourly rate for senior fitter (Obermonteur).</div></td><td class=q>1 h</td></tr>
+<tr><td class=oz>P4/05.01.0006</td><td>Monteur-in sämtliche Kosten/Zuschläge <span class=opt>optional</span><div class=rsn>AI reason: Hourly rate for fitter (Monteur).</div></td><td class=q>1 h</td></tr>
+<tr class=flag><td class=oz>P4/05.01.0025</td><td>Angenommene Stundenlohnarbeiten pauschal.<div class=rsn>AI reason: Lump-sum assumed daywork, billed by actual hours; matches lump-sum daywork under hourly personnel.</div><div class=why><b>Debatable.</b> A lump sum for all hourly work, labour and machines, filed under labour hours.</div></td><td class=q>1 psch</td></tr>
 </table></details>
-<details><summary class=type>Pumpe <small>3 items &middot; 3 St &middot; 50 m &middot; 35 h</small></summary><table>
-<tr><td class=oz>P4/02.04.0002</td><td>Pumpe mit Elektromotor ein- und ausbauen,</td><td class=q>3 St</td></tr>
-<tr><td class=oz>P4/02.04.0003</td><td>Zulage zur Position Elektropumpe mit Ablaufleitungen 15 - 20 m Länge</td><td class=q>50 m</td></tr>
-<tr><td class=oz>P4/02.04.0004</td><td>Betrieb der vorbeschriebenen Pumpen,</td><td class=q>35 h</td></tr>
-</table></details>
-<details><summary class=type>Pumpensumpf <small>1 items &middot; 3 St</small></summary><table>
-<tr><td class=oz>P4/02.04.0001</td><td>Pumpensumpf herstellen räumen Filterrohr DN400 T bis 1m</td><td class=q>3 St</td></tr>
-</table></details>
-<details><summary class=type>Sickermulde <small>1 items &middot; 2 St</small></summary><table>
-<tr><td class=oz>P4/02.04.0012</td><td>Sickermulde Maße nach [PERSON_125] des AN, angepasst an die örtlichen Verhältnisse</td><td class=q>2 St</td></tr>
-</table></details>
-</details>
-<details><summary class=trade>Armaturen <small>10 items, 4 types</small></summary>
-<details><summary class=type>Hausanschlussarmatur <small>4 items &middot; 6 St</small></summary><table>
-<tr><td class=oz>P4/03.03.0023</td><td>Anschlusstrommel 1 1/4&quot; aus Gusseisen, Epoxy-Pulverbeschichtung</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/03.03.0024</td><td>Trommelstopfen, Rotguss, 1 1/4&quot;</td><td class=q>3 St</td></tr>
-<tr><td class=oz>P4/03.03.0025</td><td>Hausanschlussgarnitur 1 1/4&quot; - da 40</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/03.03.0039</td><td>Zulage zu den Leistungspositionen Hausanschlüsse für</td><td class=q>1 St</td></tr>
-</table></details>
-<details><summary class=type>Be- und Entlüftungsventil <small>3 items &middot; 3 St &middot; 1 psch</small></summary><table>
-<tr><td class=oz>P4/03.03.0014</td><td>Membrangesteuertes 3 - Wege Be- und Entlüftungsventil</td><td class=q>2 St</td></tr>
-<tr><td class=oz>P4/03.03.0015</td><td>Zulage zur Position Membrangesteuertes 3 - Wege Be- und Entlüftungsventil</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/03.03.0016</td><td>Zulage zur Position vor Be- und Entlüftungskamin DN 160</td><td class=q>1 psch</td></tr>
-</table></details>
-<details><summary class=type>Absperrarmatur <small>2 items &middot; 13 St</small></summary><table>
-<tr><td class=oz>P4/03.03.0009</td><td>Absperrklappe weich dichtend Guss Handbetätigung Innen-/Außenschutz PN16 DN300</td><td class=q>8 St</td></tr>
-<tr><td class=oz>P4/03.03.0017</td><td>Absperrschieber Spindelgewinde innen EN-GJS-500-7 Handbetätigung Innen-/Außenschutz PN16 DN80</td><td class=q>5 St</td></tr>
-</table></details>
-<details><summary class=type>Hydrant <small>1 items &middot; 2 St</small></summary><table>
-<tr><td class=oz>P4/03.03.0022</td><td>Württemberger Schachthydrant DN 65, PN 16</td><td class=q>2 St</td></tr>
+<details open><summary class=type>Stillstandszeit <small>2 items &middot; 10 h</small></summary><table>
+<tr><td class=oz>P4/04.03.0020</td><td>Stillstand Vortriebsanlage<div class=rsn>AI reason: Standby hours of the drilling rig not caused by the contractor.</div></td><td class=q>5 h</td></tr>
+<tr><td class=oz>P4/04.03.0021</td><td>[PERSON_105]<div class=rsn>AI reason: Standby hours of the drilling crew not caused by the contractor.</div></td><td class=q>5 h</td></tr>
 </table></details>
 </details>
-<details><summary class=trade>Baustelleneinrichtung <small>10 items, 3 types</small></summary>
-<details><summary class=type>Baustelleneinrichtung <small>8 items &middot; 7 psch &middot; 2 St</small></summary><table>
-<tr><td class=oz>P4/01.01.0001</td><td>Baustelle einrichten Dies.LV-Abschn.*Zufahrt vorh.</td><td class=q>1 psch</td></tr>
-<tr><td class=oz>P4/01.01.0002</td><td>Baustelle räumen Dies. LV-Abschn.</td><td class=q>1 psch</td></tr>
-<tr><td class=oz>P4/02.01.0001</td><td>Baustelle einrichten Dies.LV-Abschn.*Zufahrt vorh.</td><td class=q>1 psch</td></tr>
-<tr><td class=oz>P4/02.01.0002</td><td>Baustelle räumen Dies. LV-Abschn.</td><td class=q>1 psch</td></tr>
-<tr><td class=oz>P4/03.01.0001</td><td>Baustelle einrichten Dies.LV-Abschn.*Zufahrt vorh.</td><td class=q>1 psch</td></tr>
-<tr><td class=oz>P4/03.01.0002</td><td>Baustelle räumen Dies. LV-Abschn.</td><td class=q>1 psch</td></tr>
-<tr><td class=oz>P4/04.01.0001</td><td>Einrichten und Räumen der Baustelle für Spülbohrarbeiten PE DA = 355 mm</td><td class=q>1 psch</td></tr>
-<tr><td class=oz>P4/04.01.0002</td><td>Einrichten und Räumen der Baustelle für Spülbohrarbeiten PE DA = 355 mm</td><td class=q>2 St</td></tr>
+<details open><summary class=trade>Straßenbau <small>15 items, 9 types</small></summary>
+<details open><summary class=type>Tragschicht <small>4 items &middot; 275 m3 &middot; 25 t &middot; 60 m2</small></summary><table>
+<tr><td class=oz>P4/01.04.0001</td><td>Liefern und Einbauen einer kombinierten Frostschutz-, Kiestragschicht,<div class=rsn>AI reason: Supply and installation of a combined frost protection and gravel base layer.</div></td><td class=q>35 m3</td></tr>
+<tr><td class=oz>P4/01.04.0002</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,<div class=rsn>AI reason: Wie vor item referring to the gravel base layer, here a crushed stone base layer as forest road base.</div></td><td class=q>240 m3</td></tr>
+<tr><td class=oz>P4/01.04.0003</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,<div class=rsn>AI reason: Wie vor item referring to the gravel base layer, here the top crushed stone base layer up to 10 cm.</div></td><td class=q>25 t</td></tr>
+<tr><td class=oz>P4/01.04.0005</td><td>Zulage zu der Position Kies- und Schottertragschicht für Feinplanum einschl.<div class=rsn>AI reason: Surcharge for fine grading and compaction on the gravel and crushed stone base layer.</div></td><td class=q>60 m2</td></tr>
 </table></details>
-<details><summary class=type>Bauzaun <small>1 items &middot; 60 m</small></summary><table>
-<tr><td class=oz>P4/01.01.0005</td><td>Bauzaun H = 2,0 m liefern, aufstellen, unterhalten und wieder nach Abschluss der Arbeiten besei</td><td class=q>60 m</td></tr>
+<details open><summary class=type>Asphaltdeckschicht <small>2 items &middot; 70 m2</small></summary><table>
+<tr><td class=oz>P4/01.04.0011</td><td>Asphaltbetondeckschicht ländl. Weg AC8DN D 3cm Bindem. 70/100<div class=rsn>AI reason: Asphalt concrete surface course AC 8 D N, 3 cm thick, in rural paths.</div></td><td class=q>60 m2</td></tr>
+<tr><td class=oz>P4/01.04.0012</td><td>Zulage zu den Positionen Asphaltbetondeckschicht für [PERSON_015] in Kleinflächen, Hofflächen u<div class=rsn>AI reason: Surcharge for the asphalt concrete surface course in small areas, yards and strips.</div></td><td class=q>10 m2</td></tr>
 </table></details>
-<details><summary class=type>Provisorische Überfahrt <small>1 items &middot; 5 St</small></summary><table>
-<tr><td class=oz>P4/01.01.0006</td><td>Provisorische Überfahrten/Durchfahrten im Ausführungsbereich für Anlieger und oder Waldarbeiten</td><td class=q>5 St</td></tr>
+<details open><summary class=type>Asphalttragschicht <small>2 items &middot; 70 m2</small></summary><table>
+<tr><td class=oz>P4/01.04.0009</td><td>TS Asphalt ländl. Weg AC32TN Bindem. 70/100 D 10cm<div class=rsn>AI reason: Asphalt base course AC 32 T N, 10 cm thick, in rural paths.</div></td><td class=q>60 m2</td></tr>
+<tr><td class=oz>P4/01.04.0010</td><td>Zulage zu den Positionen Asphalttragschicht für [PERSON_015] in Hofflächen, Kleinflächen und St<div class=rsn>AI reason: Surcharge for the asphalt base course in yards, small areas and strips.</div></td><td class=q>10 m2</td></tr>
 </table></details>
-</details>
-<details><summary class=trade>Planung und Dokumentation <small>7 items, 2 types</small> <mark>1 flagged</mark></summary>
-<details><summary class=type>Vermessung <small>6 items &middot; 260 St &middot; 675 m &middot; 2 psch</small> <mark>1</mark></summary><table>
-<tr><td class=oz>P4/02.02.0001</td><td>Vermessungstechnische Leistungen - Absteckung der Wasserleitung</td><td class=q>55 St</td></tr>
-<tr><td class=oz>P4/02.02.0002</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben, jedoch nur Zulage zur Position Ve</td><td class=q>55 St</td></tr>
-<tr><td class=oz>P4/02.02.0003</td><td>Vermessungstechnische Leistungen - Bestand Wasserleitung</td><td class=q>150 St</td></tr>
-<tr class=flag><td class=oz>P4/03.02.0024</td><td>Zulage zu allen Rohrverlegepositionen für die maßgenaue Rohrverlegung für die Gussrohr- und PE <div class=why><b>Debatable.</b> A surcharge on pipe laying for exact positioning, filed under surveying, not with the pipe it belongs to.</div></td><td class=q>675 m</td></tr>
-<tr><td class=oz>P4/04.02.0001</td><td>Vermessungstechnische Leistungen - Absteckung</td><td class=q>1 psch</td></tr>
-<tr><td class=oz>P4/04.02.0002</td><td>Vermessungstechnische Leistungen - Bestand</td><td class=q>1 psch</td></tr>
+<details open><summary class=type>Unterlage reinigen <small>2 items &middot; 120 m2</small></summary><table>
+<tr><td class=oz>P4/01.04.0006</td><td>Unterlage reinigen TSmB bitumenhaltig komb.Saug-Kehrmaschinen<div class=rsn>AI reason: Cleaning the base with suction-sweeping machines before tack coat spraying.</div></td><td class=q>60 m2</td></tr>
+<tr><td class=oz>P4/01.04.0007</td><td>Zulage reinigen Tragschicht- und Binderschicht, für fachgerechte Entsorgung anfallender Stoffe,<div class=rsn>AI reason: Surcharge for proper disposal of material from cleaning the base and binder layers.</div></td><td class=q>60 m2</td></tr>
 </table></details>
-<details><summary class=type>Bohrspülungskonzept <small>1 items &middot; 1 psch</small></summary><table>
-<tr><td class=oz>P4/04.01.0003</td><td>Bohrspülungskonzept für die geplanten Spülbohrungen erstellen,</td><td class=q>1 psch</td></tr>
+<details open><summary class=type>Asphaltschneiden <small>1 items &middot; 30 m</small></summary><table>
+<tr><td class=oz>P4/01.03.0001</td><td>Asphaltoberbau schneiden D 5-10cm T 100mm<div class=rsn>AI reason: Cutting the asphalt pavement with a joint-cutting machine to a depth of 120 mm.</div></td><td class=q>30 m</td></tr>
 </table></details>
-</details>
-<details><summary class=trade>Demontage und Rückbau <small>6 items, 3 types</small> <mark>1 flagged</mark></summary>
-<details><summary class=type>Rohrausbau <small>4 items &middot; 15 m &middot; 6 St</small> <mark>1</mark></summary><table>
-<tr><td class=oz>P4/03.02.0023</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,</td><td class=q>8 m</td></tr>
-<tr><td class=oz>P4/03.03.0026</td><td>Abbruch und Beseitigung eines Asbestzementrohres DN 100,</td><td class=q>7 m</td></tr>
-<tr><td class=oz>P4/03.03.0027</td><td>Schneiden von Asbestzementrohr DN 100 als Zulage zur Pos. Abbruch</td><td class=q>5 St</td></tr>
-<tr class=flag><td class=oz>P4/03.03.0028</td><td>Hydrantenschacht, Rückbau und Beseitigung wie folgt:<div class=why><b>Debatable.</b> Removal of a hydrant shaft, filed under pipe removal. Right trade, loose type.</div></td><td class=q>1 St</td></tr>
+<details open><summary class=type>Böschungspflaster <small>1 items &middot; 1 t</small></summary><table>
+<tr><td class=oz>P4/02.03.0059</td><td>Böschungs- und Sohlpflaster im Bereich Verdolungen<div class=rsn>AI reason: Slope and bed paving with river stones at culverts.</div></td><td class=q>1 t</td></tr>
 </table></details>
-<details><summary class=type>Asphaltaufbruch <small>1 items &middot; 50 m2</small></summary><table>
-<tr><td class=oz>P4/01.03.0002</td><td>Bituminöse Befestigung aufbrechen und aufnehmen,</td><td class=q>50 m2</td></tr>
+<details open><summary class=type>Fuge <small>1 items &middot; 15 m</small></summary><table>
+<tr><td class=oz>P4/01.04.0013</td><td>Fuge anlegen Deckschicht Asphaltbeton Längs-Querfuge Anschlüsse B 10mm T 40mm<div class=rsn>AI reason: Forming a longitudinal and transverse joint in the asphalt concrete surface course per ZTV Fug-StB.</div></td><td class=q>15 m</td></tr>
 </table></details>
-<details><summary class=type>Hindernisbeseitigung <small>1 items &middot; 2 St</small></summary><table>
-<tr><td class=oz>P4/02.05.0011</td><td>Hindernis im Boden, aus Beton, abbrechen,</td><td class=q>2 St</td></tr>
+<details open><summary class=type>Haftkleber aufsprühen <small>1 items &middot; 60 m2</small></summary><table>
+<tr><td class=oz>P4/01.04.0008</td><td>Bitumenh.Bindem. aufsprühen 0,2-0,3kg/m2 C40B5-S frisch TS Asphalt<div class=rsn>AI reason: Spraying bitumen emulsion C40B5-S onto fresh asphalt base courses.</div></td><td class=q>60 m2</td></tr>
+</table></details>
+<details open><summary class=type>Wassergebundene Deckschicht <small>1 items &middot; 15 t</small></summary><table>
+<tr><td class=oz>P4/01.04.0004</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,<div class=rsn>AI reason: Hydraulically bound wearing course of moraine gravel 0/11-0/16, 2-4 cm thick.</div></td><td class=q>15 t</td></tr>
 </table></details>
 </details>
-<details><summary class=trade>Mess-, Steuer- und Regelungstechnik <small>6 items, 2 types</small></summary>
-<details><summary class=type>Datenfernübertragung <small>4 items &middot; 3 St &middot; 1 psch</small></summary><table>
-<tr><td class=oz>P4/03.04.0003</td><td>Datenlogger zur Datenübertragung der Messwerte</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/03.04.0004</td><td>LTE Antenne mit Kabel</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/03.04.0005</td><td>SIM-Karte</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/03.04.0006</td><td>Jährliche Software-Update-Pauschale zu den Datenloggen</td><td class=q>1 psch</td></tr>
+<details open><summary class=trade>Prüfung und Inbetriebnahme <small>13 items, 5 types</small></summary>
+<details open><summary class=type>Druckprüfung <small>4 items &middot; 1 220 m &middot; 1 psch</small></summary><table>
+<tr><td class=oz>P4/03.03.0038</td><td>Druckprüfung Wasserverlustverfahren Druckrohr [PERSON_029] bis DN/OD63 maxRohr-L 150 m [PERSON_<div class=rsn>AI reason: Pressure test per DIN EN 805 using the water loss method on PE pipe.</div></td><td class=q>140 m</td></tr>
+<tr><td class=oz>P4/03.06.0004</td><td>Druckprüfung Wasserverlustverfahren Druckrohr [PERSON_029] DN/OD355 maxRohr-L 430 m [PERSON_029<div class=rsn>AI reason: Pressure test per DIN EN 805 by water loss method on the PE pipe DN/OD355.</div></td><td class=q>425 m</td></tr>
+<tr><td class=oz>P4/03.06.0005</td><td>Druckprüfung Wasserverlustverfahren Druckrohr [PERSON_029] DN300 maxRohr-L 700 m [PERSON_029] b<div class=rsn>AI reason: Pressure test per DIN EN 805 by water loss method on the ductile iron pipe DN300.</div></td><td class=q>655 m</td></tr>
+<tr><td class=oz>P4/03.06.0006</td><td>Zulage zu den Positionen Druckprüfung für:<div class=rsn>AI reason: Surcharge to the Druckprüfung items, adding a running pressure test with an air compressor.</div></td><td class=q>1 psch</td></tr>
 </table></details>
-<details><summary class=type>Messsensor <small>2 items &middot; 1 psch &middot; 2 St</small></summary><table>
-<tr><td class=oz>P4/03.04.0001</td><td>Montagearbeiten des Mess-Sensors</td><td class=q>1 psch</td></tr>
-<tr><td class=oz>P4/03.04.0002</td><td>Multisensorik für die Messung mehrerer Parameter in</td><td class=q>2 St</td></tr>
+<details open><summary class=type>Spülung und Desinfektion <small>4 items &middot; 1 875 m</small></summary><table>
+<tr><td class=oz>P4/03.03.0037</td><td>Druckrohr spülen desinfizieren TW [PERSON_029] Wasserstoffperoxid Desinfektionsm. bis DN65<div class=rsn>AI reason: Flushing and disinfecting the pressure pipe with hydrogen peroxide before commissioning per DVGW W 291.</div></td><td class=q>140 m</td></tr>
+<tr><td class=oz>P4/03.06.0001</td><td>Druckrohr spülen desinfizieren TW [PERSON_029] Wasserstoffperoxid Desinfektionsm. DN355<div class=rsn>AI reason: Flushing and disinfecting the DN355 PE pressure pipe with hydrogen peroxide per DVGW W 291.</div></td><td class=q>425 m</td></tr>
+<tr><td class=oz>P4/03.06.0002</td><td>Druckrohr aus duktilem Gusseisen, innen zementiert<div class=rsn>AI reason: Disinfecting the DN 300 ductile iron pipe before commissioning per DVGW W 291.</div></td><td class=q>655 m</td></tr>
+<tr><td class=oz>P4/03.06.0003</td><td>Druckrohr aus duktilem Gusseisen, innen zementiert<div class=rsn>AI reason: Flushing the DN 300 ductile iron line with drinking water at minimum velocity.</div></td><td class=q>655 m</td></tr>
 </table></details>
-</details>
-<details><summary class=trade>Sonstiges <small>4 items, 1 types</small></summary>
-<details><summary class=type>Preisnachlass Material <small>4 items &middot; 4 psch</small></summary><table>
-<tr><td class=oz>P4/03.02.0027</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,</td><td class=q>1 psch</td></tr>
-<tr><td class=oz>P4/03.02.0028</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,</td><td class=q>1 psch</td></tr>
-<tr><td class=oz>P4/03.02.0029</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,</td><td class=q>1 psch</td></tr>
-<tr><td class=oz>P4/03.02.0030</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,</td><td class=q>1 psch</td></tr>
+<details open><summary class=type>Plattendruckversuch <small>3 items &middot; 6 St</small></summary><table>
+<tr><td class=oz>P4/01.04.0014</td><td>Plattendruckversuche<div class=rsn>AI reason: Static plate load tests on subgrade or frost protection layer with evaluation and log, Ev2 requirements.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/01.04.0015</td><td>Leistung wie Position vor,<div class=rsn>AI reason: Same as the previous plate load test item, but dynamic load plate test with EvD values.</div></td><td class=q>2 St</td></tr>
+<tr><td class=oz>P4/02.03.0040</td><td>Dynamischer Plattendruckversuch nach TP-BF [ORT_016] B 8.3<div class=rsn>AI reason: Dynamic plate load test per TP-BF StB to determine soil compaction in the pipe trench.</div></td><td class=q>3 St</td></tr>
 </table></details>
-</details>
-<details><summary class=trade>Stahl- und Metallbau <small>3 items, 1 types</small></summary>
-<details><summary class=type>Steigleiter <small>3 items &middot; 8 St</small></summary><table>
-<tr><td class=oz>P4/02.05.0001</td><td>Sicherheitssteigleiter entspr. DIN EN 14396,</td><td class=q>1 St</td></tr>
-<tr><td class=oz>P4/02.05.0002</td><td>Sicherheitssteigleiter entspr. DIN EN 14396,</td><td class=q>2 St</td></tr>
-<tr><td class=oz>P4/02.05.0003</td><td>Steigeisen [PERSON_089] niro kunststoffummantelt Steigmaß 250mm Form B</td><td class=q>5 St</td></tr>
+<details open><summary class=type>Inbetriebnahme <small>1 items &middot; 1 psch</small></summary><table>
+<tr><td class=oz>P4/03.06.0008</td><td>Inbetriebnahme, Funktionsprüfung und Abnahme<div class=rsn>AI reason: Commissioning, functional test and acceptance of the whole works.</div></td><td class=q>1 psch</td></tr>
+</table></details>
+<details open><summary class=type>Trinkwasseruntersuchung <small>1 items &middot; 5 St</small></summary><table>
+<tr><td class=oz>P4/03.06.0007</td><td>Mikrobiologische Trinkwasseruntersuchung nach der Trinkwasserverordnung V, Anlage 1,2,5 (E-Coli<div class=rsn>AI reason: Microbiological drinking water analysis per Trinkwasserverordnung including sampling and lab fees.</div></td><td class=q>5 St</td></tr>
 </table></details>
 </details>
-<details><summary class=trade>Verkehrssicherung <small>2 items, 1 types</small></summary>
-<details><summary class=type>Verkehrssicherung <small>2 items &middot; 2 psch</small></summary><table>
-<tr><td class=oz>P4/01.01.0003</td><td>Einrichtungen zur Verkehrssicherung und Verkehrsregelung nach StVO bei Bauarbeiten auf einbahni</td><td class=q>1 psch</td></tr>
-<tr><td class=oz>P4/01.01.0004</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,</td><td class=q>1 psch</td></tr>
+<details open><summary class=trade>Wasserhaltung <small>12 items, 5 types</small></summary>
+<details open><summary class=type>Offene Wasserhaltung <small>4 items &middot; 280 m &middot; 1 psch</small></summary><table>
+<tr><td class=oz>P4/02.04.0005</td><td>Offene Wasserhaltung nach freier [PERSON_125] des Unternehmers für die Einlegung der kompletten<div class=rsn>AI reason: Open dewatering along the pipeline at contractor&#x27;s discretion, per metre.</div></td><td class=q>80 m</td></tr>
+<tr><td class=oz>P4/02.04.0006</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,<div class=rsn>AI reason: Refers to the previous open dewatering item, with water inflow up to 1.0 l/s.</div></td><td class=q>170 m</td></tr>
+<tr><td class=oz>P4/02.04.0007</td><td>Zulage zur Position offene Wasserhaltung bis 5 l/s für<div class=rsn>AI reason: Capacity surcharge to the open dewatering item for higher flow of 5-10 l/s.</div></td><td class=q>30 m</td></tr>
+<tr><td class=oz>P4/02.04.0008</td><td>Zulage zur gesamten Wasserhaltung für 2 mal tägliches Messen und<div class=rsn>AI reason: Surcharge to the overall dewatering for twice-daily flow measurement and logging of extraction volume.</div></td><td class=q>1 psch</td></tr>
+</table></details>
+<details open><summary class=type>Absetzbecken <small>3 items &middot; 7 St</small></summary><table>
+<tr><td class=oz>P4/02.04.0009</td><td>Absetzbecken Container bis 5m3 ein- ausbauen<div class=rsn>AI reason: Settling tank container up to 5 m3 installed, operated and removed.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/02.04.0010</td><td>Zulage zur Position Absetzbecken für eine weitere Vorhaltezeit<div class=rsn>AI reason: Surcharge to the settling tank item for extended hire beyond one week.</div></td><td class=q>3 St</td></tr>
+<tr><td class=oz>P4/02.04.0011</td><td>Zulage zur Position Absetzbecken für Umsetzen bei Bedarf im gesamten Baufeld vor Ort.<div class=rsn>AI reason: Surcharge to the settling tank item for relocation within the site.</div></td><td class=q>3 St</td></tr>
+</table></details>
+<details open><summary class=type>Pumpe <small>3 items &middot; 3 St &middot; 50 m &middot; 35 h</small></summary><table>
+<tr><td class=oz>P4/02.04.0002</td><td>Pumpe mit Elektromotor ein- und ausbauen,<div class=rsn>AI reason: Installing and removing an electric pump for sumps with hose discharge lines.</div></td><td class=q>3 St</td></tr>
+<tr><td class=oz>P4/02.04.0003</td><td>Zulage zur Position Elektropumpe mit Ablaufleitungen 15 - 20 m Länge<div class=rsn>AI reason: Surcharge to the electric pump item for extra length of discharge lines.</div></td><td class=q>50 m</td></tr>
+<tr><td class=oz>P4/02.04.0004</td><td>Betrieb der vorbeschriebenen Pumpen,<div class=rsn>AI reason: Operating the previously described pumps, billed per piece and hours.</div></td><td class=q>35 h</td></tr>
+</table></details>
+<details open><summary class=type>Pumpensumpf <small>1 items &middot; 3 St</small></summary><table>
+<tr><td class=oz>P4/02.04.0001</td><td>Pumpensumpf herstellen räumen Filterrohr DN400 T bis 1m<div class=rsn>AI reason: Producing and clearing a sump from filter pipes, per the title.</div></td><td class=q>3 St</td></tr>
+</table></details>
+<details open><summary class=type>Sickermulde <small>1 items &middot; 2 St</small></summary><table>
+<tr><td class=oz>P4/02.04.0012</td><td>Sickermulde Maße nach [PERSON_125] des AN, angepasst an die örtlichen Verhältnisse<div class=rsn>AI reason: Infiltration swale made in the pipeline corridor for pumped water, per the title.</div></td><td class=q>2 St</td></tr>
+</table></details>
+</details>
+<details open><summary class=trade>Armaturen <small>10 items, 4 types</small></summary>
+<details open><summary class=type>Hausanschlussarmatur <small>4 items &middot; 6 St</small></summary><table>
+<tr><td class=oz>P4/03.03.0023</td><td>Anschlusstrommel 1 1/4&quot; aus Gusseisen, Epoxy-Pulverbeschichtung<div class=rsn>AI reason: Anschlusstrommel, a connection drum with four threaded outlets for house connections.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/03.03.0024</td><td>Trommelstopfen, Rotguss, 1 1/4&quot;<div class=rsn>AI reason: Trommelstopfen, a plug for the connection drum.</div></td><td class=q>3 St</td></tr>
+<tr><td class=oz>P4/03.03.0025</td><td>Hausanschlussgarnitur 1 1/4&quot; - da 40<div class=rsn>AI reason: Hausanschlussgarnitur, a complete house connection assembly with ball valve in the shaft.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/03.03.0039</td><td>Zulage zu den Leistungspositionen Hausanschlüsse für<div class=rsn>AI reason: Surcharge for house connection changeover work onto the existing service line.</div></td><td class=q>1 St</td></tr>
+</table></details>
+<details open><summary class=type>Be- und Entlüftungsventil <small>3 items &middot; 3 St &middot; 1 psch</small></summary><table>
+<tr><td class=oz>P4/03.03.0014</td><td>Membrangesteuertes 3 - Wege Be- und Entlüftungsventil<div class=rsn>AI reason: Membrane-controlled 3-way air release valve for drinking water.</div></td><td class=q>2 St</td></tr>
+<tr><td class=oz>P4/03.03.0015</td><td>Zulage zur Position Membrangesteuertes 3 - Wege Be- und Entlüftungsventil<div class=rsn>AI reason: Surcharge for the air release valve position, adding a ventilation stack.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/03.03.0016</td><td>Zulage zur Position vor Be- und Entlüftungskamin DN 160<div class=rsn>AI reason: Surcharge for the vent stack DN 160 including trench work for its pipe.</div></td><td class=q>1 psch</td></tr>
+</table></details>
+<details open><summary class=type>Absperrarmatur <small>2 items &middot; 13 St</small></summary><table>
+<tr><td class=oz>P4/03.03.0009</td><td>Absperrklappe weich dichtend Guss Handbetätigung Innen-/Außenschutz PN16 DN300<div class=rsn>AI reason: Absperrklappe, a butterfly valve DN 300 with manual operation.</div></td><td class=q>8 St</td></tr>
+<tr><td class=oz>P4/03.03.0017</td><td>Absperrschieber Spindelgewinde innen EN-GJS-500-7 Handbetätigung Innen-/Außenschutz PN16 DN80<div class=rsn>AI reason: Absperrschieber, a gate valve DN 80 with manual operation.</div></td><td class=q>5 St</td></tr>
+</table></details>
+<details open><summary class=type>Hydrant <small>1 items &middot; 2 St</small></summary><table>
+<tr><td class=oz>P4/03.03.0022</td><td>Württemberger Schachthydrant DN 65, PN 16<div class=rsn>AI reason: Württemberger Schachthydrant DN 65, an underground shaft hydrant.</div></td><td class=q>2 St</td></tr>
+</table></details>
+</details>
+<details open><summary class=trade>Baustelleneinrichtung <small>10 items, 3 types</small></summary>
+<details open><summary class=type>Baustelleneinrichtung <small>8 items &middot; 7 psch &middot; 2 St</small></summary><table>
+<tr><td class=oz>P4/01.01.0001</td><td>Baustelle einrichten Dies.LV-Abschn.*Zufahrt vorh.<div class=rsn>AI reason: Lump sum for setting up the site: bringing equipment and tools onto the site and making them ready for operation.</div></td><td class=q>1 psch</td></tr>
+<tr><td class=oz>P4/01.01.0002</td><td>Baustelle räumen Dies. LV-Abschn.<div class=rsn>AI reason: Lump sum for clearing the site of all equipment and restoring the used areas.</div></td><td class=q>1 psch</td></tr>
+<tr><td class=oz>P4/02.01.0001</td><td>Baustelle einrichten Dies.LV-Abschn.*Zufahrt vorh.<div class=rsn>AI reason: Lump sum for setting up the site: bringing equipment and tools onto the site and making them ready for operation.</div></td><td class=q>1 psch</td></tr>
+<tr><td class=oz>P4/02.01.0002</td><td>Baustelle räumen Dies. LV-Abschn.<div class=rsn>AI reason: Lump sum for clearing the site of all equipment and restoring the used areas.</div></td><td class=q>1 psch</td></tr>
+<tr><td class=oz>P4/03.01.0001</td><td>Baustelle einrichten Dies.LV-Abschn.*Zufahrt vorh.<div class=rsn>AI reason: Lump sum for setting up the site: bringing equipment and tools onto the site and making them ready for operation.</div></td><td class=q>1 psch</td></tr>
+<tr><td class=oz>P4/03.01.0002</td><td>Baustelle räumen Dies. LV-Abschn.<div class=rsn>AI reason: Lump sum for clearing the site of all equipment and restoring the used areas.</div></td><td class=q>1 psch</td></tr>
+<tr><td class=oz>P4/04.01.0001</td><td>Einrichten und Räumen der Baustelle für Spülbohrarbeiten PE DA = 355 mm<div class=rsn>AI reason: Setting up and clearing the site for the directional drilling works, including storage and work areas.</div></td><td class=q>1 psch</td></tr>
+<tr><td class=oz>P4/04.01.0002</td><td>Einrichten und Räumen der Baustelle für Spülbohrarbeiten PE DA = 355 mm<div class=rsn>AI reason: Setting up and clearing the complete drilling rig for each of the drillings.</div></td><td class=q>2 St</td></tr>
+</table></details>
+<details open><summary class=type>Bauzaun <small>1 items &middot; 60 m</small></summary><table>
+<tr><td class=oz>P4/01.01.0005</td><td>Bauzaun H = 2,0 m liefern, aufstellen, unterhalten und wieder nach Abschluss der Arbeiten besei<div class=rsn>AI reason: Construction fence H = 2.0 m to supply, erect, maintain and remove.</div></td><td class=q>60 m</td></tr>
+</table></details>
+<details open><summary class=type>Provisorische Überfahrt <small>1 items &middot; 5 St</small></summary><table>
+<tr><td class=oz>P4/01.01.0006</td><td>Provisorische Überfahrten/Durchfahrten im Ausführungsbereich für Anlieger und oder Waldarbeiten<div class=rsn>AI reason: Temporary crossings and drive-throughs for residents built with steel plates or gravel and removed again.</div></td><td class=q>5 St</td></tr>
+</table></details>
+</details>
+<details open><summary class=trade>Betonarbeiten <small>6 items, 2 types</small></summary>
+<details open><summary class=type>Kernbohrung <small>5 items &middot; 6 St</small></summary><table>
+<tr><td class=oz>P4/02.03.0050</td><td>Komplette Kernlochbohrung DN 120 - 140 zur Herstellung von<div class=rsn>AI reason: Core drilling DN 120-140 for watertight cable penetrations in concrete shafts.</div></td><td class=q>2 St</td></tr>
+<tr><td class=oz>P4/02.05.0016</td><td>Zulage zu den Positionen Wasserleitungsschächte für<div class=rsn>AI reason: Core drilling with watertight wall duct for a DA 110 protective pipe in the shaft.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/02.05.0017</td><td>Zulage zu den Positionen Hydrantenschächte für<div class=rsn>AI reason: Core drilling and watertight wall penetration for house connection pipes in hydrant shafts.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/02.05.0018</td><td>Zulage zu den Positionen Hydrantenschächte für<div class=rsn>AI reason: Core drilling and watertight wall penetration for DA 63 house connection pipes in hydrant shafts.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/02.05.0019</td><td>Zulage zu den Positionen Hydranten- oder Sickerschächte für<div class=rsn>AI reason: Core drilling and watertight wall penetration for DA 110 drainage pipes in shafts.</div></td><td class=q>1 St</td></tr>
+</table></details>
+<details open><summary class=type>Betonfestpunkt <small>1 items &middot; 2 m3</small></summary><table>
+<tr><td class=oz>P4/02.03.0039</td><td>Festpunkte für Wasserleitungsrohre bis GGG DN 300 ZMU,<div class=rsn>AI reason: Concrete fixed points for water pipes up to DN 300 per DVGW GW 310.</div></td><td class=q>2 m3</td></tr>
+</table></details>
+</details>
+<details open><summary class=trade>Demontage und Rückbau <small>6 items, 3 types</small> <mark>1 flagged</mark></summary>
+<details open><summary class=type>Rückbau Rohrleitung <small>4 items &middot; 15 m &middot; 6 St</small> <mark>1</mark></summary><table>
+<tr><td class=oz>P4/03.02.0023</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,<div class=rsn>AI reason: Same as previous U-piece item but removal and disposal of a ductile iron pipe DN 300.</div></td><td class=q>8 m</td></tr>
+<tr><td class=oz>P4/03.03.0026</td><td>Abbruch und Beseitigung eines Asbestzementrohres DN 100,<div class=rsn>AI reason: Demolition and disposal of old asbestos cement pipe DN 100 on a special waste landfill.</div></td><td class=q>7 m</td></tr>
+<tr><td class=oz>P4/03.03.0027</td><td>Schneiden von Asbestzementrohr DN 100 als Zulage zur Pos. Abbruch<div class=rsn>AI reason: Cutting asbestos cement pipe as surcharge to the demolition item for asbestos cement pipe DN 100.</div></td><td class=q>5 St</td></tr>
+<tr class=flag><td class=oz>P4/03.03.0028</td><td>Hydrantenschacht, Rückbau und Beseitigung wie folgt:<div class=rsn>AI reason: Removal and disposal of a hydrant shaft with its installations.</div><div class=why><b>Debatable.</b> Removal of a hydrant shaft, filed under pipe removal. Right trade, loose type.</div></td><td class=q>1 St</td></tr>
+</table></details>
+<details open><summary class=type>Asphaltaufbruch <small>1 items &middot; 50 m2</small></summary><table>
+<tr><td class=oz>P4/01.03.0002</td><td>Bituminöse Befestigung aufbrechen und aufnehmen,<div class=rsn>AI reason: Breaking up and removing bituminous pavement 8 to 16 cm thick.</div></td><td class=q>50 m2</td></tr>
+</table></details>
+<details open><summary class=type>Hindernisbeseitigung <small>1 items &middot; 2 St</small></summary><table>
+<tr><td class=oz>P4/02.05.0011</td><td>Hindernis im Boden, aus Beton, abbrechen,<div class=rsn>AI reason: Breaking out a concrete obstruction in the ground, debris to be removed by contractor.</div></td><td class=q>2 St</td></tr>
+</table></details>
+</details>
+<details open><summary class=trade>Mess-, Steuer- und Regelungstechnik <small>6 items, 1 types</small></summary>
+<details open><summary class=type>Messeinrichtung <small>6 items &middot; 2 psch &middot; 5 St</small></summary><table>
+<tr><td class=oz>P4/03.04.0001</td><td>Montagearbeiten des Mess-Sensors<div class=rsn>AI reason: Mounting the AQUALINK measuring sensor for flow, pressure and temperature, incl. commissioning.</div></td><td class=q>1 psch</td></tr>
+<tr><td class=oz>P4/03.04.0002</td><td>Multisensorik für die Messung mehrerer Parameter in<div class=rsn>AI reason: Multi-sensor with flow, pressure and temperature sensors for drinking water pipes.</div></td><td class=q>2 St</td></tr>
+<tr><td class=oz>P4/03.04.0003</td><td>Datenlogger zur Datenübertragung der Messwerte<div class=rsn>AI reason: Data logger transmitting pressure, temperature and flow values, incl. antenna.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/03.04.0004</td><td>LTE Antenne mit Kabel<div class=rsn>AI reason: LTE antenna with cable for the measuring system.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/03.04.0005</td><td>SIM-Karte<div class=rsn>AI reason: SIM card supply and activation for connection to a control system.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/03.04.0006</td><td>Jährliche Software-Update-Pauschale zu den Datenloggen<div class=rsn>AI reason: Annual software update lump sum for the data loggers and monitoring software.</div></td><td class=q>1 psch</td></tr>
+</table></details>
+</details>
+<details open><summary class=trade>Planung und Dokumentation <small>6 items, 2 types</small></summary>
+<details open><summary class=type>Vermessung <small>5 items &middot; 260 St &middot; 2 psch</small></summary><table>
+<tr><td class=oz>P4/02.02.0001</td><td>Vermessungstechnische Leistungen - Absteckung der Wasserleitung<div class=rsn>AI reason: Surveying setting-out of the water pipeline, structures and hydrant shafts.</div></td><td class=q>55 St</td></tr>
+<tr><td class=oz>P4/02.02.0002</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben, jedoch nur Zulage zur Position Ve<div class=rsn>AI reason: Surcharge for additional height setting-out, belonging to the pipeline setting-out surveying item.</div></td><td class=q>55 St</td></tr>
+<tr><td class=oz>P4/02.02.0003</td><td>Vermessungstechnische Leistungen - Bestand Wasserleitung<div class=rsn>AI reason: As-built surveying of the water pipeline with house connections, delivered as CAD plan.</div></td><td class=q>150 St</td></tr>
+<tr><td class=oz>P4/04.02.0001</td><td>Vermessungstechnische Leistungen - Absteckung<div class=rsn>AI reason: Surveying setting-out of the planned pipeline route and fixed points.</div></td><td class=q>1 psch</td></tr>
+<tr><td class=oz>P4/04.02.0002</td><td>Vermessungstechnische Leistungen - Bestand<div class=rsn>AI reason: As-built surveying of installed works and pipes for record drawings.</div></td><td class=q>1 psch</td></tr>
+</table></details>
+<details open><summary class=type>Bohrspülungskonzept <small>1 items &middot; 1 psch</small></summary><table>
+<tr><td class=oz>P4/04.01.0003</td><td>Bohrspülungskonzept für die geplanten Spülbohrungen erstellen,<div class=rsn>AI reason: Drafting a drilling fluid concept for the planned bores with required contents listed.</div></td><td class=q>1 psch</td></tr>
+</table></details>
+</details>
+<details open><summary class=trade>Sonstiges <small>4 items, 1 types</small></summary>
+<details open><summary class=type>Preisnachlass Listenpreis <small>4 items &middot; 4 psch</small></summary><table>
+<tr><td class=oz>P4/03.02.0027</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,<div class=rsn>AI reason: Discount/surcharge percentage on list price for valves (Armaturen).</div></td><td class=q>1 psch</td></tr>
+<tr><td class=oz>P4/03.02.0028</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,<div class=rsn>AI reason: Discount/surcharge percentage on list price for fittings (Formstücke).</div></td><td class=q>1 psch</td></tr>
+<tr><td class=oz>P4/03.02.0029</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,<div class=rsn>AI reason: Discount/surcharge percentage on list price for WN fittings.</div></td><td class=q>1 psch</td></tr>
+<tr><td class=oz>P4/03.02.0030</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,<div class=rsn>AI reason: Discount/surcharge percentage on list price for fittings (Fitting).</div></td><td class=q>1 psch</td></tr>
+</table></details>
+</details>
+<details open><summary class=trade>Stahl- und Metallbau <small>3 items, 1 types</small></summary>
+<details open><summary class=type>Steigleiter <small>3 items &middot; 8 St</small></summary><table>
+<tr><td class=oz>P4/02.05.0001</td><td>Sicherheitssteigleiter entspr. DIN EN 14396,<div class=rsn>AI reason: Stainless safety ladder per DIN EN 14396 made of 1.4301/1.4307 steel for shafts.</div></td><td class=q>1 St</td></tr>
+<tr><td class=oz>P4/02.05.0002</td><td>Sicherheitssteigleiter entspr. DIN EN 14396,<div class=rsn>AI reason: Stainless safety ladder per DIN EN 14396, same description as the previous ladder item.</div></td><td class=q>2 St</td></tr>
+<tr><td class=oz>P4/02.05.0003</td><td>Steigeisen [PERSON_089] niro kunststoffummantelt Steigmaß 250mm Form B<div class=rsn>AI reason: Plastic-coated stainless step irons per DIN 19555 for shaft climbing, including fixing.</div></td><td class=q>5 St</td></tr>
+</table></details>
+</details>
+<details open><summary class=trade>Verkehrssicherung <small>2 items, 1 types</small></summary>
+<details open><summary class=type>Verkehrssicherung <small>2 items &middot; 2 psch</small></summary><table>
+<tr><td class=oz>P4/01.01.0003</td><td>Einrichtungen zur Verkehrssicherung und Verkehrsregelung nach StVO bei Bauarbeiten auf einbahni<div class=rsn>AI reason: Traffic safety and traffic control equipment per StVO including barriers, lighting and local diversion.</div></td><td class=q>1 psch</td></tr>
+<tr><td class=oz>P4/01.01.0004</td><td>Leistung wie Position zuletzt in vollem Wortlaut beschrieben,<div class=rsn>AI reason: Wie vor item referring to the StVO traffic safety item, here for regional diversion.</div></td><td class=q>1 psch</td></tr>
 </table></details>
 </details>
