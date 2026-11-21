@@ -772,6 +772,37 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .pconf .mono{color:var(--ink-3)}
 .pconf .cmeter{height:12px;gap:2px}
 .pconf .conf-v b{font-size:17px}
+
+/* ---- drawer compact v4 ---- */
+.dw-top{padding:12px 18px 12px 22px}
+.dw-title{margin:12px 0 10px;font-size:22px}
+.dmeta>div{padding:7px 10px 8px 0}
+.dmeta>div+div{padding-left:10px}
+.dmeta dd{margin-top:5px;font-size:13px}
+.rl{margin-top:10px;padding:6px 10px;font-size:12.5px}
+.price{margin-top:12px;padding:14px 16px 16px}
+.ptop{display:grid;grid-template-columns:minmax(0,1fr) 128px;gap:16px;align-items:stretch}
+.pmain{min-width:0}
+.price .ep,.epedit input,.epedit .cur{font-size:36px}
+.prow{margin-top:4px}
+.pconf{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin:0;padding:0 0 0 16px;border-top:0;border-left:1px solid var(--line)}
+.pconf .conf-v{flex-direction:column;align-items:flex-start;gap:4px}
+.pconf .conf-v b{font-size:26px}
+.pconf .cmeter{width:100%;height:10px;margin-top:auto}
+.stamp{position:static;display:inline-flex;margin-top:10px}
+.why2{margin:14px -16px -16px;padding:12px 16px 14px}
+.why2 p{margin-top:6px;font-size:13px;line-height:1.5}
+.calc2{margin-top:8px;padding:6px 10px}
+.calc2 .cs{padding:2px 0}
+.refs{margin-top:10px}
+
+/* ---- [01] fill ---- */
+.cost .estconf{margin:auto 0}
+.cost .cmeter{height:56px;gap:4px}
+.cost .conf-v b{font-size:34px}
+.cost .conf-h{margin-bottom:14px}
+.cost .conf-s{margin-top:8px}
+.cost .estfacts{margin-top:0}
 </style>
 </head>
 <body>
@@ -1291,7 +1322,7 @@ function vDrawer(d) {
         '<div><dt>Menge</dt><dd>' + qty(p.menge) + ' ' + p.einheit + '</dd></div></dl>' +
       (p.risk >= 40 ? '<div class="rl ' + k + '">' + IC.warn + '<span>' + esc(p.why) + '</span></div>' : '') + '</div></header>' +
     '<div class="dw-body"><div class="dw-swap ' + (S.leaving ? 'leaving' : S.swapDir) + '" data-k="b' + p.oz + '">' +
-      '<section class="price' + (ok ? ' is-ok' : '') + (S.editEp ? ' is-edit' : '') + '" aria-label="Preis">' +
+      '<section class="price' + (ok ? ' is-ok' : '') + (S.editEp ? ' is-edit' : '') + '" aria-label="Preis"><div class="ptop"><div class="pmain">' +
         '<div class="mono lab">' + (p.manual ? 'Eigener Preis · ' + pct(md) + ' zum KI-Vorschlag' : 'KI-Preisvorschlag') + '</div>' +
         '<div class="prow">' + (S.editEp
           ? '<label class="epedit"><span class="sr">Einheitspreis in Euro</span><input id="epin" inputmode="decimal" autocomplete="off" data-in="epDraft" data-enter="saveEp" value="' + esc(S.epDraft) + '"><span class="cur">€</span></label>'
@@ -1301,8 +1332,8 @@ function vDrawer(d) {
           ? '<div class="sub edhint"><span>' + (dd === null ? 'Gültigen Preis eingeben' : Math.abs(dd) < 0.05 ? 'entspricht dem KI-Vorschlag' : '<b style="color:' + (Math.abs(dd) > 10 ? 'var(--warn)' : 'var(--ink)') + '">' + pct(dd) + '</b> zum KI-Vorschlag · GP ' + eur(Math.round(dv * 100) / 100 * p.menge)) + '</span><span class="keys"><kbd>Enter</kbd> übernehmen <kbd>Esc</kbd> verwerfen</span></div>'
           : '<div class="sub">GP <b>' + eur(p.gp) + '</b> · ' + fmt(p.gp / TOTAL * 100, 2) + ' % des LV · ' + qty(p.menge) + ' ' + p.einheit +
             (p.manual ? ' · <button class="lnk" data-act="resetEp">KI-Vorschlag ' + eur(p.aiEp) + ' wiederherstellen</button>' : '') + '</div>') +
-        '<div class="pconf"><span class="mono">Konfidenz</span>' + cmeter(p.conf, 24) + '<span class="conf-v ' + confLvl(p.conf) + '"><b>' + p.conf + ' %</b>' + confWord(p.conf) + '</span></div>' +
-        (ok ? '<div class="stamp' + (fresh ? ' fx' : '') + '" data-k="st"><span class="sq">' + IC.tickRaw + '</span><span><b>Bestätigt</b><small>' + (p.manual ? 'Eigener Preis' : 'KI-Preis') + ' · T. Berger</small></span></div>' : '') +
+        (ok ? '<div class="stamp' + (fresh ? ' fx' : '') + '" data-k="st"><span class="sq">' + IC.tickRaw + '</span><span><b>Bestätigt</b><small>' + (p.manual ? 'Eigener Preis' : 'KI-Preis') + ' · T. Berger</small></span></div>' : '') + '</div>' +
+        '<div class="pconf"><span class="mono">Konfidenz</span><span class="conf-v ' + confLvl(p.conf) + '"><b>' + p.conf + ' %</b>' + confWord(p.conf) + '</span>' + cmeter(p.conf, 10) + '</div></div>' +
         '<div class="why2"><div class="mono lab">Begründung</div><p>' + esc(C.cands[0].why) + '</p>' +
           '<div class="calc2">' + C.steps.map(function (s, j) { return '<div class="cs' + (j === C.steps.length - 1 ? ' last' : '') + '"><span>' + esc(s[0]) + '</span><span>' + esc(s[1]) + '</span></div>'; }).join('') + '</div>' +
           ((R.similar || []).length ? '<div class="refs"><span class="mono">Quellen</span>' + R.similar.map(function (x) { var e = D.extra[x[0]]; return e ? '<button class="ref" data-act="preview" data-key="' + x[0] + '">' + esc(e.proj) + '<small>' + esc(x[1]) + '</small></button>' : ''; }).join('') + '</div>' : '') +
