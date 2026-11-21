@@ -4,3 +4,5 @@ langchain-anthropic>=1.0
 python-dotenv>=1.0
 pypdf>=4.0
 voyageai>=0.3.7
+openai>=1.0
+pymupdf>=1.24

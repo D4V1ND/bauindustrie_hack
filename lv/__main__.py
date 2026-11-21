@@ -1,11 +1,11 @@
-"""Command line: python -m lv ingest|price <LV file> --project <ID>"""
+"""Command line: python -m lv ingest|price <LV file> --project <ID> [--plan <plan>]"""
 import argparse
 import json
 import re
 import time
 from pathlib import Path
 
-from lv import ai
+from lv import ai, plan
 from lv.categorise import Assignments, Proposal, assign, overview, propose
 from lv.extract import add_texts, read
 from lv.match import group_label
@@ -32,13 +32,29 @@ def main(argv: list[str] | None = None, data: Path = DATA) -> None:
             command.add_argument("--copy-only", action="store_true",
                                  help="only copy the prices of exact matches: no item types, no search, no AI, "
                                       "no API key needed")
+            command.add_argument("--plan", type=Path, metavar="PLAN",
+                                 help="a construction plan (PNG, JPG or PDF): also compare the LV's quantities with it "
+                                      "and write <project>_plan.json (needs OPENAI_API_KEY and OPENAI_MODEL)")
     args = parser.parse_args(argv)
+    plan_ai = None
+    if getattr(args, "plan", None):  # checked first, so a missing plan or key costs nothing
+        if args.copy_only:
+            raise SystemExit("The plan check asks AI models, so it cannot run with --copy-only.")
+        try:
+            plan.check_file(args.plan)
+        except ValueError as error:
+            raise SystemExit(str(error))
+        plan_ai = plan.client()
 
     try:
         lv = read(args.file, args.project)
         notes = add_texts(lv, args.texts) if args.command == "ingest" and args.texts else []
     except (ValueError, OSError) as error:
         raise SystemExit(str(error))
+    plan_job = None
+    if plan_ai:  # needs only step 0's items, so it runs beside steps 1 to 4
+        print(f"plan check: started in parallel, {args.plan.name} with {plan_ai[1]}, read {plan.RUNS} times", flush=True)
+        plan_job = plan.Background(plan.check, plan.positions(lv), args.plan, plan_ai)
     if args.command == "ingest" and not lv.priced:
         raise SystemExit(f"{args.file.name} has no prices, so it cannot go into the price library.")
     if args.command == "ingest" and args.texts:
@@ -77,16 +93,27 @@ def main(argv: list[str] | None = None, data: Path = DATA) -> None:
         log = path.with_name(f"{lv.project}_judge.json")
         log.write_text(json.dumps(judge_log, ensure_ascii=False, indent=1), encoding="utf-8")
         print(f"{len(judge_log)} judge calls with the judge's thinking -> {log}")
+    if plan_job:  # collected after the LV result is saved: a failing plan check loses nothing of it
+        if not plan_job.done():
+            print("plan check: still running, waiting for it ...", flush=True)
+        try:
+            result = plan_job.result()
+        except Exception as error:
+            raise SystemExit(f"The plan check failed; the LV result above is saved. {type(error).__name__}: {error}")
+        out = path.with_name(f"{lv.project}_plan.json")
+        out.write_text(json.dumps(result, ensure_ascii=False, indent=1), encoding="utf-8")
+        counts = result["zusammenfassung"]
+        print(f"  {counts['befunde']} findings, {counts['geprueft']} items compared, {time.monotonic() - plan_job.started:.0f} s from its start -> {out}")
 
 
 def _ask(job: str, model: str, effort: str, rules: str, questions: list[str], shape: type,
          thinking: bool = False) -> list:
     """One real AI job: says what is asked, asks, and says how long it took."""
     calls = "1 call" if len(questions) == 1 else f"{len(questions)} calls"
-    print(f"asking {model} ({effort} effort) {job}: {calls} ...", end=" ", flush=True)
-    start = time.monotonic()
+    print(f"asking {model} ({effort} effort) {job}: {calls} ...", flush=True)  # whole lines: a plan check may print
+    start = time.monotonic()                                                       # in between (see lv/plan.py)
     answers = (ai.ask_with_thinking if thinking else ai.ask)(model, rules, questions, shape, effort=effort)
-    print(f"{time.monotonic() - start:.0f} s")
+    print(f"  {job}: done in {time.monotonic() - start:.0f} s", flush=True)
     return answers
 
 
