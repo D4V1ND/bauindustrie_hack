@@ -878,6 +878,18 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .drv-ol .drv-t>span:first-child::before{content:counter(drv) ".";display:inline-block;min-width:22px;font:12px var(--mono);color:var(--ink-3)}
 .drv-ol .drv-t b{font-weight:500;white-space:nowrap;flex:none}
 .np.sgp{color:var(--warn)}
+.np.span{color:var(--ink-3);font-weight:400;white-space:nowrap}
+.prow:has(.spanep){flex-wrap:wrap}
+.spanep{display:block;flex:0 0 100%;margin-bottom:8px;font-size:20px;font-weight:400;color:var(--ink-3);letter-spacing:-.01em}
+.spanep small{font-size:12px}
+.i.ndi{width:18px;height:11px;fill:none;overflow:visible;flex:none}
+.ndi-t{stroke:currentColor;stroke-width:2.4;opacity:.3}
+.ndi-h{stroke:var(--signal);stroke-width:2.4}
+.ndi-n{stroke:currentColor;stroke-width:2;stroke-linecap:round;transform-origin:10px 16px;transform:rotate(60deg)}
+.ndi-p{fill:currentColor;stroke:none}
+.lab.ai-h{display:flex;align-items:center;gap:7px;color:var(--ink)}
+.lab .ndi,.mono .ndi{margin-right:6px;vertical-align:-1px}
+.lab.ai-h .ndi{margin:0}
 .sgbox{display:flex;flex-direction:column;gap:6px;width:100%;padding:12px 14px;border:1px dashed var(--warn);background:var(--warn-bg)}
 .sg-ep{font:300 30px/1 var(--sans);letter-spacing:-.03em;color:var(--ink)}
 .sg-ep small{font-size:12px;color:var(--ink-3);letter-spacing:0}
@@ -1466,6 +1478,7 @@ function gwName(it) {
   var s = (it.section || [])[0] || it.trade || 'Ohne Abschnitt';
   return s.replace(/^[\d.]+\s+/, '') || s;
 }
+function spanTxt(sp) { return sp[0] === sp[1] ? eur(sp[0]) : eur(sp[0]).replace(/\s*€$/, '') + ' – ' + eur(sp[1]); }
 function ownPrice(it) {
   var c = (it.comments || []).filter(function (x) { return x.price != null || x.effect === 'doubt'; }).pop();
   return c && c.price != null ? c.price : null;
@@ -1481,14 +1494,13 @@ function suggest(pr) {
 function toPos(it) {
   var pr = it.prediction || {}, rk = it.risk || {}, m = pr.method || 'none', own = ownPrice(it), med = pr.median || 0, conf = rk.confidence || 0;
   var why = own != null ? 'Eigener Preis' : (WHY[m] || m);
-  if (own == null && m === 'none' && pr.min != null) why += ' · Spanne ' + eur(pr.min) + ' – ' + eur(pr.max);  // no price, only the span of differing items
   if (rk.missing && rk.missing.length) why += ' · fehlt: ' + rk.missing[0];
   if (it.plan && it.plan.status === 'differs') why = 'Plan ' + qty(it.plan.quantity || 0) + ' ' + (it.plan.unit || '') + ', LV ' + qty(it.quantity || 0) + ' · ' + why;
   var mode = MODE[m] || 'offen';
   if (mode !== 'offen' && conf < 50) mode = 'unsicher';
   return { oz: it.oz, kurz: it.short_text || it.oz, lang: it.long_text || it.short_text || '', menge: it.quantity || 0, einheit: it.unit || '', gewerk: gwName(it),
     ep: own != null ? own : med, aiEp: med, srvManual: own != null, risk: rk.score || 0, conf: conf, mode: mode, why: why, method: m, typ: it.item_type || '', descQ: rk.description || '', missing: rk.missing || [], planSt: it.plan ? it.plan.status || '' : '', opt: it.kind === 'optional', owner: '', val: rk.value || 0, cmts: it.comments || [],
-    lo: own != null ? own : pr.min != null ? Math.min(pr.min, med) : med, hi: own != null ? own : pr.max != null ? Math.max(pr.max, med) : med, sg: own == null && !med ? suggest(pr) : null };
+    lo: own != null ? own : pr.min != null ? Math.min(pr.min, med) : med, hi: own != null ? own : pr.max != null ? Math.max(pr.max, med) : med, sg: own == null && !med ? suggest(pr) : null, span: own == null && m === 'none' && pr.min != null ? [pr.min, pr.max] : null };
 }
 function toRich(it, extra) {
   var pr = it.prediction || {}, rk = it.risk || {}, srcs = pr.sources || [], jd = pr.judged || [], R = {};
@@ -1573,6 +1585,8 @@ var IC = {
   tickRaw: '<svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>',
   warn: '<svg class="i" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>',
   star: '<svg class="i star" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg>',
+  // the Needle logo, still: marks everything the AI made or answers
+  needle: '<svg class="i ndi" viewBox="1 7.2 18 11" aria-hidden="true"><path class="ndi-t" d="M2.5 16A7.5 7.5 0 0 1 14.6 10.1"/><path class="ndi-h" d="M14.6 10.1A7.5 7.5 0 0 1 17.5 16"/><path class="ndi-n" d="M10 16V9.6"/><circle class="ndi-p" cx="10" cy="16" r="1.9"/></svg>',
   down: '<svg class="i" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>',
   plus: '<svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
   bell: '<svg class="i" viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>',
@@ -1914,7 +1928,7 @@ function vSummary(d) {
   var drivers = (P.live ? d.full : d.all).filter(function (r) { return r.gp > 0; }).sort(function (a, b) { return b.gp - a.gp; }).slice(0, 5);
   if (!P.live) stats = [['', '812', 'Positionen 1:1 übernommen'], ['blue', '389', 'adaptiert'], ['warn', '83', 'unsicher, bitte prüfen'], ['', '38 → 9', 'Positionen bündelbar'], ['ok', '≈ 31.000 €', 'Nachtragspotenzial (4 Pos.)']];
   return '<section class="card sum rise' + (S.analyzing ? ' scan' : '') + '" style="flex:2 1 640px;--d:320ms" aria-label="Zusammenfassung">' +
-    '<div class="card-h"><span class="mono"><b>02</b> Zusammenfassung</span><span class="mono" style="display:flex;gap:6px;align-items:center;color:var(--signal)">' + IC.star + 'KI · jede Aussage mit Quelle</span></div>' +
+    '<div class="card-h"><span class="mono"><b>02</b> Zusammenfassung</span><span class="mono" style="display:flex;gap:6px;align-items:center;color:var(--signal)">' + IC.needle + 'KI · jede Aussage mit Quelle</span></div>' +
     '<div class="sum2"><p class="sum-p">' + txt + '</p>' +
     '<div class="sum-drv"><div class="mono faint" style="margin-bottom:8px">Top-Kostentreiber</div>' +
       '<ol class="drv-ol">' + drivers.map(function (r) { return '<li><button class="drv" data-act="open" data-oz="' + r.oz + '"><span class="drv-t"><span>' + esc(r.kurz) + '</span><b>' + eur(r.gp) + '</b></span></button></li>'; }).join('') + '</ol>' +
@@ -1931,11 +1945,11 @@ function vRow(r, d) {
     '<span role="cell" style="min-width:0"><span class="ozl mono">' + r.oz + '</span><button class="kurz" data-act="open" data-oz="' + r.oz + '">' + esc(r.kurz) + '</button>' +
       (S.density === 'details' ? '<span class="lang">' + esc(r.lang) + '</span>' : '') +
       '<span class="rmeta"><button class="gw" data-act="gewerk" data-v="' + esc(r.gewerk) + '" title="Nur ' + esc(r.gewerk) + ' anzeigen">' + esc(r.gewerk) + '</button>' +
-      (r.gen ? '<span class="why lo">' + esc(r.why) + '</span>' : '<span class="why ' + k + '">' + IC.warn + esc(r.why) + '</span>') +
+      (r.gen ? '<span class="why lo">' + esc(r.why) + '</span>' : '') +
       (cmtList(r).length ? '<span class="cmtn" title="' + cmtList(r).length + ' Kommentare">' + IC.chat + cmtList(r).length + '</span>' : '') +
       (S.bundled[r.oz] ? '<span class="chip bundle">Bündel · ' + esc(S.bundled[r.oz]) + '</span>' : '') +
       '</span></span>' +
-    '<span role="cell" class="c2" style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">' + (r.np ? (r.sg ? '<span class="np sgp" title="Vorschlag aus verwandten Positionen, niedrige Konfidenz">≈ ' + eur(r.sg.ep) + '</span>' : '<span class="np">Kein Preis</span>') : '<span style="font-size:13px;font-weight:500">' + eur(r.ep) + '</span>') + '<span class="qty">' + qty(r.menge) + ' ' + r.einheit + '</span>' + chip + '</span>' +
+    '<span role="cell" class="c2" style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">' + (r.np ? (r.sg ? '<span class="np sgp" title="Vorschlag aus verwandten Positionen, niedrige Konfidenz">≈ ' + eur(r.sg.ep) + '</span>' : r.span ? '<span class="np span" title="Spanne der nächsten Alt-LV-Positionen, die abweichen: kein Preis">' + spanTxt(r.span) + '</span>' : '<span class="np">Kein Preis</span>') : '<span style="font-size:13px;font-weight:500">' + eur(r.ep) + '</span>') + '<span class="qty">' + qty(r.menge) + ' ' + r.einheit + '</span>' + chip + '</span>' +
     '<span role="cell" class="num c2"><span style="font-size:14px;font-weight:500">' + (r.np ? '<span class="np">–</span>' : r.opt ? '<span class="np" title="Bedarfsposition, nicht in der Summe">Bedarf</span>' : eur(r.gp)) + '</span><span class="gpbar" title="' + fmt(r.gp / d.tot * 100, 1) + ' % des Volumens"><i style="width:' + Math.max(4, Math.round(r.gp / d.maxGp * 100)) + '%;background:' + (d.driver[r.oz] ? 'var(--signal)' : 'var(--ink-3)') + '"></i></span></span>' +
     '<span role="cell">' + (r.np ? '<button class="okbtn need" data-act="priceNow" data-oz="' + r.oz + '" aria-label="Preis für ' + r.oz + ' eingeben" title="Preis eingeben">' + IC.pen + '</button>' : r.gen ? '<span class="auto1" title="1:1 übernommen, keine Bestätigung nötig">1:1</span>' : '<button class="okbtn' + (ok ? ' is-ok' : '') + (fresh && ok ? ' fx' : '') + '" data-act="toggleOk" data-oz="' + r.oz + '" aria-pressed="' + ok + '" aria-label="' + (ok ? 'Bestätigung zurücknehmen' : 'Preis bestätigen') + '" title="' + (ok ? 'Bestätigung zurücknehmen' : 'Preis bestätigen') + '">' + IC.tickRaw + (fresh && ok && S.justOk[r.oz] === 0 ? particles('conf', 10, 34) : '') + '</button>') + '</span>' +
   '</div>';
@@ -2159,8 +2173,8 @@ function vDrawer(d) {
   } else if (dt === 'agent') {
     panel = (chat.length || S.thinking ? '' : '<p class="pempty">Frag den Agenten zu dieser Position, z. B. nach dem Preis, einer Bieterfrage oder einem Was-wäre-wenn.</p><div class="chips">' +
       [['Preis erklären', 'Wie kommst du auf den Preis?'], ['Bieterfrage formulieren', 'Formuliere eine Bieterfrage'], ['Material +15 %?', 'Was-wäre-wenn: Material +15 %'], ['Subunternehmer anfragen', 'An Subunternehmer anfragen']].map(function (c) { return '<button class="qchip" data-act="ask" data-v="' + esc(c[1]) + '">' + c[0] + '</button>'; }).join('') + '</div>') +
-      '<div style="display:grid;gap:10px">' + chat.map(function (m, i) { return '<div data-k="m' + i + '" style="display:flex;gap:8px;justify-content:' + (m.role === 'user' ? 'flex-end' : 'flex-start') + ';animation:rise .35s var(--ease)">' + (m.role === 'agent' ? '<span class="agent-ic">' + IC.star + '</span>' : '') + '<div class="bub' + (m.role === 'user' ? ' me' : '') + '" style="max-width:86%;white-space:pre-line">' + esc(m.t) + '</div></div>'; }).join('') +
-      (S.thinking ? '<div style="display:flex;gap:8px;align-items:center" data-k="th"><span class="agent-ic">' + IC.star + '</span><div class="bub thinking" style="display:flex;align-items:center;gap:5px"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="faint" style="font-size:12px;margin-left:6px">liest Begründung, Quellen &amp; LV…</span></div></div>' : '') + '</div>';
+      '<div style="display:grid;gap:10px">' + chat.map(function (m, i) { return '<div data-k="m' + i + '" style="display:flex;gap:8px;justify-content:' + (m.role === 'user' ? 'flex-end' : 'flex-start') + ';animation:rise .35s var(--ease)">' + (m.role === 'agent' ? '<span class="agent-ic">' + IC.needle + '</span>' : '') + '<div class="bub' + (m.role === 'user' ? ' me' : '') + '" style="max-width:86%;white-space:pre-line">' + esc(m.t) + '</div></div>'; }).join('') +
+      (S.thinking ? '<div style="display:flex;gap:8px;align-items:center" data-k="th"><span class="agent-ic">' + IC.needle + '</span><div class="bub thinking" style="display:flex;align-items:center;gap:5px"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="faint" style="font-size:12px;margin-left:6px">liest Begründung, Quellen &amp; LV…</span></div></div>' : '') + '</div>';
   }
 
   return '<aside class="dw' + (S.aiOpen || S.thinking ? ' ai-open' : '') + '" aria-label="Positionsdetails ' + p.oz + '" tabindex="-1" data-k="dw">' +
@@ -2173,15 +2187,15 @@ function vDrawer(d) {
       '<dl class="dmeta"><div><dt>GP</dt><dd>' + (p.np ? 'noch offen' : eur(p.gp)) + '</dd></div>' +
         '<div><dt>Grundlage</dt><dd><span class="mtag ' + p.mode + '"><i></i>' + p.mode + '</span></dd></div>' +
         '<div><dt>Menge</dt><dd>' + qty(p.menge) + ' ' + p.einheit + '</dd></div></dl>' +
-      (p.conf < 75 ? '<div class="rl ' + k + '">' + IC.warn + '<span>' + esc(p.why) + '</span></div>' : '') + '</div></header>' +
+      '</div></header>' +
     '<div class="dw-body"><div class="dw-swap ' + (S.leaving ? 'leaving' : S.swapDir) + '" data-k="b' + p.oz + '">' +
-      '<section class="price' + (ok ? ' is-ok' : '') + (S.editEp ? ' is-edit' : '') + '" aria-label="Preis"><button class="mini" data-act="aiClose" tabindex="-1"><span class="mono">' + (p.np ? 'Preis' : p.manual ? 'Eigener Preis' : 'KI-Preis') + '</span><b>' + (p.np ? 'fehlt' : eur(p.ep)) + '</b><span class="muted">' + (p.np ? (p.sg ? 'Vorschlag ≈ ' + eur(p.sg.ep) + ' · bitte prüfen' : 'Keine KI-Schätzung') : 'je ' + p.einheit + ' · GP ' + eur(p.gp)) + '</span><span class="conf-v ' + confLvl(p.conf) + '"><b>' + p.conf + ' %</b></span></button><div class="ptop"><div class="pmain">' +
-        '<div class="mono lab">' + (p.np ? (p.sg ? 'Vorschlag · niedrige Konfidenz, bitte prüfen' : 'Kein Preisvorschlag möglich') : p.manual ? (noAi ? 'Eigener Preis · ohne KI-Vorschlag' : 'Eigener Preis · ' + pct(md) + ' zum KI-Vorschlag') : 'KI-Preisvorschlag') + '</div>' +
+      '<section class="price' + (ok ? ' is-ok' : '') + (S.editEp ? ' is-edit' : '') + '" aria-label="Preis"><button class="mini" data-act="aiClose" tabindex="-1"><span class="mono">' + (p.np ? 'Preis' : p.manual ? 'Eigener Preis' : 'KI-Preis') + '</span><b>' + (p.np ? 'fehlt' : eur(p.ep)) + '</b><span class="muted">' + (p.np ? (p.sg ? 'Vorschlag ≈ ' + eur(p.sg.ep) + ' · bitte prüfen' : p.span ? 'Spanne ' + spanTxt(p.span) : 'Keine KI-Schätzung') : 'je ' + p.einheit + ' · GP ' + eur(p.gp)) + '</span><span class="conf-v ' + confLvl(p.conf) + '"><b>' + p.conf + ' %</b></span></button><div class="ptop"><div class="pmain">' +
+        '<div class="mono lab">' + (p.np ? (p.sg ? 'Vorschlag · niedrige Konfidenz, bitte prüfen' : p.span ? 'Kein Preis · Spanne ähnlicher Positionen' : 'Kein Preisvorschlag möglich') : p.manual ? (noAi ? 'Eigener Preis · ohne KI-Vorschlag' : 'Eigener Preis · ' + pct(md) + ' zum KI-Vorschlag') : IC.needle + 'KI-Preisvorschlag') + '</div>' +
         '<div class="prow">' + (S.editEp
           ? '<label class="epedit"><span class="sr">Einheitspreis in Euro</span><input id="epin" inputmode="decimal" autocomplete="off" data-in="epDraft" data-enter="saveEp" value="' + esc(S.epDraft) + '"><span class="cur">€</span></label>'
           : p.np && p.sg ? '<div class="sgbox" data-k="sg' + p.oz + '"><span class="sg-ep">≈ ' + eur(p.sg.ep) + '<small> je ' + esc(p.einheit) + '</small></span><span class="sg-r">' + (p.sg.hi > p.sg.lo ? 'Spanne ' + eur(p.sg.lo) + ' – ' + eur(p.sg.hi) + ' · ' : '') + 'aus ' + p.sg.n + ' verwandten Position' + (p.sg.n > 1 ? 'en' : '') + '</span>' +
               '<span class="sg-b"><button class="btn btn-sm btn-primary" data-act="takeSugg">Vorschlag übernehmen</button><button class="btn btn-sm btn-quiet" data-act="startEdit">Eigenen Preis eingeben</button></span></div>'
-          : p.np ? '<button class="ep epnp" data-k="epnp" data-act="startEdit" aria-label="Preis eingeben">Preis eingeben<span class="pen">' + IC.pen + '</span></button>'
+          : p.np ? (p.span ? '<span class="spanep" title="Spanne der nächsten Alt-LV-Positionen, die abweichen: kein Preis">' + spanTxt(p.span) + '<small> je ' + esc(p.einheit) + '</small></span>' : '') + '<button class="ep epnp" data-k="epnp" data-act="startEdit" aria-label="Preis eingeben">Preis eingeben<span class="pen">' + IC.pen + '</span></button>'
           : '<button class="ep' + (S.flashEp ? ' flash' : '') + '" data-k="ep' + p.ep + '" data-act="startEdit" title="Preis bearbeiten" aria-label="Einheitspreis ' + eur(p.ep) + ', bearbeiten">' + eur(p.ep) + '<span class="pen">' + IC.pen + '</span></button>') +
           (p.np && !S.editEp ? '' : '<span class="muted">je ' + p.einheit + '</span>') + '</div>' +
         (S.editEp
@@ -2192,8 +2206,8 @@ function vDrawer(d) {
             '</div>') +
         (ok ? '<div class="stamp' + (fresh ? ' fx' : '') + '" data-k="st"><span class="sq">' + IC.tickRaw + '</span><span><b>Bestätigt</b><small>' + (p.manual ? 'Eigener Preis' : 'KI-Preis') + '</small></span></div>' : '') + '</div>' +
         '<div class="pconf"><span class="mono">Konfidenz</span><span class="conf-v ' + confLvl(p.conf) + '"><b>' + p.conf + ' %</b>' + confWord(p.conf) + '</span>' + cmeter(p.conf, 10) + '</div></div>' +
-        (noAi ? '<div class="why2"><div class="mono lab">Warum kein Preis</div><p>' + esc(P.live && R.brief ? R.brief : p.why) + '. In euren Alt-LVs gibt es keine vergleichbare Position. Kalkuliere den Preis selbst oder hol ein Lieferantenangebot ein.</p></div></section>' :
-        '<div class="why2' + (S.whyOpen ? ' open' : '') + '"><div class="mono lab">Begründung</div><p>' + esc(C.cands[0].why) + '</p>' +
+        (noAi ? '<div class="why2"><div class="mono lab ai-h">' + IC.needle + 'Reasoning</div><p>' + esc(P.live && R.brief ? R.brief : p.why) + '. In euren Alt-LVs gibt es keine vergleichbare Position. Kalkuliere den Preis selbst oder hol ein Lieferantenangebot ein.</p></div></section>' :
+        '<div class="why2' + (S.whyOpen ? ' open' : '') + '"><div class="mono lab ai-h">' + IC.needle + 'Reasoning</div><p>' + esc(C.cands[0].why) + '</p>' +
           '<div class="whymore" aria-hidden="' + !S.whyOpen + '"><div class="whyin"><div class="calc2">' + C.steps.map(function (s, j) { return '<div class="cs' + (j === C.steps.length - 1 ? ' last' : '') + '"><span>' + esc(s[0]) + '</span><span>' + esc(s[1]) + '</span></div>'; }).join('') + '</div>' +
           ((R.similar || []).length ? '<div class="refs"><span class="mono">Quellen</span>' + R.similar.map(function (x) { var e = D.extra[x[0]]; return e ? '<button class="ref" data-act="preview" data-key="' + x[0] + '">' + esc(e.proj) + '<small>' + esc(x[1]) + '</small></button>' : ''; }).join('') + '</div>' : '') +
         '</div></div><button class="whytg" data-act="whyToggle" aria-expanded="' + !!S.whyOpen + '">' + (S.whyOpen ? 'Weniger anzeigen' : 'Berechnung &amp; Quellen anzeigen') + IC.chev + '</button></div></section>') +
@@ -2206,17 +2220,17 @@ function vDrawer(d) {
           '</div></section>';
       })() + gwPanel + '</div></div>' +
       '<div class="aiwrap"><div class="aiin"><section class="aichat" role="region" aria-label="Chat mit dem Agenten zu ' + p.oz + '">' +
-      '<div class="cp-h"><span class="agent-ic">' + IC.star + '</span><span><b>Agent</b><small>' + p.oz + ' · ' + esc(p.kurz) + '</small></span><span class="cp-live"><i></i>online</span><button class="ic" data-act="aiClose" aria-label="Chat schließen">' + IC.x + '</button></div>' +
+      '<div class="cp-h"><span class="agent-ic">' + IC.needle + '</span><span><b>Agent</b><small>' + p.oz + ' · ' + esc(p.kurz) + '</small></span><span class="cp-live"><i></i>online</span><button class="ic" data-act="aiClose" aria-label="Chat schließen">' + IC.x + '</button></div>' +
       '<div class="cp-log" data-k="cplog' + p.oz + '">' +
         (chat.length || S.thinking ? '' : '<p class="pempty">Frag mich zu dieser Position: Preis, Bieterfrage oder Was-wäre-wenn.</p><div class="chips">' +
           [['Preis erklären', 'Wie kommst du auf den Preis?'], ['Bieterfrage formulieren', 'Formuliere eine Bieterfrage'], ['Material +15 %?', 'Was-wäre-wenn: Material +15 %'], ['Subunternehmer anfragen', 'An Subunternehmer anfragen']].map(function (c) { return '<button class="qchip" data-act="ask" data-v="' + esc(c[1]) + '">' + c[0] + '</button>'; }).join('') + '</div>') +
-        chat.map(function (m, i) { return '<div class="cp-m ' + m.role + '" data-k="cm' + i + '">' + (m.role === 'agent' ? '<span class="agent-ic">' + IC.star + '</span>' : '') + '<div class="bub' + (m.role === 'user' ? ' me' : '') + '">' + esc(m.t) + '</div></div>'; }).join('') +
-        (S.thinking ? '<div class="cp-m agent" data-k="cth"><span class="agent-ic">' + IC.star + '</span><div class="bub thinking"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>' : '') +
+        chat.map(function (m, i) { return '<div class="cp-m ' + m.role + '" data-k="cm' + i + '">' + (m.role === 'agent' ? '<span class="agent-ic">' + IC.needle + '</span>' : '') + '<div class="bub' + (m.role === 'user' ? ' me' : '') + '">' + esc(m.t) + '</div></div>'; }).join('') +
+        (S.thinking ? '<div class="cp-m agent" data-k="cth"><span class="agent-ic">' + IC.needle + '</span><div class="bub thinking"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>' : '') +
       '</div></section></div></div>' +
     '</div></div>' +
     (cta ? '<div class="dw-cta" data-k="cta-bar">' + (devWarn && !ok && !p.gen && !noAi ? '<p class="hint" data-k="hint">' + IC.warn + '<span>Mehr als 10 % neben der Empfehlung. Gedrückt halten, um den eigenen Preis zu bestätigen.</span></p>' : '') + cta + '</div>' : '') +
     '<footer class="ask">' +
-      '<div class="askin"><span style="color:var(--signal);display:flex">' + IC.star + '</span><label style="flex:1;display:flex"><span class="sr">Frage an den Agenten</span><input data-in="draft" data-enter="sendDraft" value="' + esc(S.draft) + '" placeholder="Agent fragen zu ' + p.oz + '…"></label><button class="send" data-act="sendDraft" aria-label="Senden">' + IC.arrow + '</button></div></footer>' +
+      '<div class="askin"><span style="color:var(--signal);display:flex">' + IC.needle + '</span><label style="flex:1;display:flex"><span class="sr">Frage an den Agenten</span><input data-in="draft" data-enter="sendDraft" value="' + esc(S.draft) + '" placeholder="Agent fragen zu ' + p.oz + '…"></label><button class="send" data-act="sendDraft" aria-label="Senden">' + IC.arrow + '</button></div></footer>' +
   '</aside>';
 }
 
@@ -2331,7 +2345,7 @@ function vBulkNote(d) {
   if (np.length) parts.push(np.length + ' ohne Preis');
   if (low.length) parts.push(low.length + ' mit niedriger Konfidenz');
   if (big.length) parts.push(big.length + ' sicher, aber teuer genug für einen Blick');
-  return '<div class="agentnote" data-k="bulknote"><span class="an-i">' + IC.star + '</span><div class="an-t"><b>Agent</b>' +
+  return '<div class="agentnote" data-k="bulknote"><span class="an-i">' + IC.needle + '</span><div class="an-t"><b>Agent</b>' +
     '<p>' + (B.n === 1 ? '1 sicherer Preis übernommen' : B.n + ' sichere Preise übernommen') + ' (Σ ' + eur(B.sum) + '). ' + (open.length ? 'Noch offen: ' + open.length + (open.length === 1 ? ' Position' : ' Positionen') + ', davon ' + parts.join(', ') + '.' + (first.length ? ' Zuerst ansehen: ' : '') : 'Es ist nichts mehr offen.') +
     first.map(function (r, i) { return (i ? ', ' : '') + '<button class="lnk" data-act="open" data-oz="' + r.oz + '">' + esc(r.oz + ' ' + r.kurz) + '</button>'; }).join('') + (first.length ? '.' : '') + '</p>' +
     (open.length ? '<button class="btn btn-sm btn-quiet" data-act="filter" data-v="review">Offene anzeigen</button>' : '') + '</div>' +
