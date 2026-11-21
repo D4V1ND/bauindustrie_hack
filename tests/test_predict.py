@@ -1,3 +1,4 @@
+import json
 import re
 from pathlib import Path
 
@@ -9,6 +10,7 @@ from lv.ai import JUDGE_RULES
 from lv.categorise import Assigned, Assignments, Proposal, ProposedType
 from lv.extract import read
 from lv.model import LV, LineItem, load
+from lv.risk import Checked, Checks
 from lv.predict import MAX_PACK, NO_ANSWER, JudgeAnswer, Judged, Verdicts, predict
 
 RAW = Path(__file__).resolve().parent.parent / "data" / "raw" / "Challenge A Dataset"
@@ -141,9 +143,9 @@ class RuleJudge:
 
 
 def said(cand: str, verdict: str, cand_size: float | None = None, target_size: float | None = None,
-         dimension: str | None = None, difference: str = "") -> Judged:
+         dimension: str | None = None, difference: str = "", why: str = "") -> Judged:
     return Judged(cand=cand, verdict=verdict, cand_size=cand_size, target_size=target_size,
-                  dimension=dimension if dimension or cand_size is None else "DN", difference=difference)
+                  dimension=dimension if dimension or cand_size is None else "DN", difference=difference, why=why)
 
 
 def flanges() -> list[LV]:
@@ -298,7 +300,7 @@ def test_long_texts_are_cut_before_they_go_to_the_judge():
 def test_the_rules_the_judge_gets_are_the_estimators_rules():
     assert "You never state, estimate or guess a\nprice." in JUDGE_RULES
     assert "When in doubt between two verdicts, pick the\nstricter one." in JUDGE_RULES
-    assert set(Judged.model_fields) == {"cand", "verdict", "dimension", "cand_size", "target_size", "difference"}
+    assert set(Judged.model_fields) == {"cand", "verdict", "dimension", "cand_size", "target_size", "difference", "why"}
     assert set(Verdicts.model_fields) == {"id", "judged", "reason"}  # the shape named in the rules' "Output" part
 
 
@@ -436,7 +438,8 @@ def test_a_pack_answer_that_does_not_fit_the_items_own_candidates_is_rejected_an
 
     flange, pipe = (i.prediction for i in new.items)
     assert [[id for q in call for id, _ in blocks_in(q)] for call in judge.calls] == [["P4/125", "P4/rohr"], ["P4/125"]]
-    assert flange.method == "reference" and {s.id for s in flange.sources} == {"P1/50", "P1/100", "P1/150", "P1/200"}
+    assert flange.method == "reference" and len(flange.sources) == 3  # of the 4 flanges: at most 3 are kept
+    assert {s.id for s in flange.sources} < {"P1/50", "P1/100", "P1/150", "P1/200"}
     assert (pipe.method, [s.id for s in pipe.sources]) == ("similar", ["P1/rohr"])  # the good part of the answer is kept
 
 
@@ -525,6 +528,9 @@ def fake_step_2(model, system, questions, shape, effort):
     """Stands in for the two step 2 calls: one item type, and every item gets it."""
     if shape is Proposal:
         return [Proposal(item_types=[ProposedType(name="Bauleistung", trade="Erdarbeiten", description="everything")])]
+    if shape is Checks:  # step 4: every description has gaps
+        return [Checks(items=[Checked(id=id, description="gaps", missing=["size"], why="The size is not stated.")
+                              for id in re.findall(r"^### (\S+) \|", q, flags=re.M)]) for q in questions]
     assert shape is Assignments, "no key is set up, so the real judge must not be reached"
     return [Assignments(items=[Assigned(id=id, item_type="Bauleistung", reason="Everything is one type.") for id in re.findall(r"^### (\S+) \|", q, flags=re.M)])
             for q in questions]
@@ -546,16 +552,20 @@ def test_price_command_asks_the_judge_and_writes_what_code_made_of_the_verdicts(
         return answers
 
     monkeypatch.setattr(ai, "ask", fake_ask)
+    monkeypatch.setattr(ai, "ask_with_thinking", lambda *args, **kwargs: [(a, "thinking") for a in fake_ask(*args, **kwargs)])
     main(["ingest", str(RAW / P2_PRICED), "--project", "P2"], data=tmp_path)
     main(["price", str(RAW / P5_NEW), "--project", "P5"], data=tmp_path)
 
     printed = capsys.readouterr().out
+    log = json.loads((tmp_path / "out" / "P5_judge.json").read_text(encoding="utf-8"))
+    assert [call["call"] for call in log] == [1, 2, 3, 4] and all(call["thinking"] == "thinking" for call in log)
+    assert len(log[0]["items"]) == 15 and log[0]["answer"]["items"][0]["reason"] == "First candidate matches."
     result, library = load(tmp_path / "out" / "P5.json"), load(tmp_path / "library" / "P2.json")
     price = {i.id: i.unit_price for i in library.items}
     methods = result.summary.methods
     # step 2 put all items under one type: 28 items with candidates go out in 2 packs (15 + 13). Each pack comes
     # back without its last item, so 2 items are asked again on their own, and those 2 calls come back empty.
-    assert asked == [("claude-sonnet-5-5", "high", JUDGE_RULES, JudgeAnswer, 2)] * 2
+    assert asked == [("claude-sonnet-5-5", "xhigh", JUDGE_RULES, JudgeAnswer, 2)] * 2
     assert methods["similar"].items == 26 and sum(m.items for m in methods.values()) == 50
     assert methods["similar"].items + 2 + sum(1 for i in result.items if "No library item" in i.prediction.reason) == 50
     assert all(price[s.id] == s.unit_price == i.prediction.median for i in result.items for s in i.prediction.sources)
@@ -576,3 +586,29 @@ def test_price_command_prints_the_summary_and_writes_it(tmp_path, capsys):
     assert result.summary.methods["copied"].items == 160
     assert result.summary.total == sum(m.total for m in result.summary.methods.values()) > 0
     assert all(i.prediction is not None and i.unit_price is None for i in result.items)
+
+
+def test_every_verdict_is_kept_with_the_prediction_also_different_ones():
+    found = found_with(said("P1/100", "size_only", 100, 125, difference="DN 100 vs DN 125"),
+                       said("P1/50", "different", difference="much smaller"), said("P1/rohr", "different"))
+
+    assert found.method == "reference" and [s.id for s in found.sources] == ["P1/100"]
+    assert {(s.id, s.verdict, s.difference) for s in found.judged} == {
+        ("P1/100", "size_only", "DN 100 vs DN 125"), ("P1/50", "different", "much smaller")}  # P1/rohr: not offered
+
+
+def test_the_best_three_candidates_are_kept_best_first_each_with_its_why():
+    found = found_with(said("P1/50", "different", why="Far smaller."), said("P1/100", "type_only", why="Other material."),
+                       said("P1/150", "same", why="Same flange."), said("P1/200", "type_only", why="Other class."))
+
+    assert found.method == "similar" and [s.id for s in found.sources] == ["P1/150"]
+    assert [(s.id, s.verdict, s.why) for s in found.judged] == [
+        ("P1/150", "same", "Same flange."), ("P1/100", "type_only", "Other material."), ("P1/200", "type_only", "Other class.")]
+
+
+def test_the_two_sizes_behind_an_adjusted_price_come_first():
+    found = found_with(said("P1/50", "size_only", 50, 125), said("P1/100", "size_only", 100, 125),
+                       said("P1/150", "size_only", 150, 125), said("P1/200", "size_only", 200, 125))
+
+    assert found.method == "adjusted" and [s.id for s in found.judged[:2]] == ["P1/100", "P1/150"]
+    assert len(found.judged) == 3

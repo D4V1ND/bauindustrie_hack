@@ -9,9 +9,11 @@ from pydantic import BaseModel, computed_field
 class Source(BaseModel):
     """One past line item behind a prediction, or shown next to it as a reference."""
     id: str  # a line item in the price library
+    short_text: str = ""  # that item's short text, so a view needs no library file to show it
     unit_price: float
-    verdict: Literal["exact", "same", "size_only", "type_only"]  # "exact": same group label, no judge needed
+    verdict: Literal["exact", "same", "size_only", "type_only", "different"]  # "exact": same group label, no judge
     difference: str = ""
+    why: str = ""  # the judge's sentence on this candidate: why it is the match, or why not
 
 
 class Prediction(BaseModel):
@@ -27,7 +29,28 @@ class Prediction(BaseModel):
     calculation: str | None = None
     result: float | None = None
     reason: str = ""
+    judged: list[Source] = []  # the best candidates the judge saw (at most 3), best first, each with its `why`
     judged_item: str | None = None  # set on a copy: the identical item of this LV that was searched and judged
+
+
+class Risk(BaseModel):
+    """Step 4: how unsure the tool is about one line item (SPEC.md, step 4). Scores run from 0 (safe) to 100 and
+    are places on a scale, not probabilities."""
+    score: int  # the item's risk: price risk and description risk combined
+    price_risk: int  # from the step 3 method, by code
+    price_reason: str
+    description: Literal["complete", "gaps", "vague"] | None = None  # None: the description was not checked
+    description_risk: int | None = None
+    missing: list[str] = []  # what the text does not state, at most 3 short phrases
+    description_reason: str = ""
+    value: float | None = None  # roughly what the item is worth; a weight for the LV's score, never a price to show
+    value_basis: Literal["price", "reference", "assumed"]  # found price, related items' prices, or a typical item
+
+
+class RiskSummary(BaseModel):
+    score: int | None  # the items' scores, weighted by value, over the normal items
+    value: float  # the sum of those values
+    basis: dict[str, int]  # normal items per value basis: price, reference, assumed
 
 
 class MethodSum(BaseModel):
@@ -64,6 +87,7 @@ class LineItem(BaseModel):
     trade: str = ""  # step 2: the trade of that item type
     item_type_reason: str = ""  # step 2: one sentence on why the item got this type; text to show, nothing more
     prediction: Prediction | None = None  # step 3; never written into unit_price
+    risk: Risk | None = None  # step 4
 
 
 class LV(BaseModel):
@@ -74,6 +98,7 @@ class LV(BaseModel):
     items: list[LineItem]
     item_types: list[ItemType] = []  # step 2: the LV's own list of item types
     summary: Summary | None = None  # step 3: items and sums per method, and the project total
+    risk_summary: RiskSummary | None = None  # step 4: the LV's risk score and what it rests on
 
     @computed_field
     @property

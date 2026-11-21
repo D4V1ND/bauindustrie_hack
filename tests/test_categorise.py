@@ -6,6 +6,7 @@ from pydantic import ValidationError
 
 from lv import ai
 from lv.__main__ import main
+from lv.risk import Checks
 from lv.categorise import (NO_REASON, NO_VALID_ANSWER, OTHER, TRADES, Assigned, Assignments, Proposal, ProposedType,
                            assign, overview, propose, type_cap)
 from lv.extract import read
@@ -325,6 +326,8 @@ def test_price_command_writes_types_and_trades_and_prints_the_overview(tmp_path,
 
     def fake_ask(model, system, questions, shape, effort):
         asked.append((model, effort, system, shape, len(questions)))
+        if shape is Checks:  # step 4 runs after step 3; here it gets no answer
+            return [None for _ in questions]
         if shape is Proposal:
             return [Proposal(item_types=[a_type("Stundenlohnarbeit", "Stundenlohnarbeiten"), a_type("Bauleistung", "Erdarbeiten")])]
         answers = []
@@ -343,7 +346,8 @@ def test_price_command_writes_types_and_trades_and_prints_the_overview(tmp_path,
     result = load(tmp_path / "out" / "P5.json")
     assert asked == [("claude-opus-5-5", "medium", ai.PROPOSE_RULES, Proposal, 1),
                      ("claude-sonnet-5-5", "high", ai.ASSIGN_RULES, Assignments, 2),   # 50 items in 2 batches,
-                     ("claude-sonnet-5-5", "high", ai.ASSIGN_RULES, Assignments, 1)]   # then 1 item again
+                     ("claude-sonnet-5-5", "high", ai.ASSIGN_RULES, Assignments, 1),   # then 1 item again
+                     ("claude-sonnet-5-5", "xhigh", ai.DESCRIPTION_RULES, Checks, 2)]  # step 4: the descriptions
     assert "to assign item types: 2 calls" in printed and "50 items asked, 0 copied from an identical item" in printed
     assert [(t.name, t.trade) for t in result.item_types] == [("Stundenlohnarbeit", "Stundenlohnarbeiten"), ("Bauleistung", "Erdarbeiten")]
     assert {(i.item_type, i.trade) for i in result.items} == {

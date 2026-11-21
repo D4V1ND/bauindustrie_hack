@@ -58,7 +58,10 @@ Concrete examples found:
 
 ## Decisions
 
-(none yet)
+- 2026-11-21: step 4 starts as a risk score, not a flag list. One score per item from price risk (code) and
+  description risk (AI), and one value-weighted score for the LV. Built as task 18; the rules are in `SPEC.md`,
+  step 4. The flags below stay open ideas.
+- Near-zero past prices: set aside for now. A flat cut-off would also hit real prices.
 
 ## Open questions
 

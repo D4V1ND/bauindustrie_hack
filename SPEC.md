@@ -1,6 +1,6 @@
-# Spec: LV estimating backend, steps 0–3
+# Spec: LV estimating backend, steps 0–4
 
-Status: steps 0 to 3 are built and were run once with real AI calls on P5 and on P4 (numbers in `tasks/todo.md`).
+Status: steps 0 to 4 are built (step 4 was run on P5 only), and steps 0 to 3 and were run once with real AI calls on P5 and on P4 (numbers in `tasks/todo.md`).
 The price library holds P1, P2 and P3. Not built: `lv check`, reading an LV that exists only as PDF. Terms in **bold** are defined in [CONTEXT.md](CONTEXT.md).
 
 ## Objective
@@ -224,7 +224,7 @@ For each item the judge answers in a fixed shape:
 
 | Field | Meaning |
 |---|---|
-| `judged[]` | one entry per candidate: `cand` (library item id), `verdict`, `difference` (a few words) |
+| `judged[]` | one entry per candidate: `cand` (library item id), `verdict`, `difference` (a few words), `why` (one sentence: why this is the same thing, or why it is not) |
 | `verdict` | `same`, `size_only`, `type_only` or `different`; in doubt the stricter one |
 | `dimension`, `cand_size`, `target_size` | only for `size_only`: what differs (e.g. `DN`) and both sizes as numbers |
 | `reason` | one sentence for the item |
@@ -238,7 +238,11 @@ for an item, the item gets `none`.
 - `adjusted`: the nearest smaller and the nearest larger `size_only` candidate, linear interpolation:
   `smaller price + (target size − smaller size) ÷ (larger size − smaller size) × (larger price − smaller price)`,
   rounded to the cent. Both candidates must name the same dimension and the same target size.
-- `reference`: every `size_only` and `type_only` candidate is listed with its unit price. No price is proposed.
+- `reference`: the best `size_only` and `type_only` candidates, at most 3, are listed with their unit prices. No price is
+  proposed.
+- The judge reads the whole shortlist of 5. The prediction keeps the best 3 in `judged`, best first: what the price
+  rests on, then `same`, `size_only`, `type_only`, `different`. On P5 a shortlist of 3 would have lost one of five
+  prices (the match sat at place 5), so the cut is made after the judge, not before.
 
 Each item gains a `prediction`:
 
@@ -249,7 +253,8 @@ Each item gains a `prediction`:
 | `median` | the value used for totals. For `adjusted` it is the calculated result |
 | `mean` | average of the same prices. For `adjusted` it is the calculated result |
 | `count` | number of past prices behind the prediction; 0 for `reference` and `none` |
-| `sources` | list of `{id, unit_price, verdict, difference}`: every past item used or shown. `verdict` is `exact` for `copied` |
+| `sources` | list of `{id, short_text, unit_price, verdict, difference, why}`: every past item used or shown. `verdict` is `exact` for `copied` |
+| `judged` | the same shape, with the judge's `why`, for the best 3 candidates the judge gave a verdict on, best first |
 | `rule`, `calculation`, `result` | only for `adjusted`, e.g. `linear interpolation by DN`, `80 + (125 - 100) / (150 - 100) x (120 - 80)`, `100.0` |
 | `reason` | the judge's sentence, or a fixed sentence when code decided alone |
 | `judged_item` | only on a copy: the id of the identical item of this LV that was searched and judged |
@@ -258,14 +263,19 @@ The result file `data/out/<project>.json` also holds a `summary`: per method the
 `median × quantity`, and the project `total`. Sums count only **normal items** whose method is `copied`, `similar`
 or `adjusted`. `lv price` prints the same numbers.
 
+Every judge call is logged in `data/out/<project>_judge.json`: the items it asked about, the question exactly as
+sent, the judge's summarised thinking and its answer. The judge runs at effort `xhigh`: with structured output at
+`high` the model answered without thinking. At `xhigh` it may still skip thinking on a call (1 of 20 on P5). The full format for a frontend:
+`docs/result-format.md`, with JSON Schemas generated from the code.
+
 `lv price … --copy-only` stops after check 1: no item types, no search, no AI call, no API key needed. Without
 that option a missing API key stops the command with a message that says what to do, before anything is written.
 The judge itself is only called if at least one item has candidates.
 
 ### What step 3 hands to step 4
 
-Step 3 records facts and contains no thresholds. Step 4 will read `method`, `min`/`max`, `mean` vs `median`,
-`count`, `sources[].verdict`, `sources[].difference` and `read_by` to decide what to flag.
+Step 3 records facts and contains no thresholds. Step 4 reads `method`, `min`, `max`, `median`, `count` and
+`sources[].unit_price`; its thresholds live in `lv/risk.py`.
 
 ### Known limits
 
@@ -281,6 +291,42 @@ Step 3 records facts and contains no thresholds. Step 4 will read `method`, `min
 - **`lv check`** (hide one past project, predict it from the others, compare) is not built yet.
 - A repeat item in P2's `.X83` names its reference in a separate field, not in its text. That field is not read.
 
+## Step 4: risk score
+
+Every item gets one risk score from 0 (safe) to 100, and the LV gets one score weighted by value. A score is a
+place on a scale, not a probability. `lv price` runs step 4 after step 3 and writes `risk` on each item and
+`risk_summary` on the LV.
+
+An item's score has two parts:
+
+| Part | Who | How |
+|---|---|---|
+| **Price risk** | code | From the step 3 method: `copied` 5, `similar` 25, `adjusted` 45, `reference` 75, `none` 100. A `similar` price whose past prices lie more than 10% apart ((max − min) ÷ median) gets 40 |
+| **Description risk** | AI (`claude-sonnet-5-5`, `xhigh`) | Does the text state what an estimator needs to price the item: kind, material, size, class, scope, and for hourly rates the worker or machine? `complete` 10, `gaps` 50, `vague` 90. The model also names up to 3 missing things and gives one sentence. Rules: `DESCRIPTION_RULES` in `lv/ai.py`. 25 items per call; identical items are checked once |
+
+`score` = 0.6 × price risk + 0.4 × description risk, rounded. Without a description check (`--copy-only`, or no
+answer for the item) the score is the price risk alone. All numbers above are starting values to tune with the
+estimator; they sit at the top of `lv/risk.py`.
+
+**Value**, the weight of an item in the LV's score. It is never a price to show.
+
+| Order | When | `value` | `value_basis` |
+|---|---|---|---|
+| 1 | step 3 found a price | `median` × quantity | `price` |
+| 2 | only related items (`reference`) | middle unit price of the listed sources × quantity | `reference` |
+| 3 | neither | the middle value of all items of orders 1 and 2: a typical item | `assumed` |
+
+`risk_summary.score` is the sum of value × score over the **normal items**, divided by the sum of their values.
+`risk_summary.basis` counts the normal items per value basis, so a reader sees how much of the weighting is assumed.
+Optional items get a `risk` but stay out of the LV's score, as they stay out of the totals.
+
+Each item's `risk`: `score`, `price_risk`, `price_reason`, `description` (`complete`, `gaps`, `vague` or empty),
+`description_risk`, `missing[]`, `description_reason`, `value`, `value_basis`.
+
+Known limits: a value from related items inherits their prices, token prices included; on an LV where step 3 finds
+little, most values are assumed (P4: 178 of 296 items had no candidate the judge accepted); the flags of the first
+brainstorm (same item at two prices, outdated prices, quantity against plan) are not built.
+
 ## Tech stack
 
 - Python 3.13, pip, `.venv` (Windows, PowerShell).
@@ -295,7 +341,8 @@ Step 3 records facts and contains no thresholds. Step 4 will read `method`, `min
     |---|---|---|
     | Step 2: propose the item type list, one call per LV | `claude-opus-5-5` | `medium` |
     | Step 2: assign each item a type, with its reason | `claude-sonnet-5-5` | `high` |
-    | Step 3: judge the candidates | `claude-sonnet-5-5` | `high` |
+    | Step 3: judge the candidates | `claude-sonnet-5-5` | `xhigh` (at `high` it answers without thinking) |
+    | Step 4: is each item's description complete? | `claude-sonnet-5-5` | `xhigh` |
 
     No AI reads a PDF: P3's texts are read by code.
   - Model names and effort levels live in one settings place (`lv/ai.py`). No `temperature` parameter; structured output through the native
@@ -325,6 +372,7 @@ lv/
   match.py        step 1 group label; step 3 candidate search
   categorise.py   step 2: trade list, item type list, assignment, overview
   predict.py      step 3: judge input, verdicts to prediction, interpolation, statistics, totals
+  risk.py         step 4: price risk, description check, value, the LV's risk score
   ai.py           model setup, API key and prompts
 tests/            one small test file per module
 data/raw/         the dataset, unchanged

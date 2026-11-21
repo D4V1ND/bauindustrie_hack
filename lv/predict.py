@@ -25,6 +25,7 @@ class Judged(BaseModel):
     cand_size: float | None
     target_size: float | None
     difference: str
+    why: str = ""  # one sentence: why this is the same thing, or why it is not
 
 
 class Verdicts(BaseModel):
@@ -43,6 +44,8 @@ class JudgeAnswer(BaseModel):
 # question, or None where it has none.
 Judge = Callable[[list[str]], list[JudgeAnswer | None]]
 MAX_PACK = 15  # items in one judge call
+MAX_SHOWN = 3  # candidates kept with a prediction; the judge still reads the whole shortlist
+BEST_FIRST = {"same": 0, "size_only": 1, "type_only": 2, "different": 3}
 
 
 def predict(new: LV, library: list[LV], judge: Judge | None, packed: bool = True, embed: Embed | None = None) -> None:
@@ -61,7 +64,8 @@ def predict(new: LV, library: list[LV], judge: Judge | None, packed: bool = True
     for described in describe(new):
         exact = by_group.get(group_label(described.item))
         if exact:
-            sources = [Source(id=past.id, unit_price=past.unit_price, verdict="exact") for past in exact]
+            sources = [Source(id=past.id, short_text=past.short_text, unit_price=past.unit_price, verdict="exact")
+                       for past in exact]
             described.item.prediction = _priced("copied", sources, "Exact match: same short text, long text and unit.")
         else:
             unmatched.append(described)
@@ -171,19 +175,29 @@ def _from_verdicts(candidates: list[Described], answer: Verdicts | None) -> Pred
     if answer is None:
         return Prediction(method="none", reason=NO_ANSWER)
     price = {candidate.item.id: candidate.item.unit_price for candidate in candidates}  # best candidate first
+    text = {candidate.item.id: candidate.item.short_text for candidate in candidates}
     first = {}
     for entry in answer.judged:
         if entry.cand in price:  # a verdict for an id that was not offered is ignored
             first.setdefault(entry.cand, entry)
-    judged = [first[cand] for cand in price if cand in first]
+    judged = sorted((first[cand] for cand in price if cand in first), key=lambda j: BEST_FIRST[j.verdict])
 
     def source(entry: Judged) -> Source:
-        return Source(id=entry.cand, unit_price=price[entry.cand], verdict=entry.verdict, difference=entry.difference)
+        return Source(id=entry.cand, short_text=text[entry.cand], unit_price=price[entry.cand], verdict=entry.verdict,
+                      difference=entry.difference, why=entry.why)
 
+    prediction = _decide(judged, price, answer.reason, source)
+    used = {s.id for s in prediction.sources}  # what the price rests on comes first, then the nearest misses
+    prediction.judged = [source(j) for j in sorted(judged, key=lambda j: j.cand not in used)[:MAX_SHOWN]]
+    return prediction
+
+
+def _decide(judged: list[Judged], price: dict[str, float], reason: str, source: Callable[[Judged], Source]) -> Prediction:
+    """The method and the price from the verdicts: same first, then two sizes around the target, then references."""
     sized = [j for j in judged if j.verdict == "size_only" and j.cand_size is not None and j.target_size is not None]
     same = [j for j in judged if j.verdict == "same"] + [j for j in sized if j.cand_size == j.target_size]
     if same:
-        return _priced("similar", [source(j) for j in same], answer.reason)
+        return _priced("similar", [source(j) for j in same], reason)
 
     smaller = [j for j in sized if j.cand_size < j.target_size]
     larger = [j for j in sized if j.cand_size > j.target_size]
@@ -201,12 +215,12 @@ def _from_verdicts(candidates: list[Described], answer: Verdicts | None) -> Pred
                 calculation=(f"{_number(low_price)} + ({_number(target)} - {_number(low.cand_size)}) / "
                              f"({_number(high.cand_size)} - {_number(low.cand_size)}) x "
                              f"({_number(high_price)} - {_number(low_price)})"),
-                result=result, reason=answer.reason)
+                result=result, reason=reason)
 
-    references = [j for j in judged if j.verdict in ("size_only", "type_only")]
+    references = [j for j in judged if j.verdict in ("size_only", "type_only")][:MAX_SHOWN]
     if references:
-        return Prediction(method="reference", sources=[source(j) for j in references], reason=answer.reason)
-    return Prediction(method="none", reason=answer.reason)
+        return Prediction(method="reference", sources=[source(j) for j in references], reason=reason)
+    return Prediction(method="none", reason=reason)
 
 
 def _priced(method: str, sources: list[Source], reason: str) -> Prediction:

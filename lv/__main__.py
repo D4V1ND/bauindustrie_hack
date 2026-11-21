@@ -1,5 +1,7 @@
 """Command line: python -m lv ingest|price <LV file> --project <ID>"""
 import argparse
+import json
+import re
 import time
 from pathlib import Path
 
@@ -9,6 +11,7 @@ from lv.extract import add_texts, read
 from lv.match import group_label
 from lv.model import LV, load, save
 from lv.predict import NO_ANSWER, JudgeAnswer, predict
+from lv.risk import Checks, assess
 
 DATA = Path(__file__).resolve().parent.parent / "data"
 FOLDERS = {"ingest": "library", "price": "out"}
@@ -46,6 +49,7 @@ def main(argv: list[str] | None = None, data: Path = DATA) -> None:
             print(f"  {note}")
     for item in lv.items:
         item.group = group_label(item)
+    judge_log: list[dict] = []
     if args.command == "price":
         library = [load(path) for path in sorted((data / "library").glob("*.json"))]
         priced = sum(1 for past in library for item in past.items if item.unit_price)
@@ -59,21 +63,29 @@ def main(argv: list[str] | None = None, data: Path = DATA) -> None:
             if not args.copy_only:
                 print(f"search: by words and by meaning ({ai.EMBED_MODEL})" if embed
                       else "search: by words only (no VOYAGE_API_KEY in .env)")
-            predict(lv, library, judge=None if args.copy_only else ask_judge, embed=embed)  # step 3
+            judge = None if args.copy_only else lambda questions: ask_judge(questions, judge_log)
+            predict(lv, library, judge=judge, embed=embed)  # step 3
+            assess(lv, None if args.copy_only else ask_descriptions)  # step 4
         except (ai.MissingKey, RuntimeError) as stop:  # RuntimeError: every call of one kind failed
             raise SystemExit(str(stop))
         print_overview(lv)
         print_summary(lv)
+        print_risk(lv)
     path = save(lv, data / FOLDERS[args.command])
     print(f"{len(lv.items)} line items -> {path}")
+    if judge_log:
+        log = path.with_name(f"{lv.project}_judge.json")
+        log.write_text(json.dumps(judge_log, ensure_ascii=False, indent=1), encoding="utf-8")
+        print(f"{len(judge_log)} judge calls with the judge's thinking -> {log}")
 
 
-def _ask(job: str, model: str, effort: str, rules: str, questions: list[str], shape: type) -> list:
+def _ask(job: str, model: str, effort: str, rules: str, questions: list[str], shape: type,
+         thinking: bool = False) -> list:
     """One real AI job: says what is asked, asks, and says how long it took."""
     calls = "1 call" if len(questions) == 1 else f"{len(questions)} calls"
     print(f"asking {model} ({effort} effort) {job}: {calls} ...", end=" ", flush=True)
     start = time.monotonic()
-    answers = ai.ask(model, rules, questions, shape, effort=effort)
+    answers = (ai.ask_with_thinking if thinking else ai.ask)(model, rules, questions, shape, effort=effort)
     print(f"{time.monotonic() - start:.0f} s")
     return answers
 
@@ -104,9 +116,33 @@ def print_overview(lv: LV) -> None:
         print(f"  ({optional} optional items are not in the overview)")
 
 
-def ask_judge(questions: list[str]) -> list[JudgeAnswer | None]:
-    """The real judge: one Claude call per question (a pack of items of one item type, or one item)."""
-    return _ask("to judge candidates", ai.JUDGE_MODEL, ai.JUDGE_EFFORT, ai.JUDGE_RULES, questions, JudgeAnswer)
+def ask_judge(questions: list[str], log: list[dict] | None = None) -> list[JudgeAnswer | None]:
+    """The real judge: one Claude call per question (a pack of items of one item type, or one item). With `log`,
+    every call is added to it: the items asked about, the question, the judge's summarised thinking, its answer."""
+    pairs = _ask("to judge candidates", ai.JUDGE_MODEL, ai.JUDGE_EFFORT, ai.JUDGE_RULES, questions, JudgeAnswer,
+                 thinking=True)
+    if log is not None:
+        before = len(log)  # read once: extend() grows the list while it runs
+        log.extend({"call": before + n + 1, "items": re.findall(r"^### (\S+)", question, re.M), "question": question,
+                    "thinking": thinking, "answer": answer.model_dump() if answer else None}
+                   for n, (question, (answer, thinking)) in enumerate(zip(questions, pairs)))
+    return [answer for answer, _ in pairs]
+
+
+def ask_descriptions(questions: list[str]) -> list[Checks | None]:
+    return _ask("whether the descriptions are complete", ai.RISK_MODEL, ai.RISK_EFFORT, ai.DESCRIPTION_RULES,
+                questions, Checks)
+
+
+def print_risk(lv: LV) -> None:
+    """Step 4: the LV's risk score, what it rests on, and the items that weigh most."""
+    risk = lv.risk_summary
+    basis = ", ".join(f"{count} by {name}" for name, count in risk.basis.items())
+    print(f"risk: {risk.score} of 100, weighted by value over the normal items (value: {basis})")
+    top = sorted((item for item in lv.items if item.kind == "normal"),
+                 key=lambda item: -(item.risk.value or 0.0) * item.risk.score)[:5]
+    for item in top:
+        print(f"  {item.risk.score:>3}  {item.risk.value or 0:>12,.2f} ({item.risk.value_basis})  {item.oz}  {item.short_text[:50]}")
 
 
 def print_summary(lv: LV) -> None:

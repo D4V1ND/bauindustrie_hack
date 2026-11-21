@@ -327,10 +327,77 @@ Built before tasks 6 and 7: step 3 does not need trades or item types.
       New prices, read by hand (P5 has no answer key): TOK-Band, Facharbeiter, Bagger bis 1 m3 plausible;
       Vorarbeiter (Polier) from P1's "Polier- oder Obermonteur"; Transporter `same` although the judge called it
       "ambiguous"; LKW bis 12 t interpolated with a 15 t tipper that also has all-wheel drive.
+    - P4, the same way (80 judge calls, 3 min):
+
+      | | words only, 5 (task 14 run) | RRF top 5 |
+      |---|---|---|
+      | `copied` | 1 | 1 |
+      | `similar` | 4 | 3 |
+      | `reference` | 95 | 114 |
+      | `none` | 196 | 178 |
+      | total | 22,532.74 | 276.74 |
+
+      Every price that was lost still had its candidate in the top 5; the judge decided more strictly this time.
+      "Baustelle räumen" (3 identical items, 7,500 each from P3) became `type_only` ("scope wording differs"). The
+      DN 80 gate valve became `type_only` ("no material or coating stated") although a single call earlier said
+      `same`. New: "Betrieb der Pumpen" 6.80 per h from P3's "Pumpe 10 l/s pro h"; Bauzaun H 2,0 m judged `same`
+      with P3's "Ortsfester Schutzzaun", but at P3's token price of 0.10 per m.
+  - So the judge, not the shortlist, now decides most outcomes, and on borderline items it does not give the same
+    verdict twice. P3's token prices reach `same` verdicts through meaning search; no rule for them yet.
   - Not measured yet: whether more prices also means more wrong prices. The hidden-project test answers it.
   - View: `data/views/step3_match.html` (one P4 item end to end; every P5 item with its top 5 and verdicts).
   - Files: `lv/match.py`, `lv/ai.py`, `lv/predict.py`, `lv/__main__.py`, `tests/test_match.py`, `tests/conftest.py`,
     `requirements.txt`, `.gitignore`.
+
+- [x] **Task 16: Keep the judge's whole answer and thinking; the result format for the frontend** (small)
+  - Does: every prediction keeps `judged`, all candidates with the judge's verdict and difference (`different`
+    included), and every source carries the library item's `short_text`. `lv price` writes
+    `data/out/<project>_judge.json`: per judge call the items, the question as sent, the summarised thinking and
+    the answer. `docs/result-format.md` describes both files for the frontend, with JSON Schemas generated from the
+    code (`docs/result.schema.json`, `docs/judge-log.schema.json`).
+  - Found: with structured output at effort `high`, Sonnet 5.5 answers without thinking (0 reasoning tokens in all
+    21 P5 calls and in a single test call). Plain text at `high` thinks; structured output at `xhigh` thinks
+    (270 reasoning tokens) and at `max` (1,683). So every verdict so far was made without thinking. `thinking` stays
+    empty until the judge's effort is raised; that is the estimator's call, since `high` is the measured setting.
+  - P5 again with `lv price` end to end (step 2 asked again): 9 of 50 priced, 28 `reference`, 13 `none`, the same
+    items priced as in task 15's run. But LKW bis 12 t changed from `adjusted` 101.01 (7 t and 15 t tippers) to
+    `similar` at 1.06 per h: P3/2.5.30 "Lkw-Kipper (4-Achser) mit Allradantrieb, 12 t NL" is the right item at one of
+    P3's token prices. With P4's Bauzaun (0.10 per m), two token prices now reach a price. A rule for them is needed.
+  - Judge moved to effort `xhigh` (your call). P5 end to end: thinking saved for 19 of 20 calls (median 1,190
+    characters), 20 calls in 94 s, none asked again. 5 of 50 priced instead of 9: TOK-Band, Vorarbeiter (Polier),
+    Transporter and LKW bis 12 t (the 1.06 token price) became `reference`, the four that read as doubtful. Kept:
+    Baustelleneinrichtung, Asphalt schneiden, Gehobener Facharbeiter, Facharbeiter, Bagger bis 1 m3.
+  - Verify: tests pass; `lv price` on P5 writes `P5.json` and `P5_judge.json`.
+  - Files: `lv/model.py`, `lv/predict.py`, `lv/ai.py`, `lv/__main__.py`, `tests/test_ai.py`, `tests/test_predict.py`,
+    `docs/result-format.md`, `docs/result.schema.json`, `docs/judge-log.schema.json`.
+
+- [x] **Task 17: Keep the best 3 candidates, each with a why** (small)
+  - Does: the judge gives every candidate one sentence, `why`: for `same` why it is the same thing, otherwise why it
+    is not. The prediction keeps the best 3 candidates in `judged`, best first (what the price rests on, then by
+    verdict). A `reference` lists at most 3 sources.
+  - Decided against a search shortlist of 3: in the P5 run at `xhigh`, one of the five prices (Bagger bis 1 m3) had its
+    match at place 5 of the shortlist. So the judge still reads 5 and the cut to 3 comes after it.
+  - P5 end to end: 17 judge calls, 140 s. Every item has 3 candidates in `judged`, every one with a `why`. 6 priced,
+    33 `reference`, 11 `none`; the sixth price is Vorarbeiter (Polier), now matched to P3's Bauvorarbeiter at 82.60
+    (it was `reference` in the run before: the judge varying, not this change).
+  - Files: `lv/ai.py` (judging rules), `lv/predict.py`, `lv/model.py`, `tests/test_predict.py`, docs and views.
+
+- [x] **Task 18: Step 4, a risk score per item and one for the LV** (medium)
+  - Does: `lv/risk.py`. Price risk by code from the step 3 method; description risk from one AI check per item
+    (complete, gaps or vague, with what is missing); score = 0.6 × price risk + 0.4 × description risk. Each item gets
+    a value for weighting: its price × quantity, else the middle price of its related items × quantity, else the
+    value of a typical item. The LV's score is the value-weighted mean over the normal items. `lv price` writes
+    `risk` per item and `risk_summary`, and prints the score with the five items that weigh most.
+  - Decided with you: one percent per item from price and description; the more an item is worth, the more it
+    moves the LV's score; items without a price are weighted by related items' prices, then as a typical item. The
+    AI does not rate importance, since that would be a price guess.
+  - P5, real run (2 description calls, 40 s): LV score 51 of 100 over a value of 167,595.45. Value basis:
+    5 by price, 33 by related items, 12 assumed. Descriptions: 30 complete, 20 with gaps,
+    0 vague. Examples: "Asphalt schneiden" 19 (similar, complete); "Transporter" 65 (reference; vehicle size
+    and operator not stated); "FBS Pass- und Gelenkstück DN 800" 80 (nothing found; length or angle not stated).
+  - Limits: the five heaviest items are all weighted by related items' prices, not by a found price; values inherit
+    token prices; all numbers of the scale are starting values. Not run on P4 yet.
+  - Files: `lv/risk.py`, `lv/model.py`, `lv/ai.py`, `lv/__main__.py`, `tests/test_risk.py`, docs and views.
 
 ### Checkpoint: step 3
 - [x] All tests pass without network and without a key.
