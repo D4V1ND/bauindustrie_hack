@@ -1,6 +1,6 @@
 # Spec: LV estimating backend, steps 0–4
 
-Status: steps 0 to 4 are built (step 4 was run on P5 only), and steps 0 to 3 and were run once with real AI calls on P5 and on P4 (numbers in `tasks/todo.md`).
+Status: steps 0 to 4 are built and were run end to end with real AI calls on P5 and on P4 (P4: 9 min 29 s; numbers in `tasks/todo.md`).
 The price library holds P1, P2 and P3. Not built: `lv check`, reading an LV that exists only as PDF. Terms in **bold** are defined in [CONTEXT.md](CONTEXT.md).
 
 ## Objective

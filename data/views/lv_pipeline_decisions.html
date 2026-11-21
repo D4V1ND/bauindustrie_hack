@@ -781,7 +781,7 @@ NEW: Flansch DN 150, PN 10 — Glatter Flansch, Edelstahl, als Zulage zur Rohrle
         <tbody>
           <tr><th scope="row">Words only</th><td data-l="P5, 50 items">3 priced · 25 references · 22 nothing</td><td data-l="P4, 296 items">5 priced · 95 references · 196 nothing</td></tr>
           <tr><th scope="row">Words + meaning, judge at high</th><td data-l="P5, 50 items">9 priced · 26 references · 15 nothing</td><td data-l="P4, 296 items">4 priced · 114 references · 178 nothing</td></tr>
-          <tr class="sum"><th scope="row">Words + meaning, judge at xhigh</th><td data-l="P5, 50 items">5 priced · 33 references · 12 nothing</td><td data-l="P4, 296 items">not run yet</td></tr>
+          <tr class="sum"><th scope="row">Words + meaning, judge at xhigh</th><td data-l="P5, 50 items">5 priced · 33 references · 12 nothing</td><td data-l="P4, 296 items">10 priced · 121 references · 165 nothing</td></tr>
         </tbody>
       </table>
     </div>
@@ -912,23 +912,24 @@ Answer for every item id, each once:
     <h3>How it tested</h3>
     <div class="ledger nums">
       <table>
-        <thead><tr><th scope="col">P5, 50 items, first real run</th><th scope="col">Result</th></tr></thead>
+        <thead><tr><th scope="col">First real runs</th><th scope="col">P5, 50 items</th><th scope="col">P4, 296 items</th></tr></thead>
         <tbody>
-          <tr><th scope="row">Step 3 outcome in this run</th><td data-l="Result">5 similar · 33 reference · 12 none</td></tr>
-          <tr><th scope="row">Descriptions</th><td data-l="Result">30 complete · 20 with gaps · 0 vague</td></tr>
-          <tr><th scope="row">Value basis</th><td data-l="Result">5 by price · 33 by related items · 12 assumed</td></tr>
-          <tr class="sum"><th scope="row">The LV's score</th><td data-l="Result">51 of 100</td></tr>
+          <tr><th scope="row">Step 3 outcome in this run</th><td data-l="P5, 50 items">5 similar · 33 reference · 12 none</td><td data-l="P4, 296 items">10 priced · 121 reference · 165 none</td></tr>
+          <tr><th scope="row">Descriptions</th><td data-l="P5, 50 items">30 complete · 20 with gaps · 0 vague</td><td data-l="P4, 296 items">172 complete · 115 with gaps · 9 vague</td></tr>
+          <tr><th scope="row">Value basis</th><td data-l="P5, 50 items">5 by price · 33 by related items · 12 assumed</td><td data-l="P4, 296 items">9 by price · 109 by related items · 154 assumed</td></tr>
+          <tr class="sum"><th scope="row">The LV's score</th><td data-l="P5, 50 items">51 of 100</td><td data-l="P4, 296 items">52 of 100</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="fn">Two description calls, 40 seconds. Examples: "Asphalt schneiden" scores 19 (same past item found, text complete). "Transporter" scores 65 (only related items; vehicle size and operator not stated). "Pass- und Gelenkstück DN 800" scores 80 (nothing found; length or angle not stated).</p>
+    <p class="fn">P4 ran all five steps in 9 min 29 s: item types 40 s, assignment 31 s, judge 373 s, description check 119 s. P5's description check took 2 calls and 40 seconds. Examples from P5: "Asphalt schneiden" scores 19 (same past item found, text complete). "Transporter" scores 65 (only related items; vehicle size and operator not stated). "Pass- und Gelenkstück DN 800" scores 80 (nothing found; length or angle not stated).</p>
     <div class="dlg note">
       <span class="tag">Weak spots</span>
       <ul>
         <li><strong>The weights are rough.</strong> The three items that move P5's score most are all weighted by related items' prices, not by a found price:<ul><li>Rohrgrabenaushub, bis 2m, seitlich lagern, wieder einbauen: score 49, value about 39,388 (from related items).</li><li>Rohrgrabenaushub, Abfuhr auf AG-Zwischenlager: score 49, value about 27,300 (from related items).</li><li>Rohrauflager und -einbettung, Feinkies 0/32 mm, bis DN 900 m: score 49, value about 14,605 (from related items).</li></ul></li>
         <li><strong>Values inherit bad past prices,</strong> near-zero ones included.</li>
         <li><strong>Where step 3 finds little, most values are assumed.</strong> On P4, 178 of 296 items had no candidate the judge accepted.</li>
-        <li><strong>The scale is a first guess.</strong> All numbers are starting values to tune with an estimator. Not run on P4 yet.</li>
+        <li><strong>The scale is a first guess.</strong> All numbers are starting values to tune with an estimator.</li>
+        <li><strong>The description check waits for the judge.</strong> It needs only the texts and the item types, so it could run beside the judge and save about 2 minutes on P4.</li>
         <li>5 automated tests, with a stand-in for the AI.</li>
       </ul>
     </div>
@@ -963,7 +964,7 @@ Answer for every item id, each once:
     <div class="disc">
       <svg class="art" viewBox="0 0 80 80" aria-hidden="true"><use href="#i-tag"/></svg>
       <p class="part">Bottom line</p>
-      <p class="bl"><strong>Reading, linking and sorting work on any LV today.</strong> The price lookup is honest but thin: with three past projects and the search by meaning, the judge at xhigh prices 5 of P5's 50 items and shows the nearest past items for 33 more. Step 4 puts P5's risk at 51 of 100. More past LVs of the same kind of work will change that more than any prompt.</p>
+      <p class="bl"><strong>Reading, linking and sorting work on any LV today.</strong> The price lookup is honest but thin: with three past projects and the search by meaning, the judge at xhigh prices 5 of P5's 50 items and shows the nearest past items for 33 more. Step 4 puts P5's risk at 51 of 100 and P4's at 52. More past LVs of the same kind of work will change that more than any prompt.</p>
     </div>
     <div class="sources">
       <h2>Where this comes from</h2>
