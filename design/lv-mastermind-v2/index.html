@@ -978,6 +978,20 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .lv-split .gpbar{width:56px}
 .lv-split .foot{flex-direction:column;align-items:flex-start;gap:6px}
 @media (max-width:1100px){.lv-split{grid-template-columns:1fr}.plan{position:relative;top:0}}
+
+.plan-ctl{display:flex;align-items:center;gap:6px}
+.pfs-b{width:30px;height:30px;border:1px solid var(--line-2)}
+.pfs-b:hover{border-color:var(--ink)}
+.pfs-b svg{width:15px;height:15px}
+.planfs{position:fixed;inset:0;z-index:36;display:grid;place-items:center;padding:28px}
+.planfs-bg{position:absolute;inset:0;background:color-mix(in srgb,var(--ink) 45%,transparent);backdrop-filter:blur(3px);animation:fadein .25s var(--ease)}
+.plan.big{position:relative;top:0;width:min(1500px,100%);max-height:100%;box-shadow:var(--shadow);animation:planpop .4s var(--ease)}
+.plan.big .plan-c{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:18px}
+.plan.big .plan-svg{width:auto;height:auto;max-width:100%;max-height:calc(100vh - 56px - 160px)}
+.plan.big .plan-h b{font-size:15px}
+.plan.big .plan-tip{font-size:13px}
+@keyframes planpop{from{opacity:0;transform:scale(.94) translateY(12px)}to{opacity:1;transform:none}}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
 </style>
 </head>
 <body>
@@ -1117,6 +1131,7 @@ function qty(n) { return n % 1 === 0 ? fmt(n, 0) : fmt(n, 1); }
 function rk(r) { return r >= 70 ? 'hi' : r >= 40 ? 'mid' : 'lo'; }
 function pct(d) { return (d >= 0 ? '+' : '−') + fmt(Math.abs(d), Math.abs(d) < 10 ? 1 : 0) + ' %'; }
 var IC = {
+  expand: '<svg class="i" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>',
   pin: '<svg class="i" viewBox="0 0 24 24"><path d="M12 21s-6-5.6-6-11a6 6 0 1 1 12 0c0 5.4-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></svg>',
   pen: '<svg class="i" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4"/></svg>',
   search: '<svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
@@ -1323,7 +1338,7 @@ function vRow(r, d) {
   return '<div class="lv-grid lv-r' + (pk ? ' picked' : '') + (r.oz === S.sel ? ' sel' : '') + (ok ? ' is-ok' : '') + (fresh ? ' fx-ok' : '') + '" style="--i:' + (fresh ? S.justOk[r.oz] : 0) + '" role="row" data-k="r' + r.oz + '" data-act="open" data-oz="' + r.oz + '">' +
     '<span role="cell" class="c2"><input type="checkbox" class="cb"' + (pk ? ' checked' : '') + ' data-act="pick" data-oz="' + r.oz + '" aria-label="Position ' + r.oz + ' auswählen"></span>' +
     '<span role="cell"><span class="rsk ' + k + '" title="Risiko ' + r.risk + ' von 100 · ' + esc(r.why) + '"><b>' + r.risk + '</b><i class="rbar"><i style="width:' + r.risk + '%"></i></i></span></span>' +
-    '<span role="cell" style="min-width:0"><span class="ozl mono">' + r.oz + (PLAN[r.oz] ? '<span class="ploc" title="' + pm(PLAN[r.oz]) + '">' + IC.pin + PLAN[r.oz][2] + '</span>' : '') + '</span><button class="kurz" data-act="open" data-oz="' + r.oz + '">' + esc(r.kurz) + '</button>' +
+    '<span role="cell" style="min-width:0"><span class="ozl mono">' + r.oz + (PLAN[r.oz] ? '<span class="ploc" title="Im Bauplan verortet">' + IC.pin + PLAN[r.oz][2] + '</span>' : '') + '</span><button class="kurz" data-act="open" data-oz="' + r.oz + '">' + esc(r.kurz) + '</button>' +
       (S.density === 'details' ? '<span class="lang">' + esc(r.lang) + '</span>' : '') +
       '<span class="rmeta"><button class="gw" data-act="gewerk" data-v="' + esc(r.gewerk) + '" title="Nur ' + esc(r.gewerk) + ' anzeigen">' + esc(r.gewerk) + '</button>' +
       '<span class="why ' + k + '">' + IC.warn + esc(r.why) + '</span>' +
@@ -1343,7 +1358,7 @@ var PLAN = {
   '01.03.0040': [700, 300, 'EG'], '01.03.0041': [700, 196, '1.OG'], '05.01.0020': [384, 516, 'EG'], '06.01.0051': [536, 506, 'EG'], '06.01.0050': [160, 498, 'EG']
 };
 function pm(xy) { return 'X ' + fmt((xy[0] - 80) / 20, 1) + ' m · Y ' + fmt((620 - xy[1]) / 20, 1) + ' m'; }
-function vPlan(d) {
+function vPlan(d, full) {
   var shown = {}; d.rows.forEach(function (r) { shown[r.oz] = true; });
   var fl = S.floor || 'EG';
   var o = '<svg class="plan-svg" viewBox="0 0 1000 700" role="img" aria-label="Grundriss Erdgeschoss mit Positionen">';
@@ -1372,7 +1387,6 @@ function vPlan(d) {
   // dimension
   o += '<path class="dim" d="M80 678H920M80 670V686M920 670V686"/><text class="dimt" x="500" y="694">42,00 m</text>';
   // crosshair
-  o += '<g class="xh" aria-hidden="true"><line class="xh-x" x1="0" y1="0" x2="1000" y2="0"/><line class="xh-y" x1="0" y1="0" x2="0" y2="700"/></g>';
   // markers
   d.all.forEach(function (r) {
     var p = PLAN[r.oz]; if (!p) return;
@@ -1382,9 +1396,10 @@ function vPlan(d) {
   });
   o += '</svg>';
   var hi = d.all.filter(function (r) { return PLAN[r.oz] && shown[r.oz]; }).length;
-  return '<aside class="plan" aria-label="Bauplan">' +
+  return '<aside class="plan' + (full ? ' big' : '') + '" aria-label="Bauplan' + (full ? ' Vollbild' : '') + '">' +
     '<div class="plan-h"><div><span class="mono">Bauplan</span><b>A-102 · Grundriss</b></div>' +
-      '<div class="seg" role="group" aria-label="Geschoss">' + ['EG', '1.OG'].map(function (g) { return '<button class="' + (fl === g ? 'on' : '') + '" data-act="floor" data-v="' + g + '" aria-pressed="' + (fl === g) + '">' + g + '</button>'; }).join('') + '</div></div>' +
+      '<div class="plan-ctl"><div class="seg" role="group" aria-label="Geschoss">' + ['EG', '1.OG'].map(function (g) { return '<button class="' + (fl === g ? 'on' : '') + '" data-act="floor" data-v="' + g + '" aria-pressed="' + (fl === g) + '">' + g + '</button>'; }).join('') + '</div>' +
+      (full ? '<button class="ic pfs-b" data-act="planFull" data-v="0" aria-label="Vollbild schließen" title="Schließen (Esc)">' + IC.x + '</button>' : '<button class="ic pfs-b" data-act="planFull" data-v="1" aria-label="Bauplan im Vollbild" title="Vollbild">' + IC.expand + '</button>') + '</div></div>' +
     '<div class="plan-c">' + o + '<div class="plan-tip" aria-hidden="true"></div></div>' +
     '<div class="plan-f"><span class="mono plan-xy">' + hi + ' Positionen verortet · M 1:100</span><span class="plan-lg"><i class="hi"></i>hoch<i class="mid"></i>mittel<i class="lo"></i>niedrig<i class="ok"></i>bestätigt</span></div>' +
   '</aside>';
@@ -1633,7 +1648,7 @@ function view() {
   var d = derive();
   return vHeader() + '<main>' + vHero(d) +
     (S.tab === 'home' ? '<div class="grid2">' + vCost() + vBid() + '</div>' + vSummary(d) + vTable(d) : vKontext()) +
-    '</main>' + vDock(d) + vDrawer(d) + vPreview(d) + vFx() + vToast();
+    '</main>' + vDock(d) + (S.planFull ? '<div class="planfs" data-k="planfs"><div class="planfs-bg" data-act="planFull" data-v="0"></div>' + vPlan(d, true) + '</div>' : '') + vDrawer(d) + vPreview(d) + vFx() + vToast();
 }
 
 // ================= tiny DOM morph (keeps nodes, so CSS animations only play on real changes) =================
@@ -1774,32 +1789,27 @@ function aiMaybeClose() {
     aiShut();
   }, 700);
 }
-var hotOz = null;
-function planHot(oz) {
-  if (oz === hotOz) return; hotOz = oz;
+var hotOz = null, hotMk = null;
+function planHot(oz, mkEl) {
+  if (oz === hotOz && mkEl === hotMk) return; hotOz = oz; hotMk = mkEl;
   document.querySelectorAll('.mk.hot,.lv-r.hot').forEach(function (n) { n.classList.remove('hot'); });
-  var svg = document.querySelector('.plan-svg'), tip = document.querySelector('.plan-tip'), xy = document.querySelector('.plan-xy');
-  if (!svg) return;
-  if (!oz || !PLAN[oz]) { svg.classList.remove('xh-on'); if (tip) tip.classList.remove('on'); return; }
-  var p = PLAN[oz], r = derive().all.find(function (x) { return x.oz === oz; });
-  var mk = svg.querySelector('.mk[data-oz="' + oz + '"]'); if (mk) { mk.classList.add('hot'); mk.parentNode.appendChild(mk); }
+  document.querySelectorAll('.plan-tip.on').forEach(function (n) { n.classList.remove('on'); });
+  if (!oz || !PLAN[oz]) return;
+  document.querySelectorAll('.mk[data-oz="' + oz + '"]').forEach(function (m) { m.classList.add('hot'); m.parentNode.appendChild(m); });
   var row = document.querySelector('.lv-r[data-oz="' + oz + '"]'); if (row) row.classList.add('hot');
-  svg.querySelector('.xh-x').setAttribute('y1', p[1]); svg.querySelector('.xh-x').setAttribute('y2', p[1]);
-  svg.querySelector('.xh-y').setAttribute('x1', p[0]); svg.querySelector('.xh-y').setAttribute('x2', p[0]);
-  svg.classList.add('xh-on');
-  if (tip && r) {
-    tip.innerHTML = '<span class="mono">' + oz + ' · ' + p[2] + '</span><b>' + esc(r.kurz) + '</b><span class="mono">' + pm(p) + '</span><span>' + eur(r.ep) + ' je ' + r.einheit + ' · GP ' + eur(r.gp) + '</span>';
-    tip.style.left = (p[0] / 10) + '%'; tip.style.top = (p[1] / 7) + '%';
-    tip.classList.toggle('flip', p[0] > 620); tip.classList.toggle('up', p[1] > 420);
-    tip.classList.add('on');
-  }
+  if (!mkEl) return; // from a table row: only the marker lights up
+  var plan = mkEl.closest('.plan'), tip = plan && plan.querySelector('.plan-tip'), p = PLAN[oz], r = derive().all.find(function (x) { return x.oz === oz; });
+  if (!tip || !r) return;
+  tip.innerHTML = '<span class="mono">' + oz + '</span><b>' + esc(r.kurz) + '</b><span>' + eur(r.ep) + ' je ' + r.einheit + '</span>';
+  tip.style.left = (p[0] / 10) + '%'; tip.style.top = (p[1] / 7) + '%';
+  tip.classList.toggle('flip', p[0] > 620);
+  tip.classList.add('on');
 }
 document.addEventListener('mouseover', function (e) {
   if (!e.target.closest) return;
-  var t = e.target.closest('.mk[data-oz], .lv-r[data-oz]');
-  planHot(t ? t.getAttribute('data-oz') : (e.target.closest('.plan, .tbl') ? hotOz : null));
+  var m = e.target.closest('.mk[data-oz]'), t = m || e.target.closest('.lv-r[data-oz]');
+  planHot(t ? t.getAttribute('data-oz') : null, m);
 });
-document.addEventListener('mouseleave', function () { planHot(null); });
 document.addEventListener('mouseover', function (e) { if (e.target.closest && e.target.closest('.ask, .aichat')) { if (e.target.closest('.ask')) aiOpenNow(); else clearTimeout(aiT); } });
 document.addEventListener('mouseout', function (e) { var t = e.target.closest && e.target.closest('.ask, .aichat'); if (t && !(e.relatedTarget && t.contains(e.relatedTarget))) aiMaybeClose(); });
 document.addEventListener('focusin', function (e) { if (e.target.closest && e.target.closest('.ask')) aiOpenNow(); });
@@ -1948,6 +1958,7 @@ var A = {
   },
   aiClose: function () { clearTimeout(aiT); var a = document.activeElement; if (a && a.blur) a.blur(); if (S.aiOpen) aiShut(); },
   floor: function (ds) { set({ floor: ds.v }); },
+  planFull: function (ds) { planHot(null); set({ planFull: ds.v === '1' }); },
   whyToggle: function () { set({ whyOpen: !S.whyOpen }); },
   dtab: function (ds) { set({ dtab: ds.v }); },
   resetEp: function () { var p = cur(), e = Object.assign({}, S.eps), g = Object.assign({}, S.sugg), c = Object.assign({}, S.confirmed); delete e[p.oz]; delete g[p.oz]; delete c[p.oz]; set({ eps: e, sugg: g, confirmed: c, editEp: false, flashEp: 1 }); S.flashEp = 0; toast('KI-Vorschlag für ' + p.oz + ' wiederhergestellt'); },
@@ -1999,6 +2010,7 @@ document.addEventListener('keydown', function (e) {
     if (S.menu) { var mt = document.querySelector('[data-act="menu"][data-v="' + S.menu + '"]'); set({ menu: null }); if (mt) mt.focus(); return; }
     if (S.adv) { cancelAdvance(); render(); return; }
     if (S.aiOpen) { A.aiClose(); return; }
+    if (S.planFull && !S.sel) { set({ planFull: false }); return; }
     if (S.fx && S.fx.phase !== 'run') set({ fx: null });
     else if (S.preview) set({ preview: null });
     else if (S.editEp) set({ editEp: false });
