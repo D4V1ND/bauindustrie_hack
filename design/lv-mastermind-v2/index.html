@@ -932,17 +932,17 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .dw.ai-open .dw-body{overflow:hidden;display:flex;flex-direction:column}
 .dw.ai-open .dw-body>.dw-swap{flex:1;min-height:0;display:flex;flex-direction:column;padding:0 0 12px}
 .dw.ai-open .lower,.dw.ai-open .lowin{display:contents}
-.dw.ai-open .price,.dw.ai-open .gwsec,.dw.ai-open .comm{flex:none;max-height:40px;overflow:hidden;padding-top:0;padding-bottom:0;box-shadow:0 -6px 14px -10px rgba(0,0,0,.4)}
-.dw.ai-open .price{margin:12px 40px 0;z-index:1}
-.dw.ai-open .gwsec{margin:-8px 31px 0;z-index:2}
-.dw.ai-open .comm:not(.gwsec){margin:-8px 22px 0;z-index:3}
+.dw.ai-open .price,.dw.ai-open .gwsec,.dw.ai-open .comm{flex:none;max-height:40px;overflow:hidden;padding-top:0;padding-bottom:0;box-shadow:none;border-color:var(--line)}
+.dw.ai-open .price{margin:12px 22px 0}
+.dw.ai-open .gwsec{margin:6px 22px 0}
+.dw.ai-open .comm:not(.gwsec){margin:6px 22px 0}
 .dw.ai-open .cmts{display:none} /* comments have no collapsed bar; hide them while the chat is open */
 .dw.ai-open .price>:not(.mini),.dw.ai-open .gwsec>:not(.mini),.dw.ai-open .comm>:not(.mini){opacity:0;transition:opacity .15s}
 .dw.ai-open .mini{opacity:1;pointer-events:auto;transition:opacity .3s .2s}
 .dw.ai-open .mini:hover{background:var(--paper-2)}
 .dw.ai-open .aiwrap{flex:1;min-height:0}
 .dw.ai-open .aiin{display:flex}
-.dw.ai-open .aichat{flex:1;min-height:0;margin:12px 22px 0;animation:chatup .5s var(--ease)}
+.dw.ai-open .aichat{flex:1;min-height:0;margin:10px 22px 0;animation:chatup .5s var(--ease)}
 @keyframes chatup{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
 .aichat .cp-log{min-height:0}
 /* header compresses */
@@ -964,7 +964,7 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .dw.ai-open .confirm .cbadge{width:26px;height:26px}
 .dw.ai-open .confirm .ca b{font-size:14px}
 .dw.ai-open .okline{min-height:38px;padding:6px 14px}
-.price>.mini,.gwsec>.mini{height:32px}
+.price>.mini,.gwsec>.mini{height:40px}
 
 /* ---- [04] split: Bauplan + table ---- */
 .lv-split{display:grid;grid-template-columns:minmax(380px,43fr) minmax(0,57fr);gap:16px;align-items:start}
@@ -2009,7 +2009,7 @@ function vDrawer(d) {
         '<button class="lnk gwall" data-act="gewerkAll" data-v="' + esc(p.gewerk) + '">' + (sameAll.length > same.length ? 'Alle ' + (sameAll.length + 1) + ' im LV anzeigen' : 'Alle im LV filtern') + '</button>'
       : '<p class="pempty gw-e">Einzige Position in diesem Gewerk.</p>');
     var gmeta = (sameAll.length + 1) + ' Pos.' + (gsum > 0 ? ' · ' + eur(gsum) : '');
-    gwPanel = '<section class="comm gwsec" aria-label="Gewerk"><button class="mini" data-act="aiClose" tabindex="-1"><span class="mono">Gewerk</span><b>' + esc(p.gewerk) + '</b><span class="muted">' + (sameAll.length + 1) + ' Pos. · Σ ' + eur(gsum) + '</span></button><div class="comm-h"><span class="gw-t"><span class="mono">Gewerk</span><b title="' + esc(p.gewerk) + '">' + esc(p.gewerk) + '</b></span><span class="mono gw-m">' + gmeta + '</span></div><div class="panel">' + gwPanel + '</div></section>';
+    gwPanel = '<section class="comm gwsec" aria-label="Gewerk"><button class="mini" data-act="aiClose" tabindex="-1"><span class="mono">Gewerk</span><b>' + esc(p.gewerk) + '</b><span class="muted">' + gmeta + '</span></button><div class="comm-h"><span class="gw-t"><span class="mono">Gewerk</span><b title="' + esc(p.gewerk) + '">' + esc(p.gewerk) + '</b></span><span class="mono gw-m">' + gmeta + '</span></div><div class="panel">' + gwPanel + '</div></section>';
   }
   if (dt === 'team') {
     panel = (cm.length ? '<ol class="feed">' + cm.map(function (c, i) { var m = T[c.by]; return '<li data-k="c' + i + '"><span class="av" style="background:' + m.color + '">' + m.ini + '</span><div class="fb"><div class="fh"><b>' + m.name + '</b><span>' + esc(c.time) + '</span></div><p>' + esc(c.t) + '</p></div></li>'; }).join('') + '</ol>' : '<p class="pempty">Noch nichts besprochen. Erwähne Kolleg:innen mit @.</p>') +
