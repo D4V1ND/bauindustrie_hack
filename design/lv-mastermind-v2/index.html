@@ -962,7 +962,15 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .plan-h b{display:block;font-weight:500;font-size:13px;margin-top:4px}
 .plan-h .seg{height:30px;padding:2px}.plan-h .seg button{height:24px}
 .plan-c{position:relative;padding:10px;background:repeating-linear-gradient(0deg,transparent 0 19px,color-mix(in srgb,var(--line) 55%,transparent) 19px 20px),repeating-linear-gradient(90deg,transparent 0 19px,color-mix(in srgb,var(--line) 55%,transparent) 19px 20px)}
-.plan-svg{display:block;width:100%;height:auto;overflow:visible}
+.plan-svg{display:block;width:100%;height:auto;overflow:visible;touch-action:pan-x pan-y}
+.plan-svg.zoomed{overflow:hidden;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.plan-svg.panning{cursor:grabbing}
+.pz{display:flex;align-items:stretch;height:30px;border:1px solid var(--line-2)}
+.pz button{all:unset;box-sizing:border-box;cursor:pointer;min-width:30px;display:grid;place-items:center;color:var(--ink-2);transition:background .15s,color .15s}
+.pz button:hover{background:var(--paper-2);color:var(--ink)}
+.pz button:focus-visible{outline:2px solid var(--signal);outline-offset:-2px}
+.pz svg{width:14px;height:14px;stroke:currentColor;stroke-width:1.6;fill:none;stroke-linecap:round}
+.pz .pz-v{min-width:56px;padding:0 6px;font:.6rem/1 var(--mono);letter-spacing:.04em;border-left:1px solid var(--line);border-right:1px solid var(--line)}
 .plan-svg .axl{stroke:var(--line-2);stroke-width:.8;stroke-dasharray:6 6}
 .plan-svg .axc{fill:var(--card);stroke:var(--ink-3);stroke-width:1}
 .plan-svg .axt{font:500 11px var(--mono);fill:var(--ink-2);text-anchor:middle}
@@ -1083,7 +1091,8 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .plan-lg .lgt{margin-right:2px}
 
 .lv-split .lv-main,.lv-split .lv-bar,.lv-split .lv-bar .filters,.lv-split .lv-bar .tools{min-width:0}
-.lv-split .lv-bar .filters{scrollbar-width:none}
+.lv-split .lv-bar .filters{scrollbar-width:none;overflow-y:hidden}
+.lv-split .lv-bar .pill::after{bottom:0}
 .lv-split .lv-bar .filters::-webkit-scrollbar{display:none}
 .lv-split .lv-bar .pill{padding:0 9px}
 .lv-split .lv-bar .tools{gap:8px}
@@ -1732,7 +1741,8 @@ function vPlan(d, full) {
   var shown = {}; d.rows.forEach(function (r) { shown[r.oz] = true; });
   var fl = FLOORS.indexOf(S.floor) >= 0 ? S.floor : FLOORS[0];
   var img = P.live && /\.(png|jpe?g)$/i.test(P.plan.file);
-  var o = '<svg class="plan-svg" viewBox="0 0 1000 ' + PLAN_VH + '" role="img" aria-label="' + (P.live ? 'Bauplan ' + esc(P.plan.file) : 'Grundriss Erdgeschoss') + ' mit Positionen">';
+  var Z = pzBox();
+  var o = '<svg class="plan-svg' + (Z.w < 999.5 ? ' zoomed' : '') + '" viewBox="' + pzVB() + '" role="img" aria-label="' + (P.live ? 'Bauplan ' + esc(P.plan.file) : 'Grundriss Erdgeschoss') + ' mit Positionen">';
   if (P.live) o += img ? '<image href="' + esc(API + '/projects/' + encodeURIComponent(P.id) + '/files/' + encodeURIComponent(P.plan.file) + (pass() ? '?passcode=' + encodeURIComponent(pass()) : '')) + '" x="0" y="0" width="1000" height="' + PLAN_VH + '" preserveAspectRatio="none"/>'
     : '<rect class="slab" x="0" y="0" width="1000" height="' + PLAN_VH + '"/><text class="rl2" x="500" y="' + (PLAN_VH / 2) + '">PLAN ALS PDF · FÜR DIE ANSICHT PNG ODER JPG HOCHLADEN</text>';
   if (!P.live) {
@@ -1766,13 +1776,17 @@ function vPlan(d, full) {
   (P.live ? d.full : d.all).forEach(function (r) {
     var p = PLAN[r.oz]; if (!p) return;
     var k = S.confirmed[r.oz] ? 'ok' : ck(r.conf), off = p[2] !== fl;
-    o += '<g class="mk ' + k + (off ? ' off' : '') + (shown[r.oz] ? '' : ' dim') + (r.oz === S.sel ? ' sel' : '') + '" data-act="open" data-oz="' + r.oz + '" transform="translate(' + p[0] + ' ' + p[1] + ')" tabindex="0" role="button" aria-label="' + esc(r.oz + ' ' + r.kurz) + '">' +
+    o += '<g class="mk ' + k + (off ? ' off' : '') + (shown[r.oz] ? '' : ' dim') + (r.oz === S.sel ? ' sel' : '') + '" data-act="open" data-oz="' + r.oz + '" transform="' + pzMk(p) + '" tabindex="0" role="button" aria-label="' + esc(r.oz + ' ' + r.kurz) + '">' +
       '<circle class="mk-ring" r="24"/><rect class="mk-b" x="-14" y="-14" width="28" height="28"/><text class="mk-t" y="4.5">' + (S.confirmed[r.oz] ? '✓' : r.np ? '€?' : r.conf) + '</text></g>';
   });
   o += '</svg>';
   var hi = (P.live ? d.full : d.all).filter(function (r) { return PLAN[r.oz] && shown[r.oz]; }).length;
   return '<aside class="plan' + (full ? ' plan-full' : '') + '" aria-label="Bauplan' + (full ? ' Vollbild' : '') + '">' +
-    '<div class="plan-h"><div class="plan-ctl" style="margin-left:auto">' + (full ? '' : '<button class="ic" data-act="planToggle" aria-label="Bauplan ausblenden" title="Ausblenden">' + IC.x + '</button>') +
+    '<div class="plan-h"><div class="pz" role="group" aria-label="Zoom" title="Zoomen: auf dem Trackpad mit zwei Fingern aufziehen oder Strg/⌘ + Scrollen. Gezoomt: ziehen oder scrollen zum Verschieben, Doppelklick zoomt hinein.">' +
+      '<button data-act="pz" data-v="-1" aria-label="Herauszoomen"><svg viewBox="0 0 16 16"><path d="M3.5 8h9"/></svg></button>' +
+      '<button class="pz-v" data-act="pz" data-v="0" aria-label="Zoom zurücksetzen" title="Zurücksetzen">' + Math.round(100000 / Z.w) + ' %</button>' +
+      '<button data-act="pz" data-v="1" aria-label="Hineinzoomen"><svg viewBox="0 0 16 16"><path d="M3.5 8h9M8 3.5v9"/></svg></button></div>' +
+    '<div class="plan-ctl" style="margin-left:auto">' + (full ? '' : '<button class="ic" data-act="planToggle" aria-label="Bauplan ausblenden" title="Ausblenden">' + IC.x + '</button>') +
       (full ? '<button class="ic pfs-b" data-act="planFull" data-v="0" aria-label="Vollbild schließen" title="Schließen (Esc)">' + IC.x + '</button>' : '<button class="ic pfs-b" data-act="planFull" data-v="1" aria-label="Bauplan im Vollbild" title="Vollbild">' + IC.expand + '</button>') + '</div></div>' +
     '<div class="plan-c">' + o + '<div class="plan-tip" aria-hidden="true"></div></div>' +
     '<div class="plan-f"><span class="mono plan-xy">' + hi + ' Positionen verortet' + (P.live ? '' : ' · M 1:100') + '</span><span class="plan-lg"><span class="lgt">Konfidenz</span><i class="hi"></i>&lt; 50<i class="mid"></i>&lt; 75<i class="lo"></i>≥ 75<i class="ok"></i>bestätigt</span></div>' +
@@ -2209,6 +2223,89 @@ function aiMaybeClose() {
     aiShut();
   }, 700);
 }
+// ---- Bauplan zoom: viewBox in plan units, shared by the inline and the fullscreen plan ----
+var PZ = null, PZ_MIN = 125, pzDrag = null, pzMoved = false, pzPts = {}, pzPinch = null, pzG = 1;
+function pzBox() {
+  if (!PZ || PZ.vh !== PLAN_VH || PZ.id !== P.id) PZ = { x: 0, y: 0, w: 1000, h: PLAN_VH, vh: PLAN_VH, id: P.id };
+  return PZ;
+}
+function pzVB() { var Z = pzBox(); return [Z.x, Z.y, Z.w, Z.h].map(function (n) { return +n.toFixed(2); }).join(' '); }
+// markers keep roughly their screen size: they shrink in plan units as you zoom in
+function pzMk(p) { var s = Math.pow(pzBox().w / 1000, .8); return 'translate(' + p[0] + ' ' + p[1] + ')' + (s < .999 ? ' scale(' + s.toFixed(3) + ')' : ''); }
+function pzSet(x, y, w) {
+  var Z = pzBox(); w = Math.max(PZ_MIN, Math.min(1000, w));
+  var h = w * PLAN_VH / 1000;
+  Z.w = w; Z.h = h; Z.x = Math.max(0, Math.min(1000 - w, x)); Z.y = Math.max(0, Math.min(PLAN_VH - h, y));
+  var vb = pzVB(), zoomed = w < 999.5;
+  document.querySelectorAll('.plan-svg').forEach(function (svg) {
+    if (svg.getAttribute('viewBox') === vb) return;
+    svg.setAttribute('viewBox', vb); svg.classList.toggle('zoomed', zoomed);
+    svg.querySelectorAll('.mk[data-oz]').forEach(function (m) { var p = PLAN[m.getAttribute('data-oz')]; if (p) m.setAttribute('transform', pzMk(p)); });
+  });
+  document.querySelectorAll('.pz-v').forEach(function (b) { b.textContent = Math.round(100000 / w) + ' %'; });
+  planHot(null);
+}
+function pzAt(svg, cx, cy, f) {
+  var Z = pzBox(), r = svg.getBoundingClientRect(); if (!r.width || !r.height) return;
+  var fx = (cx - r.left) / r.width, fy = (cy - r.top) / r.height, w = Math.max(PZ_MIN, Math.min(1000, Z.w / f));
+  pzSet(Z.x + fx * Z.w - fx * w, Z.y + fy * Z.h - fy * (w * PLAN_VH / 1000), w);
+}
+function pzSvg(e) { return e.target && e.target.closest ? e.target.closest('.plan-svg') : null; }
+// trackpad pinch arrives as wheel + ctrlKey (Chrome, Firefox, Edge); two-finger scroll pans once zoomed
+document.addEventListener('wheel', function (e) {
+  var svg = pzSvg(e); if (!svg) return;
+  var Z = pzBox();
+  if (e.ctrlKey || e.metaKey) { e.preventDefault(); pzAt(svg, e.clientX, e.clientY, Math.exp(-e.deltaY * (e.deltaMode ? .05 : .01))); return; }
+  if (Z.w >= 999.5) return;
+  var r = svg.getBoundingClientRect(), u = Z.w / r.width * (e.deltaMode === 1 ? 16 : 1), ox = Z.x, oy = Z.y;
+  pzSet(Z.x + e.deltaX * u, Z.y + e.deltaY * u, Z.w);
+  if (Z.x !== ox || Z.y !== oy) e.preventDefault(); // at the edge the page scrolls on
+}, { passive: false });
+// Safari sends pinch as gesture events
+document.addEventListener('gesturestart', function (e) { if (pzSvg(e)) { e.preventDefault(); pzG = 1; } });
+document.addEventListener('gesturechange', function (e) { var svg = pzSvg(e); if (!svg) return; e.preventDefault(); pzAt(svg, e.clientX, e.clientY, e.scale / pzG); pzG = e.scale; });
+document.addEventListener('gestureend', function (e) { if (pzSvg(e)) e.preventDefault(); });
+// drag to pan, two fingers on a touchscreen to pinch
+document.addEventListener('pointerdown', function (e) {
+  var svg = pzSvg(e); if (!svg || e.button) return;
+  pzPts[e.pointerId] = { x: e.clientX, y: e.clientY };
+  var ids = Object.keys(pzPts);
+  if (ids.length === 2) { var a = pzPts[ids[0]], b = pzPts[ids[1]]; pzPinch = { d: Math.hypot(a.x - b.x, a.y - b.y), svg: svg }; pzDrag = null; return; }
+  pzMoved = false;
+  if (pzBox().w >= 999.5) return;
+  if (e.pointerType === 'mouse') e.preventDefault();
+  pzDrag = { x: e.clientX, y: e.clientY, zx: pzBox().x, zy: pzBox().y, svg: svg };
+});
+document.addEventListener('pointermove', function (e) {
+  if (!pzPts[e.pointerId]) return;
+  pzPts[e.pointerId] = { x: e.clientX, y: e.clientY };
+  if (pzPinch) {
+    var ids = Object.keys(pzPts); if (ids.length < 2) return;
+    var a = pzPts[ids[0]], b = pzPts[ids[1]], d = Math.hypot(a.x - b.x, a.y - b.y);
+    if (pzPinch.d) pzAt(pzPinch.svg, (a.x + b.x) / 2, (a.y + b.y) / 2, d / pzPinch.d);
+    pzPinch.d = d; pzMoved = true; return;
+  }
+  if (!pzDrag) return;
+  var dx = e.clientX - pzDrag.x, dy = e.clientY - pzDrag.y;
+  if (!pzMoved && Math.hypot(dx, dy) < 4) return;
+  if (!pzMoved) { pzMoved = true; pzDrag.svg.classList.add('panning'); }
+  var Z = pzBox(), u = Z.w / pzDrag.svg.getBoundingClientRect().width;
+  pzSet(pzDrag.zx - dx * u, pzDrag.zy - dy * u, Z.w);
+});
+function pzEnd(e) {
+  delete pzPts[e.pointerId];
+  if (Object.keys(pzPts).length < 2) pzPinch = null;
+  if (pzDrag) { pzDrag.svg.classList.remove('panning'); pzDrag = null; }
+}
+document.addEventListener('pointerup', pzEnd);
+document.addEventListener('pointercancel', pzEnd);
+// a drag must not also click the marker under the pointer
+document.addEventListener('click', function (e) { if (pzMoved && pzSvg(e)) { e.stopPropagation(); e.preventDefault(); } pzMoved = false; }, true);
+document.addEventListener('dblclick', function (e) {
+  var svg = pzSvg(e); if (!svg || e.target.closest('.mk')) return;
+  e.preventDefault(); pzAt(svg, e.clientX, e.clientY, pzBox().w <= PZ_MIN + 1 ? 1 / 8 : 2);
+});
+
 var hotOz = null, hotMk = null;
 function planHot(oz, mkEl) {
   if (oz === hotOz && mkEl === hotMk) return; hotOz = oz; hotMk = mkEl;
@@ -2221,8 +2318,10 @@ function planHot(oz, mkEl) {
   var plan = mkEl.closest('.plan'), tip = plan && plan.querySelector('.plan-tip'), p = PLAN[oz], r = derive().full.find(function (x) { return x.oz === oz; });
   if (!tip || !r) return;
   tip.innerHTML = '<span class="mono">' + oz + ' · Konfidenz ' + r.conf + ' %</span><b>' + esc(r.kurz) + '</b><span>' + (r.np ? 'Noch kein Preis' : eur(r.ep) + ' je ' + r.einheit) + '</span>';
-  tip.style.left = (p[0] / 10) + '%'; tip.style.top = (p[1] / PLAN_VH * 100) + '%';
-  tip.classList.toggle('flip', p[0] > 620);
+  var Z = pzBox(), fx = (p[0] - Z.x) / Z.w, fy = (p[1] - Z.y) / Z.h;
+  if (fx < 0 || fx > 1 || fy < 0 || fy > 1) return;
+  tip.style.left = (fx * 100) + '%'; tip.style.top = (fy * 100) + '%';
+  tip.classList.toggle('flip', fx > .62);
   tip.classList.add('on');
 }
 document.addEventListener('mouseover', function (e) {
@@ -2388,6 +2487,12 @@ var A = {
   floor: function (ds) { set({ floor: ds.v }); },
   planToggle: function () { var v = !planShown(); if (P.live) store('lvm-plan-' + P.id, v); set({ planShow: v }); },
   planFull: function (ds) { planHot(null); set({ planFull: ds.v === '1' }); },
+  pz: function (ds) {
+    var Z = pzBox(), v = +ds.v;
+    if (!v) { pzSet(0, 0, 1000); return; }
+    var w = Math.max(PZ_MIN, Math.min(1000, Z.w / (v > 0 ? 1.5 : 1 / 1.5)));
+    pzSet(Z.x + (Z.w - w) / 2, Z.y + (Z.h - w * PLAN_VH / 1000) / 2, w);
+  },
   whyToggle: function () { set({ whyOpen: !S.whyOpen }); },
   dtab: function (ds) { set({ dtab: ds.v }); },
   resetEp: function () { var p0 = cur(); if (p0 && p0.srvManual) { toast('Der eigene Preis ist im Backend gespeichert. Gib einen neuen Preis ein, um ihn zu ersetzen.'); return; } var p = cur(), e = Object.assign({}, S.eps), g = Object.assign({}, S.sugg), c = Object.assign({}, S.confirmed); delete e[p.oz]; delete g[p.oz]; delete c[p.oz]; set({ eps: e, sugg: g, confirmed: c, editEp: false, flashEp: 1 }); S.flashEp = 0; toast('KI-Vorschlag für ' + p.oz + ' wiederhergestellt'); },
