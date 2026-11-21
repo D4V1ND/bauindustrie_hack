@@ -8,7 +8,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from lv import api, assistant, index
-from lv.model import LV, Comment, LineItem, save
+from lv.model import LV, Comment, LineItem, Prediction, Source, load, save
 
 
 def _item(project, oz, short, unit="St", price=None, long="", section=("06 Armaturen",), comments=()):
@@ -103,6 +103,16 @@ def test_bidder_questions_and_memory_are_saved_and_writes_wait_for_the_run(data)
     busy = assistant.Session(data, tab, running=lambda p: True)
     with pytest.raises(assistant.ToolError, match="running"):
         busy.save_comment("01.0010", "x", None, False)
+
+
+def test_get_position_shows_the_unit_of_each_past_price(data):
+    lv = load(data / "out" / "H1.json")
+    lv.items[0].prediction = Prediction(
+        method="similar", median=774.53, sources=[Source(id="P1/06.01.4", unit_price=774.53, verdict="same")],
+        judged=[Source(id="P1/02.01.1", unit_price=48.60, verdict="different")])
+    save(lv, data / "out")
+    found = assistant.Session(data, assistant.new_tab(data, "H1"), running=lambda p: False).get_position("H1", "01.0010")
+    assert found["prediction"]["sources"][0]["unit"] == "St" and found["prediction"]["judged"][0]["unit"] == "m2"
 
 
 def test_a_dead_build_does_not_block_and_the_library_must_be_indexed_too(data):

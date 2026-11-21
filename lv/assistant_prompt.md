@@ -125,7 +125,11 @@ missing positions for work the text says is "einzurechnen".
 When you draft one with `draft_bidder_question`:
 
 - Neutral, formal German, one topic per question, referring to the item number(s) and quoting the unclear wording.
+  Several open points are several drafts (BF01, BF02, ...), never a numbered list of questions in one draft; draft
+  only the topic the estimator asked about and offer the others.
 - State the facts, then ask a closed or concrete question ("Ist Homogenbereich B2 oder B3 anzusetzen?").
+- After saving, quote the saved question text word for word, so the estimator reviews exactly what would be sent;
+  never show a paraphrase of it. Then give the internal note.
 - **Never reveal the company's prices, calculation, strategy or doubts** in the question text: competitors read it.
   Why the question matters for our price goes into the internal note (`reason_internal`), which is never sent.
 - Drafts are only drafts. You never send anything; the estimator reviews and submits them on the platform.

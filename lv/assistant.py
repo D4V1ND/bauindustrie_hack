@@ -300,6 +300,10 @@ class Session:
         found = item.model_dump(exclude={"group", "plan"} if not item.plan else {"group"}, exclude_none=True)
         found["source"] = "library" if project in self.library() else "tender"
         found["comments"] = [{"number": n, **c.model_dump()} for n, c in enumerate(item.comments, start=1)]
+        past = [entry for key in ("sources", "judged") for entry in found.get("prediction", {}).get(key, [])]
+        units = self._units({entry["id"].split("/", 1)[0] for entry in past})
+        for entry in past:  # a Source has no unit; without it a price per m and one per m³ look alike
+            entry["unit"] = units.get(entry["id"], "")
         return found
 
     def project_overview(self, project: str) -> dict:
@@ -431,6 +435,10 @@ class Session:
         if not path.exists():
             raise ToolError(f"{project} has no result yet.")
         return load(path)
+
+    def _units(self, projects: set[str]) -> dict[str, str]:
+        """Item id -> unit for the library projects named."""
+        return {item.id: item.unit for project in projects & set(self.library()) for item in self._lv(project).items}
 
     def _write_item(self, oz: str, change: Callable[[LV], Any]):
         project = self._own(write=True)
