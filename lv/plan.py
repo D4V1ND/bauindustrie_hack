@@ -1,6 +1,6 @@
 """Plan check (optional): compare the LV's quantities with a construction plan (Bauplan) (SPEC.md, plan check).
 
-The plan is read and compared by the VLM prototype in `vlm/`: a vision model (OpenAI, or Claude with only ANTHROPIC_API_KEY) counts the plan's components
+The plan is read and compared by the VLM prototype in `vlm/`: an OpenAI vision model counts the plan's components
 (`vlm/extract_plan.py`), and `vlm/compare.py` matches them to the LV and writes findings with markers. The LV itself
 comes from step 0's reader, not from an LLM, so `vlm/gaeb_llm.py` is not used here.
 """
@@ -28,7 +28,7 @@ def check_file(path: Path) -> None:
 
 
 def client() -> tuple:
-    """The prototype's chat client and model (OpenAI, else Claude). The key and model may sit in the root .env or in vlm/.env.
+    """The prototype's OpenAI client and model. The key and model may sit in the root .env or in vlm/.env.
     Called before the LV run starts, so a missing key stops the command before anything is paid for."""
     _on_path()
     load_dotenv(ROOT / ".env")
