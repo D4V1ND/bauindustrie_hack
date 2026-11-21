@@ -835,12 +835,6 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .whytg svg{width:12px;height:12px;transition:transform .3s var(--ease)}
 .why2.open .whytg svg{transform:rotate(180deg)}
 
-/* hover chat */
-.ask{position:relative;z-index:5}
-.chatpop{position:absolute;left:18px;right:18px;bottom:calc(100% - 4px);display:flex;flex-direction:column;max-height:min(460px,62vh);background:var(--card);border:1px solid var(--ink);box-shadow:6px 6px 0 var(--signal),var(--shadow);
-  opacity:0;visibility:hidden;transform:translateY(10px);clip-path:inset(100% -20px -20px -20px);transition:opacity .2s,transform .3s var(--ease),clip-path .35s var(--ease),visibility 0s linear .35s;pointer-events:none}
-.ask:hover .chatpop,.ask:focus-within .chatpop,.ask.pinned .chatpop{opacity:1;visibility:visible;transform:none;clip-path:inset(-20px -20px -20px -20px);transition:opacity .2s,transform .3s var(--ease),clip-path .35s var(--ease),visibility 0s;pointer-events:auto}
-.ask::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:8px}
 .cp-h{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line)}
 .cp-h b{display:block;font-weight:500;font-size:13px}
 .cp-h small{display:block;font-size:11.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:300px}
@@ -853,6 +847,23 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .cp-m.user{justify-content:flex-end}
 .cp-m .bub{max-width:86%;white-space:pre-line}
 .cp-m .thinking{display:flex;align-items:center;gap:5px}
+
+/* boxed lower sections + agent reveal */
+.lower,.aiwrap{display:grid;transition:grid-template-rows .45s var(--ease),opacity .3s}
+.lower{grid-template-rows:1fr}
+.aiwrap{grid-template-rows:0fr;opacity:0}
+.lowin,.aiin{overflow:hidden;min-height:0}
+.dw.ai-open .lower{grid-template-rows:0fr;opacity:0}
+.dw.ai-open .aiwrap{grid-template-rows:1fr;opacity:1}
+.lowin{padding-bottom:24px}
+.comm,.gwsec{margin:12px 22px 0;border:1px solid var(--line);background:var(--card);padding:0 16px}
+.comm-h{border-bottom:1px solid var(--line);margin:0 -16px;padding:0 6px 0 16px}
+.gwsec .comm-h{padding-right:16px}
+.comm .panel{padding:14px 0 16px}
+.gwsec .panel{padding:4px 0 12px}
+.aichat{margin:12px 22px 24px;border:1px solid var(--ink);background:var(--card);box-shadow:5px 5px 0 var(--signal);display:flex;flex-direction:column;min-height:300px}
+.aichat .cp-h .ic{width:28px;height:28px}
+.dw.ai-open .askin{border-color:var(--ink)}
 </style>
 </head>
 <body>
@@ -1337,8 +1348,8 @@ function vDrawer(d) {
   var subName = p.oz.indexOf('04') === 0 ? 'Elektro Lindner GmbH' : 'Lieferant (Vorschlag)';
   var chat = S.chats[p.oz] || [];
   var same = d.all.filter(function (r) { return r.gewerk === p.gewerk && r.oz !== p.oz; });
-  var tabs = [['team', 'Team', cm.length], ['ext', 'Extern', thread.length + notes.length], ['agent', 'Agent', chat.length]];
-  var dt = S.dtab && S.dtab !== 'gw' ? S.dtab : 'team';
+  var tabs = [['team', 'Team', cm.length], ['ext', 'Extern', thread.length + notes.length]];
+  var dt = S.dtab === 'ext' ? 'ext' : 'team';
   var panel = '';
   var gwPanel = '';
   {
@@ -1370,7 +1381,7 @@ function vDrawer(d) {
       (S.thinking ? '<div style="display:flex;gap:8px;align-items:center" data-k="th"><span class="agent-ic">' + IC.star + '</span><div class="bub thinking" style="display:flex;align-items:center;gap:5px"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="faint" style="font-size:12px;margin-left:6px">liest Begründung, Quellen &amp; LV…</span></div></div>' : '') + '</div>';
   }
 
-  return '<aside class="dw" aria-label="Positionsdetails ' + p.oz + '" tabindex="-1" data-k="dw">' +
+  return '<aside class="dw' + (S.aiOpen || S.thinking ? ' ai-open' : '') + '" aria-label="Positionsdetails ' + p.oz + '" tabindex="-1" data-k="dw">' +
     '<header class="dw-top"><div class="dw-bar"><span class="ozt' + (S.swapDir === 'next' ? ' ozflash' : '') + '" data-k="oz' + p.oz + '">' + p.oz + '</span><span class="gwt">' + esc(p.gewerk) + '</span><span style="flex:1"></span>' +
       '<div class="navg"><button class="ic" data-act="nav" data-v="-1"' + (nav.idx <= 0 ? ' disabled' : '') + ' aria-label="Vorherige Position" title="Vorherige (↑)">' + IC.up + '</button>' +
       '<span class="navc" title="Mit ↑ / ↓ blättern"><b>' + (nav.idx + 1) + '</b> / ' + nav.list.length + '</span>' +
@@ -1398,19 +1409,20 @@ function vDrawer(d) {
           '<div class="whymore" aria-hidden="' + !S.whyOpen + '"><div class="whyin"><div class="calc2">' + C.steps.map(function (s, j) { return '<div class="cs' + (j === C.steps.length - 1 ? ' last' : '') + '"><span>' + esc(s[0]) + '</span><span>' + esc(s[1]) + '</span></div>'; }).join('') + '</div>' +
           ((R.similar || []).length ? '<div class="refs"><span class="mono">Quellen</span>' + R.similar.map(function (x) { var e = D.extra[x[0]]; return e ? '<button class="ref" data-act="preview" data-key="' + x[0] + '">' + esc(e.proj) + '<small>' + esc(x[1]) + '</small></button>' : ''; }).join('') + '</div>' : '') +
         '</div></div><button class="whytg" data-act="whyToggle" aria-expanded="' + !!S.whyOpen + '">' + (S.whyOpen ? 'Weniger anzeigen' : 'Berechnung &amp; Quellen anzeigen') + IC.chev + '</button></div></section>' +
-      gwPanel + '<section class="comm" aria-label="Kommunikation"><div class="comm-h"><span class="mono">Kommunikation</span>' +
+      '<div class="lower"><div class="lowin">' + gwPanel + '<section class="comm" aria-label="Kommunikation"><div class="comm-h"><span class="mono">Kommunikation</span>' +
         '<div class="ctabs" role="tablist">' + tabs.map(function (t) { var on = dt === t[0]; return '<button role="tab" class="ctab' + (on ? ' on' : '') + '" aria-selected="' + on + '" data-act="dtab" data-v="' + t[0] + '">' + t[1] + (t[2] ? '<span class="dn">' + t[2] + '</span>' : '') + '</button>'; }).join('') + '</div></div>' +
-        '<div class="panel" data-k="p' + dt + '">' + panel + '</div></section>' +
-    '</div></div>' +
-    '<div class="dw-cta" data-k="cta-bar">' + (devWarn && !ok ? '<p class="hint" data-k="hint">' + IC.warn + '<span>Mehr als 10 % neben der Empfehlung. Gedrückt halten und kurz im Team begründen.</span></p>' : '') + cta + '</div>' +
-    '<footer class="ask' + (S.thinking ? ' pinned' : '') + '"><div class="chatpop" role="dialog" aria-label="Chat mit dem Agenten zu ' + p.oz + '">' +
-      '<div class="cp-h"><span class="agent-ic">' + IC.star + '</span><span><b>Agent</b><small>' + p.oz + ' · ' + esc(p.kurz) + '</small></span><span class="cp-live"><i></i>online</span></div>' +
+        '<div class="panel" data-k="p' + dt + '">' + panel + '</div></section></div></div>' +
+      '<div class="aiwrap"><div class="aiin"><section class="aichat" role="region" aria-label="Chat mit dem Agenten zu ' + p.oz + '">' +
+      '<div class="cp-h"><span class="agent-ic">' + IC.star + '</span><span><b>Agent</b><small>' + p.oz + ' · ' + esc(p.kurz) + '</small></span><span class="cp-live"><i></i>online</span><button class="ic" data-act="aiClose" aria-label="Chat schließen">' + IC.x + '</button></div>' +
       '<div class="cp-log" data-k="cplog' + p.oz + '">' +
         (chat.length || S.thinking ? '' : '<p class="pempty">Frag mich zu dieser Position: Preis, Bieterfrage oder Was-wäre-wenn.</p><div class="chips">' +
           [['Preis erklären', 'Wie kommst du auf den Preis?'], ['Bieterfrage formulieren', 'Formuliere eine Bieterfrage'], ['Material +15 %?', 'Was-wäre-wenn: Material +15 %'], ['Subunternehmer anfragen', 'An Subunternehmer anfragen']].map(function (c) { return '<button class="qchip" data-act="ask" data-v="' + esc(c[1]) + '">' + c[0] + '</button>'; }).join('') + '</div>') +
         chat.map(function (m, i) { return '<div class="cp-m ' + m.role + '" data-k="cm' + i + '">' + (m.role === 'agent' ? '<span class="agent-ic">' + IC.star + '</span>' : '') + '<div class="bub' + (m.role === 'user' ? ' me' : '') + '">' + esc(m.t) + '</div></div>'; }).join('') +
         (S.thinking ? '<div class="cp-m agent" data-k="cth"><span class="agent-ic">' + IC.star + '</span><div class="bub thinking"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>' : '') +
-      '</div></div>' +
+      '</div></section></div></div>' +
+    '</div></div>' +
+    '<div class="dw-cta" data-k="cta-bar">' + (devWarn && !ok ? '<p class="hint" data-k="hint">' + IC.warn + '<span>Mehr als 10 % neben der Empfehlung. Gedrückt halten und kurz im Team begründen.</span></p>' : '') + cta + '</div>' +
+    '<footer class="ask">' +
       '<div class="askin"><span style="color:var(--signal);display:flex">' + IC.star + '</span><label style="flex:1;display:flex"><span class="sr">Frage an den Agenten</span><input data-in="draft" data-enter="sendDraft" value="' + esc(S.draft) + '" placeholder="Agent fragen zu ' + p.oz + '…"></label><button class="send" data-act="sendDraft" aria-label="Senden">' + IC.arrow + '</button></div></footer>' +
   '</aside>';
 }
@@ -1578,6 +1590,24 @@ function saveEp() {
   S.flashEp = 0;
   toast('EP ' + p.oz + ': ' + eur(v) + ' · GP ' + eur(v * p.menge));
 }
+var aiT = null;
+function aiOpenNow() {
+  clearTimeout(aiT); if (S.aiOpen) return;
+  set({ aiOpen: true });
+  var bd = document.querySelector('.dw-body'); if (bd) setTimeout(function () { bd.scrollTo({ top: bd.scrollHeight, behavior: 'smooth' }); }, 60);
+}
+function aiMaybeClose() {
+  clearTimeout(aiT);
+  aiT = setTimeout(function () {
+    var inAsk = document.querySelector('.ask:hover, .aichat:hover'), f = document.activeElement;
+    if (inAsk || (f && f.closest && f.closest('.ask, .aichat')) || S.thinking) return;
+    set({ aiOpen: false });
+  }, 700);
+}
+document.addEventListener('mouseover', function (e) { if (e.target.closest && e.target.closest('.ask, .aichat')) { if (e.target.closest('.ask')) aiOpenNow(); else clearTimeout(aiT); } });
+document.addEventListener('mouseout', function (e) { var t = e.target.closest && e.target.closest('.ask, .aichat'); if (t && !(e.relatedTarget && t.contains(e.relatedTarget))) aiMaybeClose(); });
+document.addEventListener('focusin', function (e) { if (e.target.closest && e.target.closest('.ask')) aiOpenNow(); });
+document.addEventListener('focusout', function (e) { if (e.target.closest && e.target.closest('.ask, .aichat')) aiMaybeClose(); });
 function send(text) {
   var p = cur(); if (!p || !text || !text.trim()) return;
   var oz = p.oz, ch = Object.assign({}, S.chats); ch[oz] = (ch[oz] || []).concat([{ role: 'user', t: text }]);
@@ -1720,6 +1750,7 @@ var A = {
     if (a.cta === 'Sequenz vorbereiten') { st.compose = 'seq'; st.dtab = 'ext'; }
     set(st); toast(a.done);
   },
+  aiClose: function () { clearTimeout(aiT); var a = document.activeElement; if (a && a.blur) a.blur(); set({ aiOpen: false }); },
   whyToggle: function () { set({ whyOpen: !S.whyOpen }); },
   dtab: function (ds) { set({ dtab: ds.v }); },
   resetEp: function () { var p = cur(), e = Object.assign({}, S.eps), g = Object.assign({}, S.sugg), c = Object.assign({}, S.confirmed); delete e[p.oz]; delete g[p.oz]; delete c[p.oz]; set({ eps: e, sugg: g, confirmed: c, editEp: false, flashEp: 1 }); S.flashEp = 0; toast('KI-Vorschlag für ' + p.oz + ' wiederhergestellt'); },
@@ -1770,6 +1801,7 @@ document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape') {
     if (S.menu) { var mt = document.querySelector('[data-act="menu"][data-v="' + S.menu + '"]'); set({ menu: null }); if (mt) mt.focus(); return; }
     if (S.adv) { cancelAdvance(); render(); return; }
+    if (S.aiOpen) { A.aiClose(); return; }
     if (S.fx && S.fx.phase !== 'run') set({ fx: null });
     else if (S.preview) set({ preview: null });
     else if (S.editEp) set({ editEp: false });
