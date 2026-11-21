@@ -16,7 +16,7 @@ Test command for every task: `.venv\Scripts\python.exe -m pytest`
   - Depends on: nothing.
   - Files: `lv/__main__.py`, `lv/model.py`, `tests/test_model.py`, `requirements.txt`, `.gitignore`.
 
-- [ ] **Task 2: GAEB XML reader** (medium)
+- [x] **Task 2: GAEB XML reader** (medium)
   - Does: reads an `.X83` file into the line item table (header, sections, texts, quantity, cleaned unit, kind) and
     makes `lv price` write `data/out/<project>.json`.
   - Acceptance:
@@ -35,6 +35,8 @@ Test command for every task: `.venv\Scripts\python.exe -m pytest`
     - For P1 and P2 `.D86`: the sum of `total_price` over normal items equals the sums stated in the file.
     - The extra item records in the `.D86` files (P1: 197 against 159, P2: 249 against 248) are identified, and a test
       states the rule that keeps or drops them.
+  - Found in task 2: P2's `.X83` writes item numbers without leading zeros (`1.1.2`). Check how the `.D86` writes
+    the same item before matching the two files by item number.
   - Verify: tests pass; run `lv ingest` on P1 and P2 and open one library file.
   - Depends on: 2.
   - Files: `lv/extract.py`, `lv/__main__.py`, `tests/test_extract_gaeb90.py`.
