@@ -138,7 +138,7 @@ Built before tasks 6 and 7: step 3 does not need trades or item types.
   - Depends on: 3, 4.
   - Files: `lv/model.py`, `lv/predict.py`, `lv/__main__.py`, `tests/test_predict.py`.
 
-- [ ] **Task 9: Candidate search** (medium)
+- [x] **Task 9: Candidate search** (medium)
   - Does: for an item without an exact match, finds up to 5 candidates in the price library by text similarity,
     with the standard library only.
   - Acceptance:
