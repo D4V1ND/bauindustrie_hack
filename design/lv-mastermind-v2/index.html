@@ -2404,7 +2404,7 @@ function vUpload() {
     '<h3 class="up-h">LV hochladen</h3><p class="muted up-p">Das LV wird gegen die Alt-LVs der Preisbibliothek bepreist. Ein Bauplan als Kontext prüft zusätzlich die Mengen.</p>' +
     (S.apiOk === false ? '<div class="up-err">' + IC.warn + '<span>Backend unter ' + esc(API) + ' nicht erreichbar. Läuft <code>uvicorn lv.api:app</code>? Andere Adresse: Seite mit <code>?api=https://…</code> öffnen.</span></div>' : '') +
     '<div class="up-grid">' +
-      upFile('lv', U.lv, '.x83,.d83,.d84,.d86,.X83,.D83,.D84,.D86', ['Leistungsverzeichnis wählen', 'GAEB .x83, .d83, .d84, .d86 · Pflicht']) +
+      upFile('lv', U.lv, '.x83,.d83,.d84,.d86,.xlsx,.pdf,.X83,.D83,.D84,.D86,.XLSX,.PDF', ['Leistungsverzeichnis wählen', 'GAEB .x83, .d83, .d84, .d86 · Excel .xlsx · PDF · Pflicht']) +
       upFile('plan', U.plan, '.png,.jpg,.jpeg,.pdf', ['Kontext: Bauplan (optional)', 'PNG oder JPG für Markierungen, PDF geht auch']) +
     '</div>' +
     '<div class="up-f"><label><span class="mono faint">Projekt-ID</span><input class="fld" data-in="upId" value="' + esc(S.upId) + '" placeholder="z. B. KITA-RIEM" maxlength="40"></label>' +

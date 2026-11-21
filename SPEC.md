@@ -1,7 +1,7 @@
 # Spec: LV estimating backend, steps 0–4
 
 Status: steps 0 to 4 are built and were run end to end with real AI calls on P5 and on P4 (P4: 9 min 29 s; numbers in `tasks/todo.md`).
-The price library holds P1, P2 and P3. Not built: `lv check`, reading an LV that exists only as PDF. Terms in **bold** are defined in [CONTEXT.md](CONTEXT.md).
+The price library holds P1, P2 and P3. Not built: `lv check`, reading a PDF in a layout other than P6's. Terms in **bold** are defined in [CONTEXT.md](CONTEXT.md).
 
 ## Objective
 
@@ -53,10 +53,31 @@ nothing compared, nothing merged.
 | GAEB XML (`.X83`) | code | `gaeb` | first |
 | GAEB 90 (`.D83`, `.D84`, `.D86`) | code | `gaeb` | first |
 | PDF prints of P3 (texts only, next to a prices file) | code, with `pypdf` | `pdf` | built |
-| Any other LV that exists only as a PDF (e.g. P6) | not built; planned via an AI model | `ai` | later |
-| Excel, Word | not supported | | |
+| An LV that exists only as a PDF, in the print layout of P6 (`.pdf`) | code, with `pymupdf` | `pdf` | built |
+| Excel (`.xlsx`) | code, with `openpyxl` | `excel` | built |
+| A PDF in another layout | not built; planned via an AI model | `ai` | later |
+| Word, old Excel (`.xls`) | not supported | | |
 
 Each past project enters the price library exactly once (P1 and P2: the `.D86` file).
+
+**Excel and PDF LVs.** Both readers turn numbered rows into items. A row is an item when it has a quantity, a unit
+or a price; otherwise it is a section title. A section stays open for the items below it until a section of the same
+or a higher level starts (the level is the number of parts in its number: `15.1` is 2).
+
+- **Excel:** the first sheet. The header row is found by its column names: OZ / Pos. / Position, Kurztext /
+  Bezeichnung, Langtext, Menge, Einheit / ME, EP / Einheitspreis, GP / Gesamtpreis, Art / Positionsart (an `Art`
+  holding "Bedarf…" marks an optional item). A row without a number but with text continues the long text above it.
+  A priced Excel file can go into the price library; quantity × EP must equal GP, or the file is refused.
+- **PDF:** one layout, the print of the dataset's P6 ("Anfrage", columns OZ, Leistungsbeschreibung, Menge ME,
+  Einheitspreis, Gesamtbetrag). The text is put in page order by position, which also puts back the lines the
+  anonymiser moved to the end of each page. `*** Bedarfsposition ohne GB` marks an optional item; "Übertrag" and
+  "Summe" rows are skipped; the VAT and signature lines end the LV. No price is taken from a PDF, so a PDF is only
+  ever a new LV. A PDF in another layout stops with a message.
+- **Test files:** `python -m lv.samples` writes Excel files in two column layouts and PDFs in P6's layout from the
+  GAEB files of P1, P2, P4 and P5 into `data/raw/generated/`. Reading one back gives the GAEB reading, except where
+  the format cannot hold it: one P4 long text holds an image as a 192,000-character word (cut to Excel's 32,767
+  characters a cell, and to 80 characters a word in a PDF), and about 50 rare characters such as "≥" are written
+  as look-alikes in a PDF.
 
 **A prices file without texts (P3).** `Angebot AN24-0305.D84` holds item numbers, quantities, units and prices, but
 almost no texts. The texts are read by code from two PDF prints of the same LV and joined by item number:
@@ -101,7 +122,7 @@ Line item:
 | `unit_price` | number or empty | empty in a new LV; never filled by the tool |
 | `total_price` | number or empty | as written in the file |
 | `kind` | `normal` or `optional` | only **normal items** count in the project total |
-| `read_by` | `gaeb`, `pdf` or `ai` | how the texts were read: from the GAEB file, by code from a PDF print, or by AI (not built) |
+| `read_by` | `gaeb`, `pdf`, `excel` or `ai` | how the texts were read: from the GAEB file, by code from a PDF or an Excel file, or by AI (not built) |
 
 Added by the later steps:
 
@@ -288,7 +309,8 @@ Step 3 records facts and contains no thresholds. Step 4 reads `method`, `min`, `
   threshold for them. Whether such prices may be copied is the estimator's decision and is not settled yet.
 - **106 of P3's 274 items have no long text**, because the PDF has none for them: 89 repeat items ("wie vor,
   jedoch ..."), 16 hourly rates and one fitting, each one line long.
-- **A project that exists only as PDFs (P6) cannot be read yet.**
+- **P6 is read from its 27 PDFs, not priced yet.** 1,131 items, 138 optional. As printed, 9 items have a quantity
+  but no unit and one row (`13.4.210` in LV_21) is empty; they are kept. A PDF in another layout cannot be read.
 - **`lv check`** (hide one past project, predict it from the others, compare) is not built yet.
 - A repeat item in P2's `.X83` names its reference in a separate field, not in its text. That field is not read.
 
@@ -373,7 +395,8 @@ Known limits: only items in pieces
 ## Tech stack
 
 - Python 3.13, pip, `.venv` (Windows, PowerShell).
-- GAEB reading and text search: standard library only. PDF text reading: `pypdf`.
+- GAEB reading and text search: standard library only. PDF text reading: `pypdf` (P3's prints) and `pymupdf`
+  (PDF LVs); Excel: `openpyxl`.
 - Plan check: an OpenAI vision model through the `openai` package; `pymupdf` renders PDF plans to images.
 - Search by meaning: Voyage AI `voyage-4` through the `voyageai` package (Anthropic has no embedding model). No
   vector database: about 1,000 saved vectors are compared in memory.
@@ -388,7 +411,7 @@ Known limits: only items in pieces
     | Step 3: judge the candidates | `claude-sonnet-5-5` | `xhigh` (at `high` it answers without thinking) |
     | Step 4: is each item's description complete? | `claude-sonnet-5-5` | `xhigh` |
 
-    No AI reads a PDF: P3's texts are read by code.
+    No AI reads a PDF: PDFs are read by code.
   - Model names and effort levels live in one settings place (`lv/ai.py`). No `temperature` parameter; structured output through the native
     JSON-schema method, not forced tool calls. Check both against the current `langchain-anthropic` docs when building.
 - `pydantic` for the data shapes, `python-dotenv` for the API key, `pytest` for tests.
@@ -404,6 +427,7 @@ Known limits: only items in pieces
 .venv\Scripts\python.exe -m lv comment P4 01.01.0002 --price 7500 --text "..."    # the estimator's comment; recalculates confidence
 .venv\Scripts\python.exe -m lv price "<new LV file>" --project P4 --plan "<plan.pdf>"   # also compare with a construction plan
 .venv\Scripts\python.exe -m lv.ai                                         # one real AI call, to check the key
+.venv\Scripts\python.exe -m lv.samples                                    # write Excel and PDF test LVs to data/raw/generated/
 .venv\Scripts\python.exe -m lv check --hide P2                            # accuracy check (not built yet)
 .venv\Scripts\python.exe -m pytest
 ```
@@ -415,6 +439,7 @@ lv/
   __main__.py     command line: ingest, price, check
   model.py        line item, prediction and file shapes
   extract.py      step 0: one reader per format
+  samples.py      Excel and PDF test LVs written from GAEB files
   match.py        step 1 group label; step 3 candidate search
   categorise.py   step 2: trade list, item type list, assignment, overview
   predict.py      step 3: judge input, verdicts to prediction, interpolation, statistics, totals
@@ -463,6 +488,9 @@ Step 0
 - For each priced LV, the sum of `total_price` over normal items equals the total stated in the file.
 - P4 has 24 optional items; P1, P2 and P5 have none.
 - P3: every priced item in the `.D84` has a text from the PDF, joined by item number; unmatched items are listed.
+- Excel (two column layouts) and PDF written from P1, P2, P4 and P5 read back to the same items as the GAEB file;
+  P2's priced Excel file goes into the price library with the same prices.
+- P6: all 27 PDFs read, 1,131 items, every one with a quantity.
 
 Step 1
 - P2: at least 27 groups with more than one item, covering at least 55 items. P4: at least 7 groups, 15 items.
@@ -484,7 +512,7 @@ Step 3
 
 ## Out of scope
 
-Steps 4 and 5; plan check; Excel and Word; P6; price adjustment by material or by date; unit conversion (week vs
+Steps 4 and 5; plan check; Word; price adjustment by material or by date; unit conversion (week vs
 day); item types for past projects; search by meaning; a database or web server.
 
 ## Open questions

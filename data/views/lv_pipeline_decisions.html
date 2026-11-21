@@ -387,7 +387,7 @@ h3{margin:44px 0 14px;font:700 clamp(17px,2vw,20px)/1.25 var(--display);color:va
 
           <text class="lane" x="16" y="34">A · SETUP, ONCE PER PAST PROJECT</text>
           <rect class="bx file" x="16" y="52" width="112" height="68"/>
-          <text class="t" x="72" y="82">Priced LV file</text><text class="s" x="72" y="100">.D86 or .D84 + PDF</text>
+          <text class="t" x="72" y="82">Priced LV file</text><text class="s" x="72" y="100">.D86, .D84 + PDF, .xlsx</text>
           <rect class="bx code" x="152" y="52" width="104" height="68"/>
           <text class="t" x="204" y="82">Step 0 · Read</text><text class="s" x="204" y="100">one row per item</text>
           <rect class="bx code" x="280" y="52" width="104" height="68"/>
@@ -401,7 +401,7 @@ h3{margin:44px 0 14px;font:700 clamp(17px,2vw,20px)/1.25 var(--display);color:va
 
           <text class="lane" x="16" y="196">B · PRICING, ONCE PER NEW LV</text>
           <rect class="bx file" x="16" y="322" width="112" height="68"/>
-          <text class="t" x="72" y="352">New LV file</text><text class="s" x="72" y="370">.X83, no prices</text>
+          <text class="t" x="72" y="352">New LV file</text><text class="s" x="72" y="370">.X83, .xlsx or .pdf</text>
           <rect class="bx code" x="152" y="322" width="104" height="68"/>
           <text class="t" x="204" y="352">Step 0 · Read</text><text class="s" x="204" y="370">one row per item</text>
           <rect class="bx code" x="280" y="322" width="104" height="68"/>
@@ -493,9 +493,9 @@ h3{margin:44px 0 14px;font:700 clamp(17px,2vw,20px)/1.25 var(--display);color:va
       <table>
         <thead><tr><th scope="col">Part</th><th scope="col">What we decided</th><th scope="col">Who</th></tr></thead>
         <tbody>
-          <tr><th scope="row">File formats</th><td data-l="What we decided">GAEB XML (<code>.X83</code>) and the older GAEB 90 (<code>.D83</code>, <code>.D84</code>, <code>.D86</code>), each with its own reader. P3's priced file has no texts, so its texts are read from its two PDF prints and joined by item number. No price is taken from a PDF. Excel, Word and a PDF on its own are refused.</td><td class="w" data-l="Who"><span class="who code">Code</span></td></tr>
+          <tr><th scope="row">File formats</th><td data-l="What we decided">GAEB XML (<code>.X83</code>) and the older GAEB 90 (<code>.D83</code>, <code>.D84</code>, <code>.D86</code>), each with its own reader. <strong>Excel</strong> (<code>.xlsx</code>, 21 Nov): the header row is found by its column names (OZ or Pos., Kurztext or Bezeichnung, Menge, Einheit or ME; Langtext, EP, GP and Art when present); a priced Excel file can go into the price library. <strong>PDF</strong> (<code>.pdf</code>, 21 Nov): one print layout, the one of P6 and of P3's tender print ("Anfrage", columns OZ, Leistungsbeschreibung, Menge ME, Einheitspreis, Gesamtbetrag); its lines are put back in page order by their position, which also undoes the anonymiser moving lines to the end of a page. P3's priced file has no texts, so its texts are read from its two PDF prints and joined by item number. No price is ever taken from a PDF. Word, old <code>.xls</code> files and PDFs in other layouts are refused.</td><td class="w" data-l="Who"><span class="who code">Code</span></td></tr>
           <tr><th scope="row">The line item table</th><td data-l="What we decided">One row per item, in file order: item number, sections, short text, long text, quantity, unit, prices, and whether the item is normal or optional. Nothing is merged, compared or guessed while reading.</td><td class="w" data-l="Who"><span class="who code">Code</span></td></tr>
-          <tr><th scope="row">Units</th><td data-l="What we decided">One spelling per unit: <code>Stk.</code> becomes <code>St</code>, <code>m²</code> becomes <code>m2</code>.</td><td class="w" data-l="Who"><span class="who code">Code</span></td></tr>
+          <tr><th scope="row">Units</th><td data-l="What we decided">One spelling per unit: <code>Stk.</code> becomes <code>St</code>, <code>m²</code> becomes <code>m2</code>, and <code>PSCH</code>, <code>Psch</code> and <code>pau</code> (lump sum) become <code>psch</code>.</td><td class="w" data-l="Who"><span class="who code">Code</span></td></tr>
           <tr><th scope="row">Price check while reading</th><td data-l="What we decided">For every priced item, quantity × unit price must equal the total price. If not, the reader stops, because the layout was misread.</td><td class="w" data-l="Who"><span class="who code">Code</span></td></tr>
           <tr><th scope="row">Where it is saved</th><td data-l="What we decided">One JSON file per project. Past projects with prices go to <code>data/library/</code>, which is the price library. New LVs go to <code>data/out/</code>. The person picks the project ID, because the file headers turned out unreliable.</td><td class="w" data-l="Who"><span class="who code">Code</span></td></tr>
         </tbody>
@@ -510,7 +510,10 @@ h3{margin:44px 0 14px;font:700 clamp(17px,2vw,20px)/1.25 var(--display);color:va
         <li>The priced files hold more records than the unpriced ones: 38 in P1 and 1 in P2. They are change orders and are kept.</li>
         <li><strong>P3 from its PDFs:</strong> all 274 priced items found their text in both prints, with matching quantity and unit. 168 have a long text. The build session checked the other 106 and found none in the PDF either: 89 are "as before" items, 16 hourly rates, 1 a fitting.</li>
         <li>60 automated tests cover the table and the three readers, all against the real dataset files.</li>
-        <li><strong>Still not readable:</strong> P6, which exists only as PDFs in other layouts, and Excel or Word files.</li>
+        <li><strong>Excel and PDF against an answer key (21 Nov):</strong> <code>python -m lv.samples</code> writes Excel files in two column layouts and PDFs in P6's layout from the GAEB files of P1, P2, P4 and P5. Read back, every item matches the GAEB reading: number, sections, texts, quantity, unit, optional flag, and for Excel the prices. Where a format cannot hold a text, the test compares with the same cut: one P4 long text holds an image as a 192,000-character word, and about 50 rare characters such as ≥ become look-alikes in a PDF.</li>
+        <li><strong>P6 from its 27 PDFs:</strong> 1,131 items, 138 of them optional, each with a quantity. As printed, 9 items have a quantity but no unit and one row is empty; they are kept. P3's unpriced tender print reads as all 274 items.</li>
+        <li>19 more automated tests cover the Excel and PDF readers.</li>
+        <li><strong>Still not readable:</strong> PDFs in other layouts (P5's print, for one), Word files and old <code>.xls</code> files.</li>
       </ul>
     </div>
   </section>
@@ -950,7 +953,7 @@ Answer for every item id, each once:
           <tr><th scope="row">Categories for past projects</th><td data-l="Where it stands">Proposed: sort past LVs too, and look for prices among past items of the same item type first. It needs one shared list of item types for all LVs and a fallback to the text search. Not built.</td></tr>
           <tr><th scope="row">Live questions</th><td data-l="Where it stands">Agreed in outline: the user types a question, Sonnet answers from the item's saved record. The conversation is kept apart from the result file. Not built.</td></tr>
           <tr><th scope="row">Surcharges in the quantity sums</th><td data-l="Where it stands">Open. Today they are added to the sums of the item they belong to.</td></tr>
-          <tr><th scope="row">PDF reading</th><td data-l="Where it stands">Built for P3, by code. P6 exists only as PDFs in other layouts and cannot be read yet.</td></tr>
+          <tr><th scope="row">PDF and Excel reading</th><td data-l="Where it stands">Built by code (21 Nov): Excel files by their column names, and PDFs in the print layout of P6 and P3. A PDF in another layout would need an AI reader, which is not built.</td></tr>
           <tr><th scope="row">Near-zero prices and lump sums</th><td data-l="Where it stands">Open, set aside for now (21 Nov): two near-zero prices reached a price through the search by meaning. A flat cut-off would not work, because real prices can be that low too (holding a fence costs 0.03 per metre and day in P2). No rule yet for these, or for lump sums that depend on the project.</td></tr>
           <tr><th scope="row">A second judge opinion</th><td data-l="Where it stands">Decided for now: one judge call per item. Asking twice and flagging a disagreement as "unsure" was proposed and set aside.</td></tr>
           <tr><th scope="row">Plan check</th><td data-l="Where it stands">Linked: <code>lv price … --plan</code> runs the VLM prototype (PR #2) on step 0's items, in parallel with steps 1 to 4, and writes <code>&lt;project&gt;_plan.json</code>, merged into the result file at the end (each item gets its plan status and markers, the LV gets all findings), plus an overview (plan with the items numbered, and Excel). Run on the Hörsaal H1 plan: 41 of 52 items located, 27 of 30 compared items match, in parallel with the LV pipeline (5 min 37 s in total). Open: one AI provider or two, and German or English keys in the plan file.</td></tr>

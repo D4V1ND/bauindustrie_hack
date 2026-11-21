@@ -29,6 +29,20 @@
      ],
      "title": "Effect",
      "type": "string"
+    },
+    "author": {
+     "default": "estimator",
+     "enum": [
+      "estimator",
+      "assistant"
+     ],
+     "title": "Author",
+     "type": "string"
+    },
+    "edited": {
+     "default": false,
+     "title": "Edited",
+     "type": "boolean"
     }
    },
    "title": "Comment",
@@ -211,6 +225,7 @@
      "enum": [
       "gaeb",
       "pdf",
+      "excel",
       "ai"
      ],
      "title": "Read By",
