@@ -731,11 +731,12 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .dw-top{padding:14px 18px 16px 22px;border-bottom:1px solid var(--line)}
 .dw-bar{gap:10px}
 .ozt{font:500 .72rem/1 var(--mono);letter-spacing:.06em;color:var(--paper);background:var(--ink);padding:6px 8px}
-.gwt{font:.64rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.gwt{font:.64rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ozt,.navg{flex:none;white-space:nowrap}
 .navg{display:flex;align-items:center;border:1px solid var(--line-2)}
 .navg .ic{width:28px;height:28px}
 .navg .ic svg{width:14px;height:14px}
-.navc{font:.64rem/1 var(--mono);letter-spacing:.06em;color:var(--ink-3);padding:0 6px;min-width:52px;text-align:center}
+.navc{font:.64rem/1 var(--mono);letter-spacing:.06em;color:var(--ink-3);padding:0 6px;min-width:52px;text-align:center;white-space:nowrap}
 .navc b{color:var(--ink);font-weight:500}
 .xbtn{border:1px solid transparent}
 .xbtn:hover{border-color:var(--line-2)}
@@ -1088,7 +1089,7 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .okbtn.need svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2}
 .ep.epnp{font-size:26px;letter-spacing:-.02em;font-weight:300;color:var(--bad);border-bottom:1.5px dashed var(--bad)}
 .confirm.need{background:transparent;color:var(--ink);border:1px dashed var(--bad)}
-.confirm.need .cbadge{color:var(--bad)}
+.confirm.need .cbadge{background:color-mix(in srgb,var(--bad) 10%,transparent);color:var(--bad)}
 .npn{font-weight:500;color:var(--bad)}
 .plan-lg .lgt{margin-right:2px}
 
@@ -2036,7 +2037,7 @@ function vDrawer(d) {
   }
 
   return '<aside class="dw' + (S.aiOpen || S.thinking ? ' ai-open' : '') + '" aria-label="Positionsdetails ' + p.oz + '" tabindex="-1" data-k="dw">' +
-    '<header class="dw-top"><div class="dw-bar"><span class="ozt' + (S.swapDir === 'next' ? ' ozflash' : '') + '" data-k="oz' + p.oz + '">' + p.oz + '</span><span class="gwt">' + esc(p.gewerk) + '</span><span style="flex:1"></span>' +
+    '<header class="dw-top"><div class="dw-bar"><span class="ozt' + (S.swapDir === 'next' ? ' ozflash' : '') + '" data-k="oz' + p.oz + '">' + p.oz + '</span><span class="gwt" title="' + esc(p.gewerk) + '">' + esc(p.gewerk) + '</span><span style="flex:1"></span>' +
       '<div class="navg"><button class="ic" data-act="nav" data-v="-1"' + (nav.idx <= 0 ? ' disabled' : '') + ' aria-label="Vorherige Position" title="Vorherige (↑)">' + IC.up + '</button>' +
       '<span class="navc" title="Mit ↑ / ↓ blättern"><b>' + (nav.idx + 1) + '</b> / ' + nav.list.length + '</span>' +
       '<button class="ic" data-act="nav" data-v="1"' + (nav.idx >= nav.list.length - 1 ? ' disabled' : '') + ' aria-label="Nächste Position" title="Nächste (↓)">' + IC.chev + '</button></div>' +
