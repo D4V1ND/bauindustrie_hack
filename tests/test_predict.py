@@ -337,22 +337,22 @@ def test_the_judge_needs_no_key_when_nothing_has_candidates(tmp_path, monkeypatc
     assert load(tmp_path / "out" / "P5.json").summary.methods["none"].items == 50
 
 
-def fake_step_2(model, system, questions, shape):
+def fake_step_2(model, system, questions, shape, effort):
     """Stands in for the two step 2 calls: one item type, and every item gets it."""
     if shape is Proposal:
         return [Proposal(item_types=[ProposedType(name="Bauleistung", trade="Erdarbeiten", description="everything")])]
     assert shape is Assignments, "no key is set up, so the real judge must not be reached"
-    return [Assignments(items=[Assigned(id=id, item_type="Bauleistung") for id in re.findall(r"^### (\S+) \|", q, flags=re.M)])
+    return [Assignments(items=[Assigned(id=id, item_type="Bauleistung", reason="Everything is one type.") for id in re.findall(r"^### (\S+) \|", q, flags=re.M)])
             for q in questions]
 
 
 def test_price_command_asks_the_judge_and_writes_what_code_made_of_the_verdicts(tmp_path, capsys, monkeypatch):
     asked = []
 
-    def fake_ask(model, system, questions, shape):
+    def fake_ask(model, system, questions, shape, effort):
         if shape is not Verdicts:
-            return fake_step_2(model, system, questions, shape)
-        asked.append((model, system, shape))
+            return fake_step_2(model, system, questions, shape, effort)
+        asked.append((model, effort, system, shape))
         answers = []
         for block in questions:  # the first candidate of every item is "the same", the others are "different"
             cands = [line[2:].split(": ")[0] for line in block.splitlines() if line.startswith("- ")]
@@ -368,11 +368,11 @@ def test_price_command_asks_the_judge_and_writes_what_code_made_of_the_verdicts(
     result, library = load(tmp_path / "out" / "P5.json"), load(tmp_path / "library" / "P2.json")
     price = {i.id: i.unit_price for i in library.items}
     methods = result.summary.methods
-    assert asked == [("claude-sonnet-5-5", JUDGE_RULES, Verdicts)]
+    assert asked == [("claude-sonnet-5-5", "high", JUDGE_RULES, Verdicts)]
     assert methods["similar"].items > 0 and sum(m.items for m in methods.values()) == 50
     assert methods["similar"].items + 1 + sum(1 for i in result.items if "No library item" in i.prediction.reason) == 50
     assert all(price[s.id] == s.unit_price == i.prediction.median for i in result.items for s in i.prediction.sources)
-    assert f"about {methods['similar'].items + 1} items" in printed and "gave no answer for 1 of these items" in printed
+    assert f"to judge candidates: {methods['similar'].items + 1} calls" in printed and "gave no answer for 1 of these items" in printed
     assert result.summary.total == pytest.approx(sum(i.prediction.median * i.quantity for i in result.items
                                                      if i.prediction.method == "similar"))
     assert not result.priced

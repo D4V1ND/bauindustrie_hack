@@ -9,9 +9,10 @@ from typing import TypeVar
 from dotenv import dotenv_values
 from pydantic import BaseModel
 
-PROPOSE_MODEL = "claude-opus-5-5"  # step 2: one call per LV that proposes the item type list
-ASSIGN_MODEL = "claude-haiku-5-5"  # step 2: gives every item its type, a batch of items per call
-JUDGE_MODEL = "claude-sonnet-5-5"  # step 3 judge: the variant that was measured
+# One model and one effort level per job. Effort is how much the model thinks: low, medium, high, xhigh or max.
+PROPOSE_MODEL, PROPOSE_EFFORT = "claude-opus-5-5", "medium"  # step 2: one call per LV proposes the item type list
+ASSIGN_MODEL, ASSIGN_EFFORT = "claude-sonnet-5-5", "high"  # step 2: gives items their type and the reason for it
+JUDGE_MODEL, JUDGE_EFFORT = "claude-sonnet-5-5", "high"  # step 3 judge: the variant that was measured
 MAX_OUTPUT_TOKENS = 16000  # answers are small; the room is for the model's thinking
 MAX_PARALLEL_CALLS = 4
 ENV_FILE = Path(__file__).resolve().parent.parent / ".env"
@@ -58,6 +59,10 @@ Task: give every item exactly ONE type from the list, using the exact spelling o
 item is (short text, long text, section). If no type fits, use "Sonstiges". Do not invent new types. A surcharge
 item ("Zulage") gets the type of the thing it is a surcharge for. An item that says "wie vor" is the kind of
 thing the REFERS TO PREVIOUS ITEM text describes. Answer for every item id, each once.
+
+Also give each item a reason: one sentence in English, 20 words at most, naming what in the item's text decided
+the type. Example: "Trench excavation for the water pipe; the long text says dig, store and backfill." For a
+surcharge item or a "wie vor" item, name the item it belongs to, since that is what decided the type.
 """
 
 # The estimator's own judging rules, word for word. One line was added: the last one under "How to read the
@@ -151,8 +156,8 @@ class MissingKey(Exception):
     """No API key is set up. The message says what to do."""
 
 
-def structured(model: str, shape: type[Shape]):
-    """The chat model, set up to answer in `shape`."""
+def structured(model: str, shape: type[Shape], effort: str):
+    """The chat model, set up to answer in `shape` with the given effort level."""
     key = os.environ.get("ANTHROPIC_API_KEY") or dotenv_values(ENV_FILE).get("ANTHROPIC_API_KEY")
     if not key:
         raise MissingKey(
@@ -164,15 +169,15 @@ def structured(model: str, shape: type[Shape]):
 
     # No temperature (current Claude models reject it) and no forced tool call: "json_schema" is Claude's own
     # structured output. Checked against langchain-anthropic 1.7.
-    chat = ChatAnthropic(model=model, api_key=key, max_tokens=MAX_OUTPUT_TOKENS)
+    chat = ChatAnthropic(model=model, api_key=key, max_tokens=MAX_OUTPUT_TOKENS, effort=effort)
     return chat.with_structured_output(shape, method="json_schema")
 
 
-def ask(model: str, system: str, questions: list[str], shape: type[Shape]) -> list[Shape | None]:
+def ask(model: str, system: str, questions: list[str], shape: type[Shape], effort: str) -> list[Shape | None]:
     """One call per question. Answers come back in the order of the questions; a failed call gives None."""
     if not questions:
         return []
-    answers = structured(model, shape).batch(
+    answers = structured(model, shape, effort).batch(
         [[("system", system), ("human", question)] for question in questions],
         config={"max_concurrency": MAX_PARALLEL_CALLS}, return_exceptions=True)
     errors = [answer for answer in answers if isinstance(answer, Exception)]
@@ -187,6 +192,6 @@ if __name__ == "__main__":
         capital: str
 
     try:
-        print(ask(JUDGE_MODEL, "Answer in the requested shape.", ["Germany"], Capital))
+        print(ask(JUDGE_MODEL, "Answer in the requested shape.", ["Germany"], Capital, effort="low"))
     except MissingKey as stop:
         raise SystemExit(str(stop))

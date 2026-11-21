@@ -105,7 +105,7 @@ Test command for every task: `.venv\Scripts\python.exe -m pytest`
 - [x] **Task 7: Assign item types and print the overview** (medium)
   - Real run on P5 (45 s for steps 2 and 3 together): 50 items -> 20 item types -> 11 trades, 0 items forced to
     `Sonstiges`. Step 3 on the same run: 2 `similar`, 13 `reference`, 35 `none` (library: P1 and P2).
-  - Items go to `claude-haiku-5-5` 25 per call. The overview counts normal items only; optional items are named
+  - Items went to `claude-haiku-5-5` 25 per call (changed to Sonnet in task 12). The overview counts normal items only; optional items are named
     in one line below it. With `--copy-only` step 2 is skipped as well.
   - Real run on P4 (once, 219 calls, no failed call): 296 items -> 73 item types -> 16 trades, no item outside the
     list, none forced to `Sonstiges`. The 24 optional items are all hourly rates. Step 3 on the same run: 1 `copied`
@@ -123,6 +123,25 @@ Test command for every task: `.venv\Scripts\python.exe -m pytest`
   - Verify: tests pass for the validation and the per-unit sums; run on P5 and read the overview for sense.
   - Depends on: 4, 6.
   - Files: `lv/categorise.py`, `lv/__main__.py`, `tests/test_categorise.py`.
+
+- [x] **Task 12: Reason per item type, Sonnet, effort levels, one decision per group** (small)
+  - Does: the assignment also returns one short reason per item and saves it as `item_type_reason`; it runs on
+    `claude-sonnet-5-5`; every AI job names its effort level next to its model (propose `medium`, assign `high`,
+    judge `high`); identical items are asked about once and the others get a copy.
+  - Acceptance (all with the fake):
+    - The reason is saved per item. An item that falls back to `Sonstiges` after the second try gets a reason
+      written by code that says so. A valid type with an empty reason is still assigned.
+    - A reason never changes the type.
+    - Identical items are asked once and all get the same type, trade and reason. Two repeat items with the same
+      words that follow different items are asked separately.
+    - The request carries the effort level together with the fixed answer shape (checked offline).
+  - Real run on P5: 50 items asked, 0 copied (P5 has no identical items); assignment took 11 s in 2 calls on
+    Sonnet. Every item has a reason, none over 20 words, none written by code; 20 types in 10 trades.
+    The Haiku run was not timed on its own: the whole P5 run took 45 s then and 57 s now.
+  - On hold: the P4 run. It will also show whether the fix that drops surcharge-named types holds on real data.
+  - Verify: tests pass; `lv price` on P5 and read `item_type_reason` in `data/out/P5.json`.
+  - Depends on: 7.
+  - Files: `lv/categorise.py`, `lv/ai.py`, `lv/model.py`, `lv/__main__.py`, `tests/`.
 
 ### Checkpoint: steps 0–2 complete
 - [x] All tests pass.

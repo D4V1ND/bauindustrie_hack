@@ -1,5 +1,6 @@
 """Command line: python -m lv ingest|price <LV file> --project <ID>"""
 import argparse
+import time
 from pathlib import Path
 
 from lv import ai
@@ -42,7 +43,8 @@ def main(argv: list[str] | None = None, data: Path = DATA) -> None:
         try:
             if lv.items and not args.copy_only:  # step 2
                 lv.item_types = propose(lv, ask_types)
-                assign(lv, lv.item_types, ask_assignments)
+                asked = assign(lv, lv.item_types, ask_assignments)
+                print(f"  {_items(asked)} asked, {len(lv.items) - asked} copied from an identical item")
             predict(lv, library, judge=None if args.copy_only else ask_judge)  # step 3
         except (ai.MissingKey, RuntimeError) as stop:  # RuntimeError: every call of one kind failed
             raise SystemExit(str(stop))
@@ -52,14 +54,22 @@ def main(argv: list[str] | None = None, data: Path = DATA) -> None:
     print(f"{len(lv.items)} line items -> {path}")
 
 
+def _ask(job: str, model: str, effort: str, rules: str, questions: list[str], shape: type) -> list:
+    """One real AI job: says what is asked, asks, and says how long it took."""
+    calls = "1 call" if len(questions) == 1 else f"{len(questions)} calls"
+    print(f"asking {model} ({effort} effort) {job}: {calls} ...", end=" ", flush=True)
+    start = time.monotonic()
+    answers = ai.ask(model, rules, questions, shape, effort=effort)
+    print(f"{time.monotonic() - start:.0f} s")
+    return answers
+
+
 def ask_types(question: str) -> Proposal | None:
-    print(f"asking {ai.PROPOSE_MODEL} for the list of item types ...")
-    return ai.ask(ai.PROPOSE_MODEL, ai.PROPOSE_RULES, [question], Proposal)[0]
+    return _ask("for the list of item types", ai.PROPOSE_MODEL, ai.PROPOSE_EFFORT, ai.PROPOSE_RULES, [question], Proposal)[0]
 
 
 def ask_assignments(questions: list[str]) -> list[Assignments | None]:
-    print(f"asking {ai.ASSIGN_MODEL} to assign item types ({len(questions)} calls) ...")
-    return ai.ask(ai.ASSIGN_MODEL, ai.ASSIGN_RULES, questions, Assignments)
+    return _ask("to assign item types", ai.ASSIGN_MODEL, ai.ASSIGN_EFFORT, ai.ASSIGN_RULES, questions, Assignments)
 
 
 def print_overview(lv: LV) -> None:
@@ -82,8 +92,7 @@ def print_overview(lv: LV) -> None:
 
 def ask_judge(blocks: list[str]) -> list[Verdicts | None]:
     """The real judge: one Claude call per item that has candidates."""
-    print(f"asking the judge ({ai.JUDGE_MODEL}) about {len(blocks)} items ...")
-    return ai.ask(ai.JUDGE_MODEL, ai.JUDGE_RULES, blocks, Verdicts)
+    return _ask("to judge candidates", ai.JUDGE_MODEL, ai.JUDGE_EFFORT, ai.JUDGE_RULES, blocks, Verdicts)
 
 
 def print_summary(lv: LV) -> None:

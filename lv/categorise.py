@@ -10,7 +10,7 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-from lv.match import Described, describe
+from lv.match import Described, describe, group_label
 from lv.model import LV, ItemType
 
 # ponytail: 17 stand-in names from the first test; swap this one constant when an official trade list is chosen
@@ -21,6 +21,9 @@ TRADES = (
     "Prüfung und Inbetriebnahme", "Stundenlohnarbeiten", "Sonstiges",
 )
 OTHER = "Sonstiges"  # the item type, and its trade, for an item that fits no type of the list
+# Reasons written by code, so the field is never empty and never pretends the model decided something it did not.
+NO_VALID_ANSWER = "No valid answer came back from the model after two tries, so code set this item to Sonstiges."
+NO_REASON = "The model chose this type and gave no reason."
 BATCH = 25  # items per assignment call
 MIN_CAP, MAX_CAP = 20, 100  # a small LV may still have 20 types: with 13, P5 lost its hourly-rate items to "Sonstiges"
 
@@ -62,6 +65,7 @@ def propose(lv: LV, ask: Callable[[str], Proposal | None]) -> list[ItemType]:
 class Assigned(BaseModel):
     id: str  # a line item
     item_type: str  # checked against the list in code
+    reason: str  # one sentence on what in the text decided the type; shown to the user, never used to decide
 
 
 class Assignments(BaseModel):
@@ -69,22 +73,41 @@ class Assignments(BaseModel):
     items: list[Assigned]
 
 
-def assign(lv: LV, item_types: list[ItemType], ask: Callable[[list[str]], list[Assignments | None]]) -> None:
-    """Gives every item one type of the list and that type's trade. An answer outside the list, or a missing one,
-    is asked again once; what is left after that becomes "Sonstiges"."""
+def assign(lv: LV, item_types: list[ItemType], ask: Callable[[list[str]], list[Assignments | None]]) -> int:
+    """Gives every item one type of the list, that type's trade and the reason. Returns how many items were asked.
+
+    Identical items are decided once: the first one is asked, the others get a copy of its type, trade and reason.
+    An answer outside the list, or a missing one, is asked again once; what is left then becomes "Sonstiges".
+    """
     trade_of = {item_type.name: item_type.trade for item_type in item_types} | {OTHER: OTHER}
-    waiting = describe(lv)
+    everything = describe(lv)
+    first: dict[tuple[str, str], Described] = {}  # the first item of each set of identical items
+    for described in everything:
+        first.setdefault(_same_item(described), described)
+
+    waiting = list(first.values())
     for _ in range(2):
         batches = [waiting[start:start + BATCH] for start in range(0, len(waiting), BATCH)]
         answers = ask([_assignment_input(batch, item_types) for batch in batches]) if batches else []
-        chosen = {assigned.id: assigned.item_type.strip() for answer in answers if answer for assigned in answer.items}
+        chosen = {assigned.id: assigned for answer in answers if answer for assigned in answer.items}
         for described in waiting:
-            name = chosen.get(described.item.id)
-            if name in trade_of:
-                described.item.item_type, described.item.trade = name, trade_of[name]
+            answer, item = chosen.get(described.item.id), described.item
+            if answer and answer.item_type.strip() in trade_of:  # the reason plays no part in this check
+                item.item_type = answer.item_type.strip()
+                item.trade, item.item_type_reason = trade_of[item.item_type], answer.reason.strip() or NO_REASON
         waiting = [described for described in waiting if not described.item.item_type]
     for described in waiting:
-        described.item.item_type = described.item.trade = OTHER
+        described.item.item_type, described.item.trade, described.item.item_type_reason = OTHER, OTHER, NO_VALID_ANSWER
+
+    for described in everything:
+        decided, item = first[_same_item(described)].item, described.item
+        item.item_type, item.trade, item.item_type_reason = decided.item_type, decided.trade, decided.item_type_reason
+    return len(first)
+
+
+def _same_item(described: Described) -> tuple[str, str]:
+    """Identical for step 2: the same group label, and for a repeat item ("wie vor") the same item it refers to."""
+    return group_label(described.item), described.refers_to
 
 
 def _assignment_input(batch: list[Described], item_types: list[ItemType]) -> str:

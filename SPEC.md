@@ -87,6 +87,16 @@ Line item:
 | `kind` | `normal` or `optional` | only **normal items** count in the project total |
 | `read_by` | `gaeb` or `ai` | how the texts were read |
 
+Added by the later steps:
+
+| Field | Type | Added by | Meaning |
+|---|---|---|---|
+| `group` | text | step 1 | the same label for every exact match |
+| `item_type` | text | step 2 | one type from the LV's list, or `Sonstiges` |
+| `trade` | text | step 2 | the trade of that item type |
+| `item_type_reason` | text | step 2 | one sentence on why the item got this type |
+| `prediction` | object or empty | step 3 | what the price lookup found (see step 3) |
+
 Left out on purpose: price components (labour/material/equipment), notes without a price.
 
 ## Step 1: exact match
@@ -107,16 +117,27 @@ Three levels above the line item: **trade** → **item type** → **group**.
    exactly one trade from the fixed trade list (17 stand-in names, `TRADES` in `lv/categorise.py`). Cap: about one
    type per four items, never below 20 and never above 100. Code removes double names, a type named after
    surcharges, a catch-all type and everything over the cap.
-2. **Assign.** AI (`claude-haiku-5-5`, 25 items per call) gives every item exactly one item type from that list,
-   or `Sonstiges` if none fits. Code checks every answer against the list. An answer outside the list, or a missing
-   one, is asked again once; what is left then becomes `Sonstiges`.
+2. **Assign.** AI (`claude-sonnet-5-5`, 25 items per call) gives every item exactly one item type from that list,
+   or `Sonstiges` if none fits, and one sentence on why. Code checks every type against the list. An answer outside
+   the list, or a missing one, is asked again once; what is left then becomes `Sonstiges`.
 
-Rules: surcharge items ("Zulage …") get the type of the thing they are a surcharge for. A repeat item is sent
-together with the text of the item it refers to. Types are for the overview, not for prices. Quantities add up
-per unit and are never added across units. The AI sees no price in this step either.
+Rules:
+- Surcharge items ("Zulage …") get the type of the thing they are a surcharge for. A repeat item is sent together
+  with the text of the item it refers to.
+- **One decision per set of identical items.** Items with the same `group` label are asked about once; the others
+  get a copy of the type, trade and reason. So identical items always land in the same type, and repeated items
+  cost no extra call. Two repeat items ("wie vor …") with the same words count as identical only if they refer to
+  the same item.
+- **The reason** (`item_type_reason`) is one sentence in English, 20 words at most, naming what in the item's text
+  decided the type; for a surcharge or a repeat item it names the item it belongs to. It is text to show ("why is
+  this item in this category?") and never changes the outcome: only the type is checked against the list. The
+  field is never empty after step 2: if the model gives a valid type without a reason, or no valid answer comes
+  back after the second try, code writes a sentence that says exactly that.
+- Types are for the overview, not for prices. Quantities add up per unit and are never added across units. The AI
+  sees no price in this step either.
 
-Each item gains `item_type` and `trade` (`Sonstiges` has the trade `Sonstiges`). The result file gains
-`item_types`: the LV's list with `name`, `trade` and `description`.
+Each item gains `item_type`, `trade` and `item_type_reason` (`Sonstiges` has the trade `Sonstiges`). The result
+file gains `item_types`: the LV's list with `name`, `trade` and `description`.
 
 `lv price` prints the overview: trade → item type → number of items and quantities per unit. It counts normal
 items only and names the number of optional items below. With `--copy-only` step 2 is skipped.
@@ -219,10 +240,16 @@ Step 3 records facts and contains no thresholds. Step 4 will read `method`, `min
 - GAEB reading and text search: standard library only.
 - AI: Claude API through `langchain-anthropic`, used thinly: chat model, structured output, `.batch()` with a
   concurrency limit. No agents, chains, vector stores or LangGraph.
-  - `claude-sonnet-5-5` for the step 3 judge: the variant that was measured.
-  - `claude-opus-5-5` for the one call per LV that proposes the item type list, `claude-haiku-5-5` to assign
-    item types. Reading PDF texts (P3) is not built yet.
-  - Model names live in one settings place. No `temperature` parameter; structured output through the native
+  - One model and one effort level per job (effort is how much the model thinks before it answers):
+
+    | Job | Model | Effort |
+    |---|---|---|
+    | Step 2: propose the item type list, one call per LV | `claude-opus-5-5` | `medium` |
+    | Step 2: assign each item a type, with its reason | `claude-sonnet-5-5` | `high` |
+    | Step 3: judge the candidates | `claude-sonnet-5-5` | `high` |
+
+    Reading PDF texts (P3) is not built yet.
+  - Model names and effort levels live in one settings place (`lv/ai.py`). No `temperature` parameter; structured output through the native
     JSON-schema method, not forced tool calls. Check both against the current `langchain-anthropic` docs when building.
 - `pydantic` for the data shapes, `python-dotenv` for the API key, `pytest` for tests.
 
