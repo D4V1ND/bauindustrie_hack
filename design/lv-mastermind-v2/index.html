@@ -1840,7 +1840,7 @@ function vTable(d) {
         '<div class="seg" role="group" aria-label="Darstellung"><button class="' + (S.density === 'compact' ? 'on' : '') + '" data-act="density" data-v="compact" aria-pressed="' + (S.density === 'compact') + '">Kompakt</button><button class="' + (S.density === 'details' ? 'on' : '') + '" data-act="density" data-v="details" aria-pressed="' + (S.density === 'details') + '">Langtext</button></div>' +
         (hasPlan() ? '<button class="btn btn-quiet' + (planShown() ? ' on' : '') + '" data-act="planToggle" aria-pressed="' + planShown() + '" title="' + (planShown() ? 'Bauplan ausblenden' : 'Bauplan einblenden') + '">' + IC.panel + 'Bauplan</button>' : '') +
         '<button class="btn btn-quiet' + (S.group ? ' on' : '') + '" data-act="group" aria-pressed="' + S.group + '">' + IC.layers + 'Nach Gewerk</button>' +
-        '<button class="btn btn-quiet" data-act="csv" title="CSV kopieren">' + IC.copy + 'CSV</button></div></div>' +
+        '</div></div>' +
     '<div class="tbl"><div role="table" aria-label="Positionen des Leistungsverzeichnisses">' +
       '<div class="lv-grid th mono" role="row"><span role="columnheader"><input type="checkbox" class="cb' + (!allPicked && d.rows.some(function (r) { return S.picked[r.oz]; }) ? ' some' : '') + '"' + (allPicked ? ' checked' : '') + ' data-act="pickAll" aria-label="Alle angezeigten Positionen auswählen"></span>' +
         th('conf') + '<span role="columnheader" class="thl">' + th('oz').replace(/^<span[^>]*>|<\/span>$/g, '') + '<i>/</i>' + th('kurz').replace(/^<span[^>]*>|<\/span>$/g, '') + '</span>' + th('ep', 1) + th('gp', 1) + '<span role="columnheader" style="text-align:center">OK</span></div>' +
@@ -2341,11 +2341,6 @@ var A = {
   density: function (ds) { set({ density: ds.v }); },
   group: function () { set({ group: !S.group }); },
   collapse: function (ds) { var c = Object.assign({}, S.collapsed); c[ds.v] = !c[ds.v]; set({ collapsed: c }); },
-  csv: function () {
-    var rows = derive().rows, q = function (t) { return '"' + String(t).replace(/"/g, '""') + '"'; };
-    var lines = ['OZ;Kurztext;Gewerk;Menge;Einheit;EP;GP;Konfidenz;Status'].concat(rows.map(function (r) { return [r.oz, q(r.kurz), q(r.gewerk), fmt(r.menge, r.menge % 1 ? 1 : 0), r.einheit, fmt(r.ep, 2), fmt(r.gp, 2), r.risk, S.confirmed[r.oz] ? 'bestätigt' : r.mode].join(';'); }));
-    try { navigator.clipboard.writeText(lines.join('\n')).then(function () { toast(rows.length + ' Zeilen als CSV kopiert'); }, function () { toast('Kopieren nicht möglich'); }); } catch (e) { toast('Kopieren nicht möglich'); }
-  },
   bulkSafe: function () {
     var d = derive(), sf = safeRows(d); if (!sf.length) return;
     var c = Object.assign({}, S.confirmed); sf.forEach(function (r) { c[r.oz] = true; });
