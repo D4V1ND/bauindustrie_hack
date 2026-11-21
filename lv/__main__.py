@@ -104,6 +104,11 @@ def main(argv: list[str] | None = None, data: Path = DATA) -> None:
         out.write_text(json.dumps(result, ensure_ascii=False, indent=1), encoding="utf-8")
         counts = result["zusammenfassung"]
         print(f"  {counts['befunde']} findings, {counts['geprueft']} items compared, {time.monotonic() - plan_job.started:.0f} s from its start -> {out}")
+        try:  # the prototype's fixed overview: plan with the items numbered (PNG) and the item list (Excel)
+            png, xlsx = plan.overview(result, args.plan, path.parent, lv.project)
+        except Exception as error:
+            raise SystemExit(f"The plan overview failed; both result files above are saved. {type(error).__name__}: {error}")
+        print(f"  overview -> {png.name}, {xlsx.name}")
 
 
 def _ask(job: str, model: str, effort: str, rules: str, questions: list[str], shape: type,

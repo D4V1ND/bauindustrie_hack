@@ -330,13 +330,14 @@ brainstorm (same item at two prices, outdated prices, quantity against plan) are
 ## Plan check (optional)
 
 When a construction plan (Bauplan) is given, `lv price … --plan <plan>` also compares the LV's quantities with it
-and writes a second file, `data/out/<project>_plan.json`. Without `--plan` nothing changes. The LV is required;
+and writes `data/out/<project>_plan.json`, plus the prototype's fixed overview: `<project>__<plan>_uebersicht.png`
+(the plan with every located item numbered, and a legend) and `.xlsx` (every item with status, location and findings). Without `--plan` nothing changes. The LV is required;
 the plan is optional.
 
 | Part | Who | How |
 |---|---|---|
 | The LV's items | code | Step 0's reader, the same items as the price lookup (`lv/plan.py`, `positions`). The prototype's own GAEB reading by an LLM (`vlm/gaeb_llm.py`) is not used |
-| Read the plan | AI (OpenAI vision model, `OPENAI_MODEL`) | `vlm/extract_plan.py`: countable components with counts and approximate x/y markers, read 3 times; the median count is used and counts that vary are flagged |
+| Read the plan | AI (OpenAI vision model, `OPENAI_MODEL`) | `vlm/extract_plan.py`: countable components with counts and approximate x/y markers, and the rooms with their areas, read 3 times; the median count is used and counts that vary are flagged |
 | Compare | code, then AI | `vlm/compare.py`: matches by plan codes (F1, T3) and dimensions first, then lets the model match the rest by majority vote; writes findings per item (quantity differs, not in the plan, in the plan but not in the LV, units not comparable) with markers and an open decision field |
 
 The plan check starts right after step 0, since it needs only step 0's items, and runs in a background thread beside
@@ -349,7 +350,11 @@ The two files join on `oz`: an item of `<project>.json` and its entry in the pla
 item number. The plan file's shape is the prototype's own, with German keys (`positionen`, `befunde`,
 `zusammenfassung`); see `vlm/README.md` and `docs/result-format.md`.
 
-Known limits: not run end to end in this repository yet (no plan file and no OpenAI key here); only items in pieces
+Every item that can be located gets `plan` with markers (x/y relative to the plan image), so a view can show it on
+the plan; items in m2 get frames around their rooms. Run on the Hörsaal H1 LV with its plan: 41 of 52 items located,
+27 of the 30 compared items match, 4 findings (one is the plan's 3 exit signs not matched to the LV's exit-sign item).
+
+Known limits: only items in pieces
 (`St`) are compared by count; the plan check uses a second AI provider (OpenAI) next to Claude and Voyage.
 
 ## Tech stack

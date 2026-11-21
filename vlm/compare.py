@@ -121,12 +121,98 @@ def llm_match(client, model, lv_rows: list[dict], plan: list[dict], idx: list[in
     return res.get("zuordnung", [])
 
 
+AREA_UNITS = {"m²", "m2", "qm"}
+
+ROOM_PROMPT = """Ordne Flächenpositionen eines Leistungsverzeichnisses (LV) den Räumen eines Bauplans zu.
+Eine Position kann mehrere Räume betreffen. Ordne nur zu, wenn der Text es nahelegt (Raumnamen wie Kinosaal oder
+Foyer, Nutzung, Gewerk), sonst lass die Liste leer. Nenne die Raumnamen exakt wie in der Raumliste.
+
+LV-Flächenpositionen (oz | Text | Menge):
+{lv}
+
+Räume (Name | Fläche):
+{rooms}
+
+Antworte NUR mit JSON: {{"zuordnung": [{{"oz": "...", "raeume": ["Raumname"], "sicherheit": "hoch|mittel|niedrig"}}]}}"""
+
+
+def _room_marker(r: dict, plan_id: str) -> dict:
+    return {"plan_id": plan_id, "seite": r.get("seite", 1), "x": round(float(r["x"]), 4), "y": round(float(r["y"]), 4),
+            "breite": round(float(r["breite"]), 4), "hoehe": round(float(r["hoehe"]), 4), "form": "rahmen",
+            "genauigkeit": "grob", "beschriftung": r["name"], "flaeche_m2": r.get("flaeche_m2")}
+
+
+def _assign_rooms(positions: list[dict], rooms: list[dict], plan_id: str, client, model) -> None:
+    """Area positions (m²) are not countable, so they get the frame(s) of the room(s) they belong to."""
+    from llm_common import chat_json
+
+    ok = [r for r in rooms if r.get("name") and all(isinstance(r.get(k), (int, float)) for k in ("x", "y", "breite", "hoehe"))]
+    area = [p for p in positions if p["plan"] is None and p["menge"] is not None
+            and str(p.get("einheit", "")).strip().lower() in AREA_UNITS]
+    if not (client and ok and area):
+        return
+    names = {r["name"] for r in ok}
+    prompt = ROOM_PROMPT.format(
+        lv="\n".join(f"{p['oz']} | {p['kurztext']} | {p['menge']:g} {p['einheit']}" for p in area),
+        rooms="\n".join(f"{r['name']} | {r.get('flaeche_m2') or '?'} m²" for r in ok))
+    votes: dict[tuple, int] = {}
+    for _ in range(3):  # majority vote, the answer varies between calls
+        for z in chat_json(client, model, [{"type": "text", "text": prompt}]).get("zuordnung", []):
+            sel = tuple(sorted(n for n in z.get("raeume", []) if n in names))
+            if sel and z.get("sicherheit") != "niedrig":
+                votes[(z.get("oz"), sel)] = votes.get((z.get("oz"), sel), 0) + 1
+    best: dict[str, tuple[tuple, int]] = {}
+    for (oz, sel), v in votes.items():
+        if v >= 2 and v > best.get(oz, ((), 0))[1]:
+            best[oz] = (sel, v)
+    by_name = {r["name"]: r for r in ok}
+    for pos in area:
+        if pos["oz"] in best:
+            sel = [by_name[n] for n in best[pos["oz"]][0]]
+            pos["plan"] = {"menge": sum(r.get("flaeche_m2") or 0 for r in sel) or None, "einheit": "m²",
+                           "zuordnung": "Raum", "raeume": [r["name"] for r in sel],
+                           "marker": [_room_marker(r, plan_id) for r in sel]}
+
+
+def _is_st(p: dict) -> bool:
+    return str(p.get("einheit", "")).strip().lower() in COUNT_UNITS and p["menge"] is not None
+
+
+def _match_run(positions: list[dict], plan: list[dict], client, model):
+    """Match ONE plan run to the LV: deterministic first (codes, dimensions), then the LLM for the rest."""
+    by_oz = {p["oz"]: p for p in positions}
+    matches: dict[str, tuple[list[int], str]] = {}
+    other_unit: dict[str, list[int]] = {}
+    used: set[int] = set()
+    for pos in positions:
+        if not _is_st(pos):
+            continue
+        hits, how = match({"kurztext": pos.get("kurztext", ""), "codes": codes(pos.get("kurztext", ""))}, plan)
+        if hits:
+            matches[pos["oz"]] = (hits, how)
+            used.update(hits)
+    open_plan = [i for i, p in enumerate(plan) if i not in used and p["anzahl"]]
+    open_lv = [p for p in positions if p["oz"] not in matches and p["menge"] is not None]
+    if client and open_plan and open_lv:
+        for z in llm_match(client, model, open_lv, plan, open_plan):
+            pos = by_oz.get(z.get("oz"))
+            hits = [i for i in z.get("plan_indizes", []) if i in open_plan and i not in used]
+            if not pos or not hits or z.get("sicherheit") == "niedrig":
+                continue
+            used.update(hits)
+            if _is_st(pos):
+                matches[pos["oz"]] = (hits, "KI-Zuordnung")
+            else:
+                other_unit[pos["oz"]] = hits
+    return matches, other_unit, used
+
+
 def build_result(lv: dict, plan_runs: list[list[dict]] | None, plan_meta: dict | None,
-                 client=None, model=None) -> dict:
+                 client=None, model=None, rooms: list[dict] | None = None) -> dict:
     positions = [dict(p) for p in lv["positionen"]]
     for p in positions:
         p["menge"] = float(p["menge"]) if p.get("menge") not in (None, "") else None
-        p.update({"pruefung": "nicht_geprueft", "befund_ids": []})
+        p.update({"pruefung": "nicht_geprueft", "befund_ids": [], "plan": None})
     findings: list[dict] = []
 
     def add(**kw):
@@ -136,50 +222,24 @@ def build_result(lv: dict, plan_runs: list[list[dict]] | None, plan_meta: dict |
         return f["id"]
 
     if plan_runs is not None:
-        plan = plan_items(plan_runs)
         pid = plan_meta["id"]
-        is_st = lambda p: str(p.get("einheit", "")).strip().lower() in COUNT_UNITS and p["menge"] is not None
-        by_oz = {p["oz"]: p for p in positions}
-        matches: dict[str, tuple[list[int], str]] = {}
-        other_unit: dict[str, list[int]] = {}
-        used: set[int] = set()
-
-        # Stage 1: deterministic (plan codes like F1-F4, then dimensions)
-        for pos in positions:
-            if not is_st(pos):
-                continue
-            hits, how = match({"kurztext": pos.get("kurztext", ""), "codes": codes(pos.get("kurztext", ""))}, plan)
-            if hits:
-                matches[pos["oz"]] = (hits, how)
-                used.update(hits)
-
-        # Stage 2: the LLM matches the rest (only the unsure ones), any unit
-        open_plan = [i for i, p in enumerate(plan) if i not in used and p["anzahl"]]
-        open_lv = [p for p in positions if p["oz"] not in matches and p["menge"] is not None]
-        if client and open_plan and open_lv:
-            votes: dict[tuple, int] = {}
-            for _ in range(3):  # majority vote: the LLM answer varies between calls
-                for z in llm_match(client, model, open_lv, plan, open_plan):
-                    if z.get("plan_indizes") and z.get("sicherheit") != "niedrig":
-                        key = (z.get("oz"), tuple(sorted(z["plan_indizes"])))
-                        votes[key] = votes.get(key, 0) + 1
-            for (oz_, idxs), v in sorted(votes.items()):
-                pos = by_oz.get(oz_)
-                hits = [i for i in idxs if i in open_plan and i not in used]
-                if v < 2 or not pos or not hits:
-                    continue
-                used.update(hits)
-                if is_st(pos):
-                    matches[pos["oz"]] = (hits, "KI-Zuordnung")
-                else:
-                    other_unit[pos["oz"]] = hits
+        nr = len(plan_runs)
+        need = (nr + 1) // 2  # a result counts if at least half of the runs agree on it
+        # Each run is matched to the LV on its own (the model names the same part differently in each run),
+        # then the outcome per LV position is combined over the runs.
+        per_run = []
+        for r in plan_runs:
+            plan = plan_items([r])
+            per_run.append((plan, *_match_run(positions, plan, client, model)))
+        tol = lambda med: max(1.0, 0.05 * med)
 
         for pos in positions:
-            if not is_st(pos):
+            if not _is_st(pos):
                 continue
             oz, txt = pos["oz"], pos["kurztext"]
             row_codes = codes(txt)
-            if oz not in matches:
+            found = [(plan, m[oz]) for plan, m, o, u in per_run if oz in m]
+            if len(found) < need:
                 has_code = bool(row_codes)
                 bid = add(
                     oz=oz, art="nicht_im_plan", schwere="fehler" if has_code else "hinweis",
@@ -197,10 +257,12 @@ def build_result(lv: dict, plan_runs: list[list[dict]] | None, plan_meta: dict |
                 pos["pruefung"] = "nicht_im_plan"
                 pos["befund_ids"].append(bid)
                 continue
-            hits, how = matches[oz]
-            sel = [plan[i] for i in hits]
-            n = sum(p["anzahl"] for p in sel)
-            stable = all(p["stabil"] for p in sel)
+            counts = [sum(plan[i]["anzahl"] for i in hits) for plan, (hits, how) in found]
+            n = statistics.median(counts)
+            stable = len(found) == nr and (max(counts) - min(counts)) <= tol(n)
+            plan0, (hits0, how) = found[0]
+            sel = [plan0[i] for i in hits0]
+            pos["plan"] = {"menge": n, "einheit": "St", "zuordnung": how, "marker": _markers(sel, pid)}
             if n == pos["menge"] and stable:
                 pos["pruefung"] = "ok"
                 continue
@@ -209,10 +271,9 @@ def build_result(lv: dict, plan_runs: list[list[dict]] | None, plan_meta: dict |
                 bid = add(
                     oz=oz, art="instabile_zaehlung", schwere="hinweis",
                     titel="Planzahl stimmt, schwankt aber zwischen den Läufen",
-                    beschreibung=(f"{oz} „{txt}“: LV und Plan nennen {_fmt(n)} {pos['einheit']}, die Zählung "
-                                  f"am Plan war aber nicht in allen Läufen gleich "
-                                  f"({', '.join(_fmt(v) for p in sel for v in p['laeufe'])}). "
-                                  "Zahl bitte kurz am Plan prüfen."),
+                    beschreibung=(f"{oz} „{txt}“: LV und Plan nennen {_fmt(n)} {pos['einheit']}. Die Zählung am Plan "
+                                  f"war aber nicht in allen Läufen gleich ({', '.join(_fmt(v) for v in counts)}; "
+                                  f"in {len(found)} von {nr} Läufen zugeordnet). Zahl bitte kurz am Plan prüfen."),
                     lv={"menge": pos["menge"], "einheit": pos["einheit"]}, plan={"menge": n},
                     regel="stueckzahl_vergleich", quelle="vlm", konfidenz="niedrig",
                     marker=_markers(sel, pid))
@@ -237,9 +298,14 @@ def build_result(lv: dict, plan_runs: list[list[dict]] | None, plan_meta: dict |
             pos["pruefung"] = "abweichung"
             pos["befund_ids"].append(bid)
 
-        for oz, hits in other_unit.items():
-            pos, sel = by_oz[oz], [plan[i] for i in hits]
-            n = sum(p["anzahl"] for p in sel)
+        for oz in sorted({oz for _, _, o, _ in per_run for oz in o}):
+            found = [(plan, o[oz]) for plan, m, o, u in per_run if oz in o]
+            if len(found) < need:
+                continue
+            pos, plan0, hits0 = next(p for p in positions if p["oz"] == oz), found[0][0], found[0][1]
+            sel = [plan0[i] for i in hits0]
+            n = statistics.median(sum(plan[i]["anzahl"] for i in hits) for plan, hits in found)
+            pos["plan"] = {"menge": n, "einheit": "St", "zuordnung": "KI-Zuordnung", "marker": _markers(sel, pid)}
             bid = add(
                 oz=oz, art="einheit_nicht_vergleichbar", schwere="hinweis",
                 titel=f"Plan zählt Stück, LV rechnet in {pos['einheit']}",
@@ -253,9 +319,20 @@ def build_result(lv: dict, plan_runs: list[list[dict]] | None, plan_meta: dict |
             pos["pruefung"] = "einheit_nicht_vergleichbar"
             pos["befund_ids"].append(bid)
 
-        for i, p in enumerate(plan):
-            if i in used or not p["anzahl"]:
+        _assign_rooms(positions, rooms or [], pid, client, model)
+
+        # Plan parts without an LV position: keep those that stay unmatched in at least half of the runs
+        norm = lambda s: re.sub(r"\W+", "", s.lower())
+        presence: dict[str, list[tuple[int, dict]]] = {}
+        for ri, (plan, m, o, used) in enumerate(per_run):
+            for i, p in enumerate(plan):
+                if i not in used and p["anzahl"]:
+                    presence.setdefault(norm(p["typ"] or p["name"]), []).append((ri, p))
+        for key, entries in presence.items():
+            if len({ri for ri, _ in entries}) < need:
                 continue
+            p = dict(entries[0][1])
+            p["anzahl"] = statistics.median(q["anzahl"] for _, q in entries)
             label = f"{p['kategorie']} {p['typ']} {p['name']}".strip()
             add(
                 oz=None, art="fehlt_im_lv", schwere="hinweis" if not p["typ"] else "risiko",

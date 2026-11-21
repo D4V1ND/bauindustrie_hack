@@ -290,11 +290,15 @@ Written by `lv price … --plan <plan>`. The shape is the VLM prototype's (`vlm/
 | Field | Meaning |
 |---|---|
 | `eingaben` | the LV file and the plan (`id`, `datei`, `breite_px`, `hoehe_px`) |
-| `positionen[]` | the LV's items: `oz`, `gruppe`, `kurztext`, `menge`, `einheit`, plus `pruefung` (`ok`, `ok_instabil`, `abweichung`, `nicht_im_plan`, `einheit_nicht_vergleichbar`, `nicht_geprueft`) and `befund_ids` |
+| `positionen[]` | the LV's items: `oz`, `gruppe`, `kurztext`, `menge`, `einheit`, plus `pruefung` (`ok`, `ok_instabil`, `abweichung`, `nicht_im_plan`, `einheit_nicht_vergleichbar`, `nicht_geprueft`), `befund_ids`, and `plan`: `null` when the item cannot be located, else `menge`, `einheit`, `zuordnung` (`Plankürzel`, `KI-Zuordnung` or `Raum`), `marker[]` and, for items in m2, `raeume` |
 | `befunde[]` | findings: `id`, `oz` (null for a plan component missing in the LV), `art`, `schwere` (`fehler`, `risiko`, `hinweis`), `titel`, `beschreibung`, `lv` and `plan` quantities, `marker[]` with `x`, `y` relative to the plan image (0 to 1, from the top left; `breite` and `hoehe` for a frame), and `entscheidung` (`status: "offen"`, for the estimator) |
 | `zusammenfassung` | number of findings per `schwere`, and how many items were compared |
 
-Join it to `<project>.json` on `oz`. Show a finding's markers on the plan image when its item is selected.
+Join it to `<project>.json` on `oz`. Show an item's `plan.marker` (or a finding's `marker`) on the plan image when it is
+selected: pixel = `x × breite_px`, `y × hoehe_px`.
+
+Next to it, `<project>__<plan>_uebersicht.png` and `.xlsx` hold the same result as a fixed overview: the plan with
+every located item numbered and a legend, and a spreadsheet of all items.
 
 ## Rules for showing results
 
