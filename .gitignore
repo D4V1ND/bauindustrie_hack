@@ -22,3 +22,4 @@ vlm/plans/*
 vlm/.venv/
 vlm/out/
 .vercel
+.env*
