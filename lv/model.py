@@ -6,6 +6,39 @@ from typing import Literal
 from pydantic import BaseModel, computed_field
 
 
+class Source(BaseModel):
+    """One past line item behind a prediction, or shown next to it as a reference."""
+    id: str  # a line item in the price library
+    unit_price: float
+    verdict: Literal["exact", "same", "size_only", "type_only"]  # "exact": same group label, no judge needed
+    difference: str = ""
+
+
+class Prediction(BaseModel):
+    """Step 3: what the lookup in the price library found for one line item (SPEC.md, step 3)."""
+    method: Literal["copied", "similar", "adjusted", "reference", "none"]
+    min: float | None = None
+    max: float | None = None
+    median: float | None = None  # the value used for totals
+    mean: float | None = None
+    count: int = 0  # number of past prices behind min, max, median and mean
+    sources: list[Source] = []
+    rule: str | None = None  # rule, calculation and result: only for "adjusted"
+    calculation: str | None = None
+    result: float | None = None
+    reason: str = ""
+
+
+class MethodSum(BaseModel):
+    items: int
+    total: float  # sum of median x quantity over the normal items
+
+
+class Summary(BaseModel):
+    methods: dict[str, MethodSum]
+    total: float
+
+
 class LineItem(BaseModel):
     id: str  # project + "/" + oz, unique across all projects
     oz: str
@@ -19,6 +52,7 @@ class LineItem(BaseModel):
     kind: Literal["normal", "optional"] = "normal"
     read_by: Literal["gaeb", "ai"] = "gaeb"
     group: str = ""  # step 1: the same label for every exact match, inside one LV and across the price library
+    prediction: Prediction | None = None  # step 3; never written into unit_price
 
 
 class LV(BaseModel):
@@ -27,6 +61,7 @@ class LV(BaseModel):
     date: date | None
     source_file: str
     items: list[LineItem]
+    summary: Summary | None = None  # step 3: items and sums per method, and the project total
 
     @computed_field
     @property

@@ -118,7 +118,11 @@ Test command for every task: `.venv\Scripts\python.exe -m pytest`
 
 Built before tasks 6 and 7: step 3 does not need trades or item types.
 
-- [ ] **Task 8: Prediction shapes, copied prices and the total** (medium)
+- [x] **Task 8: Prediction shapes, copied prices and the total** (medium)
+  - Measured: 160 of 248 items (65%) of P2's `.X83` get a copied price from P2's `.D86`. 156 of them are exactly
+    the item's own price. The other 4 are two pairs of identical items that P2 itself priced differently
+    (19.60 and 21.00; 236.47 and 610.86 for 318 m and 18 m of the same pipe): range and median show both prices.
+    The 88 items without a copy are worded differently in the two files (see the spec, known limits).
   - Does: adds the `prediction` and `summary` shapes, copies prices from library items with the same `group` label,
     adds up the total, and makes `lv price` load `data/library/`, print the result and write it. With `--copy-only`
     the command stops here: no search, no AI.
