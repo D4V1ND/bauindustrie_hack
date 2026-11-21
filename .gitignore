@@ -1,0 +1,14 @@
+# Secrets - never commit
+.env
+*.env
+!.env.example
+
+# Local plan files for VLM tests
+vlm/plans/*
+!vlm/plans/.gitkeep
+
+# VLM local env and outputs
+vlm/.venv/
+vlm/out/
+.venv/
+__pycache__/
