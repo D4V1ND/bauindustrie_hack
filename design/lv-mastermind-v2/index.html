@@ -985,13 +985,17 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .pfs-b svg{width:15px;height:15px}
 .planfs{position:fixed;inset:0;z-index:36;display:grid;place-items:center;padding:28px}
 .planfs-bg{position:absolute;inset:0;background:color-mix(in srgb,var(--ink) 45%,transparent);backdrop-filter:blur(3px);animation:fadein .25s var(--ease)}
-.plan.big{position:relative;top:0;width:min(1500px,100%);max-height:100%;box-shadow:var(--shadow);animation:planpop .4s var(--ease)}
-.plan.big .plan-c{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:18px}
-.plan.big .plan-svg{width:auto;height:auto;max-width:100%;max-height:calc(100vh - 56px - 160px)}
-.plan.big .plan-h b{font-size:15px}
-.plan.big .plan-tip{font-size:13px}
+.plan.plan-full{position:relative;top:0;width:min(1500px,100%);max-height:100%;box-shadow:var(--shadow);animation:planpop .4s var(--ease)}
+.plan.plan-full .plan-c{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:18px}
+.plan.plan-full .plan-svg{width:auto;height:auto;max-width:100%;max-height:calc(100vh - 56px - 160px)}
+.plan.plan-full .plan-h b{font-size:15px}
+.plan.plan-full .plan-tip{font-size:13px}
 @keyframes planpop{from{opacity:0;transform:scale(.94) translateY(12px)}to{opacity:1;transform:none}}
 @keyframes fadein{from{opacity:0}to{opacity:1}}
+
+.plan-tip{letter-spacing:normal;text-transform:none;font-family:var(--sans)}
+.plan-tip .mono{font-family:var(--mono);letter-spacing:.04em}
+
 </style>
 </head>
 <body>
@@ -1396,7 +1400,7 @@ function vPlan(d, full) {
   });
   o += '</svg>';
   var hi = d.all.filter(function (r) { return PLAN[r.oz] && shown[r.oz]; }).length;
-  return '<aside class="plan' + (full ? ' big' : '') + '" aria-label="Bauplan' + (full ? ' Vollbild' : '') + '">' +
+  return '<aside class="plan' + (full ? ' plan-full' : '') + '" aria-label="Bauplan' + (full ? ' Vollbild' : '') + '">' +
     '<div class="plan-h"><div><span class="mono">Bauplan</span><b>A-102 · Grundriss</b></div>' +
       '<div class="plan-ctl"><div class="seg" role="group" aria-label="Geschoss">' + ['EG', '1.OG'].map(function (g) { return '<button class="' + (fl === g ? 'on' : '') + '" data-act="floor" data-v="' + g + '" aria-pressed="' + (fl === g) + '">' + g + '</button>'; }).join('') + '</div>' +
       (full ? '<button class="ic pfs-b" data-act="planFull" data-v="0" aria-label="Vollbild schließen" title="Schließen (Esc)">' + IC.x + '</button>' : '<button class="ic pfs-b" data-act="planFull" data-v="1" aria-label="Bauplan im Vollbild" title="Vollbild">' + IC.expand + '</button>') + '</div></div>' +
