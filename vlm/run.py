@@ -43,14 +43,17 @@ if __name__ == "__main__":
                 lambda: extract_positions(lv_path, client, model))
 
     plan_runs = plan_meta = None
+    rooms: list[dict] = []
     if a.plan:
         pp = Path(a.plan)
-        plan_runs = cached(OUT / f"{pp.stem}_laeufe{a.runs}.json", a.neu,
-                           lambda: extract_runs(pp, a.runs, client=client, model=model))
+        data = cached(OUT / f"{pp.stem}_laeufe{a.runs}.json", a.neu,
+                      lambda: dict(zip(("laeufe", "raeume"), extract_runs(pp, a.runs, client=client, model=model))))
+        # older cache files are a plain list of runs (no rooms)
+        plan_runs, rooms = (data, []) if isinstance(data, list) else (data["laeufe"], data.get("raeume", []))
         w, h = image_size(pp)
         plan_meta = {"id": pp.stem, "datei": pp.name, "breite_px": w, "hoehe_px": h}
 
-    result = build_result(lv, plan_runs, plan_meta, client, model)
+    result = build_result(lv, plan_runs, plan_meta, client, model, rooms)
     dest = OUT / f"{lv_path.stem}_ergebnis.json"
     dest.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
     z = result["zusammenfassung"]

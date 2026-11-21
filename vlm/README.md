@@ -15,3 +15,14 @@ Zwischenergebnisse werden in `out/` zwischengespeichert (`--neu` liest neu).
 
 Ausgabe `out/<lv>_ergebnis.json`: `eingaben`, `positionen` (mit `pruefung`, `befund_ids`), `befunde`
 (`beschreibung`, `marker` mit relativen x/y, `entscheidung`), `zusammenfassung`.
+
+## Koordinaten fuer das Frontend
+Jede Position in `positionen` hat das Feld `plan`: `null` (nicht im Plan verortbar) oder
+`{"menge", "einheit", "zuordnung", "marker": [...]}`. Ein Marker ist `{"plan_id", "seite", "x", "y", "form", "genauigkeit", "beschriftung"}`;
+`x`/`y` sind relativ (0..1, Ursprung oben links, Mittelpunkt), bei `"form": "rahmen"` kommen `breite`/`hoehe` dazu.
+Plan-Datei und Pixelgroesse stehen in `eingaben.plan`. Das Frontend zeichnet beim Klick auf eine Position deren Marker
+ueber den Plan (Umrechnung: `x * breite_px`, `y * hoehe_px`).
+
+Flaechenpositionen (m2) haben `plan.zuordnung = "Raum"`: Ihre Marker sind Rahmen (`form: "rahmen"`) um die zugeordneten
+Raeume (`plan.raeume`, `plan.menge` = Raumflaeche laut Plan, nur Info, kein Vergleich). Die Raeume liest `extract_plan.py`
+zusammen mit den Bauteilen aus (`raeume` in `out/<plan>_laeufe<N>.json`).

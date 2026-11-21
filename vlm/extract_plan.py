@@ -30,7 +30,13 @@ Antworte NUR mit JSON in diesem Format:
   "typ_bezeichnung": "...", "bezeichnung": "ausgeschriebener Name laut Legende", "masse": "...", "anzahl": 0,
   "geschoss": "...", "raum": "...", "quelle": "Liste|gezaehlt",
   "konfidenz": "hoch|mittel|niedrig", "bemerkung": "...",
-  "marker": [{"seite": 1, "x": 0.0, "y": 0.0}]}]}"""
+  "marker": [{"seite": 1, "x": 0.0, "y": 0.0}]}],
+ "raeume": [{"name": "Raumname wie im Plan, z. B. 1 Kinosaal", "flaeche_m2": 0.0, "seite": 1,
+             "x": 0.0, "y": 0.0, "breite": 0.0, "hoehe": 0.0}]}
+
+raeume: jeder Raum des Plans (Raumstempel). x, y = Mittelpunkt des Raums, breite/hoehe = Rahmen um den ganzen
+Raum innerhalb der Wände, alles relativ zur Bildgröße (0 bis 1, Ursprung oben links). flaeche_m2 nur, wenn im Plan
+angegeben, sonst null. Räume sind KEINE Bauteile und gehören nicht in positionen."""
 
 
 def page_images(path: Path, pages: list[int] | None, dpi: int) -> list[bytes]:
@@ -62,11 +68,13 @@ def extract_runs(path: Path, runs: int = 3, pages: list[int] | None = None, dpi:
         content.append({"type": "image_url",
                         "image_url": {"url": f"data:image/png;base64,{b64}", "detail": "high"}})
     print(f"{path.name}: {len(images)} Bild(er), {runs} Läufe", flush=True)
-    out = []
+    out, rooms = [], []
     for n in range(runs):
-        out.append(chat_json(client, model, content).get("positionen", []))
+        res = chat_json(client, model, content)
+        out.append(res.get("positionen", []))
+        rooms = rooms or res.get("raeume", [])  # rooms of the first run that has any
         print(f"  Lauf {n + 1}/{runs}: {len(out[-1])} Einträge", flush=True)
-    return out
+    return out, rooms
 
 
 if __name__ == "__main__":
@@ -78,10 +86,11 @@ if __name__ == "__main__":
     ap.add_argument("--dpi", type=int, default=150)
     a = ap.parse_args()
     plan = Path(a.plan)
-    runs = extract_runs(plan, a.runs, [int(p) for p in a.pages.split(",")] if a.pages else None, a.dpi)
+    runs, rooms = extract_runs(plan, a.runs, [int(p) for p in a.pages.split(",")] if a.pages else None, a.dpi)
     out = Path(__file__).parent / "out"
     out.mkdir(exist_ok=True)
-    (out / f"{plan.stem}.json").write_text(json.dumps(runs, ensure_ascii=False, indent=2), encoding="utf-8")
+    (out / f"{plan.stem}.json").write_text(
+        json.dumps({"laeufe": runs, "raeume": rooms}, ensure_ascii=False, indent=2), encoding="utf-8")
     cols = ["kategorie", "typ_bezeichnung", "bezeichnung", "masse", "anzahl", "geschoss", "raum",
             "quelle", "konfidenz", "bemerkung"]
     with open(out / f"{plan.stem}.csv", "w", newline="", encoding="utf-8-sig") as f:
