@@ -1615,56 +1615,8 @@ function vCost() {
   '</section>';
 }
 
-function dial(sc, ghost) {
-  sc = sc == null ? 72 : sc;
-  var cx = 130, cy = 128, r = 100;
-  var pt = function (v, rr) { var a = Math.PI * (1 - v / 100); return [(cx + rr * Math.cos(a)).toFixed(2), (cy - rr * Math.sin(a)).toFixed(2)]; };
-  var arc = function (a, b, rr) { var p = pt(a, rr), q = pt(b, rr); return 'M' + p[0] + ' ' + p[1] + ' A' + rr + ' ' + rr + ' 0 0 1 ' + q[0] + ' ' + q[1]; };
-  var o = '<svg class="dial" viewBox="0 0 260 142" role="img" aria-label="Bid-Score ' + sc + ' von 100. Bieten ab 60.">';
-  o += '<path class="rail r1" pathLength="1" d="' + arc(0, 39.4, r + 9) + '"/><path class="rail r2" pathLength="1" d="' + arc(40.6, 59.4, r + 9) + '"/><path class="rail r3" pathLength="1" d="' + arc(60.6, 100, r + 9) + '"/>';
-  o += '<path class="base" d="' + arc(0, 100, r) + '"/>';
-  for (var v = 0, n = 0; v <= 100; v += 2.5, n++) {
-    var mj = v % 10 === 0, a = pt(v, r), b = pt(v, r - (mj ? 10 : v % 5 === 0 ? 6 : 3));
-    o += '<line class="tk' + (mj ? ' mj' : '') + '" style="--i:' + n + '" x1="' + a[0] + '" y1="' + a[1] + '" x2="' + b[0] + '" y2="' + b[1] + '"/>';
-    if (v % 20 === 0) { var t = pt(v, r - 22); o += '<text class="tl" style="--i:' + n + '" x="' + t[0] + '" y="' + (+t[1] + 3) + '" text-anchor="middle">' + v + '</text>'; }
-  }
-  var z1 = pt(20, r + 20), z3 = pt(80, r + 20);
-  o += '<text class="zl" x="' + z1[0] + '" y="' + z1[1] + '" text-anchor="end" fill="var(--bad)">NO BID</text><text class="zl" x="' + z3[0] + '" y="' + z3[1] + '" fill="var(--ok)">BID</text>';
-  if (ghost != null) { var g = pt(ghost, r - 14); o += '<line class="ghost" x1="' + cx + '" y1="' + cy + '" x2="' + g[0] + '" y2="' + g[1] + '"><title>Vorher ' + ghost + '</title></line>'; }
-  o += '<g class="ndl" style="transform:rotate(' + ((sc - 50) * 1.8).toFixed(1) + 'deg)"><line x1="' + cx + '" y1="' + (cy + 10) + '" x2="' + cx + '" y2="' + (cy - r + 14) + '"/><circle cx="' + cx + '" cy="' + (cy - r + 14) + '" r="2.5"/></g>';
-  o += '<rect class="hub" x="' + (cx - 5) + '" y="' + (cy - 5) + '" width="10" height="10"/></svg>';
-  return o;
-}
-
 // weight of an item in the LV confidence: the backend's risk.value (live), else the price
 function cw(r) { return P.live ? (r.opt ? 0 : r.val || r.gp) : r.gp; }
-function bidLive() {
-  var d = derive(), rows = d.full.filter(function (r) { return !r.opt; }), n = rows.length || 1, npN = rows.filter(function (r) { return r.np; }).length, share = Math.round((n - npN) / n * 100), w = 0, c = 0;
-  rows.forEach(function (r) { var k = cw(r); w += k; c += k * (S.confirmed[r.oz] ? 100 : r.conf); });
-  var conf = w ? Math.round(c / w) : 0, size = d.tot >= 5e5 && d.tot <= 5e6, score = Math.round(0.5 * conf + 0.3 * share + 0.2 * (size ? 100 : 30));
-  return { score: score, f: [[size ? 'p' : 'm', size ? '+' : '–', 'Volumen ' + eur(Math.round(d.tot)) + (size ? ' passt in den Korridor 0,5–5 Mio. €' : ' liegt außerhalb des Korridors 0,5–5 Mio. €')],
-    [share >= 80 ? 'p' : 'm', share >= 80 ? '+' : '–', share + ' % der Positionen mit Preis aus der eigenen Preisbasis'],
-    [conf >= 70 ? 'p' : 'm', conf >= 70 ? '+' : '–', 'Konfidenz ' + conf + ' %, gewichtet mit dem Gesamtpreis'],
-    npN ? ['m', '–', npN + ' Positionen ohne Preis, zuerst bearbeiten'] : ['p', '+', 'Alle Positionen haben einen Preis']] };
-}
-function vBid() {
-  if (P.live) {
-    var B = bidLive(), verdict = B.score >= 60 ? 'Bieten empfohlen' : B.score >= 40 ? 'Genau prüfen' : 'Eher nicht bieten';
-    return '<section class="card bid rise" style="flex:1 1 360px;--d:260ms" aria-label="Bid / No Bid">' +
-      '<div class="card-h"><span class="mono"><b>[02]</b> Bid / No Bid</span><span class="mono">Größe · Abdeckung · Konfidenz</span></div>' +
-      '<div class="bid-head">' + dial(B.score) +
-      '<div class="bid-side"><div class="bid-n"><b data-count="' + B.score + '" data-dec="0">' + B.score + '</b><span>/ 100</span></div><span class="verdict2' + (B.score >= 60 ? '' : ' warn') + '"><i></i>' + verdict + '</span></div></div>' +
-      '<ul class="factors">' + B.f.map(function (x, i) { return '<li style="--i:' + i + '"><span class="sign ' + x[0] + '">' + x[1] + '</span><span>' + esc(x[2]) + '</span></li>'; }).join('') + '</ul></section>';
-  }
-  var f = [['p', '+', 'Projektgröße passt in euren Korridor (0,5–5 Mio. €)'], ['p', '+', '84 % der Positionen direkt aus eigener Preisbasis'], ['p', '+', 'Kalkulation 5,8 % unter prognostiziertem Zuschlag'], ['m', '–', '3 Positionen ohne Preis (Konfidenz 0 %), alle pauschal']];
-  return '<section class="card bid rise' + (S.analyzing ? ' scan' : '') + '" style="flex:1 1 360px;--d:260ms" aria-label="Bid / No Bid">' +
-    '<div class="card-h"><span class="mono"><b>[02]</b> Bid / No Bid</span><span class="mono">Vorher 66 · <b style="color:var(--ok)">▲ +6</b></span></div>' +
-    '<div class="bid-head">' + dial(72, 66) +
-    '<div class="bid-side"><div class="bid-n"><b data-count="72" data-dec="0">72</b><span>/ 100</span></div><span class="verdict2"><i></i>Bieten empfohlen</span></div></div>' +
-    '<ul class="factors">' + f.map(function (x, i) { return '<li style="--i:' + i + '"><span class="sign ' + x[0] + '">' + x[1] + '</span><span>' + x[2] + '</span></li>'; }).join('') + '</ul>' +
-  '</section>';
-}
-
 function vSummary(d) {
   var stats, parts = [['Neubau einer 4-gruppigen Kita in Massivbauweise, drei Geschosse, ca. 1.900 m² BGF. Das LV hat 1.284 Positionen in 11 Gewerken, aber nur 20 Positionen machen 80 % des Volumens aus. Kostentreiber sind die '],
     ['Holz-Alu-Fenster', '02.01.0010'], [', der '], ['Betonstahl', '01.02.0020'], [' und die '], ['Stahlbetonwände', '01.03.0040'],
@@ -1685,7 +1637,7 @@ function vSummary(d) {
   var drivers = (P.live ? d.full : d.all).slice().sort(function (a, b) { return b.gp - a.gp; }).slice(0, 5);
   if (!P.live) stats = [['', '812', 'Positionen 1:1 übernommen'], ['blue', '389', 'adaptiert'], ['warn', '83', 'unsicher, bitte prüfen'], ['', '38 → 9', 'Positionen bündelbar'], ['ok', '≈ 31.000 €', 'Nachtragspotenzial (4 Pos.)']];
   return '<section class="card sum rise' + (S.analyzing ? ' scan' : '') + '" style="flex:2 1 640px;--d:320ms" aria-label="Zusammenfassung">' +
-    '<div class="card-h"><span class="mono"><b>[03]</b> Zusammenfassung</span><span class="mono" style="display:flex;gap:6px;align-items:center;color:var(--signal)">' + IC.star + 'KI · jede Aussage mit Quelle</span></div>' +
+    '<div class="card-h"><span class="mono"><b>[02]</b> Zusammenfassung</span><span class="mono" style="display:flex;gap:6px;align-items:center;color:var(--signal)">' + IC.star + 'KI · jede Aussage mit Quelle</span></div>' +
     '<div class="sum2"><p class="sum-p">' + txt + '</p>' +
     '<div class="sum-drv"><div class="mono faint" style="margin-bottom:8px">Top-Kostentreiber</div>' +
       drivers.map(function (r, i) { return '<button class="drv" data-act="open" data-oz="' + r.oz + '"><span class="drv-t"><span>' + esc(r.kurz) + '</span><b style="font-weight:500">' + eur(r.gp) + '</b></span><span class="drv-bar"><i style="width:' + Math.round(r.gp / drivers[0].gp * 100) + '%;--i:' + i + '"></i></span></button>'; }).join('') +
@@ -1800,7 +1752,7 @@ function vTable(d) {
   var sum = d.rows.reduce(function (a, r) { return a + r.gp; }, 0);
   var okN = d.all.filter(function (r) { return S.confirmed[r.oz]; }).length;
   return '<section aria-label="Leistungsverzeichnis" class="rise" style="--d:380ms">' +
-    '<div class="lv-head"><div><div class="mono faint"><span style="color:var(--ink)">[04]</span> Leistungsverzeichnis</div><div class="lv-title">' + (isAll ? fmt(d.rows.length) + ' Positionen <small>· gesamtes LV</small>' : d.rows.length + ' wichtige Positionen <small>· von ' + fmt(d.full.length) + '</small>') + '</div>' +
+    '<div class="lv-head"><div><div class="mono faint"><span style="color:var(--ink)">[03]</span> Leistungsverzeichnis</div><div class="lv-title">' + (isAll ? fmt(d.rows.length) + ' Positionen <small>· gesamtes LV</small>' : d.rows.length + ' wichtige Positionen <small>· von ' + fmt(d.full.length) + '</small>') + '</div>' +
       '<div class="seg lv-scope" role="group" aria-label="Umfang"><button class="' + (isAll ? '' : 'on') + '" data-act="scope" data-v="key" aria-pressed="' + !isAll + '">Wichtige · ' + d.all.length + '</button><button class="' + (isAll ? 'on' : '') + '" data-act="scope" data-v="all" aria-pressed="' + isAll + '">Gesamtes LV · ' + fmt(d.full.length) + '</button></div></div>' +
       '<div class="lv-stats"><div class="lv-stat"><span class="mono">Bestätigt</span><b>' + okN + '<small> / ' + d.all.length + '</small></b><i class="lv-meter"><i style="width:' + (okN / d.all.length * 100) + '%"></i></i></div>' +
         '<div class="lv-stat"><span class="mono">Summe angezeigt</span><b>' + eur(sum) + '</b><i class="lv-meter"><i style="width:' + Math.min(100, sum / d.tot * 100) + '%;background:var(--ink)"></i></i></div></div></div>' +
@@ -2098,7 +2050,7 @@ function view() {
   if (S.home) return vHeader() + '<main>' + vStart() + '</main>' + vUpload() + vToast();
   var d = derive();
   return vHeader() + '<main>' + vHero(d) +
-    (S.tab === 'home' ? '<div class="grid2">' + vCost() + '</div><div class="grid2 row2">' + vBid() + vSummary(d) + '</div>' + vTable(d) : vKontext()) +
+    (S.tab === 'home' ? '<div class="grid2">' + vCost() + '</div><div class="grid2 row2">' + vSummary(d) + '</div>' + vTable(d) : vKontext()) +
     '</main>' + vDock(d) + vReport(d) + (S.planFull ? '<div class="planfs" data-k="planfs"><div class="planfs-bg" data-act="planFull" data-v="0"></div>' + vPlan(d, true) + '</div>' : '') + vDrawer(d) + vPreview(d) + vFx() + vUpload() + vToast();
 }
 
