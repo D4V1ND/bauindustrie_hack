@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -54,7 +54,7 @@ svg.i{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-widt
 @keyframes wmtwitch{0%,88%,100%{transform:rotate(0)}92%{transform:rotate(-9deg)}96%{transform:rotate(5deg)}}
 .brand-b:hover .wm-n{animation:wmswing .9s var(--spring)}
 @media (prefers-reduced-motion:reduce){.wm-n{animation:none!important}}
-.brand b{font-weight:600;letter-spacing:-.03em;font-size:16px}
+.brand b{font-weight:600;letter-spacing:-.03em;font-size:21px}
 .crumb{color:var(--ink-3)}
 .crumb a{color:var(--ink-2);text-decoration:none}.crumb a:hover{color:var(--signal)}
 .top-r{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
@@ -1233,10 +1233,10 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 // ================= data (mock, browser only) =================
 var D = (function () {
   var team = {
-    TB: { ini: 'TB', name: 'Thomas Berger', role: 'Oberkalkulator', color: 'var(--tm-tb)' },
-    LW: { ini: 'LW', name: 'Lena Wolf', role: 'Fenster & Fassade', color: 'var(--tm-lw)' },
-    MA: { ini: 'MA', name: 'Mehmet Arslan', role: 'Elektro / TGA', color: 'var(--tm-ma)' },
-    SK: { ini: 'SK', name: 'Sophie Krüger', role: 'Rohbau', color: 'var(--tm-sk)' }
+    TB: { ini: 'TB', name: 'Thomas Berger', role: 'Lead estimator', color: 'var(--tm-tb)' },
+    LW: { ini: 'LW', name: 'Lena Wolf', role: 'Windows & facade', color: 'var(--tm-lw)' },
+    MA: { ini: 'MA', name: 'Mehmet Arslan', role: 'Electrical / MEP', color: 'var(--tm-ma)' },
+    SK: { ini: 'SK', name: 'Sophie Krüger', role: 'Shell construction', color: 'var(--tm-sk)' }
   };
   var pos = [
     { oz: '04.05.0030', kurz: 'Beschallungsanlage Mehrzweck- und Gruppenräume', lang: 'Beschallungsanlage liefern, montieren und in Betrieb nehmen. Pauschal, komplett. Alle Anforderungen des Nutzers müssen erfüllt sein.', menge: 1, einheit: 'psch', gewerk: 'Elektro / TGA', ep: 0, risk: 91, mode: 'offen', conf: 0, why: 'Pauschal ohne Spezifikation, keine Referenz' },
@@ -1381,7 +1381,7 @@ var LVX = (function () {
 
 // ================= backend (lv/api.py) =================
 // P: the project shown. Demo data until a project from the API is loaded.
-var P = { live: false, id: 'P-2026-114', name: 'Neubau Kita Sonnenhof, München-Riem', short: 'Kita Sonnenhof' };
+var P = { live: false, id: 'P-2026-114', name: 'New build Sonnenhof daycare centre, Munich-Riem', short: 'Sonnenhof daycare' };
 var FLOORS = ['EG', '1.OG'], PLAN_VH = 700;
 var API = (function () {
   var q = null; try { q = new URLSearchParams(location.search).get('api'); } catch (e) {}
@@ -1396,7 +1396,7 @@ function api(path, opt, again) {
   var o = Object.assign({}, opt, { headers: Object.assign({}, opt.headers, pass() ? { 'X-Passcode': pass() } : {}) });
   return fetch(API + path, o).then(function (r) {
     if (r.status === 401 && !again) {
-      var p = window.prompt('Passcode für das Backend:');
+      var p = window.prompt('Backend passcode:');
       if (p && p.trim()) { store('lvm-passcode', p.trim()); return api(path, opt, true); }
     }
     return r.json().catch(function () { return {}; }).then(function (j) {
@@ -1407,11 +1407,13 @@ function api(path, opt, again) {
 }
 function store(k, v) { try { if (v === undefined) return JSON.parse(localStorage.getItem(k) || 'null'); localStorage.setItem(k, JSON.stringify(v)); } catch (e) { return null; } }
 var MODE = { copied: 'übernommen', similar: 'adaptiert', adjusted: 'adaptiert', reference: 'adaptiert', none: 'offen' };
-var WHY = { copied: 'Textgleich in Alt-LV', similar: 'Gleichwertige Position in Alt-LV', adjusted: 'Interpoliert aus Alt-LV', reference: 'Verwandte Positionen in Alt-LV (Median)', none: 'Keine Referenz in den Alt-LVs' };
-var VERD = { exact: 'textgleich', same: 'gleichwertig', size_only: 'andere Größe', type_only: 'gleiche Art', different: 'anders' };
+var WHY = { copied: 'Identical text in a past BoQ', similar: 'Equivalent item in a past BoQ', adjusted: 'Interpolated from past BoQs', reference: 'Related items in past BoQs (median)', none: 'No reference in past BoQs' };
+// display names for the internal mode keys (the keys also name CSS classes)
+var MODE_L = { 'übernommen': 'copied', adaptiert: 'adapted', offen: 'open', unsicher: 'uncertain' };
+var VERD = { exact: 'identical text', same: 'equivalent', size_only: 'different size', type_only: 'same type', different: 'different' };
 function gwName(it) {
   if (it.trade && it.trade !== 'Sonstiges') return it.trade;
-  var s = (it.section || [])[0] || it.trade || 'Ohne Abschnitt';
+  var s = (it.section || [])[0] || it.trade || 'No section';
   return s.replace(/^[\d.]+\s+/, '') || s;
 }
 function ownPrice(it) {
@@ -1428,9 +1430,9 @@ function suggest(pr) {
 }
 function toPos(it) {
   var pr = it.prediction || {}, rk = it.risk || {}, m = pr.method || 'none', own = ownPrice(it), med = pr.median || 0, conf = rk.confidence || 0;
-  var why = own != null ? 'Eigener Preis' : (WHY[m] || m);
-  if (own == null && m === 'none' && pr.min != null) why += ' · Spanne ' + eur(pr.min) + ' – ' + eur(pr.max);  // no price, only the span of differing items
-  if (rk.missing && rk.missing.length) why += ' · fehlt: ' + rk.missing[0];
+  var why = own != null ? 'Own price' : (WHY[m] || m);
+  if (own == null && m === 'none' && pr.min != null) why += ' · range ' + eur(pr.min) + ' – ' + eur(pr.max);  // no price, only the span of differing items
+  if (rk.missing && rk.missing.length) why += ' · missing: ' + rk.missing[0];
   if (it.plan && it.plan.status === 'differs') why = 'Plan ' + qty(it.plan.quantity || 0) + ' ' + (it.plan.unit || '') + ', LV ' + qty(it.quantity || 0) + ' · ' + why;
   var mode = MODE[m] || 'offen';
   if (mode !== 'offen' && conf < 50) mode = 'unsicher';
@@ -1440,22 +1442,22 @@ function toPos(it) {
 }
 function toRich(it, extra) {
   var pr = it.prediction || {}, rk = it.risk || {}, srcs = pr.sources || [], jd = pr.judged || [], R = {};
-  var proj = function (id) { return 'Alt-LV ' + String(id).split('/')[0]; };
+  var proj = function (id) { return 'Past BoQ ' + String(id).split('/')[0]; };
   srcs.concat(jd).forEach(function (s) {
     if (extra[s.id]) return;
     extra[s.id] = { oz: String(s.id).split('/').slice(1).join('/'), proj: proj(s.id), kurz: s.short_text, lang: s.why || s.difference || s.short_text, menge: 0, einheit: it.unit || '', ep: s.unit_price, note: s.why || s.difference || '' };
   });
   R.brief = pr.reason || rk.price_reason || '';
   if (rk.description_reason && rk.description !== 'complete') R.brief += (R.brief ? ' ' : '') + rk.description_reason;
-  R.segs = [[R.brief + (srcs.length ? ' Quelle: ' : '')]];
+  R.segs = [[R.brief + (srcs.length ? ' Source: ' : '')]];
   srcs.slice(0, 3).forEach(function (s, i) { if (i) R.segs.push([', ']); R.segs.push([s.short_text + ' (' + proj(s.id) + ', ' + eur(s.unit_price) + ')', s.id]); });
-  if (pr.method === 'adjusted') R.steps = [['Regel', pr.rule || '–'], ['Rechnung', pr.calculation || '–'], ['EP', eur(pr.result || pr.median || 0)]];
-  else if (pr.median) R.steps = srcs.slice(0, 4).map(function (s) { return ['EP ' + s.id, eur(s.unit_price)]; })
-    .concat(pr.count > 1 ? [['Spanne (' + pr.count + ' Preise)', eur(pr.min) + ' – ' + eur(pr.max)]] : []).concat([['EP (Median)', eur(pr.median)]]);
-  else if (pr.min != null) R.steps = jd.slice(0, 3).map(function (s) { return ['EP ' + s.id + ' (anders)', eur(s.unit_price)]; })
-    .concat([['Spanne · kein Preis', eur(pr.min) + ' – ' + eur(pr.max)]]);
-  else R.steps = [['Preis', 'keiner gefunden']];
-  R.steps.push(['Preisrisiko · Beschreibung', (rk.price_risk != null ? rk.price_risk : '–') + ' · ' + (rk.description || 'nicht geprüft')]);
+  if (pr.method === 'adjusted') R.steps = [['Rule', pr.rule || '–'], ['Calculation', pr.calculation || '–'], ['Unit price', eur(pr.result || pr.median || 0)]];
+  else if (pr.median) R.steps = srcs.slice(0, 4).map(function (s) { return ['Price ' + s.id, eur(s.unit_price)]; })
+    .concat(pr.count > 1 ? [['Range (' + pr.count + ' prices)', eur(pr.min) + ' – ' + eur(pr.max)]] : []).concat([['Unit price (median)', eur(pr.median)]]);
+  else if (pr.min != null) R.steps = jd.slice(0, 3).map(function (s) { return ['Price ' + s.id + ' (different)', eur(s.unit_price)]; })
+    .concat([['Range · no price', eur(pr.min) + ' – ' + eur(pr.max)]]);
+  else R.steps = [['Price', 'none found']];
+  R.steps.push(['Price risk · description', (rk.price_risk != null ? rk.price_risk : '–') + ' · ' + (rk.description || 'not checked')]);
   var seen = {}; R.similar = [];
   srcs.concat(jd).forEach(function (s) { if (seen[s.id]) return; seen[s.id] = 1; R.similar.push([s.id, VERD[s.verdict] || s.verdict]); });
   R.judge = pr.judge_call;
@@ -1474,20 +1476,20 @@ function loadLV(lv, st) {
   D = { team: D.team, pos: key, extra: extra, rich: rich };
   LVX = rest;
   TOTAL = (lv.summary && lv.summary.total) || pos.reduce(function (a, p) { return a + p.menge * p.ep; }, 0) || 1;
-  PLAN = {}; FLOORS = ['Blatt 1']; PLAN_VH = 700;
+  PLAN = {}; FLOORS = ['Sheet 1']; PLAN_VH = 700;
   var pl = lv.plan;
   if (pl && pl.width_px && pl.height_px) PLAN_VH = Math.round(1000 * pl.height_px / pl.width_px);
   if (pl) items.forEach(function (it) {
     var mk = it.plan && (it.plan.markers || []).filter(function (m) { return (m.page || 1) === 1; })[0];
-    if (mk) PLAN[it.oz] = [Math.round(mk.x * 1000), Math.round(mk.y * PLAN_VH), 'Blatt 1'];
+    if (mk) PLAN[it.oz] = [Math.round(mk.x * 1000), Math.round(mk.y * PLAN_VH), 'Sheet 1'];
   });
   var meth = (lv.summary && lv.summary.methods) || {}, n = function (k) { return (meth[k] || {}).items || 0; };
   var lib = '';
-  ((st && st.log) || []).forEach(function (l) { var m = /price library: (\d+) line items with a price from (\d+) project/.exec(l); if (m) lib = m[2] + ' Alt-LVs · ' + fmt(+m[1]) + ' bepreiste Positionen'; });
+  ((st && st.log) || []).forEach(function (l) { var m = /price library: (\d+) line items with a price from (\d+) project/.exec(l); if (m) lib = m[2] + ' past BoQs · ' + fmt(+m[1]) + ' priced items'; });
   var meta = store('lvm-meta-' + lv.project) || {};
   var gws = {}; pos.forEach(function (p) { gws[p.gewerk] = 1; });
   P = { live: true, id: lv.project, name: meta.name || lv.name || lv.project, short: meta.name || lv.name || lv.project, file: lv.source_file || '', date: lv.date,
-    deadline: meta.deadline || '', lib: lib || 'Preisbibliothek des Backends', n: items.length, gewerke: Object.keys(gws).length,
+    deadline: meta.deadline || '', lib: lib || 'Backend price library', n: items.length, gewerke: Object.keys(gws).length,
     methods: { copied: n('copied'), similar: n('similar'), adjusted: n('adjusted'), reference: n('reference'), none: n('none') },
     risk: lv.risk_summary || {}, plan: pl || null, priced: lv.priced };
 }
@@ -1497,7 +1499,7 @@ function slug(s) { return String(s).replace(/[^\wäöüÄÖÜß-]+/g, '_').repla
 var S = { tab: 'home', filter: 'all', sel: null, q: '', sort: { k: 'conf', d: 1 }, density: 'compact', group: false, gewerk: '', owner: '',
   picked: {}, owners: {}, confirmed: {}, bundled: {}, collapsed: {}, toast: null, dtab: '', sugg: {}, editEp: false, epDraft: '', eps: {},
   accepted: {}, justOk: {}, comments: {}, cmt: '', notes: {}, noteDraft: '', compose: null, seqs: {}, chats: {}, draft: '', thinking: false,
-  preview: null, fx: null, holding: false, analyzing: false, analyzed: 'heute, 08:47 · vor 12 Min.', flashEp: 0, focusEp: false,
+  preview: null, fx: null, holding: false, analyzing: false, analyzed: 'today, 08:47 · 12 min ago', flashEp: 0, focusEp: false,
   scope: 'key', lvLimit: 60, mg: {}, planShow: null };
 // plan panel next to the table: open by default when there is a plan; the toolbar toggle is remembered per project
 function hasPlan() { return !!(P.plan || !P.live); }
@@ -1505,13 +1507,15 @@ function planShown() { return hasPlan() && (S.planShow === null || S.planShow ==
 
 // ================= helpers =================
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-function fmt(n, d) { return new Intl.NumberFormat('de-DE', { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 }).format(n); }
-function eur(n) { return fmt(n, n < 1000 ? 2 : 0) + ' €'; }
+function fmt(n, d) { return new Intl.NumberFormat('en-GB', { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 }).format(n); }
+function eur(n) { return (n < 0 ? '−€' : '€') + fmt(Math.abs(n), Math.abs(n) < 1000 ? 2 : 0); }
+// price typed by a person: "1,380.50" or "1380.5"; a lone comma with 1 or 2 decimals ("12,5") counts as a decimal point
+function num(v) { var s = String(v).replace(/[\s€]/g, ''); if (/,\d{1,2}$/.test(s) && s.indexOf('.') < 0) s = s.replace(',', '.'); return parseFloat(s.replace(/,/g, '')); }
 function qty(n) { return n % 1 === 0 ? fmt(n, 0) : fmt(n, 1); }
 function rk(r) { return r >= 70 ? 'hi' : r >= 40 ? 'mid' : 'lo'; }
 // confidence -> colour class (red below 50 %, amber below 75 %, grey above)
 function ck(c) { return c === 0 ? 'hi zero' : c < 50 ? 'hi' : c < 75 ? 'mid' : 'lo'; }
-function pct(d) { return (d >= 0 ? '+' : '−') + fmt(Math.abs(d), Math.abs(d) < 10 ? 1 : 0) + ' %'; }
+function pct(d) { return (d >= 0 ? '+' : '−') + fmt(Math.abs(d), Math.abs(d) < 10 ? 1 : 0) + '%'; }
 var IC = {
   expand: '<svg class="i" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>',
   pin: '<svg class="i" viewBox="0 0 24 24"><path d="M12 21s-6-5.6-6-11a6 6 0 1 1 12 0c0 5.4-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></svg>',
@@ -1600,13 +1604,13 @@ function segs(arr) {
 // ================= views =================
 function vHeader() {
   return '<header class="top"><div class="top-in">' +
-    '<div class="brand"><button class="brand-b" data-act="home" aria-label="Startseite"><b class="wm">need<svg class="wm-n" viewBox="0 0 8 24" aria-hidden="true"><path fill-rule="evenodd" d="M2.60 23.60L4.21 18.89L6.39 1.73A1.00 1.00 0 0 0 4.41 1.47L2.22 18.63ZM5.57 3.13L5.00 7.60L4.29 7.51L4.85 3.04Z"/></svg>e</b></button><span class="crumb">/ <span class="pmw"><button class="crumb-b" data-act="projects" aria-expanded="' + !!S.projOpen + '">Projekte' + IC.chev + '</button>' + vProjMenu() + '</span> /</span>' + (S.home ? '<span>Neues LV</span>' : '<span>' + esc(P.short) + '</span>') + '</div>' +
+    '<div class="brand"><button class="brand-b" data-act="home" aria-label="Home"><b class="wm">need<svg class="wm-n" viewBox="0 0 8 24" aria-hidden="true"><path fill-rule="evenodd" d="M2.60 23.60L4.21 18.89L6.39 1.73A1.00 1.00 0 0 0 4.41 1.47L2.22 18.63ZM5.57 3.13L5.00 7.60L4.29 7.51L4.85 3.04Z"/></svg>e</b></button><span class="crumb">/ <span class="pmw"><button class="crumb-b" data-act="projects" aria-expanded="' + !!S.projOpen + '">Projects' + IC.chev + '</button>' + vProjMenu() + '</span> /</span>' + (S.home ? '<span>New BoQ</span>' : '<span>' + esc(P.short) + '</span>') + '</div>' +
     '<div class="top-r">' +
-      (S.home ? '' : '<button class="btn btn-primary" data-act="newProj">' + IC.plus + 'Neues Projekt</button>') +
+      (S.home ? '' : '<button class="btn btn-primary" data-act="newProj">' + IC.plus + 'New project</button>') +
     '</div></div></header>';
 }
 
-function deDate(s) { var t = new Date(s); return isNaN(t) ? String(s) : t.toLocaleDateString('de-DE'); }
+function deDate(s) { var t = new Date(s); return isNaN(t) ? String(s) : t.toLocaleDateString('en-GB'); }
 function daysTo(s) { return Math.max(0, Math.ceil((new Date(s) - new Date()) / 864e5)); }
 function vHero(d) {
   return '<div class="hero rise">' +
@@ -1620,19 +1624,19 @@ function vHero(d) {
 function vMenu(id, cur, up) {
   if (S.menu !== id) return '';
   var keys = id === 'owner' ? TEAM.concat(['']) : TEAM;
-  return '<div class="menu' + (up ? ' up' : '') + '" role="menu" data-k="m' + id + '"><div class="menu-h mono">' + (id === 'bulk' ? 'Ausgewählte zuweisen an' : 'Zuständig für diese Position') + '</div>' +
+  return '<div class="menu' + (up ? ' up' : '') + '" role="menu" data-k="m' + id + '"><div class="menu-h mono">' + (id === 'bulk' ? 'Assign selected to' : 'Owner of this item') + '</div>' +
     keys.map(function (k) {
       var on = k === cur, m = T[k];
       return '<button class="mi' + (on ? ' on' : '') + (k ? '' : ' none') + '" role="menuitemradio" aria-checked="' + on + '" data-act="menuPick" data-menu="' + id + '" data-v="' + k + '">' +
-        (k ? '<span class="av" style="background:' + m.color + '">' + k + '</span><span class="mt">' + m.name + '<small>' + m.role + '</small></span>' : '<span class="av none">–</span><span class="mt">Niemand zugewiesen</span>') +
+        (k ? '<span class="av" style="background:' + m.color + '">' + k + '</span><span class="mt">' + m.name + '<small>' + m.role + '</small></span>' : '<span class="av none">–</span><span class="mt">Unassigned</span>') +
         (on ? '<span class="chk">' + IC.tick + '</span>' : '') + '</button>';
     }).join('') + '</div>';
 }
 
 function confLvl(v) { return v >= 75 ? 'hi' : v >= 50 ? 'mid' : 'lo'; }
-function confWord(v) { return v >= 75 ? 'hoch' : v >= 50 ? 'mittel' : 'niedrig'; }
+function confWord(v) { return v >= 75 ? 'high' : v >= 50 ? 'medium' : 'low'; }
 function cmeter(v, n) {
-  var on = Math.round(v / 100 * n), o = '<span class="cmeter ' + confLvl(v) + '" role="img" aria-label="Konfidenz ' + v + ' %">';
+  var on = Math.round(v / 100 * n), o = '<span class="cmeter ' + confLvl(v) + '" role="img" aria-label="Confidence ' + v + '%">';
   for (var i = 0; i < n; i++) o += '<i' + (i < on ? ' class="on"' : '') + ' style="--i:' + i + '"></i>';
   return o + '</span>';
 }
@@ -1649,10 +1653,10 @@ function priceRange(rows) {
   return { lo: lo, hi: hi, sgN: sgN, openN: openN };
 }
 function moneyRange(a, b) {
-  if (Math.round(a) === Math.round(b)) { var one = b >= 1e6 ? [fmt(b / 1e6, 2), 'Mio. €'] : b >= 1e5 ? [fmt(b / 1e3, 0), 'Tsd. €'] : [fmt(Math.round(b)), '€']; return one; }
-  if (b >= 1e6) return [fmt(a / 1e6, 2) + ' – ' + fmt(b / 1e6, 2), 'Mio. €'];
-  if (b >= 1e5) return [fmt(a / 1e3, 0) + ' – ' + fmt(b / 1e3, 0), 'Tsd. €'];
-  return [fmt(Math.round(a)) + ' – ' + fmt(Math.round(b)), '€'];
+  if (Math.round(a) === Math.round(b)) return b >= 1e6 ? ['€' + fmt(b / 1e6, 2), 'million'] : b >= 1e5 ? ['€' + fmt(b / 1e3, 0), 'thousand'] : ['€' + fmt(Math.round(b)), ''];
+  if (b >= 1e6) return ['€' + fmt(a / 1e6, 2) + ' – ' + fmt(b / 1e6, 2), 'million'];
+  if (b >= 1e5) return ['€' + fmt(a / 1e3, 0) + ' – ' + fmt(b / 1e3, 0), 'thousand'];
+  return ['€' + fmt(Math.round(a)) + ' – ' + fmt(Math.round(b)), ''];
 }
 function vCost() {
   var d0 = derive(), all = P.live ? d0.full : d0.all, w = 0, c = 0;
@@ -1665,17 +1669,17 @@ function vCost() {
     else if (r.method === 'similar' || r.method === 'reference' || r.method === 'none') cnt.similar++;
     else cnt.copied++;
   });
-  var boxes = [['hi', cnt.copied, 'Aus altem LV übernommen', 'Gleicher Text in einem früheren LV, Preis 1:1'],
-    ['hi', cnt.similar, 'Ähnliche Position aus altem LV', 'Gleichwertige Leistung, Preis übernommen'],
-    ['mid', cnt.adjusted, 'Angepasst (Größe/Material)', 'Aus ähnlichen Positionen umgerechnet'],
-    ['lo', cnt.open, 'Noch kein Preis, bitte prüfen', R.sgN ? 'Nur ein Vorschlag aus verwandten Positionen' : 'Keine passende Position in den alten LVs']];
-  return '<section class="card cost rise' + (S.analyzing ? ' scan' : '') + '" style="flex:1 1 100%;--d:200ms" aria-label="Kostenschätzung">' +
-    '<div class="card-h"><span class="mono"><b>01</b> Kostenschätzung</span><span class="mono">' + (P.live ? esc(P.lib) : '3 Alt-LVs · 9.120 bepreiste Positionen') + '</span></div>' +
+  var boxes = [['hi', cnt.copied, 'Copied from a past BoQ', 'Same text in an earlier BoQ, price 1:1'],
+    ['hi', cnt.similar, 'Similar item from a past BoQ', 'Equivalent work, price carried over'],
+    ['mid', cnt.adjusted, 'Adjusted (size/material)', 'Converted from similar items'],
+    ['lo', cnt.open, 'No price yet, please check', R.sgN ? 'Only a suggestion from related items' : 'No matching item in past BoQs']];
+  return '<section class="card cost rise' + (S.analyzing ? ' scan' : '') + '" style="flex:1 1 100%;--d:200ms" aria-label="Cost estimate">' +
+    '<div class="card-h"><span class="mono"><b>01</b> Cost estimate</span><span class="mono">' + (P.live ? esc(P.lib) : '3 past BoQs · 9,120 priced items') + '</span></div>' +
     '<div class="cost-main"><div class="est"><span class="big rng">' + rg[0] + ' <small>' + rg[1] + '</small></span></div>' +
-    '<div class="estconf"><div class="conf-h"><span class="conf-l">Konfidenz<small>Wie sicher die Preise sind, gewichtet nach Volumen</small></span><span class="conf-v ' + confLvl(conf) + '" data-k="cv' + conf + '"><b>' + conf + ' %</b>' + confWord(conf) + '</span></div>' +
+    '<div class="estconf"><div class="conf-h"><span class="conf-l">Confidence<small>How certain the prices are, weighted by value</small></span><span class="conf-v ' + confLvl(conf) + '" data-k="cv' + conf + '"><b>' + conf + '%</b>' + confWord(conf) + '</span></div>' +
       cmeter(conf, 50) + '<div class="conf-s"><span>0</span><span>50</span><span>100</span></div></div></div>' +
-    '<div class="srcs" role="list" aria-label="Woher die Preise kommen">' + boxes.map(function (b) {
-      return '<div class="src ' + b[0] + '" role="listitem"><b>' + fmt(b[1]) + '</b><span class="src-l">' + b[2] + '</span><small>' + b[3] + ' · ' + Math.round(b[1] / n * 100) + ' % der Positionen</small></div>';
+    '<div class="srcs" role="list" aria-label="Where the prices come from">' + boxes.map(function (b) {
+      return '<div class="src ' + b[0] + '" role="listitem"><b>' + fmt(b[1]) + '</b><span class="src-l">' + b[2] + '</span><small>' + b[3] + ' · ' + Math.round(b[1] / n * 100) + '% of items</small></div>';
     }).join('') + '</div>' +
   '</section>';
 }
@@ -1683,28 +1687,28 @@ function vCost() {
 // weight of an item in the LV confidence: the backend's risk.value (live), else the price
 function cw(r) { return P.live ? (r.opt ? 0 : r.val || r.gp) : r.gp; }
 function vSummary(d) {
-  var stats, parts = [['Neubau einer 4-gruppigen Kita in Massivbauweise, drei Geschosse, ca. 1.900 m² BGF. Das LV hat 1.284 Positionen in 11 Gewerken, aber nur 20 Positionen machen 80 % des Volumens aus. Kostentreiber sind die '],
-    ['Holz-Alu-Fenster', '02.01.0010'], [', der '], ['Betonstahl', '01.02.0020'], [' und die '], ['Stahlbetonwände', '01.03.0040'],
-    ['. Das größte Risiko liegt in der pauschal ausgeschriebenen '], ['Beschallungsanlage', '04.05.0030'], [' ohne Spezifikation, im '], ['Fundamentbeton', '01.04.0010'],
-    [', der der Statik widerspricht, und in der unklaren Bodenklasse beim '], ['Erdaushub', '03.02.0100'], ['. Im Plan sind 71 Fenster eingezeichnet, im LV 64: Nachtragspotenzial.']];
+  var stats, parts = [['New build of a four-group daycare centre in solid construction, three storeys, approx. 1,900 m² GFA. The BoQ has 1,284 items in 11 trades, but only 20 items make up 80% of the value. The cost drivers are the '],
+    ['timber-aluminium windows', '02.01.0010'], [', the '], ['reinforcing steel', '01.02.0020'], [' and the '], ['reinforced concrete walls', '01.03.0040'],
+    ['. The biggest risks are the lump-sum '], ['PA system', '04.05.0030'], [' with no specification, the '], ['foundation concrete', '01.04.0010'],
+    [' that contradicts the structural design, and the unclear soil class for the '], ['excavation', '03.02.0100'], ['. The plan shows 71 windows, the BoQ 64: change order potential.']];
   if (P.live) {
     var M = P.methods, top = d.full.filter(function (r) { return r.gp > 0; }).sort(function (a, b) { return b.gp - a.gp; }).slice(0, 3),
       open = d.full.filter(function (r) { return r.np; }).sort(function (a, b) { return (b.val || 0) - (a.val || 0); }).slice(0, 3), fd = (P.plan && P.plan.findings) || [];
-    var lk = function (xs) { var o = []; xs.forEach(function (r, i) { if (i) o.push([i === xs.length - 1 ? ' und ' : ', ']); o.push([r.kurz, r.oz]); }); return o; };
-    parts = [[P.name + ': ' + fmt(P.n) + ' Positionen in ' + P.gewerke + ' Gewerken. ' + fmt(M.copied) + ' sind textgleich in den Alt-LVs, ' + fmt(M.similar + M.adjusted) + ' gleichwertig oder interpoliert, ' + fmt(M.reference + M.none) + ' ohne Preis.' + (top.length ? ' Größte Positionen: ' : '')]]
-      .concat(lk(top)).concat([[top.length ? '.' : '']]).concat(open.length ? [[' Ohne Preis und am wertvollsten: ']].concat(lk(open)).concat([['.']]) : [])
-      .concat([[P.plan ? ' Der Bauplan wurde geprüft: ' + fd.length + ' Befunde zu den Mengen.' : ' Kein Bauplan hochgeladen, die Mengen sind nicht gegen den Plan geprüft.']]);
+    var lk = function (xs) { var o = []; xs.forEach(function (r, i) { if (i) o.push([i === xs.length - 1 ? ' and ' : ', ']); o.push([r.kurz, r.oz]); }); return o; };
+    parts = [[P.name + ': ' + fmt(P.n) + ' items in ' + P.gewerke + ' trades. ' + fmt(M.copied) + ' have identical text in past BoQs, ' + fmt(M.similar + M.adjusted) + ' are equivalent or interpolated, ' + fmt(M.reference + M.none) + ' have no price.' + (top.length ? ' Largest items: ' : '')]]
+      .concat(lk(top)).concat([[top.length ? '.' : '']]).concat(open.length ? [[' Most valuable items without a price: ']].concat(lk(open)).concat([['.']]) : [])
+      .concat([[P.plan ? ' The construction plan was checked: ' + fd.length + ' findings on quantities.' : ' No construction plan uploaded, so the quantities are not checked against a plan.']]);
     var lowN = d.full.filter(function (r) { return !r.np && r.conf < 50; }).length, npN2 = d.full.filter(function (r) { return r.np; }).length;
-    stats = [['', fmt(M.copied), 'Positionen 1:1 übernommen'], ['blue', fmt(M.similar + M.adjusted), 'adaptiert'], ['warn', fmt(lowN), 'unsicher, bitte prüfen'], [npN2 ? 'warn' : 'ok', fmt(npN2), 'ohne Preis']]
-      .concat(P.plan ? [['ok', fmt(fd.length), 'Plan-Befunde']] : []);
+    stats = [['', fmt(M.copied), 'items copied 1:1'], ['blue', fmt(M.similar + M.adjusted), 'adapted'], ['warn', fmt(lowN), 'uncertain, please check'], [npN2 ? 'warn' : 'ok', fmt(npN2), 'without a price']]
+      .concat(P.plan ? [['ok', fmt(fd.length), 'plan findings']] : []);
   }
   var txt = parts.map(function (s) { return s.length > 1 ? '<button class="lnk" data-act="open" data-oz="' + s[1] + '">' + esc(s[0]) + '</button>' : esc(s[0]); }).join('');
   var drivers = (P.live ? d.full : d.all).filter(function (r) { return r.gp > 0; }).sort(function (a, b) { return b.gp - a.gp; }).slice(0, 5);
-  if (!P.live) stats = [['', '812', 'Positionen 1:1 übernommen'], ['blue', '389', 'adaptiert'], ['warn', '83', 'unsicher, bitte prüfen'], ['', '38 → 9', 'Positionen bündelbar'], ['ok', '≈ 31.000 €', 'Nachtragspotenzial (4 Pos.)']];
-  return '<section class="card sum rise' + (S.analyzing ? ' scan' : '') + '" style="flex:2 1 640px;--d:320ms" aria-label="Zusammenfassung">' +
-    '<div class="card-h"><span class="mono"><b>02</b> Zusammenfassung</span></div>' +
+  if (!P.live) stats = [['', '812', 'items copied 1:1'], ['blue', '389', 'adapted'], ['warn', '83', 'uncertain, please check'], ['', '38 → 9', 'items can be bundled'], ['ok', '≈ €31,000', 'change order potential (4 items)']];
+  return '<section class="card sum rise' + (S.analyzing ? ' scan' : '') + '" style="flex:2 1 640px;--d:320ms" aria-label="Summary">' +
+    '<div class="card-h"><span class="mono"><b>02</b> Summary</span></div>' +
     '<div class="sum2"><p class="sum-p">' + txt + '</p>' +
-    '<div class="sum-drv"><div class="mono faint" style="margin-bottom:8px">Top-Kostentreiber</div>' +
+    '<div class="sum-drv"><div class="mono faint" style="margin-bottom:8px">Top cost drivers</div>' +
       '<ol class="drv-ol">' + drivers.map(function (r) { return '<li><button class="drv" data-act="open" data-oz="' + r.oz + '"><span class="drv-t"><span>' + esc(r.kurz) + '</span><b>' + eur(r.gp) + '</b></span></button></li>'; }).join('') + '</ol>' +
     '</div></div>' +
   '</section>';
@@ -1712,20 +1716,20 @@ function vSummary(d) {
 
 function vRow(r, d) {
   var ow = ownerOf(r), m = ow ? T[ow] : null, ok = !!S.confirmed[r.oz], pk = !!S.picked[r.oz], fresh = S.justOk[r.oz] !== undefined, n = cmtN(r.oz), k = ck(r.conf);
-  var chip = r.np ? (r.sg ? '<span class="mtag unsicher"><i></i>Vorschlag · prüfen</span>' : '<span class="mtag offen"><i></i>Preis fehlt</span>') : r.gen ? '<span class="mtag ' + (r.manual ? 'adaptiert' : '') + '"><i></i>' + (r.manual ? 'manuell' : '1:1 · ' + r.conf + ' %') + '</span>' : ok ? '<span class="mtag ok"><i></i>' + (r.manual ? 'manuell' : 'bestätigt') + '</span>' : '<span class="mtag ' + r.mode + '"><i></i>' + r.mode + ' · ' + r.conf + ' %</span>';
+  var chip = r.np ? (r.sg ? '<span class="mtag unsicher"><i></i>Suggestion · check</span>' : '<span class="mtag offen"><i></i>Price missing</span>') : r.gen ? '<span class="mtag ' + (r.manual ? 'adaptiert' : '') + '"><i></i>' + (r.manual ? 'manual' : '1:1 · ' + r.conf + '%') + '</span>' : ok ? '<span class="mtag ok"><i></i>' + (r.manual ? 'manual' : 'confirmed') + '</span>' : '<span class="mtag ' + r.mode + '"><i></i>' + (MODE_L[r.mode] || r.mode) + ' · ' + r.conf + '%</span>';
   return '<div class="lv-grid lv-r' + (pk ? ' picked' : '') + (r.oz === S.sel ? ' sel' : '') + (r.np ? ' noprice' : '') + (r.gen ? ' gen' : '') + (ok ? ' is-ok' : '') + (fresh ? ' fx-ok' : '') + '" style="--i:' + (fresh ? S.justOk[r.oz] : 0) + '" role="row" data-k="r' + r.oz + '" data-act="open" data-oz="' + r.oz + '">' +
-    '<span role="cell" class="c2">' + (r.gen ? '' : '<input type="checkbox" class="cb"' + (pk ? ' checked' : '') + ' data-act="pick" data-oz="' + r.oz + '" aria-label="Position ' + r.oz + ' auswählen">') + '</span>' +
-    '<span role="cell"><span class="rsk ' + k + '" title="Konfidenz ' + r.conf + ' % · ' + esc(r.why) + '"><b>' + r.conf + '<small>%</small></b><i class="rbar"><i style="width:' + Math.max(r.conf, 0) + '%"></i></i></span></span>' +
+    '<span role="cell" class="c2">' + (r.gen ? '' : '<input type="checkbox" class="cb"' + (pk ? ' checked' : '') + ' data-act="pick" data-oz="' + r.oz + '" aria-label="Select item ' + r.oz + '">') + '</span>' +
+    '<span role="cell"><span class="rsk ' + k + '" title="Confidence ' + r.conf + '% · ' + esc(r.why) + '"><b>' + r.conf + '<small>%</small></b><i class="rbar"><i style="width:' + Math.max(r.conf, 0) + '%"></i></i></span></span>' +
     '<span role="cell" style="min-width:0"><span class="ozl mono">' + r.oz + '</span><button class="kurz" data-act="open" data-oz="' + r.oz + '">' + esc(r.kurz) + '</button>' +
       (S.density === 'details' ? '<span class="lang">' + esc(r.lang) + '</span>' : '') +
-      '<span class="rmeta"><button class="gw" data-act="gewerk" data-v="' + esc(r.gewerk) + '" title="Nur ' + esc(r.gewerk) + ' anzeigen">' + esc(r.gewerk) + '</button>' +
+      '<span class="rmeta"><button class="gw" data-act="gewerk" data-v="' + esc(r.gewerk) + '" title="Show only ' + esc(r.gewerk) + '">' + esc(r.gewerk) + '</button>' +
       (r.gen ? '<span class="why lo">' + esc(r.why) + '</span>' : '<span class="why ' + k + '">' + IC.warn + esc(r.why) + '</span>') +
-      (cmtList(r).length ? '<span class="cmtn" title="' + cmtList(r).length + ' Kommentare">' + IC.chat + cmtList(r).length + '</span>' : '') +
-      (S.bundled[r.oz] ? '<span class="chip bundle">Bündel · ' + esc(S.bundled[r.oz]) + '</span>' : '') +
+      (cmtList(r).length ? '<span class="cmtn" title="' + cmtList(r).length + ' comments">' + IC.chat + cmtList(r).length + '</span>' : '') +
+      (S.bundled[r.oz] ? '<span class="chip bundle">Bundle · ' + esc(S.bundled[r.oz]) + '</span>' : '') +
       '</span></span>' +
-    '<span role="cell" class="c2" style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">' + (r.np ? (r.sg ? '<span class="np sgp" title="Vorschlag aus verwandten Positionen, niedrige Konfidenz">≈ ' + eur(r.sg.ep) + '</span>' : '<span class="np">Kein Preis</span>') : '<span style="font-size:13px;font-weight:500">' + eur(r.ep) + '</span>') + '<span class="qty">' + qty(r.menge) + ' ' + r.einheit + '</span>' + chip + '</span>' +
-    '<span role="cell" class="num c2"><span style="font-size:14px;font-weight:500">' + (r.np ? '<span class="np">–</span>' : r.opt ? '<span class="np" title="Bedarfsposition, nicht in der Summe">Bedarf</span>' : eur(r.gp)) + '</span><span class="gpbar" title="' + fmt(r.gp / d.tot * 100, 1) + ' % des Volumens"><i style="width:' + Math.max(4, Math.round(r.gp / d.maxGp * 100)) + '%;background:' + (d.driver[r.oz] ? 'var(--signal)' : 'var(--ink-3)') + '"></i></span></span>' +
-    '<span role="cell">' + (r.np ? '<button class="okbtn need" data-act="priceNow" data-oz="' + r.oz + '" aria-label="Preis für ' + r.oz + ' eingeben" title="Preis eingeben">' + IC.pen + '</button>' : r.gen ? '<span class="auto1" title="1:1 übernommen, keine Bestätigung nötig">1:1</span>' : '<button class="okbtn' + (ok ? ' is-ok' : '') + (fresh && ok ? ' fx' : '') + '" data-act="toggleOk" data-oz="' + r.oz + '" aria-pressed="' + ok + '" aria-label="' + (ok ? 'Bestätigung zurücknehmen' : 'Preis bestätigen') + '" title="' + (ok ? 'Bestätigung zurücknehmen' : 'Preis bestätigen') + '">' + IC.tickRaw + (fresh && ok && S.justOk[r.oz] === 0 ? particles('conf', 10, 34) : '') + '</button>') + '</span>' +
+    '<span role="cell" class="c2" style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">' + (r.np ? (r.sg ? '<span class="np sgp" title="Suggestion from related items, low confidence">≈ ' + eur(r.sg.ep) + '</span>' : '<span class="np">No price</span>') : '<span style="font-size:13px;font-weight:500">' + eur(r.ep) + '</span>') + '<span class="qty">' + qty(r.menge) + ' ' + r.einheit + '</span>' + chip + '</span>' +
+    '<span role="cell" class="num c2"><span style="font-size:14px;font-weight:500">' + (r.np ? '<span class="np">–</span>' : r.opt ? '<span class="np" title="Optional item, not in the total">Optional</span>' : eur(r.gp)) + '</span><span class="gpbar" title="' + fmt(r.gp / d.tot * 100, 1) + '% of value"><i style="width:' + Math.max(4, Math.round(r.gp / d.maxGp * 100)) + '%;background:' + (d.driver[r.oz] ? 'var(--signal)' : 'var(--ink-3)') + '"></i></span></span>' +
+    '<span role="cell">' + (r.np ? '<button class="okbtn need" data-act="priceNow" data-oz="' + r.oz + '" aria-label="Enter price for ' + r.oz + '" title="Enter price">' + IC.pen + '</button>' : r.gen ? '<span class="auto1" title="Copied 1:1, no confirmation needed">1:1</span>' : '<button class="okbtn' + (ok ? ' is-ok' : '') + (fresh && ok ? ' fx' : '') + '" data-act="toggleOk" data-oz="' + r.oz + '" aria-pressed="' + ok + '" aria-label="' + (ok ? 'Undo confirmation' : 'Confirm price') + '" title="' + (ok ? 'Undo confirmation' : 'Confirm price') + '">' + IC.tickRaw + (fresh && ok && S.justOk[r.oz] === 0 ? particles('conf', 10, 34) : '') + '</button>') + '</span>' +
   '</div>';
 }
 
@@ -1742,9 +1746,9 @@ function vPlan(d, full) {
   var fl = FLOORS.indexOf(S.floor) >= 0 ? S.floor : FLOORS[0];
   var img = P.live && /\.(png|jpe?g)$/i.test(P.plan.file);
   var Z = pzBox();
-  var o = '<svg class="plan-svg' + (Z.w < 999.5 ? ' zoomed' : '') + '" viewBox="' + pzVB() + '" role="img" aria-label="' + (P.live ? 'Bauplan ' + esc(P.plan.file) : 'Grundriss Erdgeschoss') + ' mit Positionen">';
+  var o = '<svg class="plan-svg' + (Z.w < 999.5 ? ' zoomed' : '') + '" viewBox="' + pzVB() + '" role="img" aria-label="' + (P.live ? 'Plan ' + esc(P.plan.file) : 'Ground floor plan') + ' with items">';
   if (P.live) o += img ? '<image href="' + esc(API + '/projects/' + encodeURIComponent(P.id) + '/files/' + encodeURIComponent(P.plan.file) + (pass() ? '?passcode=' + encodeURIComponent(pass()) : '')) + '" x="0" y="0" width="1000" height="' + PLAN_VH + '" preserveAspectRatio="none"/>'
-    : '<rect class="slab" x="0" y="0" width="1000" height="' + PLAN_VH + '"/><text class="rl2" x="500" y="' + (PLAN_VH / 2) + '">PLAN ALS PDF · FÜR DIE ANSICHT PNG ODER JPG HOCHLADEN</text>';
+    : '<rect class="slab" x="0" y="0" width="1000" height="' + PLAN_VH + '"/><text class="rl2" x="500" y="' + (PLAN_VH / 2) + '">PLAN IS A PDF · UPLOAD A PNG OR JPG TO VIEW IT</text>';
   if (!P.live) {
   o += '<defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="8" class="hl"/></pattern></defs>';
   // axes
@@ -1752,7 +1756,7 @@ function vPlan(d, full) {
   ax.forEach(function (x, i) { o += '<line class="axl" x1="' + x + '" y1="58" x2="' + x + '" y2="660"/><circle class="axc" cx="' + x + '" cy="42" r="11"/><text class="axt" x="' + x + '" y="46">' + al[i] + '</text>'; });
   [120, 320, 400, 620].forEach(function (y, i) { o += '<line class="axl" x1="58" y1="' + y + '" x2="960" y2="' + y + '"/><circle class="axc" cx="38" cy="' + y + '" r="11"/><text class="axt" x="38" y="' + (y + 4) + '">' + (i + 1) + '</text>'; });
   // excavation
-  o += '<rect class="pit" x="56" y="78" width="904" height="574"/><text class="pitl" x="948" y="70" text-anchor="end">BAUGRUBE</text>';
+  o += '<rect class="pit" x="56" y="78" width="904" height="574"/><text class="pitl" x="948" y="70" text-anchor="end">EXCAVATION PIT</text>';
   // slab + walls
   o += '<rect class="slab" x="80" y="120" width="840" height="500"/>';
   o += '<path class="wall" d="M80 120H920V620H80Z"/>';
@@ -1766,10 +1770,10 @@ function vPlan(d, full) {
   [110, 170, 290, 340, 450, 500, 600, 650, 730, 780, 860].forEach(function (x) { o += '<rect class="win" x="' + (x - 16) + '" y="616" width="32" height="8"/>'; });
   [150, 200, 300, 360, 590, 640, 760, 830].forEach(function (x) { o += '<rect class="win" x="' + (x - 16) + '" y="116" width="32" height="8"/>'; });
   // room labels
-  [['SANITÄR', 170, 180], ['KÜCHE', 340, 180], ['TREPPE', 480, 312], ['PERSONAL', 620, 180], ['EINGANG · GARDEROBE', 810, 180], ['FLUR', 500, 366],
-   ['GRUPPE 1', 155, 450], ['GRUPPE 2', 305, 450], ['GRUPPE 3', 455, 450], ['GRUPPE 4', 605, 450], ['MEHRZWECKRAUM', 800, 450]].forEach(function (r) { o += '<text class="rl2" x="' + r[1] + '" y="' + r[2] + '">' + r[0] + '</text>'; });
+  [['WC', 170, 180], ['KITCHEN', 340, 180], ['STAIRS', 480, 312], ['STAFF', 620, 180], ['ENTRANCE · CLOAKROOM', 810, 180], ['CORRIDOR', 500, 366],
+   ['GROUP 1', 155, 450], ['GROUP 2', 305, 450], ['GROUP 3', 455, 450], ['GROUP 4', 605, 450], ['MULTI-PURPOSE ROOM', 800, 450]].forEach(function (r) { o += '<text class="rl2" x="' + r[1] + '" y="' + r[2] + '">' + r[0] + '</text>'; });
   // dimension
-  o += '<path class="dim" d="M80 678H920M80 670V686M920 670V686"/><text class="dimt" x="500" y="694">42,00 m</text>';
+  o += '<path class="dim" d="M80 678H920M80 670V686M920 670V686"/><text class="dimt" x="500" y="694">42.00 m</text>';
   }
   // crosshair
   // markers
@@ -1781,25 +1785,25 @@ function vPlan(d, full) {
   });
   o += '</svg>';
   var hi = (P.live ? d.full : d.all).filter(function (r) { return PLAN[r.oz] && shown[r.oz]; }).length;
-  return '<aside class="plan' + (full ? ' plan-full' : '') + '" aria-label="Bauplan' + (full ? ' Vollbild' : '') + '">' +
-    '<div class="plan-h"><div class="pz" role="group" aria-label="Zoom" title="Zoomen: auf dem Trackpad mit zwei Fingern aufziehen oder Strg/⌘ + Scrollen. Gezoomt: ziehen oder scrollen zum Verschieben, Doppelklick zoomt hinein.">' +
-      '<button data-act="pz" data-v="-1" aria-label="Herauszoomen"><svg viewBox="0 0 16 16"><path d="M3.5 8h9"/></svg></button>' +
-      '<button class="pz-v" data-act="pz" data-v="0" aria-label="Zoom zurücksetzen" title="Zurücksetzen">' + Math.round(100000 / Z.w) + ' %</button>' +
-      '<button data-act="pz" data-v="1" aria-label="Hineinzoomen"><svg viewBox="0 0 16 16"><path d="M3.5 8h9M8 3.5v9"/></svg></button></div>' +
-    '<div class="plan-ctl" style="margin-left:auto">' + (full ? '' : '<button class="ic" data-act="planToggle" aria-label="Bauplan ausblenden" title="Ausblenden">' + IC.x + '</button>') +
-      (full ? '<button class="ic pfs-b" data-act="planFull" data-v="0" aria-label="Vollbild schließen" title="Schließen (Esc)">' + IC.x + '</button>' : '<button class="ic pfs-b" data-act="planFull" data-v="1" aria-label="Bauplan im Vollbild" title="Vollbild">' + IC.expand + '</button>') + '</div></div>' +
+  return '<aside class="plan' + (full ? ' plan-full' : '') + '" aria-label="Plan' + (full ? ' fullscreen' : '') + '">' +
+    '<div class="plan-h"><div class="pz" role="group" aria-label="Zoom" title="Zoom: pinch on the trackpad or Ctrl/⌘ + scroll. When zoomed: drag or scroll to pan, double-click to zoom in.">' +
+      '<button data-act="pz" data-v="-1" aria-label="Zoom out"><svg viewBox="0 0 16 16"><path d="M3.5 8h9"/></svg></button>' +
+      '<button class="pz-v" data-act="pz" data-v="0" aria-label="Reset zoom" title="Reset">' + Math.round(100000 / Z.w) + '%</button>' +
+      '<button data-act="pz" data-v="1" aria-label="Zoom in"><svg viewBox="0 0 16 16"><path d="M3.5 8h9M8 3.5v9"/></svg></button></div>' +
+    '<div class="plan-ctl" style="margin-left:auto">' + (full ? '' : '<button class="ic" data-act="planToggle" aria-label="Hide plan" title="Hide">' + IC.x + '</button>') +
+      (full ? '<button class="ic pfs-b" data-act="planFull" data-v="0" aria-label="Close fullscreen" title="Close (Esc)">' + IC.x + '</button>' : '<button class="ic pfs-b" data-act="planFull" data-v="1" aria-label="Plan fullscreen" title="Fullscreen">' + IC.expand + '</button>') + '</div></div>' +
     '<div class="plan-c">' + o + '<div class="plan-tip" aria-hidden="true"></div></div>' +
-    '<div class="plan-f"><span class="mono plan-xy">' + hi + ' Positionen verortet' + (P.live ? '' : ' · M 1:100') + '</span><span class="plan-lg"><span class="lgt">Konfidenz</span><i class="hi"></i>&lt; 50<i class="mid"></i>&lt; 75<i class="lo"></i>≥ 75<i class="ok"></i>bestätigt</span></div>' +
+    '<div class="plan-f"><span class="mono plan-xy">' + hi + ' items located' + (P.live ? '' : ' · M 1:100') + '</span><span class="plan-lg"><span class="lgt">Confidence</span><i class="hi"></i>&lt; 50<i class="mid"></i>&lt; 75<i class="lo"></i>≥ 75<i class="ok"></i>confirmed</span></div>' +
   '</aside>';
 }
 
 function vTable(d) {
-  var sortDef = { conf: 'Konf.', oz: 'OZ', kurz: 'Leistung', menge: 'Menge', ep: 'EP · Menge', gp: 'GP' };
+  var sortDef = { conf: 'Conf.', oz: 'No.', kurz: 'Description', menge: 'Qty', ep: 'Unit price · Qty', gp: 'Total' };
   var th = function (k, right) {
     var on = S.sort.k === k;
     return '<span role="columnheader" aria-sort="' + (on ? (S.sort.d < 0 ? 'descending' : 'ascending') : 'none') + '"' + (right ? ' style="text-align:right"' : '') + '><button class="sort' + (on ? ' on' : '') + '" data-act="sort" data-v="' + k + '">' + sortDef[k] + (on ? ' <b>' + (S.sort.d < 0 ? '↓' : '↑') + '</b>' : '') + '</button></span>';
   };
-  var filters = [['all', 'Alle'], ['noprice', 'Ohne Preis'], ['low', 'Konf. < 50 %'], ['review', 'Zu prüfen'], ['cost', 'Kostentreiber'], ['bundle', 'Bündelbar']];
+  var filters = [['all', 'All'], ['noprice', 'No price'], ['low', 'Conf. < 50%'], ['review', 'To review'], ['cost', 'Cost drivers'], ['bundle', 'Bundleable']];
   var allPicked = d.rows.length > 0 && d.rows.every(function (r) { return S.picked[r.oz]; });
   var body = '', isAll = S.scope === 'all', vis = d.rows.slice(0, S.lvLimit), genN = d.full.length - d.all.length;
   if (S.group) {
@@ -1809,36 +1813,36 @@ function vTable(d) {
     order.sort(function (a, b) { return gsum(b) - gsum(a); });
     order.forEach(function (g) {
       var closed = !!S.collapsed[g], sub = gsum(g);
-      body += '<button class="grp" data-k="g' + esc(g) + '" data-act="collapse" data-v="' + esc(g) + '" aria-expanded="' + !closed + '"><span style="display:flex;transform:' + (closed ? 'rotate(-90deg)' : 'none') + ';transition:transform .3s var(--spring)">' + IC.chev + '</span><b style="font-weight:500">' + esc(g) + '</b><span class="mono faint">' + groups[g].length + ' Pos.</span><span style="flex:1"></span><span class="mono faint">' + fmt(sub / d.tot * 100, 1) + ' % des Volumens</span><b style="font-weight:500;min-width:110px;text-align:right">' + eur(sub) + '</b></button>';
+      body += '<button class="grp" data-k="g' + esc(g) + '" data-act="collapse" data-v="' + esc(g) + '" aria-expanded="' + !closed + '"><span style="display:flex;transform:' + (closed ? 'rotate(-90deg)' : 'none') + ';transition:transform .3s var(--spring)">' + IC.chev + '</span><b style="font-weight:500">' + esc(g) + '</b><span class="mono faint">' + groups[g].length + ' items</span><span style="flex:1"></span><span class="mono faint">' + fmt(sub / d.tot * 100, 1) + '% of value</span><b style="font-weight:500;min-width:110px;text-align:right">' + eur(sub) + '</b></button>';
       if (!closed) groups[g].forEach(function (r) { body += vRow(r, d); });
     });
   } else vis.forEach(function (r) { body += vRow(r, d); });
-  if (body && d.rows.length > vis.length) body += '<button class="lv-more" data-k="more" data-act="more"><span>' + fmt(vis.length) + ' von ' + fmt(d.rows.length) + ' angezeigt</span><b>Weitere 60 laden' + IC.chev + '</b></button>';
-  else if (body && !isAll && genN) body += '<button class="lv-more" data-k="more" data-act="scope" data-v="all"><span>+ ' + fmt(genN) + ' weitere Positionen · ' + (P.live ? 'textgleich aus Alt-LV kopiert' : '1:1 aus Alt-LV übernommen') + '</span><b>Gesamtes LV anzeigen' + IC.arrow + '</b></button>';
+  if (body && d.rows.length > vis.length) body += '<button class="lv-more" data-k="more" data-act="more"><span>' + fmt(vis.length) + ' of ' + fmt(d.rows.length) + ' shown</span><b>Load 60 more' + IC.chev + '</b></button>';
+  else if (body && !isAll && genN) body += '<button class="lv-more" data-k="more" data-act="scope" data-v="all"><span>+ ' + fmt(genN) + ' more items · ' + (P.live ? 'identical text copied from past BoQs' : 'copied 1:1 from past BoQs') + '</span><b>Show full BoQ' + IC.arrow + '</b></button>';
   var sum = d.rows.reduce(function (a, r) { return a + r.gp; }, 0);
   var okN = d.all.filter(function (r) { return S.confirmed[r.oz]; }).length;
-  return '<section aria-label="Leistungsverzeichnis" class="rise" style="--d:380ms">' +
-    '<div class="lv-head"><div><div class="mono faint"><span style="color:var(--ink)">03</span> Leistungsverzeichnis</div><div class="lv-title">' + (isAll ? fmt(d.rows.length) + ' Positionen <small>· gesamtes LV</small>' : d.rows.length + ' wichtige Positionen <small>· von ' + fmt(d.full.length) + '</small>') + '</div>' +
+  return '<section aria-label="Bill of quantities" class="rise" style="--d:380ms">' +
+    '<div class="lv-head"><div><div class="mono faint"><span style="color:var(--ink)">03</span> Bill of quantities</div><div class="lv-title">' + (isAll ? fmt(d.rows.length) + ' items <small>· full BoQ</small>' : d.rows.length + ' key items <small>· of ' + fmt(d.full.length) + '</small>') + '</div>' +
       '</div>' +
-      '<div class="lv-stats">' + (function () { var sf = safeRows(d); return sf.length ? '<button class="btn btn-primary bulksafe" data-act="bulkSafe" title="Konfidenz ab 75 % und höchstens 2 % des LV-Volumens">' + IC.tick + (sf.length === 1 ? '1 sicheren Preis übernehmen' : sf.length + ' sichere Preise übernehmen') + '</button>' : ''; })() + '<div class="lv-stat"><span class="mono">Bestätigt</span><b>' + okN + '<small> / ' + d.all.length + '</small></b><i class="lv-meter"><i style="width:' + (okN / d.all.length * 100) + '%"></i></i></div>' +
-        '<div class="lv-stat"><span class="mono">Summe angezeigt</span><b>' + eur(sum) + '</b><i class="lv-meter"><i style="width:' + Math.min(100, sum / d.tot * 100) + '%;background:var(--ink)"></i></i></div></div></div>' +
+      '<div class="lv-stats">' + (function () { var sf = safeRows(d); return sf.length ? '<button class="btn btn-primary bulksafe" data-act="bulkSafe" title="Confidence of 75% or more and at most 2% of the BoQ value">' + IC.tick + (sf.length === 1 ? 'Accept 1 safe price' : 'Accept ' + sf.length + ' safe prices') + '</button>' : ''; })() + '<div class="lv-stat"><span class="mono">Confirmed</span><b>' + okN + '<small> / ' + d.all.length + '</small></b><i class="lv-meter"><i style="width:' + (okN / d.all.length * 100) + '%"></i></i></div>' +
+        '<div class="lv-stat"><span class="mono">Total shown</span><b>' + eur(sum) + '</b><i class="lv-meter"><i style="width:' + Math.min(100, sum / d.tot * 100) + '%;background:var(--ink)"></i></i></div></div></div>' +
     vBulkNote(d) + '<div class="lv-split' + (planShown() ? '' : ' plan-off') + '">' + (planShown() ? vPlan(d) : '') + '<div class="lv-main"><div class="lv-bar"><div class="filters" role="group" aria-label="Filter">' + filters.map(function (x) {
       var on = d.f === x[0];
       return '<button class="pill' + (on ? ' on' : '') + '" aria-pressed="' + on + '" data-act="filter" data-v="' + x[0] + '">' + x[1] + '<span class="cnt">' + d.base.filter(d.fdef[x[0]]).length + '</span></button>';
     }).join('') +
-      (S.gewerk ? '<span class="ftag" data-k="fg">Gewerk: ' + esc(S.gewerk) + '<button data-act="gewerk" data-v="" aria-label="Gewerk-Filter entfernen">×</button></span>' : '') +
-    '</div><div class="tools"><label class="search">' + IC.search + '<span class="sr">Positionen filtern</span><input id="q-lv" type="search" data-in="q" value="' + esc(S.q) + '" placeholder="OZ, Text oder Gewerk…"></label>' +
+      (S.gewerk ? '<span class="ftag" data-k="fg">Trade: ' + esc(S.gewerk) + '<button data-act="gewerk" data-v="" aria-label="Remove trade filter">×</button></span>' : '') +
+    '</div><div class="tools"><label class="search">' + IC.search + '<span class="sr">Filter items</span><input id="q-lv" type="search" data-in="q" value="' + esc(S.q) + '" placeholder="Item no., text or trade…"></label>' +
         '<span class="vsep" aria-hidden="true"></span>' +
-        '<div class="seg" role="group" aria-label="Darstellung"><button class="' + (S.density === 'compact' ? 'on' : '') + '" data-act="density" data-v="compact" aria-pressed="' + (S.density === 'compact') + '">Kompakt</button><button class="' + (S.density === 'details' ? 'on' : '') + '" data-act="density" data-v="details" aria-pressed="' + (S.density === 'details') + '">Langtext</button></div>' +
-        (hasPlan() ? '<button class="btn btn-quiet' + (planShown() ? ' on' : '') + '" data-act="planToggle" aria-pressed="' + planShown() + '" title="' + (planShown() ? 'Bauplan ausblenden' : 'Bauplan einblenden') + '">' + IC.panel + 'Bauplan</button>' : '') +
-        '<button class="btn btn-quiet' + (S.group ? ' on' : '') + '" data-act="group" aria-pressed="' + S.group + '">' + IC.layers + 'Nach Gewerk</button>' +
+        '<div class="seg" role="group" aria-label="View"><button class="' + (S.density === 'compact' ? 'on' : '') + '" data-act="density" data-v="compact" aria-pressed="' + (S.density === 'compact') + '">Compact</button><button class="' + (S.density === 'details' ? 'on' : '') + '" data-act="density" data-v="details" aria-pressed="' + (S.density === 'details') + '">Long text</button></div>' +
+        (hasPlan() ? '<button class="btn btn-quiet' + (planShown() ? ' on' : '') + '" data-act="planToggle" aria-pressed="' + planShown() + '" title="' + (planShown() ? 'Hide plan' : 'Show plan') + '">' + IC.panel + 'Plan</button>' : '') +
+        '<button class="btn btn-quiet' + (S.group ? ' on' : '') + '" data-act="group" aria-pressed="' + S.group + '">' + IC.layers + 'By trade</button>' +
         '</div></div>' +
-    '<div class="tbl"><div role="table" aria-label="Positionen des Leistungsverzeichnisses">' +
-      '<div class="lv-grid th mono" role="row"><span role="columnheader"><input type="checkbox" class="cb' + (!allPicked && d.rows.some(function (r) { return S.picked[r.oz]; }) ? ' some' : '') + '"' + (allPicked ? ' checked' : '') + ' data-act="pickAll" aria-label="Alle angezeigten Positionen auswählen"></span>' +
+    '<div class="tbl"><div role="table" aria-label="Bill of quantities items">' +
+      '<div class="lv-grid th mono" role="row"><span role="columnheader"><input type="checkbox" class="cb' + (!allPicked && d.rows.some(function (r) { return S.picked[r.oz]; }) ? ' some' : '') + '"' + (allPicked ? ' checked' : '') + ' data-act="pickAll" aria-label="Select all shown items"></span>' +
         th('conf') + '<span role="columnheader" class="thl">' + th('oz').replace(/^<span[^>]*>|<\/span>$/g, '') + '<i>/</i>' + th('kurz').replace(/^<span[^>]*>|<\/span>$/g, '') + '</span>' + th('ep', 1) + th('gp', 1) + '<span role="columnheader" style="text-align:center">OK</span></div>' +
       body +
-      (body ? '' : '<div class="empty">Keine Position passt zu diesen Filtern. ' + (isAll ? '' : '<button class="lnk" data-act="scope" data-v="all">Im gesamten LV suchen</button> · ') + '<button class="lnk" data-act="resetFilters">Filter zurücksetzen</button></div>') +
-      '<div class="foot"><span class="mono">' + fmt(vis.length) + ' Positionen angezeigt · ' + okN + ' von ' + d.all.length + ' bestätigt</span><span class="ft-r"><span class="mono">Gesamt LV · KI-Kalkulation</span><b>' + eur(Math.round(d.tot)) + '</b></span></div>' +
+      (body ? '' : '<div class="empty">No item matches these filters. ' + (isAll ? '' : '<button class="lnk" data-act="scope" data-v="all">Search the full BoQ</button> · ') + '<button class="lnk" data-act="resetFilters">Reset filters</button></div>') +
+      '<div class="foot"><span class="mono">' + fmt(vis.length) + ' items shown · ' + okN + ' of ' + d.all.length + ' confirmed</span><span class="ft-r"><span class="mono">BoQ total · AI estimate</span><b>' + eur(Math.round(d.tot)) + '</b></span></div>' +
     '</div></div></div></div></section>';
 }
 
@@ -1846,11 +1850,11 @@ function vTable(d) {
 function vDock(d) {
   var pr = d.all.filter(function (r) { return S.picked[r.oz]; });
   if (!pr.length) return '';
-  return '<div class="dock" role="region" aria-label="Mehrfachauswahl" data-k="dock">' +
-    '<span class="n">' + pr.length + '</span><span class="mono" style="opacity:.7">ausgewählt · Σ ' + eur(pr.reduce(function (a, r) { return a + r.gp; }, 0)) + '</span>' +
-    '<button class="btn go" data-act="bulkOk">' + IC.tick + 'Preise bestätigen</button>' +
-    '<button class="btn" data-act="bulkBundle"' + (pr.length < 2 ? ' disabled title="Mindestens 2 Positionen auswählen"' : '') + '>' + IC.layers + 'Bündeln</button>' +
-    '<button class="btn" data-act="clearPicked" aria-label="Auswahl aufheben" style="width:34px;padding:0;justify-content:center">' + IC.x + '</button></div>';
+  return '<div class="dock" role="region" aria-label="Multiple selection" data-k="dock">' +
+    '<span class="n">' + pr.length + '</span><span class="mono" style="opacity:.7">selected · Σ ' + eur(pr.reduce(function (a, r) { return a + r.gp; }, 0)) + '</span>' +
+    '<button class="btn go" data-act="bulkOk">' + IC.tick + 'Confirm prices</button>' +
+    '<button class="btn" data-act="bulkBundle"' + (pr.length < 2 ? ' disabled title="Select at least 2 items"' : '') + '>' + IC.layers + 'Bundle</button>' +
+    '<button class="btn" data-act="clearPicked" aria-label="Clear selection" style="width:34px;padding:0;justify-content:center">' + IC.x + '</button></div>';
 }
 
 function liveCtx() {
@@ -1866,13 +1870,13 @@ function liveCtx() {
 
 // ---- drawer ----
 function candidates(p, R) {
-  if (P.live) { var st = R.steps || [['EP', eur(p.aiEp)]]; return { cands: [{ ep: p.aiEp, label: 'Empfehlung', why: R.brief || p.why, steps: st }], src: '', steps: st, segs: R.segs || [[p.why]] }; }
+  if (P.live) { var st = R.steps || [['EP', eur(p.aiEp)]]; return { cands: [{ ep: p.aiEp, label: 'Recommendation', why: R.brief || p.why, steps: st }], src: '', steps: st, segs: R.segs || [[p.why]] }; }
   var src = p.mode === 'übernommen' ? 'Grundschule Trudering 2024' : 'Kita Freiham 2023';
   var aiEp = p.aiEp, baseEp = p.mode === 'übernommen' ? aiEp : Math.round(aiEp / 1.042 * 100) / 100;
   var steps = R.steps || (p.mode === 'übernommen' ? [['Basis-EP ' + src, eur(aiEp)], ['Anpassung', 'keine'], ['EP', eur(aiEp)]] : [['Basis-EP ' + src, eur(baseEp)], ['Baupreisindex Q3/2026', '+4,2 %'], ['EP', eur(aiEp)]]);
   var rnd = function (v) { return v >= 1000 ? Math.round(v / 10) * 10 : v >= 100 ? Math.round(v) : Math.round(v * 2) / 2; };
   var shortP = function (n) { return n.split(' ').slice(-2).join(' '); };
-  var cands = [{ ep: aiEp, label: 'Empfehlung', pv: null, steps: steps, why: R.brief || (p.mode === 'übernommen' ? 'Textgleich aus ' + src + '. Eure Preise liegen weniger als 10 % auseinander.' : 'Aus ' + src + ' übernommen und mit dem Baupreisindex angepasst. ' + p.why + '.') }];
+  var cands = [{ ep: aiEp, label: 'Recommendation', pv: null, steps: steps, why: R.brief || (p.mode === 'übernommen' ? 'Textgleich aus ' + src + '. Eure Preise liegen weniger als 10 % auseinander.' : 'Aus ' + src + ' übernommen und mit dem Baupreisindex angepasst. ' + p.why + '.') }];
   var used = {}; if (p.mode === 'übernommen') used[src] = true;
   var add = function (c) { if (cands.length >= 3 || used[c.proj] || cands.some(function (x) { return Math.abs(x.ep - c.ep) / x.ep < 0.005; })) return; used[c.proj] = true; cands.push(c); };
   (R.similar || []).map(function (x) {
@@ -1900,24 +1904,24 @@ function vDrawer(d) {
   var R = D.rich[p.oz] || {}, k = ck(p.conf), nav = navInfo(d), ok = !!S.confirmed[p.oz], fresh = S.justOk[p.oz] !== undefined;
   var C = candidates(p, R);
   var noAi = !p.aiEp, md = noAi ? 0 : (p.ep - p.aiEp) / p.aiEp * 100;
-  var dv = parseFloat(String(S.epDraft).replace(',', '.'));
+  var dv = num(S.epDraft);
   var dd = isFinite(dv) && dv > 0 ? (noAi ? 0 : (dv - p.aiEp) / p.aiEp * 100) : null;
   var devWarn = !noAi && (S.editEp ? (dd !== null && Math.abs(dd) > 10) : Math.abs(md) > 10);
   var nextOpen = nav.list.slice(nav.idx + 1).find(function (r) { return !S.confirmed[r.oz]; });
 
   var cta = p.np
-    ? '<button class="confirm need" data-k="ctanp" data-act="startEdit"><span class="cbadge">' + IC.pen + '</span><span class="cl"><b>' + (p.sg ? 'Vorschlag prüfen' : 'Erst Preis eingeben') + '</b><small>' + (p.sg ? 'Niedrige Konfidenz · Vorschlag übernehmen oder eigenen Preis eingeben' : 'Keine passende Position in den alten LVs') + '</small></span><span class="ca"><small>Menge</small><b>' + qty(p.menge) + ' ' + p.einheit + '</b></span></button>'
+    ? '<button class="confirm need" data-k="ctanp" data-act="startEdit"><span class="cbadge">' + IC.pen + '</span><span class="cl"><b>' + (p.sg ? 'Check suggestion' : 'Enter a price first') + '</b><small>' + (p.sg ? 'Low confidence · accept the suggestion or enter your own price' : 'No matching item in past BoQs') + '</small></span><span class="ca"><small>Qty</small><b>' + qty(p.menge) + ' ' + p.einheit + '</b></span></button>'
     : p.gen
-    ? '<div class="okline auto" data-k="okauto">' + IC.tick + (p.manual ? 'Eigener Preis gespeichert · zählt direkt ins Angebot' : '1:1 aus Alt-LV · keine Bestätigung nötig') + (p.manual ? '<button class="lnk" data-act="resetEp">Rückgängig</button>' : '') + '</div>'
+    ? '<div class="okline auto" data-k="okauto">' + IC.tick + (p.manual ? 'Own price saved · counts straight into the bid' : 'Copied 1:1 from a past BoQ · no confirmation needed') + (p.manual ? '<button class="lnk" data-act="resetEp">Undo</button>' : '') + '</div>'
     : ok
-    ? '<div class="okline' + (fresh ? ' fx' : '') + '" data-k="okl">' + IC.tick + (p.manual ? 'Eigener Preis bestätigt' : 'KI-Preis bestätigt') +
+    ? '<div class="okline' + (fresh ? ' fx' : '') + '" data-k="okl">' + IC.tick + (p.manual ? 'Own price confirmed' : 'AI price confirmed') +
         (S.adv && S.adv.from === p.oz
-          ? '<button class="adv" data-act="goNext">Weiter zu ' + S.adv.to + IC.arrow + '</button><button class="lnk" style="margin-left:14px" data-act="stay">Hier bleiben</button><i class="advbar" data-k="ab' + S.adv.to + '"></i>'
-          : '<button class="lnk" data-act="undoOk">Rückgängig</button>') + '</div>'
+          ? '<button class="adv" data-act="goNext">Next: ' + S.adv.to + IC.arrow + '</button><button class="lnk" style="margin-left:14px" data-act="stay">Stay here</button><i class="advbar" data-k="ab' + S.adv.to + '"></i>'
+          : '<button class="lnk" data-act="undoOk">Undo</button>') + '</div>'
     : '<button class="confirm' + (devWarn ? ' hold' : '') + (S.holding ? ' is-holding' : '') + (S.confirming ? ' is-confirming' : '') + '" data-k="cta" ' + (devWarn ? 'data-hold="1"' : 'data-act="okNext"') + '>' +
         '<span class="cfill"></span><span class="cbadge">' + (devWarn ? IC.warn : IC.tick) + '</span>' +
-        '<span class="cl"><b>' + (S.confirming ? 'Bestätigt' : devWarn ? 'Gedrückt halten' : 'Preis bestätigen') + '</b><small>' + (devWarn ? 'Mehr als 10 % neben der Empfehlung' : nextOpen ? 'und weiter zu ' + nextOpen.oz : 'letzte offene Position') + '</small></span>' +
-        '<span class="ca"><small>GP</small><b>' + eur(S.editEp && dd !== null ? Math.round(dv * 100) / 100 * p.menge : p.gp) + '</b></span>' + (devWarn || !nextOpen ? '' : '<span class="cgo" aria-hidden="true">' + IC.arrow + '</span>') + '</button>';
+        '<span class="cl"><b>' + (S.confirming ? 'Confirmed' : devWarn ? 'Hold to confirm' : 'Confirm price') + '</b><small>' + (devWarn ? 'More than 10% off the recommendation' : nextOpen ? 'then on to ' + nextOpen.oz : 'last open item') + '</small></span>' +
+        '<span class="ca"><small>Total</small><b>' + eur(S.editEp && dd !== null ? Math.round(dv * 100) / 100 * p.menge : p.gp) + '</b></span>' + (devWarn || !nextOpen ? '' : '<span class="cgo" aria-hidden="true">' + IC.arrow + '</span>') + '</button>';
 
   var cm = (R.comments || []).concat(S.comments[p.oz] || []);
   var ext = R.ext, seq = S.seqs[p.oz];
@@ -1935,15 +1939,15 @@ function vDrawer(d) {
   {
     var gsum = sameAll.reduce(function (a, r) { return a + r.gp; }, p.gp);
     gwPanel = 
-      (same.length ? '<ol class="gwl">' + same.map(function (r) { var ok2 = !!S.confirmed[r.oz]; return '<li data-k="g' + r.oz + '"><button data-act="open" data-oz="' + r.oz + '"><span class="gwm"><span class="mono">' + r.oz + '</span><span class="gwk">' + esc(r.kurz) + '</span></span><span class="gwr">' + (r.np ? '' : '<b>' + eur(r.gp) + '</b>') + (r.np ? '<span class="mtag offen"><i></i>Preis fehlt</span>' : ok2 ? '<span class="mtag ok"><i></i>bestätigt</span>' : '<span class="mtag ' + r.mode + '"><i></i>' + r.conf + ' %</span>') + '</span>' + IC.arrow + '</button></li>'; }).join('') + '</ol>' +
-        '<button class="lnk gwall" data-act="gewerkAll" data-v="' + esc(p.gewerk) + '">' + (sameAll.length > same.length ? 'Alle ' + (sameAll.length + 1) + ' im LV anzeigen' : 'Alle im LV filtern') + '</button>'
-      : '<p class="pempty gw-e">Einzige Position in diesem Gewerk.</p>');
-    var gmeta = (sameAll.length + 1) + ' Pos.' + (gsum > 0 ? ' · ' + eur(gsum) : '');
-    gwPanel = '<section class="comm gwsec" aria-label="Gewerk"><button class="mini" data-act="aiClose" tabindex="-1"><span class="mono">Gewerk</span><b>' + esc(p.gewerk) + '</b><span class="muted">' + gmeta + '</span></button><div class="comm-h"><span class="gw-t"><span class="mono">Gewerk</span><b title="' + esc(p.gewerk) + '">' + esc(p.gewerk) + '</b></span><span class="mono gw-m">' + gmeta + '</span></div><div class="panel">' + gwPanel + '</div></section>';
+      (same.length ? '<ol class="gwl">' + same.map(function (r) { var ok2 = !!S.confirmed[r.oz]; return '<li data-k="g' + r.oz + '"><button data-act="open" data-oz="' + r.oz + '"><span class="gwm"><span class="mono">' + r.oz + '</span><span class="gwk">' + esc(r.kurz) + '</span></span><span class="gwr">' + (r.np ? '' : '<b>' + eur(r.gp) + '</b>') + (r.np ? '<span class="mtag offen"><i></i>Price missing</span>' : ok2 ? '<span class="mtag ok"><i></i>confirmed</span>' : '<span class="mtag ' + r.mode + '"><i></i>' + r.conf + '%</span>') + '</span>' + IC.arrow + '</button></li>'; }).join('') + '</ol>' +
+        '<button class="lnk gwall" data-act="gewerkAll" data-v="' + esc(p.gewerk) + '">' + (sameAll.length > same.length ? 'Show all ' + (sameAll.length + 1) + ' in the BoQ' : 'Filter the BoQ by this trade') + '</button>'
+      : '<p class="pempty gw-e">Only item in this trade.</p>');
+    var gmeta = (sameAll.length + 1) + ' items' + (gsum > 0 ? ' · ' + eur(gsum) : '');
+    gwPanel = '<section class="comm gwsec" aria-label="Trade"><button class="mini" data-act="aiClose" tabindex="-1"><span class="mono">Trade</span><b>' + esc(p.gewerk) + '</b><span class="muted">' + gmeta + '</span></button><div class="comm-h"><span class="gw-t"><span class="mono">Trade</span><b title="' + esc(p.gewerk) + '">' + esc(p.gewerk) + '</b></span><span class="mono gw-m">' + gmeta + '</span></div><div class="panel">' + gwPanel + '</div></section>';
   }
   if (dt === 'team') {
     panel = (cm.length ? '<ol class="feed">' + cm.map(function (c, i) { var m = T[c.by]; return '<li data-k="c' + i + '"><span class="av" style="background:' + m.color + '">' + m.ini + '</span><div class="fb"><div class="fh"><b>' + m.name + '</b><span>' + esc(c.time) + '</span></div><p>' + esc(c.t) + '</p></div></li>'; }).join('') + '</ol>' : '<p class="pempty">Noch nichts besprochen. Erwähne Kolleg:innen mit @.</p>') +
-      '<div class="composer"><label><span class="sr">Kommentar</span><input data-in="cmt" data-enter="sendCmt" value="' + esc(S.cmt) + '" placeholder="Ans Team schreiben… @Lena"></label><button data-act="sendCmt" aria-label="Kommentar senden">' + IC.arrow + '</button></div>';
+      '<div class="composer"><label><span class="sr">Comment</span><input data-in="cmt" data-enter="sendCmt" value="' + esc(S.cmt) + '" placeholder="Ans Team schreiben… @Lena"></label><button data-act="sendCmt" aria-label="Kommentar senden">' + IC.arrow + '</button></div>';
   } else if (dt === 'ext') {
     var sub2 = ext || { name: subName, contact: 'via Outlook', status: 'Sequenz läuft' };
     panel = (ext || seq ? '<div class="xc"><span class="xi">' + IC.building + '</span><span style="flex:1;min-width:0"><b>' + esc(sub2.name) + '</b><small>' + esc(sub2.contact) + '</small></span><span class="xs">' + esc(sub2.status) + '</span></div>' +
@@ -1957,96 +1961,96 @@ function vDrawer(d) {
       (!S.compose ? '<div class="xact"><button class="btn btn-sm" data-act="compose" data-v="seq">' + IC.arrow + 'Anfrage per Outlook</button><button class="btn btn-sm btn-quiet" data-act="compose" data-v="note">Notiz</button></div>' : '');
   } else if (dt === 'agent') {
     panel = (chat.length || S.thinking ? '' : '<p class="pempty">Frag den Agenten zu dieser Position, z. B. nach dem Preis, einer Bieterfrage oder einem Was-wäre-wenn.</p><div class="chips">' +
-      [['Preis erklären', 'Wie kommst du auf den Preis?'], ['Bieterfrage formulieren', 'Formuliere eine Bieterfrage'], ['Material +15 %?', 'Was-wäre-wenn: Material +15 %'], ['Subunternehmer anfragen', 'An Subunternehmer anfragen']].map(function (c) { return '<button class="qchip" data-act="ask" data-v="' + esc(c[1]) + '">' + c[0] + '</button>'; }).join('') + '</div>') +
+      [['Explain price', 'How did you get this price?'], ['Draft bidder query', 'Draft a bidder query'], ['Material +15%?', 'What if material costs rise 15%?'], ['Ask subcontractor', 'Send a request to a subcontractor']].map(function (c) { return '<button class="qchip" data-act="ask" data-v="' + esc(c[1]) + '">' + c[0] + '</button>'; }).join('') + '</div>') +
       '<div style="display:grid;gap:10px">' + chat.map(function (m, i) { return '<div data-k="m' + i + '" style="display:flex;gap:8px;justify-content:' + (m.role === 'user' ? 'flex-end' : 'flex-start') + ';animation:rise .35s var(--ease)">' + (m.role === 'agent' ? '<span class="agent-ic">' + IC.star + '</span>' : '') + '<div class="bub' + (m.role === 'user' ? ' me' : '') + '" style="max-width:86%;white-space:pre-line">' + esc(m.t) + '</div></div>'; }).join('') +
       (S.thinking ? '<div style="display:flex;gap:8px;align-items:center" data-k="th"><span class="agent-ic">' + IC.star + '</span><div class="bub thinking" style="display:flex;align-items:center;gap:5px"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="faint" style="font-size:12px;margin-left:6px">liest Begründung, Quellen &amp; LV…</span></div></div>' : '') + '</div>';
   }
 
-  return '<aside class="dw' + (S.aiOpen || S.thinking ? ' ai-open' : '') + '" aria-label="Positionsdetails ' + p.oz + '" tabindex="-1" data-k="dw">' +
+  return '<aside class="dw' + (S.aiOpen || S.thinking ? ' ai-open' : '') + '" aria-label="Item details ' + p.oz + '" tabindex="-1" data-k="dw">' +
     '<header class="dw-top"><div class="dw-bar"><span class="ozt' + (S.swapDir === 'next' ? ' ozflash' : '') + '" data-k="oz' + p.oz + '">' + p.oz + '</span><span class="gwt" title="' + esc(p.gewerk) + '">' + esc(p.gewerk) + '</span><span style="flex:1"></span>' +
-      '<div class="navg"><button class="ic" data-act="nav" data-v="-1"' + (nav.idx <= 0 ? ' disabled' : '') + ' aria-label="Vorherige Position" title="Vorherige (↑)">' + IC.up + '</button>' +
-      '<span class="navc" title="Mit ↑ / ↓ blättern"><b>' + (nav.idx + 1) + '</b> / ' + nav.list.length + '</span>' +
-      '<button class="ic" data-act="nav" data-v="1"' + (nav.idx >= nav.list.length - 1 ? ' disabled' : '') + ' aria-label="Nächste Position" title="Nächste (↓)">' + IC.chev + '</button></div>' +
-      '<button class="ic xbtn" data-act="close" aria-label="Panel schließen" title="Schließen (Esc)">' + IC.x + '</button></div>' +
+      '<div class="navg"><button class="ic" data-act="nav" data-v="-1"' + (nav.idx <= 0 ? ' disabled' : '') + ' aria-label="Previous item" title="Previous (↑)">' + IC.up + '</button>' +
+      '<span class="navc" title="Browse with ↑ / ↓"><b>' + (nav.idx + 1) + '</b> / ' + nav.list.length + '</span>' +
+      '<button class="ic" data-act="nav" data-v="1"' + (nav.idx >= nav.list.length - 1 ? ' disabled' : '') + ' aria-label="Next item" title="Next (↓)">' + IC.chev + '</button></div>' +
+      '<button class="ic xbtn" data-act="close" aria-label="Close panel" title="Close (Esc)">' + IC.x + '</button></div>' +
       '<div class="dw-swap ' + (S.leaving ? 'leaving' : S.swapDir) + '" data-k="h' + p.oz + '"><h2 class="dw-title">' + esc(p.kurz) + '</h2>' +
-      '<dl class="dmeta"><div><dt>GP</dt><dd>' + (p.np ? 'noch offen' : eur(p.gp)) + '</dd></div>' +
-        '<div><dt>Grundlage</dt><dd><span class="mtag ' + p.mode + '"><i></i>' + p.mode + '</span></dd></div>' +
-        '<div><dt>Menge</dt><dd>' + qty(p.menge) + ' ' + p.einheit + '</dd></div></dl>' +
+      '<dl class="dmeta"><div><dt>Total</dt><dd>' + (p.np ? 'still open' : eur(p.gp)) + '</dd></div>' +
+        '<div><dt>Basis</dt><dd><span class="mtag ' + p.mode + '"><i></i>' + (MODE_L[p.mode] || p.mode) + '</span></dd></div>' +
+        '<div><dt>Qty</dt><dd>' + qty(p.menge) + ' ' + p.einheit + '</dd></div></dl>' +
       (p.conf < 75 ? '<div class="rl ' + k + '">' + IC.warn + '<span>' + esc(p.why) + '</span></div>' : '') + '</div></header>' +
     '<div class="dw-body"><div class="dw-swap ' + (S.leaving ? 'leaving' : S.swapDir) + '" data-k="b' + p.oz + '">' +
-      '<section class="price' + (ok ? ' is-ok' : '') + (S.editEp ? ' is-edit' : '') + '" aria-label="Preis"><button class="mini" data-act="aiClose" tabindex="-1"><span class="mono">' + (p.np ? 'Preis' : p.manual ? 'Eigener Preis' : 'KI-Preis') + '</span><b>' + (p.np ? 'fehlt' : eur(p.ep)) + '</b><span class="muted">' + (p.np ? (p.sg ? 'Vorschlag ≈ ' + eur(p.sg.ep) + ' · bitte prüfen' : 'Keine KI-Schätzung') : 'je ' + p.einheit + ' · GP ' + eur(p.gp)) + '</span><span class="conf-v ' + confLvl(p.conf) + '"><b>' + p.conf + ' %</b></span></button><div class="ptop"><div class="pmain">' +
-        '<div class="mono lab">' + (p.np ? (p.sg ? 'Vorschlag · bitte prüfen' : 'Kein Preisvorschlag möglich') : p.manual ? (noAi ? 'Eigener Preis · ohne KI-Vorschlag' : 'Eigener Preis · ' + pct(md) + ' zum KI-Vorschlag') : 'KI-Preisvorschlag') + '</div>' +
+      '<section class="price' + (ok ? ' is-ok' : '') + (S.editEp ? ' is-edit' : '') + '" aria-label="Price"><button class="mini" data-act="aiClose" tabindex="-1"><span class="mono">' + (p.np ? 'Price' : p.manual ? 'Own price' : 'AI price') + '</span><b>' + (p.np ? 'missing' : eur(p.ep)) + '</b><span class="muted">' + (p.np ? (p.sg ? 'Suggestion ≈ ' + eur(p.sg.ep) + ' · please check' : 'No AI estimate') : 'per ' + p.einheit + ' · total ' + eur(p.gp)) + '</span><span class="conf-v ' + confLvl(p.conf) + '"><b>' + p.conf + ' %</b></span></button><div class="ptop"><div class="pmain">' +
+        '<div class="mono lab">' + (p.np ? (p.sg ? 'Suggestion · please check' : 'No price suggestion possible') : p.manual ? (noAi ? 'Own price · no AI suggestion' : 'Own price · ' + pct(md) + ' vs. AI suggestion') : 'AI price suggestion') + '</div>' +
         '<div class="prow">' + (S.editEp
-          ? '<label class="epedit"><span class="sr">Einheitspreis in Euro</span><input id="epin" inputmode="decimal" autocomplete="off" data-in="epDraft" data-enter="saveEp" value="' + esc(S.epDraft) + '"><span class="cur">€</span></label>'
-          : p.np && p.sg ? '<div class="sgbox" data-k="sg' + p.oz + '"><span class="sg-ep">≈ ' + eur(p.sg.ep) + '<small> je ' + esc(p.einheit) + '</small></span><span class="sg-r">' + (p.sg.hi > p.sg.lo ? 'Spanne ' + eur(p.sg.lo) + ' – ' + eur(p.sg.hi) + ' · ' : '') + 'aus ' + p.sg.n + ' verwandten Position' + (p.sg.n > 1 ? 'en' : '') + '</span>' +
-              '<span class="sg-b"><button class="btn btn-sm btn-primary" data-act="takeSugg">' + IC.tick + 'Übernehmen</button><button class="btn btn-sm btn-quiet" data-act="startEdit">' + IC.pen + 'Eigener Preis</button></span></div>'
-          : p.np ? '<button class="ep epnp" data-k="epnp" data-act="startEdit" aria-label="Preis eingeben">Preis eingeben<span class="pen">' + IC.pen + '</span></button>'
-          : '<button class="ep' + (S.flashEp ? ' flash' : '') + '" data-k="ep' + p.ep + '" data-act="startEdit" title="Preis bearbeiten" aria-label="Einheitspreis ' + eur(p.ep) + ', bearbeiten">' + eur(p.ep) + '<span class="pen">' + IC.pen + '</span></button>') +
-          (p.np && !S.editEp ? '' : '<span class="muted">je ' + p.einheit + '</span>') + '</div>' +
+          ? '<label class="epedit"><span class="sr">Unit price in euros</span><input id="epin" inputmode="decimal" autocomplete="off" data-in="epDraft" data-enter="saveEp" value="' + esc(S.epDraft) + '"><span class="cur">€</span></label>'
+          : p.np && p.sg ? '<div class="sgbox" data-k="sg' + p.oz + '"><span class="sg-ep">≈ ' + eur(p.sg.ep) + '<small> per ' + esc(p.einheit) + '</small></span><span class="sg-r">' + (p.sg.hi > p.sg.lo ? 'Range ' + eur(p.sg.lo) + ' – ' + eur(p.sg.hi) + ' · ' : '') + 'from ' + p.sg.n + ' related item' + (p.sg.n > 1 ? 's' : '') + '</span>' +
+              '<span class="sg-b"><button class="btn btn-sm btn-primary" data-act="takeSugg">' + IC.tick + 'Accept</button><button class="btn btn-sm btn-quiet" data-act="startEdit">' + IC.pen + 'Own price</button></span></div>'
+          : p.np ? '<button class="ep epnp" data-k="epnp" data-act="startEdit" aria-label="Enter price">Enter price<span class="pen">' + IC.pen + '</span></button>'
+          : '<button class="ep' + (S.flashEp ? ' flash' : '') + '" data-k="ep' + p.ep + '" data-act="startEdit" title="Edit price" aria-label="Unit price ' + eur(p.ep) + ', edit">' + eur(p.ep) + '<span class="pen">' + IC.pen + '</span></button>') +
+          (p.np && !S.editEp ? '' : '<span class="muted">per ' + p.einheit + '</span>') + '</div>' +
         (S.editEp
-          ? '<div class="sub edhint"><span>' + (dd === null ? 'Gültigen Preis eingeben' : noAi ? 'GP ' + eur(Math.round(dv * 100) / 100 * p.menge) : Math.abs(dd) < 0.05 ? 'entspricht dem KI-Vorschlag' : '<b style="color:' + (Math.abs(dd) > 10 ? 'var(--warn)' : 'var(--ink)') + '">' + pct(dd) + '</b> zum KI-Vorschlag · GP ' + eur(Math.round(dv * 100) / 100 * p.menge)) + '</span><span class="keys"><kbd>Enter</kbd> übernehmen <kbd>Esc</kbd> verwerfen</span></div>'
-          : p.np ? '<div class="sub">' + qty(p.menge) + ' ' + p.einheit + (p.sg ? ' · GP ≈ ' + eur(p.sg.ep * p.menge) + (p.sg.hi > p.sg.lo ? ' (' + eur(p.sg.lo * p.menge) + ' – ' + eur(p.sg.hi * p.menge) + ')' : '') : ' · GP wird nach der Eingabe berechnet') + '</div>'
-          : '<div class="sub">GP <b>' + eur(p.gp) + '</b> · ' + fmt(p.gp / TOTAL * 100, 2) + ' % des LV · ' + qty(p.menge) + ' ' + p.einheit +
-            (p.manual && !p.srvManual ? ' · <button class="lnk" data-act="resetEp">' + (noAi ? 'Preis entfernen' : 'KI-Vorschlag ' + eur(p.aiEp) + ' wiederherstellen') + '</button>' : '') +
+          ? '<div class="sub edhint"><span>' + (dd === null ? 'Enter a valid price' : noAi ? 'Total ' + eur(Math.round(dv * 100) / 100 * p.menge) : Math.abs(dd) < 0.05 ? 'matches the AI suggestion' : '<b style="color:' + (Math.abs(dd) > 10 ? 'var(--warn)' : 'var(--ink)') + '">' + pct(dd) + '</b> vs. AI suggestion · total ' + eur(Math.round(dv * 100) / 100 * p.menge)) + '</span><span class="keys"><kbd>Enter</kbd> save <kbd>Esc</kbd> discard</span></div>'
+          : p.np ? '<div class="sub">' + qty(p.menge) + ' ' + p.einheit + (p.sg ? ' · total ≈ ' + eur(p.sg.ep * p.menge) + (p.sg.hi > p.sg.lo ? ' (' + eur(p.sg.lo * p.menge) + ' – ' + eur(p.sg.hi * p.menge) + ')' : '') : ' · total is calculated once you enter a price') + '</div>'
+          : '<div class="sub">Total <b>' + eur(p.gp) + '</b> · ' + fmt(p.gp / TOTAL * 100, 2) + '% of the BoQ · ' + qty(p.menge) + ' ' + p.einheit +
+            (p.manual && !p.srvManual ? ' · <button class="lnk" data-act="resetEp">' + (noAi ? 'Remove price' : 'Restore AI suggestion ' + eur(p.aiEp)) + '</button>' : '') +
             '</div>') +
-        (ok ? '<div class="stamp' + (fresh ? ' fx' : '') + '" data-k="st"><span class="sq">' + IC.tickRaw + '</span><span><b>Bestätigt</b><small>' + (p.manual ? 'Eigener Preis' : 'KI-Preis') + '</small></span></div>' : '') + '</div>' +
-        '<div class="pconf"><span class="mono">Konfidenz</span><span class="conf-v ' + confLvl(p.conf) + '"><b>' + p.conf + ' %</b>' + confWord(p.conf) + '</span>' + cmeter(p.conf, 10) + '</div></div>' +
-        (noAi ? '<div class="why2"><div class="mono lab">Warum kein Preis</div><p>' + esc(P.live && R.brief ? R.brief : p.why) + '. In euren Alt-LVs gibt es keine vergleichbare Position. Kalkuliere den Preis selbst oder hol ein Lieferantenangebot ein.</p></div></section>' :
-        '<div class="why2' + (S.whyOpen ? ' open' : '') + '"><div class="mono lab">Begründung</div><p>' + esc(C.cands[0].why) + '</p>' +
+        (ok ? '<div class="stamp' + (fresh ? ' fx' : '') + '" data-k="st"><span class="sq">' + IC.tickRaw + '</span><span><b>Confirmed</b><small>' + (p.manual ? 'Own price' : 'AI price') + '</small></span></div>' : '') + '</div>' +
+        '<div class="pconf"><span class="mono">Confidence</span><span class="conf-v ' + confLvl(p.conf) + '"><b>' + p.conf + '%</b>' + confWord(p.conf) + '</span>' + cmeter(p.conf, 10) + '</div></div>' +
+        (noAi ? '<div class="why2"><div class="mono lab">Why no price</div><p>' + esc(P.live && R.brief ? R.brief : p.why) + '. Your past BoQs have no comparable item. Price it yourself or get a supplier quote.</p></div></section>' :
+        '<div class="why2' + (S.whyOpen ? ' open' : '') + '"><div class="mono lab">Reasoning</div><p>' + esc(C.cands[0].why) + '</p>' +
           '<div class="whymore" aria-hidden="' + !S.whyOpen + '"><div class="whyin"><div class="calc2">' + C.steps.map(function (s, j) { return '<div class="cs' + (j === C.steps.length - 1 ? ' last' : '') + '"><span>' + esc(s[0]) + '</span><span>' + esc(s[1]) + '</span></div>'; }).join('') + '</div>' +
-          ((R.similar || []).length ? '<div class="refs"><span class="mono">Quellen</span>' + R.similar.map(function (x) { var e = D.extra[x[0]]; return e ? '<button class="ref" data-act="preview" data-key="' + x[0] + '">' + esc(e.proj) + '<small>' + esc(x[1]) + '</small></button>' : ''; }).join('') + '</div>' : '') +
-        '</div></div><button class="whytg" data-act="whyToggle" aria-expanded="' + !!S.whyOpen + '">' + (S.whyOpen ? 'Weniger anzeigen' : 'Berechnung &amp; Quellen anzeigen') + IC.chev + '</button></div></section>') +
+          ((R.similar || []).length ? '<div class="refs"><span class="mono">Sources</span>' + R.similar.map(function (x) { var e = D.extra[x[0]]; return e ? '<button class="ref" data-act="preview" data-key="' + x[0] + '">' + esc(e.proj) + '<small>' + esc(x[1]) + '</small></button>' : ''; }).join('') + '</div>' : '') +
+        '</div></div><button class="whytg" data-act="whyToggle" aria-expanded="' + !!S.whyOpen + '">' + (S.whyOpen ? 'Show less' : 'Show calculation &amp; sources') + IC.chev + '</button></div></section>') +
       '<div class="lower"><div class="lowin">' + (function () {
         var L = cmtList(p);
-        return '<section class="comm cmts" aria-label="Kommentare"><div class="comm-h"><span class="gw-t"><span class="mono">Kommentare</span></span><span class="mono gw-m">' + (L.length ? L.length + (L.length === 1 ? ' Kommentar' : ' Kommentare') : 'keine') + '</span></div><div class="panel">' +
+        return '<section class="comm cmts" aria-label="Comments"><div class="comm-h"><span class="gw-t"><span class="mono">Comments</span></span><span class="mono gw-m">' + (L.length ? L.length + (L.length === 1 ? ' comment' : ' comments') : 'none') + '</span></div><div class="panel">' +
           (L.length ? '<ol class="cml">' + L.map(function (c, i) { return '<li data-k="cm' + i + '">' + (c.tag ? '<span class="cmt-tag mono">' + esc(c.tag) + '</span>' : '') + '<p>' + esc(c.t || '–') + '</p>' + (c.time ? '<small>' + esc(c.time) + '</small>' : '') + '</li>'; }).join('') + '</ol>'
-            : '<p class="pempty">Noch keine Kommentare zu dieser Position.</p>') +
-          '<div class="composer"><label><span class="sr">Kommentar</span><input data-in="cmt" data-enter="sendCmt" value="' + esc(S.cmt) + '" placeholder="Kommentar zu ' + esc(p.oz) + ' schreiben…"></label><button data-act="sendCmt" aria-label="Kommentar speichern">' + IC.arrow + '</button></div>' +
+            : '<p class="pempty">No comments on this item yet.</p>') +
+          '<div class="composer"><label><span class="sr">Comment</span><input data-in="cmt" data-enter="sendCmt" value="' + esc(S.cmt) + '" placeholder="Comment on ' + esc(p.oz) + '…"></label><button data-act="sendCmt" aria-label="Save comment">' + IC.arrow + '</button></div>' +
           '</div></section>';
       })() + gwPanel + '</div></div>' +
-      '<div class="aiwrap"><div class="aiin"><section class="aichat" role="region" aria-label="Chat mit dem Agenten zu ' + p.oz + '">' +
-      '<div class="cp-h"><span class="agent-ic">' + IC.star + '</span><span><b>Agent</b><small>' + p.oz + ' · ' + esc(p.kurz) + '</small></span><span class="cp-live"><i></i>online</span><button class="ic" data-act="aiClose" aria-label="Chat schließen">' + IC.x + '</button></div>' +
+      '<div class="aiwrap"><div class="aiin"><section class="aichat" role="region" aria-label="Chat with the agent about ' + p.oz + '">' +
+      '<div class="cp-h"><span class="agent-ic">' + IC.star + '</span><span><b>Agent</b><small>' + p.oz + ' · ' + esc(p.kurz) + '</small></span><span class="cp-live"><i></i>online</span><button class="ic" data-act="aiClose" aria-label="Close chat">' + IC.x + '</button></div>' +
       '<div class="cp-log" data-k="cplog' + p.oz + '">' +
-        (chat.length || S.thinking ? '' : '<p class="pempty">Frag mich zu dieser Position: Preis, Bieterfrage oder Was-wäre-wenn.</p><div class="chips">' +
-          [['Preis erklären', 'Wie kommst du auf den Preis?'], ['Bieterfrage formulieren', 'Formuliere eine Bieterfrage'], ['Material +15 %?', 'Was-wäre-wenn: Material +15 %'], ['Subunternehmer anfragen', 'An Subunternehmer anfragen']].map(function (c) { return '<button class="qchip" data-act="ask" data-v="' + esc(c[1]) + '">' + c[0] + '</button>'; }).join('') + '</div>') +
+        (chat.length || S.thinking ? '' : '<p class="pempty">Ask me about this item: price, bidder query or what-if.</p><div class="chips">' +
+          [['Explain price', 'How did you get this price?'], ['Draft bidder query', 'Draft a bidder query'], ['Material +15%?', 'What if material costs rise 15%?'], ['Ask subcontractor', 'Send a request to a subcontractor']].map(function (c) { return '<button class="qchip" data-act="ask" data-v="' + esc(c[1]) + '">' + c[0] + '</button>'; }).join('') + '</div>') +
         chat.map(function (m, i) { return '<div class="cp-m ' + m.role + '" data-k="cm' + i + '">' + (m.role === 'agent' ? '<span class="agent-ic">' + IC.star + '</span>' : '') + '<div class="bub' + (m.role === 'user' ? ' me' : '') + '">' + esc(m.t) + '</div></div>'; }).join('') +
         (S.thinking ? '<div class="cp-m agent" data-k="cth"><span class="agent-ic">' + IC.star + '</span><div class="bub thinking"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>' : '') +
       '</div></section></div></div>' +
     '</div></div>' +
-    '<div class="dw-cta" data-k="cta-bar">' + (devWarn && !ok && !p.gen && !noAi ? '<p class="hint" data-k="hint">' + IC.warn + '<span>Mehr als 10 % neben der Empfehlung. Gedrückt halten, um den eigenen Preis zu bestätigen.</span></p>' : '') + cta + '</div>' +
+    '<div class="dw-cta" data-k="cta-bar">' + (devWarn && !ok && !p.gen && !noAi ? '<p class="hint" data-k="hint">' + IC.warn + '<span>More than 10% off the recommendation. Hold the button to confirm your own price.</span></p>' : '') + cta + '</div>' +
     '<footer class="ask">' +
-      '<div class="askin"><span style="color:var(--signal);display:flex">' + IC.star + '</span><label style="flex:1;display:flex"><span class="sr">Frage an den Agenten</span><input data-in="draft" data-enter="sendDraft" value="' + esc(S.draft) + '" placeholder="Agent fragen zu ' + p.oz + '…"></label><button class="send" data-act="sendDraft" aria-label="Senden">' + IC.arrow + '</button></div></footer>' +
+      '<div class="askin"><span style="color:var(--signal);display:flex">' + IC.star + '</span><label style="flex:1;display:flex"><span class="sr">Question for the agent</span><input data-in="draft" data-enter="sendDraft" value="' + esc(S.draft) + '" placeholder="Ask the agent about ' + p.oz + '…"></label><button class="send" data-act="sendDraft" aria-label="Send">' + IC.arrow + '</button></div></footer>' +
   '</aside>';
 }
 
 function vPreview(d) {
   if (!S.preview) return '';
   var lp = lookup(S.preview, d) || {};
-  return '<div class="scrim" data-act="closePreview" data-k="pv"><div class="modal" role="dialog" aria-modal="true" aria-label="Positionsvorschau" data-stop="1">' +
-    '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span class="mono faint">' + esc(lp.oz) + ' · ' + esc(lp.proj) + '</span><button class="ic" data-act="closePreview" aria-label="Vorschau schließen">' + IC.x + '</button></div>' +
+  return '<div class="scrim" data-act="closePreview" data-k="pv"><div class="modal" role="dialog" aria-modal="true" aria-label="Item preview" data-stop="1">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span class="mono faint">' + esc(lp.oz) + ' · ' + esc(lp.proj) + '</span><button class="ic" data-act="closePreview" aria-label="Close preview">' + IC.x + '</button></div>' +
     '<h3 style="margin:8px 0 6px;font-size:22px;font-weight:300;letter-spacing:-.03em">' + esc(lp.kurz) + '</h3><p class="muted" style="margin:0;font-size:13px;line-height:1.6">' + esc(lp.lang) + '</p>' +
-    '<div class="kv"><div><div class="mono">Menge</div><b style="font-weight:500">' + qty(lp.menge || 0) + ' ' + esc(lp.einheit) + '</b></div><div><div class="mono">EP</div><b style="font-weight:500">' + (lp.ep ? eur(lp.ep) : '–') + '</b></div><div><div class="mono">GP</div><b style="font-weight:500">' + (lp.ep ? eur(lp.ep * lp.menge) : '–') + '</b></div></div>' +
-    '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:18px"><button class="btn btn-quiet" data-act="closePreview">Schließen</button>' + (lp.inTable && lp.oz !== S.sel ? '<button class="btn btn-primary" data-act="open" data-oz="' + lp.oz + '">Position öffnen' + IC.arrow + '</button>' : '') + '</div></div></div>';
+    '<div class="kv"><div><div class="mono">Qty</div><b style="font-weight:500">' + qty(lp.menge || 0) + ' ' + esc(lp.einheit) + '</b></div><div><div class="mono">Unit price</div><b style="font-weight:500">' + (lp.ep ? eur(lp.ep) : '–') + '</b></div><div><div class="mono">Total</div><b style="font-weight:500">' + (lp.ep ? eur(lp.ep * lp.menge) : '–') + '</b></div></div>' +
+    '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:18px"><button class="btn btn-quiet" data-act="closePreview">Close</button>' + (lp.inTable && lp.oz !== S.sel ? '<button class="btn btn-primary" data-act="open" data-oz="' + lp.oz + '">Open item' + IC.arrow + '</button>' : '') + '</div></div></div>';
 }
 
 function vFx() {
   var fx = S.fx; if (!fx) return '';
   var steps = fx.kind === 'export'
-    ? ['13 Positionen prüfen', 'Preise einfrieren', 'GAEB X84 erzeugen', 'Datei bereitstellen']
-    : [fx.n + ' Preise sperren', 'Summen neu berechnen', 'Protokoll schreiben'];
+    ? ['Check items', 'Freeze prices', 'Generate GAEB X84', 'Prepare file']
+    : ['Lock ' + fx.n + ' prices', 'Recalculate totals', 'Write log'];
   var title = fx.kind === 'export'
-    ? (fx.phase === 'ask' ? fx.open + ' Preise sind noch unbestätigt' : fx.phase === 'done' ? 'Angebot exportiert' : 'Export läuft')
-    : (fx.phase === 'done' ? fx.n + ' Preise bestätigt' : 'Bestätige ' + fx.n + ' Preise');
+    ? (fx.phase === 'ask' ? fx.open + ' prices are still unconfirmed' : fx.phase === 'done' ? 'Bid exported' : 'Exporting')
+    : (fx.phase === 'done' ? fx.n + ' prices confirmed' : 'Confirming ' + fx.n + ' prices');
   var cls = fx.phase === 'done' ? 'done' : fx.phase === 'ask' ? 'is-warn' : '';
   var btns = fx.phase === 'ask'
-    ? '<button class="btn btn-quiet" data-act="fxClose">Erst prüfen</button><button class="btn btn-primary" data-act="fxRun">Trotzdem exportieren' + IC.arrow + '</button>'
+    ? '<button class="btn btn-quiet" data-act="fxClose">Review first</button><button class="btn btn-primary" data-act="fxRun">Export anyway' + IC.arrow + '</button>'
     : fx.phase === 'done' && fx.kind === 'export'
-      ? '<button class="btn btn-quiet" data-act="fxClose">Schließen</button><button class="btn btn-primary" data-act="download">' + IC.down + esc(slug(P.short)) + '.X84</button>' : '';
+      ? '<button class="btn btn-quiet" data-act="fxClose">Close</button><button class="btn btn-primary" data-act="download">' + IC.down + esc(slug(P.short)) + '.X84</button>' : '';
   return '<div class="scrim" data-k="fx-' + fx.kind + '"><div class="fxcard" role="dialog" aria-modal="true" aria-labelledby="fxT" aria-live="polite">' +
     '<div class="fxv ' + cls + '"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="fx-track" cx="60" cy="60" r="52"/><circle class="fx-ring" cx="60" cy="60" r="52"/>' +
       (fx.phase === 'ask' ? '<path class="fx-warn" d="M60 36v30M60 82v.5"/>' : '<path class="fx-check" d="M38 62l15 15 30-33"/>') + '</svg><span class="burst"></span><span class="burst b2"></span>' + (fx.phase === 'done' ? particles('spark', 14, 90) : '') + '</div>' +
     '<div class="fx-amt">' + fx.amount + '</div><div class="fx-title mono" id="fxT">' + title + '</div>' +
-    (fx.phase === 'ask' ? '<p class="muted" style="margin:0;font-size:13px;max-width:320px">Unbestätigte Positionen gehen mit dem KI-Preis ins Angebot. Du kannst sie vorher in der Tabelle unter „Zu prüfen“ durchgehen.</p>'
+    (fx.phase === 'ask' ? '<p class="muted" style="margin:0;font-size:13px;max-width:320px">Unconfirmed items go into the bid at the AI price. You can go through them first under “To review” in the table.</p>'
       : '<ol class="fx-steps">' + steps.map(function (t, i) { var st = fx.phase === 'done' || i < fx.step ? 'done' : i === fx.step ? 'run' : ''; return '<li class="' + st + '"><span class="si">' + (st === 'done' ? IC.tickRaw : '') + '</span>' + esc(t) + '</li>'; }).join('') + '</ol>') +
     '<div class="fx-btns">' + btns + '</div></div></div>';
 }
@@ -2126,14 +2130,14 @@ function vBulkNote(d) {
   var open = openRows(d), np = open.filter(function (r) { return r.np; }), low = open.filter(function (r) { return !r.np && r.conf < 50; }),
     big = open.filter(function (r) { return !r.np && r.conf >= 50; }), first = np.concat(low, big).sort(function (a, b) { return (b.val || b.gp) - (a.val || a.gp); }).slice(0, 3);
   var parts = [];
-  if (np.length) parts.push(np.length + ' ohne Preis');
-  if (low.length) parts.push(low.length + ' mit niedriger Konfidenz');
-  if (big.length) parts.push(big.length + ' sicher, aber teuer genug für einen Blick');
+  if (np.length) parts.push(np.length + ' without a price');
+  if (low.length) parts.push(low.length + ' with low confidence');
+  if (big.length) parts.push(big.length + ' safe but expensive enough to look at');
   return '<div class="agentnote" data-k="bulknote"><span class="an-i">' + IC.star + '</span><div class="an-t"><b>Agent</b>' +
-    '<p>' + (B.n === 1 ? '1 sicherer Preis übernommen' : B.n + ' sichere Preise übernommen') + ' (Σ ' + eur(B.sum) + '). ' + (open.length ? 'Noch offen: ' + open.length + (open.length === 1 ? ' Position' : ' Positionen') + ', davon ' + parts.join(', ') + '.' + (first.length ? ' Zuerst ansehen: ' : '') : 'Es ist nichts mehr offen.') +
+    '<p>' + (B.n === 1 ? '1 safe price accepted' : B.n + ' safe prices accepted') + ' (Σ ' + eur(B.sum) + '). ' + (open.length ? 'Still open: ' + open.length + (open.length === 1 ? ' item' : ' items') + ': ' + parts.join(', ') + '.' + (first.length ? ' Look at these first: ' : '') : 'Nothing is left open.') +
     first.map(function (r, i) { return (i ? ', ' : '') + '<button class="lnk" data-act="open" data-oz="' + r.oz + '">' + esc(r.oz + ' ' + r.kurz) + '</button>'; }).join('') + (first.length ? '.' : '') + '</p>' +
-    (open.length ? '<button class="btn btn-sm btn-quiet" data-act="filter" data-v="review">Offene anzeigen</button>' : '') + '</div>' +
-    '<button class="ic" data-act="bulkNoteClose" aria-label="Hinweis schließen">' + IC.x + '</button></div>';
+    (open.length ? '<button class="btn btn-sm btn-quiet" data-act="filter" data-v="review">Show open items</button>' : '') + '</div>' +
+    '<button class="ic" data-act="bulkNoteClose" aria-label="Close note">' + IC.x + '</button></div>';
 }
 function flagOk(list) {
   var j = Object.assign({}, S.justOk);
@@ -2149,18 +2153,18 @@ function runSteps(n, ms, done) {
 // ================= agent reply (mock) =================
 function reply(p, text) {
   var t = text.toLowerCase(), gp = p.menge * p.ep;
-  if (t.indexOf('preis') >= 0 || t.indexOf('wie kommst') >= 0) {
+  if (t.indexOf('price') >= 0 || t.indexOf('preis') >= 0) {
     var r = D.rich[p.oz] || {};
-    var st = r.steps ? r.steps.map(function (s) { return s[0] + ': ' + s[1]; }).join('\n') : 'Basis: textgleiche Position in der Preisbasis\nEP: ' + eur(p.ep);
-    return 'So komme ich auf ' + eur(p.ep) + ' je ' + p.einheit + ':\n' + st + '\nKonfidenz ' + p.conf + ' %. Quellen stehen unter der Begründung.';
+    var st = r.steps ? r.steps.map(function (s) { return s[0] + ': ' + s[1]; }).join('\n') : 'Basis: item with identical text in the price library\nUnit price: ' + eur(p.ep);
+    return 'This is how I get to ' + eur(p.ep) + ' per ' + p.einheit + ':\n' + st + '\nConfidence ' + p.conf + '%. The sources are listed under the reasoning.';
   }
-  if (t.indexOf('bieterfrage') >= 0) return 'Entwurf Bieterfrage zu ' + p.oz + ':\n„Zur Position ' + p.oz + ' (' + p.kurz + ') bitten wir um Klärung: ' + p.why + '. Bitte bestätigen Sie Menge und Ausführungsqualität.“\nSoll ich das als Entwurf in Outlook ablegen?';
-  if (t.indexOf('+15') >= 0 || t.indexOf('wenn') >= 0) {
+  if (t.indexOf('query') >= 0 || t.indexOf('bieterfrage') >= 0) return 'Draft bidder query for ' + p.oz + ':\n“Regarding item ' + p.oz + ' (' + p.kurz + '), please clarify: ' + p.why + '. Please confirm the quantity and the required quality.”\nShall I save this as a draft in Outlook?';
+  if (t.indexOf('15') >= 0 || t.indexOf('what if') >= 0) {
     var ep2 = p.ep * 1.09;
-    return 'Bei +15 % Materialpreis (Materialanteil ca. 60 %) steigt der EP von ' + eur(p.ep) + ' auf ' + eur(Math.round(ep2 * 100) / 100) + '.\nGP: +' + eur(Math.round((ep2 - p.ep) * p.menge)) + '. Die Gesamtschätzung bleibt links vom prognostizierten Zuschlag (1,21 Mio. €).';
+    return 'If material prices rise 15% (material share about 60%), the unit price goes from ' + eur(p.ep) + ' to ' + eur(Math.round(ep2 * 100) / 100) + '.\nTotal: +' + eur(Math.round((ep2 - p.ep) * p.menge)) + '.';
   }
-  if (t.indexOf('subunternehmer') >= 0 || t.indexOf('anfrag') >= 0) return 'Ich habe eine Outlook-Sequenz vorbereitet: Anfrage heute, Erinnerung nach 3 Tagen, Nachfassen nach 7 Tagen. Unter „Extern“ kannst du sie starten.';
-  return 'Verstanden. Für ' + p.oz + ' sehe ich vor allem: ' + p.why + '. Der GP liegt bei ' + eur(gp) + ' (' + fmt(gp / TOTAL * 100, 1) + ' % des LV).';
+  if (t.indexOf('subcontractor') >= 0 || t.indexOf('subunternehmer') >= 0) return 'I prepared an Outlook sequence: request today, reminder after 3 days, follow-up after 7 days.';
+  return 'Got it. For ' + p.oz + ' the main point is: ' + p.why + '. The total is ' + eur(gp) + ' (' + fmt(gp / TOTAL * 100, 1) + '% of the BoQ).';
 }
 
 // ================= actions =================
@@ -2179,33 +2183,33 @@ function confirmCurrent() {
   var p = cur(); if (!p || S.confirmed[p.oz]) return;
   var patch = { editEp: false, holding: false };
   if (S.editEp) {
-    var v = parseFloat(String(S.epDraft).replace(',', '.'));
-    if (!isFinite(v) || v <= 0) { toast('Bitte einen gültigen Preis eingeben'); return; }
+    var v = num(S.epDraft);
+    if (!isFinite(v) || v <= 0) { toast('Please enter a valid price'); return; }
     v = Math.round(v * 100) / 100;
     var e = Object.assign({}, S.eps), g = Object.assign({}, S.sugg);
     if (Math.abs(v - p.aiEp) < 0.005) delete e[p.oz]; else e[p.oz] = v;
     delete g[p.oz]; patch.eps = e; patch.sugg = g;
-    if (P.live && Math.abs(v - p.ep) >= 0.005) postComment(p.oz, { price: v, text: 'Eigener Preis im Dashboard' }, 'EP ' + p.oz);
+    if (P.live && Math.abs(v - p.ep) >= 0.005) postComment(p.oz, { price: v, text: 'Own price set in the dashboard' }, 'EP ' + p.oz);
   }
   var c = Object.assign({}, S.confirmed); c[p.oz] = true; patch.confirmed = c;
   flagOk([p.oz]);
   set(patch);
   var nav = navInfo(derive()), next = nav.list.slice(nav.idx + 1).find(function (r) { return !S.confirmed[r.oz]; });
-  toast(p.oz + ' bestätigt');
+  toast(p.oz + ' confirmed');
   if (next) { scheduleAdvance(p.oz, next.oz); render(); }
 }
 function saveEp() {
   var p = cur(); if (!p) return;
-  var v = parseFloat(String(S.epDraft).replace(',', '.'));
-  if (!isFinite(v) || v <= 0) { toast('Bitte einen gültigen Preis eingeben'); return; }
+  var v = num(S.epDraft);
+  if (!isFinite(v) || v <= 0) { toast('Please enter a valid price'); return; }
   v = Math.round(v * 100) / 100;
   var e = Object.assign({}, S.eps), g = Object.assign({}, S.sugg), c = Object.assign({}, S.confirmed);
   if (Math.abs(v - p.aiEp) < 0.005) delete e[p.oz]; else e[p.oz] = v;
   delete g[p.oz]; delete c[p.oz];
   set({ eps: e, sugg: g, confirmed: c, editEp: false, flashEp: 1 });
   S.flashEp = 0;
-  toast('EP ' + p.oz + ': ' + eur(v) + ' · GP ' + eur(v * p.menge));
-  if (P.live && Math.abs(v - p.ep) >= 0.005) postComment(p.oz, { price: v, text: 'Eigener Preis im Dashboard' }, 'EP ' + p.oz);
+  toast('Unit price ' + p.oz + ': ' + eur(v) + ' · total ' + eur(v * p.menge));
+  if (P.live && Math.abs(v - p.ep) >= 0.005) postComment(p.oz, { price: v, text: 'Own price set in the dashboard' }, 'EP ' + p.oz);
 }
 var aiT = null, aiScroll = 0;
 function aiShut() { set({ aiOpen: false }); var bd = document.querySelector('.dw-body'); if (bd) setTimeout(function () { bd.scrollTo({ top: aiScroll, behavior: 'smooth' }); }, 420); }
@@ -2242,7 +2246,7 @@ function pzSet(x, y, w) {
     svg.setAttribute('viewBox', vb); svg.classList.toggle('zoomed', zoomed);
     svg.querySelectorAll('.mk[data-oz]').forEach(function (m) { var p = PLAN[m.getAttribute('data-oz')]; if (p) m.setAttribute('transform', pzMk(p)); });
   });
-  document.querySelectorAll('.pz-v').forEach(function (b) { b.textContent = Math.round(100000 / w) + ' %'; });
+  document.querySelectorAll('.pz-v').forEach(function (b) { b.textContent = Math.round(100000 / w) + '%'; });
   planHot(null);
 }
 function pzAt(svg, cx, cy, f) {
@@ -2317,7 +2321,7 @@ function planHot(oz, mkEl) {
   if (!mkEl) return; // from a table row: only the marker lights up
   var plan = mkEl.closest('.plan'), tip = plan && plan.querySelector('.plan-tip'), p = PLAN[oz], r = derive().full.find(function (x) { return x.oz === oz; });
   if (!tip || !r) return;
-  tip.innerHTML = '<span class="mono">' + oz + ' · Konfidenz ' + r.conf + ' %</span><b>' + esc(r.kurz) + '</b><span>' + (r.np ? 'Noch kein Preis' : eur(r.ep) + ' je ' + r.einheit) + '</span>';
+  tip.innerHTML = '<span class="mono">' + oz + ' · confidence ' + r.conf + '%</span><b>' + esc(r.kurz) + '</b><span>' + (r.np ? 'No price yet' : eur(r.ep) + ' per ' + r.einheit) + '</span>';
   var Z = pzBox(), fx = (p[0] - Z.x) / Z.w, fy = (p[1] - Z.y) / Z.h;
   if (fx < 0 || fx > 1 || fy < 0 || fy > 1) return;
   tip.style.left = (fx * 100) + '%'; tip.style.top = (fy * 100) + '%';
@@ -2340,13 +2344,13 @@ function send(text) {
   setTimeout(function () { var c2 = Object.assign({}, S.chats); c2[oz] = (c2[oz] || []).concat([{ role: 'agent', t: reply(p, text) }]); set({ chats: c2, thinking: false }); }, 1500);
 }
 function cmtList(p) {
-  if (P.live) return (p.cmts || []).map(function (c) { return { t: c.text, tag: c.price != null ? 'Preis ' + eur(c.price) : '' }; });
+  if (P.live) return (p.cmts || []).map(function (c) { return { t: c.text, tag: c.price != null ? 'Price ' + eur(c.price) : '' }; });
   return (S.comments[p.oz] || []).map(function (c) { return { t: c.t, tag: '', time: c.time }; });
 }
 function addComment() {
   var v = S.cmt.trim(); if (!v || !S.sel) return;
-  if (P.live) { var oz = S.sel; set({ cmt: '' }); postComment(oz, { text: v }, 'Kommentar zu ' + oz); return; }
-  var c = Object.assign({}, S.comments); c[S.sel] = (c[S.sel] || []).concat([{ by: 'TB', time: 'gerade eben', t: v }]);
+  if (P.live) { var oz = S.sel; set({ cmt: '' }); postComment(oz, { text: v }, 'Comment on ' + oz); return; }
+  var c = Object.assign({}, S.comments); c[S.sel] = (c[S.sel] || []).concat([{ by: 'TB', time: 'just now', t: v }]);
   set({ comments: c, cmt: '' });
 }
 function download() {
@@ -2355,13 +2359,13 @@ function download() {
   var items = (P.live ? d.full : d.all).filter(function (r) { return !r.np; }).map(function (r) {
     return '      <Item RNoPart="' + r.oz + '"><Qty>' + r.menge + '</Qty><QU>' + x(r.einheit) + '</QU><UP>' + r.ep.toFixed(2) + '</UP><IT>' + r.gp.toFixed(2) + '</IT><Description><OutlineText>' + x(r.kurz) + '</OutlineText></Description></Item>';
   }).join('\n');
-  var xml = '<?xml version="1.0" encoding="UTF-8"?>\n<!-- ' + (P.live ? 'Export Needle, Projekt ' + x(P.id) : 'Mock-Export Needle (Demo-Daten)') + ' -->\n<GAEB xmlns="http://www.gaeb.de/GAEB_DA_XML/DA84/3.3">\n  <GAEBInfo><Version>3.3</Version><ProgSystem>LV Mastermind</ProgSystem></GAEBInfo>\n  <Award><DP>84</DP><BoQ><BoQInfo><Name>' + x(P.name) + '</Name></BoQInfo><BoQBody>\n' + items + '\n  </BoQBody></BoQ></Award>\n</GAEB>\n';
+  var xml = '<?xml version="1.0" encoding="UTF-8"?>\n<!-- ' + (P.live ? 'Needle export, project ' + x(P.id) : 'Needle mock export (demo data)') + ' -->\n<GAEB xmlns="http://www.gaeb.de/GAEB_DA_XML/DA84/3.3">\n  <GAEBInfo><Version>3.3</Version><ProgSystem>LV Mastermind</ProgSystem></GAEBInfo>\n  <Award><DP>84</DP><BoQ><BoQInfo><Name>' + x(P.name) + '</Name></BoQInfo><BoQBody>\n' + items + '\n  </BoQBody></BoQ></Award>\n</GAEB>\n';
   var a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([xml], { type: 'application/xml' }));
   a.download = slug(P.short) + '.X84';
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
-  toast(slug(P.short) + '.X84 heruntergeladen');
+  toast(slug(P.short) + '.X84 downloaded');
 }
 function startExport() {
   var d = derive();
@@ -2375,7 +2379,7 @@ var A = {
   analyze: function () {
     if (S.analyzing) return;
     set({ analyzing: true });
-    setTimeout(function () { set({ analyzing: false, analyzed: 'gerade eben' }); toast('Analyse aktuell · keine neuen Abweichungen'); }, 2200);
+    setTimeout(function () { set({ analyzing: false, analyzed: 'just now' }); toast('Analysis up to date · no new deviations'); }, 2200);
   },
   export: function () {
     var d = derive(), open = d.all.filter(function (r) { return !S.confirmed[r.oz]; }).length;
@@ -2398,7 +2402,7 @@ var A = {
     var c = Object.assign({}, S.confirmed); c[ds.oz] = !c[ds.oz];
     if (c[ds.oz]) flagOk([ds.oz]);
     set({ confirmed: c });
-    toast(c[ds.oz] ? 'Preis für ' + ds.oz + ' bestätigt' : 'Bestätigung für ' + ds.oz + ' zurückgenommen');
+    toast(c[ds.oz] ? 'Price for ' + ds.oz + ' confirmed' : 'Confirmation for ' + ds.oz + ' undone');
   },
   sort: function (ds) { var on = S.sort.k === ds.v; set({ sort: { k: ds.v, d: on ? -S.sort.d : ((ds.v === 'oz' || ds.v === 'kurz' || ds.v === 'conf') ? 1 : -1) } }); },
   filter: function (ds) { set({ filter: ds.v }); },
@@ -2417,7 +2421,7 @@ var A = {
     var c = Object.assign({}, S.confirmed); sf.forEach(function (r) { c[r.oz] = true; });
     flagOk(sf.map(function (r) { return r.oz; }));
     set({ confirmed: c, bulkNote: { n: sf.length, sum: sf.reduce(function (a, r) { return a + r.gp; }, 0) } });
-    toast(sf.length === 1 ? '1 sicherer Preis übernommen' : sf.length + ' sichere Preise übernommen');
+    toast(sf.length === 1 ? '1 safe price accepted' : sf.length + ' safe prices accepted');
   },
   bulkNoteClose: function () { set({ bulkNote: null }); },
   takeSugg: function () { var p = cur(); if (!p || !p.sg) return; S.epDraft = String(p.sg.ep); saveEp(); },
@@ -2432,7 +2436,7 @@ var A = {
         var c = Object.assign({}, S.confirmed); pr.forEach(function (r) { c[r.oz] = true; });
         flagOk(pr.map(function (r) { return r.oz; }));
         set({ fx: null, confirmed: c, picked: {} });
-        toast(pr.length + ' Preise bestätigt');
+        toast(pr.length + ' prices confirmed');
       }, 1200);
     });
   },
@@ -2442,7 +2446,7 @@ var A = {
     for (var i = 0; i < w[0].length; i++) { var tok = w[0][i]; if (w.every(function (x) { return x[i] === tok; })) out.push(tok); else break; }
     var nm = out.join(' ').replace(/[,;:·\s–-]+$/, '') || pr[0].kurz.split(',')[0];
     var b = Object.assign({}, S.bundled); pr.forEach(function (r) { b[r.oz] = nm; });
-    set({ bundled: b, picked: {} }); toast('Gebündelt: ' + nm + ' · ' + pr.length + ' Positionen');
+    set({ bundled: b, picked: {} }); toast('Bundled: ' + nm + ' · ' + pr.length + ' items');
   },
   clearPicked: function () { set({ picked: {} }); },
   preview: function (ds) { set({ preview: ds.key }); },
@@ -2468,10 +2472,10 @@ var A = {
   },
   menuPick: function (ds) {
     var v = ds.v; S.menu = null;
-    if (ds.menu === 'owner') { var o2 = Object.assign({}, S.owners); o2[S.sel] = v; set({ owners: o2 }); toast(v ? S.sel + ' an ' + T[v].name + ' zugewiesen' : 'Zuweisung für ' + S.sel + ' entfernt'); }
+    if (ds.menu === 'owner') { var o2 = Object.assign({}, S.owners); o2[S.sel] = v; set({ owners: o2 }); toast(v ? S.sel + ' assigned to ' + T[v].name : 'Assignment for ' + S.sel + ' removed'); }
     else if (ds.menu === 'bulk' && T[v]) {
       var pr = derive().all.filter(function (r) { return S.picked[r.oz]; }), o = Object.assign({}, S.owners);
-      pr.forEach(function (r) { o[r.oz] = v; }); set({ owners: o }); toast(pr.length + ' Positionen an ' + T[v].name + ' zugewiesen');
+      pr.forEach(function (r) { o[r.oz] = v; }); set({ owners: o }); toast(pr.length + ' items assigned to ' + T[v].name);
     } else render();
   },
   undoOk: function () { cancelAdvance(); var c = Object.assign({}, S.confirmed); delete c[S.sel]; set({ confirmed: c }); },
@@ -2495,12 +2499,12 @@ var A = {
   },
   whyToggle: function () { set({ whyOpen: !S.whyOpen }); },
   dtab: function (ds) { set({ dtab: ds.v }); },
-  resetEp: function () { var p0 = cur(); if (p0 && p0.srvManual) { toast('Der eigene Preis ist im Backend gespeichert. Gib einen neuen Preis ein, um ihn zu ersetzen.'); return; } var p = cur(), e = Object.assign({}, S.eps), g = Object.assign({}, S.sugg), c = Object.assign({}, S.confirmed); delete e[p.oz]; delete g[p.oz]; delete c[p.oz]; set({ eps: e, sugg: g, confirmed: c, editEp: false, flashEp: 1 }); S.flashEp = 0; toast('KI-Vorschlag für ' + p.oz + ' wiederhergestellt'); },
+  resetEp: function () { var p0 = cur(); if (p0 && p0.srvManual) { toast('Your own price is saved in the backend. Enter a new price to replace it.'); return; } var p = cur(), e = Object.assign({}, S.eps), g = Object.assign({}, S.sugg), c = Object.assign({}, S.confirmed); delete e[p.oz]; delete g[p.oz]; delete c[p.oz]; set({ eps: e, sugg: g, confirmed: c, editEp: false, flashEp: 1 }); S.flashEp = 0; toast('AI suggestion restored for ' + p.oz); },
   sendCmt: addComment,
   compose: function (ds) { set({ compose: ds.v, dtab: 'ext' }); },
   cancelCompose: function () { set({ compose: null }); },
   saveNote: function () { var v = S.noteDraft.trim(); if (!v) return; var n = Object.assign({}, S.notes); n[S.sel] = (n[S.sel] || []).concat([{ by: 'Thomas', t: v }]); set({ notes: n, noteDraft: '', compose: null }); },
-  startSeq: function () { var q = Object.assign({}, S.seqs); q[S.sel] = true; set({ seqs: q, compose: null }); toast('Outlook-Sequenz geplant · Tag 0, 3, 7'); },
+  startSeq: function () { var q = Object.assign({}, S.seqs); q[S.sel] = true; set({ seqs: q, compose: null }); toast('Outlook sequence scheduled · day 0, 3, 7'); },
   ask: function (ds) { send(ds.v); },
   sendDraft: function () { send(S.draft); }
 };
@@ -2509,31 +2513,31 @@ var A = {
 function vProjMenu() {
   if (!S.projOpen) return '';
   var L = S.projList;
-  return '<div class="pmenu" role="menu" data-k="pmenu"><div class="menu-h mono">Projekte</div>' +
-    (L === null ? '<div class="pm-e mono faint">Lädt…</div>' : L === false ? '<div class="pm-e">Projekte konnten nicht geladen werden.</div>' : !L.length ? '<div class="pm-e">Noch keine Projekte analysiert.</div>' :
+  return '<div class="pmenu" role="menu" data-k="pmenu"><div class="menu-h mono">Projects</div>' +
+    (L === null ? '<div class="pm-e mono faint">Loading…</div>' : L === false ? '<div class="pm-e">Could not load projects.</div>' : !L.length ? '<div class="pm-e">No projects analysed yet.</div>' :
       L.map(function (p) {
-        return '<button class="pm-i' + (P.live && P.id === p.project ? ' on' : '') + '" data-act="loadProj" data-v="' + esc(p.project) + '"' + (p.items == null ? ' disabled' : '') + '><span><b>' + esc((store('lvm-meta-' + p.project) || {}).name || p.project) + '</b><small>' + esc(p.project) + (p.items != null ? ' · ' + fmt(p.items) + ' Pos.' : '') + (p.total != null ? ' · ' + eur(Math.round(p.total)) : '') + '</small></span>' +
-          '<span class="mono ' + (p.status === 'failed' ? 'pm-bad' : 'faint') + '">' + (p.status === 'running' ? 'läuft…' : p.status === 'failed' ? 'Fehler' : p.confidence != null ? p.confidence + ' %' : '') + '</span></button>';
+        return '<button class="pm-i' + (P.live && P.id === p.project ? ' on' : '') + '" data-act="loadProj" data-v="' + esc(p.project) + '"' + (p.items == null ? ' disabled' : '') + '><span><b>' + esc((store('lvm-meta-' + p.project) || {}).name || p.project) + '</b><small>' + esc(p.project) + (p.items != null ? ' · ' + fmt(p.items) + ' items' : '') + (p.total != null ? ' · ' + eur(Math.round(p.total)) : '') + '</small></span>' +
+          '<span class="mono ' + (p.status === 'failed' ? 'pm-bad' : 'faint') + '">' + (p.status === 'running' ? 'running…' : p.status === 'failed' ? 'Failed' : p.confidence != null ? p.confidence + '%' : '') + '</span></button>';
       }).join('')) +
-    '<button class="pm-new" data-act="newProj">' + IC.plus + 'Neues Projekt hochladen</button></div>';
+    '<button class="pm-new" data-act="newProj">' + IC.plus + 'Upload new project</button></div>';
 }
 function upFile(kind, f, acc, hint) {
   return '<label class="updrop' + (f ? ' has' : '') + '" data-drop="' + kind + '" data-k="ud' + kind + '"><input type="file" class="sr" accept="' + acc + '" data-file="' + kind + '">' +
-    '<span class="updrop-i">' + (f ? IC.tick : IC.down) + '</span><span class="updrop-t"><b>' + (f ? esc(f.name) : hint[0]) + '</b><small>' + (f ? fmt(Math.max(1, f.size / 1024)) + ' KB · Klicken zum Ersetzen' : hint[1]) + '</small></span></label>';
+    '<span class="updrop-i">' + (f ? IC.tick : IC.down) + '</span><span class="updrop-t"><b>' + (f ? esc(f.name) : hint[0]) + '</b><small>' + (f ? fmt(Math.max(1, f.size / 1024)) + ' KB · click to replace' : hint[1]) + '</small></span></label>';
 }
 function vUpload() {
   var U = S.up; if (!U) return '';
-  var head = '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span class="mono faint">Neues Projekt</span>' +
-    (U.phase === 'run' ? '' : '<button class="ic" data-act="upClose" aria-label="Schließen">' + IC.x + '</button>') + '</div>';
+  var head = '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span class="mono faint">New project</span>' +
+    (U.phase === 'run' ? '' : '<button class="ic" data-act="upClose" aria-label="Close">' + IC.x + '</button>') + '</div>';
   if (U.phase === 'run' || U.phase === 'err') {
     var sec = Math.round(((U.t1 || Date.now()) - U.t0) / 1000);
-    return '<div class="scrim" data-k="up"><div class="modal upm" role="dialog" aria-modal="true" aria-label="Analyse läuft" data-stop="1">' + head +
-      '<h3 class="up-h">' + (U.phase === 'err' ? 'Analyse fehlgeschlagen' : 'LV wird analysiert') + '</h3>' +
+    return '<div class="scrim" data-k="up"><div class="modal upm" role="dialog" aria-modal="true" aria-label="Analysis running" data-stop="1">' + head +
+      '<h3 class="up-h">' + (U.phase === 'err' ? 'Analysis failed' : 'Analysing the BoQ') + '</h3>' +
       '<p class="muted up-p">' + esc(U.lvName) + (U.planName ? ' + ' + esc(U.planName) : '') + ' · ' + sec + ' s</p>' +
       (U.phase === 'err' ? '<div class="up-err">' + IC.warn + '<span>' + esc(U.err) + '</span></div>' : '<div class="up-bar"><i></i></div>') +
-      '<pre class="up-log" data-k="ulog">' + esc((U.log || []).slice(-12).join('\n') || 'Warte auf die ersten Zeilen…') + '</pre>' +
-      (U.phase === 'err' ? '<div class="up-btns"><button class="btn btn-quiet" data-act="upClose">Schließen</button><button class="btn btn-primary" data-act="upBack">Zurück zum Formular</button></div>' :
-        '<p class="mono faint up-note">Eine volle Analyse fragt KI-Modelle und dauert einige Minuten. Das Fenster kann offen bleiben.</p>') +
+      '<pre class="up-log" data-k="ulog">' + esc((U.log || []).slice(-12).join('\n') || 'Waiting for the first lines…') + '</pre>' +
+      (U.phase === 'err' ? '<div class="up-btns"><button class="btn btn-quiet" data-act="upClose">Close</button><button class="btn btn-primary" data-act="upBack">Back to the form</button></div>' :
+        '<p class="mono faint up-note">A full analysis queries AI models and takes a few minutes. You can keep this window open.</p>') +
       '</div></div>';
   }
   return '';
@@ -2568,7 +2572,7 @@ function itemPatched(item, sum) {
 function postComment(oz, body, msg) {
   if (!P.live) return;
   api('/projects/' + encodeURIComponent(P.id) + '/items/' + encodeURIComponent(oz) + '/comments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-    .then(function (res) { itemPatched(res.item, res.risk_summary); render(); toast(msg + ' · gespeichert'); }, function (err) { toast('Nicht gespeichert: ' + err.message); });
+    .then(function (res) { itemPatched(res.item, res.risk_summary); render(); toast(msg + ' · saved'); }, function (err) { toast('Not saved: ' + err.message); });
 }
 var upT = null;
 function pollRun(id) {
@@ -2577,9 +2581,9 @@ function pollRun(id) {
     if (!S.up || S.up.id !== id) return;
     S.up.log = st.log || [];
     if (st.status === 'running') { render(); upT = setTimeout(function () { pollRun(id); }, 2500); return; }
-    if (st.status === 'failed') { S.up.phase = 'err'; S.up.t1 = Date.now(); S.up.err = st.error || 'Die Analyse ist abgebrochen.'; render(); return; }
-    loadProject(id).then(function () { S.up = null; render(); toast(id + ' analysiert · ' + P.n + ' Positionen'); }, function (e) { S.up.phase = 'err'; S.up.err = e.message; render(); });
-  }, function (e) { if (!S.up) return; S.up.log = (S.up.log || []).concat(['Status nicht abrufbar: ' + e.message]); render(); upT = setTimeout(function () { pollRun(id); }, 4000); });
+    if (st.status === 'failed') { S.up.phase = 'err'; S.up.t1 = Date.now(); S.up.err = st.error || 'The analysis stopped.'; render(); return; }
+    loadProject(id).then(function () { S.up = null; render(); toast(id + ' analysed · ' + P.n + ' items'); }, function (e) { S.up.phase = 'err'; S.up.err = e.message; render(); });
+  }, function (e) { if (!S.up) return; S.up.log = (S.up.log || []).concat(['Could not fetch status: ' + e.message]); render(); upT = setTimeout(function () { pollRun(id); }, 4000); });
 }
 function suggestId(name) { return String(name || '').replace(/\.[^.]+$/, '').replace(/[^A-Za-z0-9-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'LV-1'; }
 function takeFiles(files) {
@@ -2588,7 +2592,7 @@ function takeFiles(files) {
   Array.prototype.forEach.call(files, function (f) {
     if (LV_EXT.test(f.name)) S.up.lv = f; else if (PLAN_EXT.test(f.name)) S.up.plan = f; else bad.push(f.name);
   });
-  S.up.err = bad.length ? 'Nicht unterstützt: ' + bad.join(', ') + '. Erlaubt sind GAEB .X83/.D83/.D84/.D86 und PNG/JPG.' : '';
+  S.up.err = bad.length ? 'Not supported: ' + bad.join(', ') + '. Allowed: GAEB .X83/.D83/.D84/.D86, Excel .XLSX, PDF and PNG/JPG.' : '';
   render();
 }
 
@@ -2596,21 +2600,21 @@ function takeFiles(files) {
 var LV_EXT = /\.(x83|d83|d84|d86|xlsx|pdf)$/i, PLAN_EXT = /\.(png|jpe?g)$/i;
 function freshUp() { return { phase: 'form', lv: null, plan: null, copy: false, err: '' }; }
 function upRow(kind, f) {
-  return '<li data-k="uf' + kind + '"><span class="uf-i">' + IC.doc + '</span><span class="uf-n">' + esc(f.name) + '</span><span class="uf-t mono">' + (kind === 'lv' ? 'LV' : 'Bauplan') + '</span><span class="uf-s mono">' + fmt(Math.max(1, f.size / 1024)) + ' KB</span>' +
-    '<button class="ic" data-act="upRemove" data-v="' + kind + '" aria-label="' + esc(f.name) + ' entfernen">' + IC.x + '</button></li>';
+  return '<li data-k="uf' + kind + '"><span class="uf-i">' + IC.doc + '</span><span class="uf-n">' + esc(f.name) + '</span><span class="uf-t mono">' + (kind === 'lv' ? 'BoQ' : 'Plan') + '</span><span class="uf-s mono">' + fmt(Math.max(1, f.size / 1024)) + ' KB</span>' +
+    '<button class="ic" data-act="upRemove" data-v="' + kind + '" aria-label="Remove ' + esc(f.name) + '">' + IC.x + '</button></li>';
 }
 function vStart() {
   var U = S.up || (S.up = freshUp());
   return '<div class="start" data-k="start">' +
-    '<h1>Neues Projekt</h1><p class="st-lead muted">Lade ein Leistungsverzeichnis hoch. Jede Position bekommt einen Preis aus euren Alt-LVs, eine Konfidenz und eine Quelle. Ein Bauplan prüft zusätzlich die Mengen.</p>' +
-    '<section class="card st-up" aria-label="Projekt hochladen">' +
+    '<h1>New project</h1><p class="st-lead muted">Upload a bill of quantities. Every item gets a price from your past BoQs, a confidence score and a source. A construction plan also checks the quantities.</p>' +
+    '<section class="card st-up" aria-label="Upload project">' +
       '<label class="dropz' + (U.lv || U.plan ? ' has' : '') + '" data-drop="any" data-k="dropz"><input type="file" class="sr" multiple accept=".x83,.d83,.d84,.d86,.xlsx,.pdf,.X83,.D83,.D84,.D86,.XLSX,.PDF,.png,.jpg,.jpeg" data-file="any">' +
-        '<span class="dropz-i">' + IC.down + '</span><b>Upload your project</b><span class="muted">Dateien hierher ziehen oder klicken</span>' +
-        '<span class="dropz-f mono"><span>LV · GAEB .X83 / .D83 / .D84 / .D86 · Excel .XLSX · PDF</span><span>Bauplan · PNG / JPG (optional)</span></span>' +
+        '<span class="dropz-i">' + IC.down + '</span><b>Upload your project</b><span class="muted">Drag files here or click</span>' +
+        '<span class="dropz-f mono"><span>BoQ · GAEB .X83 / .D83 / .D84 / .D86 · Excel .XLSX · PDF</span><span>Plan · PNG / JPG (optional)</span></span>' +
       '</label>' +
       (U.lv || U.plan ? '<ul class="uf">' + (U.lv ? upRow('lv', U.lv) : '') + (U.plan ? upRow('plan', U.plan) : '') + '</ul>' : '') +
       (U.err ? '<div class="up-err">' + IC.warn + '<span>' + esc(U.err) + '</span></div>' : '') +
-      '<div class="up-btns"><button class="btn btn-primary" data-act="upGo"' + (U.lv ? '' : ' disabled') + '>Analyse starten' + IC.arrow + '</button></div>' +
+      '<div class="up-btns"><button class="btn btn-primary" data-act="upGo"' + (U.lv ? '' : ' disabled') + '>Start analysis' + IC.arrow + '</button></div>' +
     '</section></div>';
 }
 var STARTA = {
@@ -2628,14 +2632,14 @@ var LIVEA = {
   loadProj: function (ds) {
     S.projOpen = false;
     if (ds.v === 'demo') { A.home(); return; }
-    render(); loadProject(ds.v).catch(function (e) { toast('Laden fehlgeschlagen: ' + e.message); });
+    render(); loadProject(ds.v).catch(function (e) { toast('Loading failed: ' + e.message); });
   },
   newProj: function () { STARTA.home(); },
   upClose: function () { clearTimeout(upT); if (S.home && S.up) { S.up.phase = 'form'; render(); } else set({ up: null }); },
   upBack: function () { S.up.phase = 'form'; S.up.err = ''; render(); },
   upGo: function () {
     var U = S.up;
-    if (!U.lv) { U.err = 'Bitte ein LV hochladen.'; render(); return; }
+    if (!U.lv) { U.err = 'Please upload a BoQ.'; render(); return; }
     // the project id comes from the LV file name plus a short suffix, so a new upload never overwrites an old run
     var id = suggestId(U.lv.name).slice(0, 33) + '-' + Date.now().toString(36).slice(-6).toUpperCase();
     var fd = new FormData(); fd.append('project', id); fd.append('lv', U.lv);
@@ -2644,7 +2648,7 @@ var LIVEA = {
     Object.assign(U, { phase: 'run', id: id, lvName: U.lv.name, planName: U.plan ? U.plan.name : '', log: [], t0: Date.now(), t1: 0, err: '' });
     render();
     api('/projects', { method: 'POST', body: fd }).then(function (st) { U.log = st.log || []; render(); upT = setTimeout(function () { pollRun(id); }, 1200); },
-      function (e) { U.phase = 'form'; U.err = e.message === 'Failed to fetch' ? 'Der Upload hat nicht geklappt. Bitte gleich noch einmal versuchen.' : e.message; render(); });
+      function (e) { U.phase = 'form'; U.err = e.message === 'Failed to fetch' ? 'The upload did not work. Please try again in a moment.' : e.message; render(); });
   },
 };
 Object.assign(A, LIVEA, STARTA);
@@ -2675,9 +2679,9 @@ document.addEventListener('change', function (e) {
   var v = e.target.value;
   if (k === 'bulkAssign' && v && T[v]) {
     var pr = derive().all.filter(function (r) { return S.picked[r.oz]; }), o = Object.assign({}, S.owners);
-    pr.forEach(function (r) { o[r.oz] = v; }); set({ owners: o }); toast(pr.length + ' Positionen an ' + T[v].name + ' zugewiesen');
+    pr.forEach(function (r) { o[r.oz] = v; }); set({ owners: o }); toast(pr.length + ' items assigned to ' + T[v].name);
   }
-  if (k === 'setOwner') { var o2 = Object.assign({}, S.owners); o2[S.sel] = v; set({ owners: o2 }); toast(v ? S.sel + ' an ' + T[v].name + ' zugewiesen' : 'Zuweisung für ' + S.sel + ' entfernt'); }
+  if (k === 'setOwner') { var o2 = Object.assign({}, S.owners); o2[S.sel] = v; set({ owners: o2 }); toast(v ? S.sel + ' assigned to ' + T[v].name : 'Assignment for ' + S.sel + ' removed'); }
 });
 document.addEventListener('keydown', function (e) {
   var tg = e.target.tagName, inField = tg === 'INPUT' || tg === 'TEXTAREA' || tg === 'SELECT';
@@ -2734,7 +2738,7 @@ DEMO = { D: D, LVX: LVX, TOTAL: TOTAL, PLAN: PLAN, P: P, FLOORS: FLOORS, PLAN_VH
 var bootId = (/[#&]p=([^&]+)/.exec(location.hash) || [])[1];
 if (bootId) {
   render();
-  loadProject(decodeURIComponent(bootId)).catch(function (e) { A.home(); toast('Projekt ' + decodeURIComponent(bootId) + ' nicht geladen: ' + e.message); });
+  loadProject(decodeURIComponent(bootId)).catch(function (e) { A.home(); toast('Project ' + decodeURIComponent(bootId) + ' not loaded: ' + e.message); });
 } else A.home();
 })();
 </script>
