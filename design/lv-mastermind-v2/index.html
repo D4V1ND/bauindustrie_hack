@@ -1088,7 +1088,7 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .updrop.has .updrop-i{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .updrop-t{min-width:0}.updrop-t b{display:block;font-weight:500;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .updrop-t small{display:block;color:var(--ink-3);font-size:11.5px;margin-top:2px}
-.up-f{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:10px;margin-top:14px}
+.up-f{display:grid;grid-template-columns:1fr 1.4fr;gap:10px;margin-top:14px}
 .up-f label{display:grid;gap:5px;min-width:0}.up-f .fld{width:100%;flex:none}
 .up-chk{all:unset;box-sizing:border-box;width:100%;display:flex;gap:12px;align-items:flex-start;margin-top:14px;padding:12px 14px;border:1px solid var(--line);cursor:pointer}
 .up-chk:hover{border-color:var(--ink-3)}.up-chk b{font-weight:500;font-size:13px}.up-chk small{display:block;color:var(--ink-3);font-size:12px;margin-top:2px}
@@ -1206,8 +1206,7 @@ var D = (function () {
       segs: [['Adaptiert aus der textgleichen Position der '], ['Grundschule Trudering 2024', 'H-TRU-0201'], [' (EP 1.290 €), indexiert mit dem Baupreisindex und +2,6 % für Schallschutzklasse 3 laut Langtext. Achtung Menge: Das LV nennt 64 Stk, die '], ['Fensterbänke 02.01.0090', '02.01.0090'], [' sind aber mit 71 Stk ausgeschrieben und im Grundriss sind 71 Öffnungen eingezeichnet. Fenstertüren laufen separat unter '], ['02.01.0011', '02.01.0011'], ['.']],
       steps: [['Basis-EP Trudering 2024', '1.290,00 €'], ['Baupreisindex Q3/2026', '+4,2 %'], ['Zuschlag Schallschutzklasse 3', '+2,6 %'], ['EP (gerundet)', '1.380,00 €']],
       actions: [
-        { title: 'Bieterfrage zur Fenstermenge', sub: '7 Stk Differenz · ≈ 9.660 € Nachtragspotenzial', cta: 'Bieterfrage entwerfen', done: 'Bieterfrage als Entwurf angelegt' },
-        { title: 'Zuweisen an Lena Wolf', sub: 'Gewerk Fenster & Fassade', who: 'LW', cta: 'Zuweisen', done: 'Lena Wolf zugewiesen' }
+        { title: 'Bieterfrage zur Fenstermenge', sub: '7 Stk Differenz · ≈ 9.660 € Nachtragspotenzial', cta: 'Bieterfrage entwerfen', done: 'Bieterfrage als Entwurf angelegt' }
       ],
       comments: [
         { by: 'TB', time: 'Mi, 16:20', t: 'Plan A-102 Nordseite: Ich zähle 4 Fenster, im LV-Auszug stehen 3. Kann das jemand gegenchecken?' },
@@ -1225,8 +1224,7 @@ var D = (function () {
       steps: [['Referenz Pasing 2025', '41.500 €'], ['Skalierung Raumfläche (0,82)', '34.030 €'], ['Index + Risikozuschlag 8 %', '+11,7 %'], ['EP (gerundet)', '38.000 €']],
       actions: [
         { title: 'Bieterfrage zur Spezifikation', sub: 'Hohes Nachtragspotenzial', cta: 'Bieterfrage entwerfen', done: 'Bieterfrage als Entwurf angelegt' },
-        { title: 'An Subunternehmer: Elektro Lindner', sub: 'Hat Pasing 2025 ausgeführt', cta: 'Sequenz vorbereiten', done: 'Sequenz unter „Extern“ angelegt' },
-        { title: 'Zuweisen an Mehmet Arslan', sub: 'Elektro / TGA', who: 'MA', cta: 'Zuweisen', done: 'Mehmet Arslan zugewiesen' }
+        { title: 'An Subunternehmer: Elektro Lindner', sub: 'Hat Pasing 2025 ausgeführt', cta: 'Sequenz vorbereiten', done: 'Sequenz unter „Extern“ angelegt' }
       ],
       comments: [{ by: 'MA', time: 'Do, 11:40', t: 'Ohne Lautsprecheranzahl kann ich das nicht seriös bepreisen. Ich würde 38k mit Vorbehalt reinschreiben.' }],
       similar: [['H-PAS-0402', 'Referenz'], ['H-FRE-0501', 'kleiner']]
@@ -1239,8 +1237,7 @@ var D = (function () {
     },
     '01.03.0040': {
       actions: [
-        { title: 'Mit 1. und 2. OG bündeln', sub: '3 Positionen → 366 m³', bundle: ['01.03.0040', '01.03.0041'], cta: 'Bündeln', done: 'Gebündelt: Wandbeton C25/30, 366 m³' },
-        { title: 'Zuweisen an Sophie Krüger', sub: 'Rohbau', who: 'SK', cta: 'Zuweisen', done: 'Sophie Krüger zugewiesen' }
+        { title: 'Mit 1. und 2. OG bündeln', sub: '3 Positionen → 366 m³', bundle: ['01.03.0040', '01.03.0041'], cta: 'Bündeln', done: 'Gebündelt: Wandbeton C25/30, 366 m³' }
       ]
     },
     '01.04.0010': {
@@ -1525,7 +1522,7 @@ function daysTo(s) { return Math.max(0, Math.ceil((new Date(s) - new Date()) / 8
 function liveMeta() {
   var lib = P.lib.split(' · '), fd = (P.plan && P.plan.findings) || [];
   return [['Projekt-ID', P.id, P.priced ? 'LV enthält schon Preise' : 'Neues LV ohne Preise'], ['LV-Datei', P.file || '–', P.date ? 'vom ' + deDate(P.date) : 'GAEB'],
-    ['Abgabefrist', P.deadline ? deDate(P.deadline) : '–', P.deadline ? 'noch ' + daysTo(P.deadline) + ' Tage' : 'beim Upload angeben'], ['Leistungsverzeichnis', fmt(P.n) + ' Positionen', P.gewerke + ' Gewerke'],
+    ['Leistungsverzeichnis', fmt(P.n) + ' Positionen', P.gewerke + ' Gewerke'],
     ['Bauplan', P.plan ? P.plan.file : 'keiner', P.plan ? fd.length + ' Befunde · ' + (P.plan.checked || 0) + ' Pos. geprüft' : 'beim Upload als Kontext'], ['Preisbasis', lib[0], lib[1] || 'Alt-LVs mit Preisen']];
 }
 function vHero(d) {
@@ -1542,13 +1539,12 @@ function vHero(d) {
       '<div class="ticks" role="img" aria-label="' + okN + ' von ' + d.all.length + ' Preisen bestätigt">' + d.all.slice().sort(function (a, b) { return a.oz.localeCompare(b.oz); }).map(function (r) {
         return '<span class="tick-s' + (S.confirmed[r.oz] ? ' ok' : '') + (S.justOk[r.oz] !== undefined ? ' bump' : '') + '" title="' + r.oz + '"></span>';
       }).join('') + '</div>' +
-      (P.live ? (P.deadline ? '<div class="deadline"><span class="mono faint">Abgabe in</span><b>' + daysTo(P.deadline) + ' Tagen</b><span class="mono faint">' + deDate(P.deadline) + '</span></div>' : '<div class="deadline"><span class="mono faint">LV</span><b>' + fmt(P.n) + '</b><span class="mono faint">Positionen</span></div>')
-        : '<div class="deadline"><span class="mono faint">Abgabe in</span><b>21 Tagen</b><span class="mono faint">12.12. · 11:00</span></div>') +
+      '<div class="deadline"><span class="mono faint">LV</span><b>' + fmt(P.live ? P.n : d.all.length) + '</b><span class="mono faint">Positionen</span></div>' +
     '</div>' +
     '<dl class="meta rise" style="--d:140ms">' + (P.live ? liveMeta() : [
       ['Bauherr', 'Kommune (anonymisiert)', 'Öffentlicher Auftraggeber'], ['Vergabe', 'Öffentlich, VOB/A', 'Einheitspreisvertrag'],
-      ['Abgabefrist', '12.12.2026, 11:00', 'noch 21 Tage'], ['Leistungsverzeichnis', 'GAEB X83', '1.284 Positionen · 11 Gewerke'],
-      ['Pläne', '14 Blätter', 'Grundrisse, Schnitte, Statik'], ['Verantwortlich', 'Thomas Berger', 'Oberkalkulation']
+      ['Leistungsverzeichnis', 'GAEB X83', '1.284 Positionen · 11 Gewerke'],
+      ['Pläne', '14 Blätter', 'Grundrisse, Schnitte, Statik']
     ]).map(function (m) { return '<div><dt class="mono">' + m[0] + '</dt><dd>' + m[1] + '</dd><dd>' + m[2] + '</dd></div>'; }).join('') + '</dl>' +
     '<nav class="tabs" aria-label="Projektbereiche">' +
       '<button class="tab' + (S.tab === 'home' ? ' on' : '') + '" data-act="tab" data-v="home" aria-current="' + (S.tab === 'home') + '">' + IC.home + 'Home</button>' +
@@ -1831,7 +1827,7 @@ function repHTML(d) {
   var cls = function (v) { return v === 0 ? 'z' : v < 50 ? 'l' : v < 75 ? 'md' : 'h'; };
   var list = function (xs, empty) { return xs.length ? '<table><thead><tr><th>OZ</th><th>Leistung</th><th>Grund</th><th class="r">Menge</th><th class="r">Konf.</th></tr></thead><tbody>' + xs.map(function (r) { return '<tr><td class="oz">' + r.oz + '</td><td>' + esc(r.kurz) + '<div class="why">' + esc(r.gewerk) + '</div></td><td class="why">' + esc(r.why) + '</td><td class="r">' + qty(r.menge) + ' ' + esc(r.einheit) + '</td><td class="r"><span class="c ' + cls(r.conf) + '">' + r.conf + ' %</span></td></tr>'; }).join('') + '</tbody></table>' : '<p class="why">' + empty + '</p>'; };
   return '<div class="rp">' +
-    '<div class="hd"><div><div class="m">Konfidenzbericht · ' + esc(P.id) + '</div><h1>' + esc(P.name) + '</h1><div class="why">' + (P.live ? esc(P.file) + ' · ' + fmt(P.n) + ' Positionen' + (P.deadline ? ' · Abgabe ' + deDate(P.deadline) : '') : 'Öffentliche Ausschreibung · VOB/A · Abgabe 12.12.2026, 11:00') + '</div></div><div class="m" style="text-align:right">Stand<br><span style="color:#141414">' + date + '</span><br><br>LV Mastermind</div></div>' +
+    '<div class="hd"><div><div class="m">Konfidenzbericht · ' + esc(P.id) + '</div><h1>' + esc(P.name) + '</h1><div class="why">' + (P.live ? esc(P.file) + ' · ' + fmt(P.n) + ' Positionen' + '' : 'Öffentliche Ausschreibung · VOB/A') + '</div></div><div class="m" style="text-align:right">Stand<br><span style="color:#141414">' + date + '</span><br><br>LV Mastermind</div></div>' +
     '<div class="kpi"><div><div class="m">Gesamtkonfidenz (GP-gewichtet)</div><b>' + R.conf + ' %</b><div class="bar"><i class="' + cls(R.conf) + '" style="width:' + R.conf + '%"></i></div></div>' +
       '<div><div class="m">Positionen</div><b>' + fmt(R.rows.length) + '</b></div><div><div class="m">Ohne Preis</div><b style="color:#b8332b">' + R.np.length + '</b></div><div><div class="m">Bestätigt</div><b>' + R.ok + ' / ' + R.core + '</b></div></div>' +
     '<div class="sec"><h2>Verteilung nach Konfidenz</h2><div class="m">Anteil am Volumen (GP)</div><div class="bar">' + R.bk.map(function (b) { return '<i class="' + b.k + '" style="width:' + (b.gp / R.tot * 100) + '%"></i>'; }).join('') + '</div>' +
@@ -2004,7 +2000,7 @@ function vDrawer(d) {
           : '<div class="sub">GP <b>' + eur(p.gp) + '</b> · ' + fmt(p.gp / TOTAL * 100, 2) + ' % des LV · ' + qty(p.menge) + ' ' + p.einheit +
             (p.manual && !p.srvManual ? ' · <button class="lnk" data-act="resetEp">' + (noAi ? 'Preis entfernen' : 'KI-Vorschlag ' + eur(p.aiEp) + ' wiederherstellen') + '</button>' : '') +
             (P.live && !p.manual && !p.np ? ' · <button class="lnk" data-act="doubt" title="Senkt die Konfidenz dieser Position im Backend">Preis anzweifeln</button>' : '') + '</div>') +
-        (ok ? '<div class="stamp' + (fresh ? ' fx' : '') + '" data-k="st"><span class="sq">' + IC.tickRaw + '</span><span><b>Bestätigt</b><small>' + (p.manual ? 'Eigener Preis' : 'KI-Preis') + ' · T. Berger</small></span></div>' : '') + '</div>' +
+        (ok ? '<div class="stamp' + (fresh ? ' fx' : '') + '" data-k="st"><span class="sq">' + IC.tickRaw + '</span><span><b>Bestätigt</b><small>' + (p.manual ? 'Eigener Preis' : 'KI-Preis') + '</small></span></div>' : '') + '</div>' +
         '<div class="pconf"><span class="mono">Konfidenz</span><span class="conf-v ' + confLvl(p.conf) + '"><b>' + p.conf + ' %</b>' + confWord(p.conf) + '</span>' + cmeter(p.conf, 10) + '</div></div>' +
         (noAi ? '<div class="why2"><div class="mono lab">Warum kein Preis</div><p>' + esc(P.live && R.brief ? R.brief : p.why) + '. In euren Alt-LVs gibt es keine vergleichbare Position. Kalkuliere den Preis selbst oder hol ein Lieferantenangebot ein.</p></div></section>' :
         '<div class="why2' + (S.whyOpen ? ' open' : '') + '"><div class="mono lab">Begründung</div><p>' + esc(C.cands[0].why) + '</p>' +
@@ -2459,8 +2455,7 @@ function vUpload() {
       upFile('plan', U.plan, '.png,.jpg,.jpeg,.pdf', ['Kontext: Bauplan (optional)', 'PNG oder JPG für Markierungen, PDF geht auch']) +
     '</div>' +
     '<div class="up-f"><label><span class="mono faint">Projekt-ID</span><input class="fld" data-in="upId" value="' + esc(S.upId) + '" placeholder="z. B. KITA-RIEM" maxlength="40"></label>' +
-      '<label><span class="mono faint">Name (optional)</span><input class="fld" data-in="upName" value="' + esc(S.upName) + '" placeholder="Neubau Kita Sonnenhof"></label>' +
-      '<label><span class="mono faint">Abgabefrist (optional)</span><input class="fld" type="date" data-in="upDeadline" value="' + esc(S.upDeadline) + '"></label></div>' +
+      '<label><span class="mono faint">Name (optional)</span><input class="fld" data-in="upName" value="' + esc(S.upName) + '" placeholder="Neubau Kita Sonnenhof"></label></div>' +
     '<button class="up-chk' + (U.copy ? ' on' : '') + '" data-act="upCopy" aria-pressed="' + !!U.copy + '"><span class="cb2">' + (U.copy ? IC.tickRaw : '') + '</span><span><b>Schnelltest ohne KI</b><small>Nur textgleiche Positionen kopieren. Sekunden statt Minuten, keine Kosten, kein Bauplan.</small></span></button>' +
     (U.err ? '<div class="up-err">' + IC.warn + '<span>' + esc(U.err) + '</span></div>' : '') +
     '<div class="up-btns"><button class="btn btn-quiet" data-act="upClose">Abbrechen</button><button class="btn btn-primary" data-act="upGo"' + (U.lv ? '' : ' disabled') + '>Analyse starten' + IC.arrow + '</button></div></div></div>';
@@ -2537,8 +2532,7 @@ function vStart() {
       upFile('plan', U.plan, '.png,.jpg,.jpeg,.pdf', ['Kontext: Bauplan (optional)', 'PNG oder JPG für Markierungen, PDF geht auch']) +
     '</div>' +
     '<div class="up-f"><label><span class="mono faint">Projekt-ID</span><input class="fld" data-in="upId" value="' + esc(S.upId || '') + '" placeholder="z. B. KITA-RIEM" maxlength="40"></label>' +
-      '<label><span class="mono faint">Name (optional)</span><input class="fld" data-in="upName" value="' + esc(S.upName || '') + '" placeholder="Neubau Kita Sonnenhof"></label>' +
-      '<label><span class="mono faint">Abgabefrist (optional)</span><input class="fld" type="date" data-in="upDeadline" value="' + esc(S.upDeadline || '') + '"></label></div>' +
+      '<label><span class="mono faint">Name (optional)</span><input class="fld" data-in="upName" value="' + esc(S.upName || '') + '" placeholder="Neubau Kita Sonnenhof"></label></div>' +
     '<button class="up-chk' + (U.copy ? ' on' : '') + '" data-act="upCopy" aria-pressed="' + !!U.copy + '"><span class="cb2">' + (U.copy ? IC.tickRaw : '') + '</span><span><b>Schnelltest ohne KI</b><small>Nur textgleiche Positionen aus den Alt-LVs übernehmen. Sekunden statt Minuten, keine Kosten, ohne Bauplan. Aus: volle KI-Analyse, braucht API-Schlüssel im Backend.</small></span></button>' +
     (U.err ? '<div class="up-err">' + IC.warn + '<span>' + esc(U.err) + '</span></div>' : '') +
     '<div class="up-btns"><button class="btn btn-primary" data-act="upGo"' + (U.lv && !off ? '' : ' disabled') + '>' + (U.copy ? 'Schnelltest starten' : 'Analyse starten') + IC.arrow + '</button></div></section>';
@@ -2600,7 +2594,7 @@ var LIVEA = {
     var fd = new FormData(); fd.append('project', id); fd.append('lv', U.lv);
     if (U.plan && !U.copy) fd.append('plan', U.plan);
     if (U.copy) fd.append('copy_only', 'true');
-    store('lvm-meta-' + id, { name: String(S.upName || '').trim(), deadline: S.upDeadline || '' });
+    store('lvm-meta-' + id, { name: String(S.upName || '').trim() });
     Object.assign(U, { phase: 'run', id: id, lvName: U.lv.name, planName: U.plan && !U.copy ? U.plan.name : '', log: [], t0: Date.now(), t1: 0, err: '' });
     render();
     api('/projects', { method: 'POST', body: fd }).then(function (st) { U.log = st.log || []; render(); upT = setTimeout(function () { pollRun(id); }, 1200); },
