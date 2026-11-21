@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Needle</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Crect width='20' height='20' fill='%230a0a0a'/%3E%3Cpath d='M2.5 16A7.5 7.5 0 0 1 14.6 10.1' fill='none' stroke='%23fff' stroke-opacity='.35' stroke-width='2.4'/%3E%3Cpath d='M14.6 10.1A7.5 7.5 0 0 1 17.5 16' fill='none' stroke='%23f0542b' stroke-width='2.4'/%3E%3Cpath d='M10 16V9.6' stroke='%23fff' stroke-width='2' stroke-linecap='round' transform='rotate(60 10 16)'/%3E%3Ccircle cx='10' cy='16' r='1.9' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Crect width='20' height='20' rx='3' fill='%230a0a0a'/%3E%3Cpath fill-rule='evenodd' fill='%23f0542b' transform='translate(5.6 1.2) scale(.73)' d='M2.60 23.60L4.21 18.89L6.39 1.73A1.00 1.00 0 0 0 4.41 1.47L2.22 18.63ZM5.57 3.13L5.00 7.60L4.29 7.51L4.85 3.04Z'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -26,21 +26,6 @@
  --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
  --ease:cubic-bezier(.22,1,.36,1);--spring:cubic-bezier(.34,1.56,.64,1);
  color-scheme:light}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
- --paper:#0d0d0c;--paper-2:#161614;--paper-3:#1f1f1c;--card:#121211;
- --ink:#f2f1ec;--ink-2:#aeada6;--ink-3:#77766f;--line:rgba(242,241,236,.12);--line-2:rgba(242,241,236,.28);
- --signal:#ff6c43;--signal-bg:rgba(255,108,67,.1);--ok:#6fd39b;--ok-bg:rgba(111,211,155,.1);--on-ok:#08140d;
- --warn:#f0b65a;--warn-bg:rgba(240,182,90,.1);--bad:#ff8f86;--bad-bg:rgba(255,143,134,.1);
- --glow-1:rgba(214,158,40,.2);--glow-2:rgba(214,110,70,.16);--glow-3:rgba(190,90,120,.12);
- --shadow:0 24px 60px -20px rgba(0,0,0,.75);--tm-tb:#9aa8bb;--tm-lw:#98b5a1;--tm-ma:#c9a083;--tm-sk:#dcb06a;--on-av:#12110f;color-scheme:dark}}
-:root[data-theme="dark"]{
- --paper:#0d0d0c;--paper-2:#161614;--paper-3:#1f1f1c;--card:#121211;
- --ink:#f2f1ec;--ink-2:#aeada6;--ink-3:#77766f;--line:rgba(242,241,236,.12);--line-2:rgba(242,241,236,.28);
- --signal:#ff6c43;--signal-bg:rgba(255,108,67,.1);--ok:#6fd39b;--ok-bg:rgba(111,211,155,.1);--on-ok:#08140d;
- --warn:#f0b65a;--warn-bg:rgba(240,182,90,.1);--bad:#ff8f86;--bad-bg:rgba(255,143,134,.1);
- --glow-1:rgba(214,158,40,.2);--glow-2:rgba(214,110,70,.16);--glow-3:rgba(190,90,120,.12);
- --shadow:0 24px 60px -20px rgba(0,0,0,.75);--tm-tb:#9aa8bb;--tm-lw:#98b5a1;--tm-ma:#c9a083;--tm-sk:#dcb06a;--on-av:#12110f;color-scheme:dark}
-
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--paper);color:var(--ink);font:400 14px/1.55 var(--sans);-webkit-font-smoothing:antialiased;
@@ -63,16 +48,13 @@ svg.i{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--paper) 84%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
 .top-in{max-width:1360px;margin:0 auto;padding:12px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:10px;font-size:14px;min-width:0}
-.mark{width:21px;height:13px;flex:none;overflow:visible;margin-top:1px}
-.nd-tr{fill:none;stroke:var(--ink);stroke-width:2.4;opacity:.25}
-.nd-hot{fill:none;stroke:var(--signal);stroke-width:2.4}
-.nd{stroke:var(--ink);stroke-width:2;stroke-linecap:round;transform-origin:10px 16px;transform:rotate(60deg);animation:ndswing 1.1s var(--spring) .2s both,ndtwitch 7s var(--ease) 3s infinite}
-.nd-p{fill:var(--ink)}
-@keyframes ndswing{from{transform:rotate(-70deg)}to{transform:rotate(60deg)}}
-@keyframes ndtwitch{0%,88%,100%{transform:rotate(60deg)}92%{transform:rotate(52deg)}96%{transform:rotate(66deg)}}
-.brand-b:hover .nd{animation:ndswing .9s var(--spring)}
-@media (prefers-reduced-motion:reduce){.nd{animation:none!important}}
-.brand b{font-weight:600;letter-spacing:-.02em;font-size:15px}
+.wm{display:inline-flex;align-items:baseline}
+.wm-n{width:.31em;height:.93em;margin:0 .01em -.04em .02em;fill:var(--signal);overflow:visible;transform-origin:30% 98%;animation:wmswing 1.1s var(--spring) .2s both,wmtwitch 7s var(--ease) 3s infinite}
+@keyframes wmswing{from{transform:rotate(-55deg)}to{transform:rotate(0)}}
+@keyframes wmtwitch{0%,88%,100%{transform:rotate(0)}92%{transform:rotate(-9deg)}96%{transform:rotate(5deg)}}
+.brand-b:hover .wm-n{animation:wmswing .9s var(--spring)}
+@media (prefers-reduced-motion:reduce){.wm-n{animation:none!important}}
+.brand b{font-weight:600;letter-spacing:-.03em;font-size:16px}
 .crumb{color:var(--ink-3)}
 .crumb a{color:var(--ink-2);text-decoration:none}.crumb a:hover{color:var(--signal)}
 .top-r{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
@@ -84,11 +66,6 @@ svg.i{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .av{width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;color:var(--on-av);font:500 10px/1 var(--mono);letter-spacing:.02em;flex:none;border:0;padding:0}
 .team .av{border:2px solid var(--paper);margin-left:-5px;width:30px;height:30px;transition:transform .25s var(--spring)}
 .team .av:hover{transform:translateY(-3px)}
-.theme-btn{display:inline-flex;align-items:center;gap:.5rem;border:0;background:none;color:var(--ink-2);padding:6px 0;font:400 .68rem/1 var(--mono);letter-spacing:.07em;text-transform:uppercase}
-.theme-btn:hover{color:var(--ink)}
-.theme-icon{width:11px;height:11px;border:1px solid currentColor;position:relative;overflow:hidden;transition:transform .5s var(--spring)}
-.theme-icon::after{content:"";position:absolute;inset:0 50% 0 0;background:currentColor}
-.theme-btn:hover .theme-icon{transform:rotate(180deg)}
 .bell{position:relative;width:36px;height:36px;border:1px solid var(--line-2);background:transparent;display:inline-flex;align-items:center;justify-content:center;transition:background .16s}
 .bell:hover{background:var(--paper-2)}
 .bell::after{content:"";position:absolute;top:7px;right:7px;width:6px;height:6px;background:var(--signal);animation:blink 2s infinite}
@@ -882,19 +859,16 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .prow:has(.spanep){flex-wrap:wrap}
 .spanep{display:block;flex:0 0 100%;margin-bottom:8px;font-size:20px;font-weight:400;color:var(--ink-3);letter-spacing:-.01em}
 .spanep small{font-size:12px}
-.i.ndi{width:18px;height:11px;fill:none;overflow:visible;flex:none}
-.ndi-t{stroke:currentColor;stroke-width:2.4;opacity:.3}
-.ndi-h{stroke:var(--signal);stroke-width:2.4}
-.ndi-n{stroke:currentColor;stroke-width:2;stroke-linecap:round;transform-origin:10px 16px;transform:rotate(60deg)}
-.ndi-p{fill:currentColor;stroke:none}
+.i.ndi{width:6px;height:16px;fill:var(--signal);stroke:none;overflow:visible;flex:none}
 .lab.ai-h{display:flex;align-items:center;gap:7px;color:var(--ink)}
 .lab .ndi,.mono .ndi{margin-right:6px;vertical-align:-1px}
 .lab.ai-h .ndi{margin:0}
-.sgbox{display:flex;flex-direction:column;gap:6px;width:100%;padding:12px 14px;border:1px dashed var(--warn);background:var(--warn-bg)}
-.sg-ep{font:300 30px/1 var(--sans);letter-spacing:-.03em;color:var(--ink)}
-.sg-ep small{font-size:12px;color:var(--ink-3);letter-spacing:0}
-.sg-r{font-size:12px;color:var(--ink-2)}
-.sg-b{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.sgbox{display:flex;flex-direction:column;gap:8px;width:100%;padding:2px 0 2px 14px;border-left:2px solid var(--warn)}
+.sg-ep{font:300 32px/1 var(--sans);letter-spacing:-.03em;color:var(--ink)}
+.sg-ep small{font-size:12px;color:var(--ink-3);letter-spacing:0;margin-left:4px}
+.sg-r{font:.62rem/1.4 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.sg-b{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.sg-b .btn{flex:1 1 0;justify-content:center;white-space:nowrap}.sg-b .btn svg{width:13px;height:13px}
 .bulksafe{align-self:center;white-space:nowrap}
 .agentnote{display:flex;gap:14px;align-items:flex-start;margin:0 0 16px;padding:14px 16px;border:1px solid var(--ink);background:var(--card)}
 .an-i{flex:none;display:grid;place-items:center;width:32px;height:32px;background:var(--signal-bg);color:var(--signal)}
@@ -1032,7 +1006,15 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .plan-h b{display:block;font-weight:500;font-size:13px;margin-top:4px}
 .plan-h .seg{height:30px;padding:2px}.plan-h .seg button{height:24px}
 .plan-c{position:relative;padding:10px;background:repeating-linear-gradient(0deg,transparent 0 19px,color-mix(in srgb,var(--line) 55%,transparent) 19px 20px),repeating-linear-gradient(90deg,transparent 0 19px,color-mix(in srgb,var(--line) 55%,transparent) 19px 20px)}
-.plan-svg{display:block;width:100%;height:auto;overflow:visible}
+.plan-svg{display:block;width:100%;height:auto;overflow:visible;touch-action:pan-x pan-y}
+.plan-svg.zoomed{overflow:hidden;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.plan-svg.panning{cursor:grabbing}
+.pz{display:flex;align-items:stretch;height:30px;border:1px solid var(--line-2)}
+.pz button{all:unset;box-sizing:border-box;cursor:pointer;min-width:30px;display:grid;place-items:center;color:var(--ink-2);transition:background .15s,color .15s}
+.pz button:hover{background:var(--paper-2);color:var(--ink)}
+.pz button:focus-visible{outline:2px solid var(--signal);outline-offset:-2px}
+.pz svg{width:14px;height:14px;stroke:currentColor;stroke-width:1.6;fill:none;stroke-linecap:round}
+.pz .pz-v{min-width:56px;padding:0 6px;font:.6rem/1 var(--mono);letter-spacing:.04em;border-left:1px solid var(--line);border-right:1px solid var(--line)}
 .plan-svg .axl{stroke:var(--line-2);stroke-width:.8;stroke-dasharray:6 6}
 .plan-svg .axc{fill:var(--card);stroke:var(--ink-3);stroke-width:1}
 .plan-svg .axt{font:500 11px var(--mono);fill:var(--ink-2);text-anchor:middle}
@@ -1112,10 +1094,9 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 
 .gwl button{position:relative}
 .gwl button:hover{background:transparent}
-.gwl button{transition:padding .22s var(--ease)}
-.gwl button::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:2px;background:var(--ink);transform:scaleY(0);transition:transform .22s var(--ease)}
-.gwl button:hover{padding-left:14px}
-.gwl button:hover::before{transform:none}
+.gwsec .gwl{margin:-4px -16px 0}
+.gwl button{padding:12px 16px;transition:background .14s}
+.gwl button:hover{background:var(--paper-2)}
 .gwl .gwk{color:var(--ink-2);transition:color .15s}.gwl .gwm .mono{transition:color .15s}
 .gwl button:hover .gwk,.gwl button:hover .gwm .mono{color:var(--ink)}
 .rsk.na b{color:var(--ink-3)}
@@ -1131,11 +1112,6 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .lv-more:hover b svg{transform:translateX(3px)}
 .lv-more:focus-visible{outline:2px solid var(--signal);outline-offset:-2px}
 .lv-r.gen .rsk{opacity:.55}
-/* table rows: same quiet selection as the Gewerk list (thin ink line, no grey block) */
-.lv-r:hover,.lv-r.sel{background:transparent}
-.lv-r.sel,.lv-r.picked:not(.sel){box-shadow:none}
-.lv-r::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:2px;background:var(--ink);transform:scaleY(0);transition:transform .22s var(--ease)}
-.lv-r:hover::before,.lv-r.sel::before,.lv-r.picked::before{transform:none}
 .auto1{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;font:.58rem/1 var(--mono);letter-spacing:.04em;color:var(--ink-3);border:1px dashed var(--line-2)}
 .okline.auto{background:transparent;color:var(--ink-2);border:1px dashed var(--line-2);min-height:52px}
 .okline.auto svg.i{color:var(--ink-3)}
@@ -1152,11 +1128,15 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .ep.epnp{font-size:26px;letter-spacing:-.02em;font-weight:300;color:var(--bad);border-bottom:1.5px dashed var(--bad)}
 .confirm.need{background:transparent;color:var(--ink);border:1px dashed var(--bad)}
 .confirm.need .cbadge{background:color-mix(in srgb,var(--bad) 10%,transparent);color:var(--bad)}
+.confirm.need::before{background:var(--bad)}
+.confirm.need:hover{box-shadow:0 18px 36px -16px color-mix(in srgb,var(--bad) 35%,rgba(0,0,0,.35))}
+.confirm.need::after{display:none}
 .npn{font-weight:500;color:var(--bad)}
 .plan-lg .lgt{margin-right:2px}
 
 .lv-split .lv-main,.lv-split .lv-bar,.lv-split .lv-bar .filters,.lv-split .lv-bar .tools{min-width:0}
-.lv-split .lv-bar .filters{scrollbar-width:none}
+.lv-split .lv-bar .filters{scrollbar-width:none;overflow-y:hidden}
+.lv-split .lv-bar .pill::after{bottom:0}
 .lv-split .lv-bar .filters::-webkit-scrollbar{display:none}
 .lv-split .lv-bar .pill{padding:0 9px}
 .lv-split .lv-bar .tools{gap:8px}
@@ -1223,7 +1203,7 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 
 /* start page */
 .brand-b{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:inherit}
-.brand-b:hover b{color:var(--signal)}
+
 .brand-b:focus-visible{outline:2px solid var(--signal);outline-offset:3px;border-radius:4px}
 .start .eyebrow{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
 .st-ok,.st-bad{display:inline-flex;align-items:center;gap:6px}
@@ -1586,7 +1566,7 @@ var IC = {
   warn: '<svg class="i" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>',
   star: '<svg class="i star" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg>',
   // the Needle logo, still: marks everything the AI made or answers
-  needle: '<svg class="i ndi" viewBox="1 7.2 18 11" aria-hidden="true"><path class="ndi-t" d="M2.5 16A7.5 7.5 0 0 1 14.6 10.1"/><path class="ndi-h" d="M14.6 10.1A7.5 7.5 0 0 1 17.5 16"/><path class="ndi-n" d="M10 16V9.6"/><circle class="ndi-p" cx="10" cy="16" r="1.9"/></svg>',
+  needle: '<svg class="i ndi" viewBox="0 0 8 24" aria-hidden="true"><path fill-rule="evenodd" d="M2.60 23.60L4.21 18.89L6.39 1.73A1.00 1.00 0 0 0 4.41 1.47L2.22 18.63ZM5.57 3.13L5.00 7.60L4.29 7.51L4.85 3.04Z"/></svg>',
   down: '<svg class="i" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>',
   plus: '<svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
   bell: '<svg class="i" viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>',
@@ -1743,17 +1723,13 @@ function segs(arr) {
     return s.length > 1 ? '<button class="lnk" data-act="preview" data-key="' + esc(s[1]) + '">' + esc(s[0]) + '</button>' : esc(s[0]);
   }).join('');
 }
-function isDark() {
-  var t = document.documentElement.getAttribute('data-theme');
-  return t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches);
-}
+
 
 // ================= views =================
 function vHeader() {
   return '<header class="top"><div class="top-in">' +
-    '<div class="brand"><button class="brand-b" data-act="home" aria-label="Startseite"><svg class="mark" viewBox="1 7.2 18 11" aria-hidden="true"><path class="nd-tr" d="M2.5 16A7.5 7.5 0 0 1 14.6 10.1"/><path class="nd-hot" d="M14.6 10.1A7.5 7.5 0 0 1 17.5 16"/><path class="nd" d="M10 16V9.6"/><circle class="nd-p" cx="10" cy="16" r="1.9"/></svg><b>Needle</b></button><span class="crumb">/ <span class="pmw"><button class="crumb-b" data-act="projects" aria-expanded="' + !!S.projOpen + '">Projekte' + IC.chev + '</button>' + vProjMenu() + '</span> /</span>' + (S.home ? '<span>Neues LV</span>' : '<span>' + esc(P.short) + '</span>') + '</div>' +
+    '<div class="brand"><button class="brand-b" data-act="home" aria-label="Startseite"><b class="wm">need<svg class="wm-n" viewBox="0 0 8 24" aria-hidden="true"><path fill-rule="evenodd" d="M2.60 23.60L4.21 18.89L6.39 1.73A1.00 1.00 0 0 0 4.41 1.47L2.22 18.63ZM5.57 3.13L5.00 7.60L4.29 7.51L4.85 3.04Z"/></svg>e</b></button><span class="crumb">/ <span class="pmw"><button class="crumb-b" data-act="projects" aria-expanded="' + !!S.projOpen + '">Projekte' + IC.chev + '</button>' + vProjMenu() + '</span> /</span>' + (S.home ? '<span>Neues LV</span>' : '<span>' + esc(P.short) + '</span>') + '</div>' +
     '<div class="top-r">' +
-      '<button class="theme-btn" data-act="theme" aria-label="Farbschema wechseln"><span class="theme-icon"></span>' + (isDark() ? 'Hell' : 'Dunkel') + '</button>' +
       (S.home ? '' : '<button class="btn btn-primary" data-act="newProj">' + IC.plus + 'Neues Projekt</button>') +
     '</div></div></header>';
 }
@@ -1928,7 +1904,7 @@ function vSummary(d) {
   var drivers = (P.live ? d.full : d.all).filter(function (r) { return r.gp > 0; }).sort(function (a, b) { return b.gp - a.gp; }).slice(0, 5);
   if (!P.live) stats = [['', '812', 'Positionen 1:1 übernommen'], ['blue', '389', 'adaptiert'], ['warn', '83', 'unsicher, bitte prüfen'], ['', '38 → 9', 'Positionen bündelbar'], ['ok', '≈ 31.000 €', 'Nachtragspotenzial (4 Pos.)']];
   return '<section class="card sum rise' + (S.analyzing ? ' scan' : '') + '" style="flex:2 1 640px;--d:320ms" aria-label="Zusammenfassung">' +
-    '<div class="card-h"><span class="mono"><b>02</b> Zusammenfassung</span><span class="mono" style="display:flex;gap:6px;align-items:center;color:var(--signal)">' + IC.needle + 'KI · jede Aussage mit Quelle</span></div>' +
+    '<div class="card-h"><span class="mono"><b>02</b> Zusammenfassung</span></div>' +
     '<div class="sum2"><p class="sum-p">' + txt + '</p>' +
     '<div class="sum-drv"><div class="mono faint" style="margin-bottom:8px">Top-Kostentreiber</div>' +
       '<ol class="drv-ol">' + drivers.map(function (r) { return '<li><button class="drv" data-act="open" data-oz="' + r.oz + '"><span class="drv-t"><span>' + esc(r.kurz) + '</span><b>' + eur(r.gp) + '</b></span></button></li>'; }).join('') + '</ol>' +
@@ -1967,7 +1943,8 @@ function vPlan(d, full) {
   var shown = {}; d.rows.forEach(function (r) { shown[r.oz] = true; });
   var fl = FLOORS.indexOf(S.floor) >= 0 ? S.floor : FLOORS[0];
   var img = P.live && /\.(png|jpe?g)$/i.test(P.plan.file);
-  var o = '<svg class="plan-svg" viewBox="0 0 1000 ' + PLAN_VH + '" role="img" aria-label="' + (P.live ? 'Bauplan ' + esc(P.plan.file) : 'Grundriss Erdgeschoss') + ' mit Positionen">';
+  var Z = pzBox();
+  var o = '<svg class="plan-svg' + (Z.w < 999.5 ? ' zoomed' : '') + '" viewBox="' + pzVB() + '" role="img" aria-label="' + (P.live ? 'Bauplan ' + esc(P.plan.file) : 'Grundriss Erdgeschoss') + ' mit Positionen">';
   if (P.live) o += img ? '<image href="' + esc(API + '/projects/' + encodeURIComponent(P.id) + '/files/' + encodeURIComponent(P.plan.file) + (pass() ? '?passcode=' + encodeURIComponent(pass()) : '')) + '" x="0" y="0" width="1000" height="' + PLAN_VH + '" preserveAspectRatio="none"/>'
     : '<rect class="slab" x="0" y="0" width="1000" height="' + PLAN_VH + '"/><text class="rl2" x="500" y="' + (PLAN_VH / 2) + '">PLAN ALS PDF · FÜR DIE ANSICHT PNG ODER JPG HOCHLADEN</text>';
   if (!P.live) {
@@ -2001,13 +1978,17 @@ function vPlan(d, full) {
   (P.live ? d.full : d.all).forEach(function (r) {
     var p = PLAN[r.oz]; if (!p) return;
     var k = S.confirmed[r.oz] ? 'ok' : ck(r.conf), off = p[2] !== fl;
-    o += '<g class="mk ' + k + (off ? ' off' : '') + (shown[r.oz] ? '' : ' dim') + (r.oz === S.sel ? ' sel' : '') + '" data-act="open" data-oz="' + r.oz + '" transform="translate(' + p[0] + ' ' + p[1] + ')" tabindex="0" role="button" aria-label="' + esc(r.oz + ' ' + r.kurz) + '">' +
+    o += '<g class="mk ' + k + (off ? ' off' : '') + (shown[r.oz] ? '' : ' dim') + (r.oz === S.sel ? ' sel' : '') + '" data-act="open" data-oz="' + r.oz + '" transform="' + pzMk(p) + '" tabindex="0" role="button" aria-label="' + esc(r.oz + ' ' + r.kurz) + '">' +
       '<circle class="mk-ring" r="24"/><rect class="mk-b" x="-14" y="-14" width="28" height="28"/><text class="mk-t" y="4.5">' + (S.confirmed[r.oz] ? '✓' : r.np ? '€?' : r.conf) + '</text></g>';
   });
   o += '</svg>';
   var hi = (P.live ? d.full : d.all).filter(function (r) { return PLAN[r.oz] && shown[r.oz]; }).length;
   return '<aside class="plan' + (full ? ' plan-full' : '') + '" aria-label="Bauplan' + (full ? ' Vollbild' : '') + '">' +
-    '<div class="plan-h"><div class="plan-ctl" style="margin-left:auto">' + (full ? '' : '<button class="ic" data-act="planToggle" aria-label="Bauplan ausblenden" title="Ausblenden">' + IC.x + '</button>') +
+    '<div class="plan-h"><div class="pz" role="group" aria-label="Zoom" title="Zoomen: auf dem Trackpad mit zwei Fingern aufziehen oder Strg/⌘ + Scrollen. Gezoomt: ziehen oder scrollen zum Verschieben, Doppelklick zoomt hinein.">' +
+      '<button data-act="pz" data-v="-1" aria-label="Herauszoomen"><svg viewBox="0 0 16 16"><path d="M3.5 8h9"/></svg></button>' +
+      '<button class="pz-v" data-act="pz" data-v="0" aria-label="Zoom zurücksetzen" title="Zurücksetzen">' + Math.round(100000 / Z.w) + ' %</button>' +
+      '<button data-act="pz" data-v="1" aria-label="Hineinzoomen"><svg viewBox="0 0 16 16"><path d="M3.5 8h9M8 3.5v9"/></svg></button></div>' +
+    '<div class="plan-ctl" style="margin-left:auto">' + (full ? '' : '<button class="ic" data-act="planToggle" aria-label="Bauplan ausblenden" title="Ausblenden">' + IC.x + '</button>') +
       (full ? '<button class="ic pfs-b" data-act="planFull" data-v="0" aria-label="Vollbild schließen" title="Schließen (Esc)">' + IC.x + '</button>' : '<button class="ic pfs-b" data-act="planFull" data-v="1" aria-label="Bauplan im Vollbild" title="Vollbild">' + IC.expand + '</button>') + '</div></div>' +
     '<div class="plan-c">' + o + '<div class="plan-tip" aria-hidden="true"></div></div>' +
     '<div class="plan-f"><span class="mono plan-xy">' + hi + ' Positionen verortet' + (P.live ? '' : ' · M 1:100') + '</span><span class="plan-lg"><span class="lgt">Konfidenz</span><i class="hi"></i>&lt; 50<i class="mid"></i>&lt; 75<i class="lo"></i>≥ 75<i class="ok"></i>bestätigt</span></div>' +
@@ -2190,11 +2171,11 @@ function vDrawer(d) {
       '</div></header>' +
     '<div class="dw-body"><div class="dw-swap ' + (S.leaving ? 'leaving' : S.swapDir) + '" data-k="b' + p.oz + '">' +
       '<section class="price' + (ok ? ' is-ok' : '') + (S.editEp ? ' is-edit' : '') + '" aria-label="Preis"><button class="mini" data-act="aiClose" tabindex="-1"><span class="mono">' + (p.np ? 'Preis' : p.manual ? 'Eigener Preis' : 'KI-Preis') + '</span><b>' + (p.np ? 'fehlt' : eur(p.ep)) + '</b><span class="muted">' + (p.np ? (p.sg ? 'Vorschlag ≈ ' + eur(p.sg.ep) + ' · bitte prüfen' : p.span ? 'Spanne ' + spanTxt(p.span) : 'Keine KI-Schätzung') : 'je ' + p.einheit + ' · GP ' + eur(p.gp)) + '</span><span class="conf-v ' + confLvl(p.conf) + '"><b>' + p.conf + ' %</b></span></button><div class="ptop"><div class="pmain">' +
-        '<div class="mono lab">' + (p.np ? (p.sg ? 'Vorschlag · niedrige Konfidenz, bitte prüfen' : p.span ? 'Kein Preis · Spanne ähnlicher Positionen' : 'Kein Preisvorschlag möglich') : p.manual ? (noAi ? 'Eigener Preis · ohne KI-Vorschlag' : 'Eigener Preis · ' + pct(md) + ' zum KI-Vorschlag') : IC.needle + 'KI-Preisvorschlag') + '</div>' +
+        '<div class="mono lab">' + (p.np ? (p.sg ? 'Vorschlag · bitte prüfen' : p.span ? 'Kein Preis · Spanne ähnlicher Positionen' : 'Kein Preisvorschlag möglich') : p.manual ? (noAi ? 'Eigener Preis · ohne KI-Vorschlag' : 'Eigener Preis · ' + pct(md) + ' zum KI-Vorschlag') : IC.needle + 'KI-Preisvorschlag') + '</div>' +
         '<div class="prow">' + (S.editEp
           ? '<label class="epedit"><span class="sr">Einheitspreis in Euro</span><input id="epin" inputmode="decimal" autocomplete="off" data-in="epDraft" data-enter="saveEp" value="' + esc(S.epDraft) + '"><span class="cur">€</span></label>'
           : p.np && p.sg ? '<div class="sgbox" data-k="sg' + p.oz + '"><span class="sg-ep">≈ ' + eur(p.sg.ep) + '<small> je ' + esc(p.einheit) + '</small></span><span class="sg-r">' + (p.sg.hi > p.sg.lo ? 'Spanne ' + eur(p.sg.lo) + ' – ' + eur(p.sg.hi) + ' · ' : '') + 'aus ' + p.sg.n + ' verwandten Position' + (p.sg.n > 1 ? 'en' : '') + '</span>' +
-              '<span class="sg-b"><button class="btn btn-sm btn-primary" data-act="takeSugg">Vorschlag übernehmen</button><button class="btn btn-sm btn-quiet" data-act="startEdit">Eigenen Preis eingeben</button></span></div>'
+              '<span class="sg-b"><button class="btn btn-sm btn-primary" data-act="takeSugg">' + IC.tick + 'Übernehmen</button><button class="btn btn-sm btn-quiet" data-act="startEdit">' + IC.pen + 'Eigener Preis</button></span></div>'
           : p.np ? (p.span ? '<span class="spanep" title="Spanne der nächsten Alt-LV-Positionen, die abweichen: kein Preis">' + spanTxt(p.span) + '<small> je ' + esc(p.einheit) + '</small></span>' : '') + '<button class="ep epnp" data-k="epnp" data-act="startEdit" aria-label="Preis eingeben">Preis eingeben<span class="pen">' + IC.pen + '</span></button>'
           : '<button class="ep' + (S.flashEp ? ' flash' : '') + '" data-k="ep' + p.ep + '" data-act="startEdit" title="Preis bearbeiten" aria-label="Einheitspreis ' + eur(p.ep) + ', bearbeiten">' + eur(p.ep) + '<span class="pen">' + IC.pen + '</span></button>') +
           (p.np && !S.editEp ? '' : '<span class="muted">je ' + p.einheit + '</span>') + '</div>' +
@@ -2439,6 +2420,89 @@ function aiMaybeClose() {
     aiShut();
   }, 700);
 }
+// ---- Bauplan zoom: viewBox in plan units, shared by the inline and the fullscreen plan ----
+var PZ = null, PZ_MIN = 125, pzDrag = null, pzMoved = false, pzPts = {}, pzPinch = null, pzG = 1;
+function pzBox() {
+  if (!PZ || PZ.vh !== PLAN_VH || PZ.id !== P.id) PZ = { x: 0, y: 0, w: 1000, h: PLAN_VH, vh: PLAN_VH, id: P.id };
+  return PZ;
+}
+function pzVB() { var Z = pzBox(); return [Z.x, Z.y, Z.w, Z.h].map(function (n) { return +n.toFixed(2); }).join(' '); }
+// markers keep roughly their screen size: they shrink in plan units as you zoom in
+function pzMk(p) { var s = Math.pow(pzBox().w / 1000, .8); return 'translate(' + p[0] + ' ' + p[1] + ')' + (s < .999 ? ' scale(' + s.toFixed(3) + ')' : ''); }
+function pzSet(x, y, w) {
+  var Z = pzBox(); w = Math.max(PZ_MIN, Math.min(1000, w));
+  var h = w * PLAN_VH / 1000;
+  Z.w = w; Z.h = h; Z.x = Math.max(0, Math.min(1000 - w, x)); Z.y = Math.max(0, Math.min(PLAN_VH - h, y));
+  var vb = pzVB(), zoomed = w < 999.5;
+  document.querySelectorAll('.plan-svg').forEach(function (svg) {
+    if (svg.getAttribute('viewBox') === vb) return;
+    svg.setAttribute('viewBox', vb); svg.classList.toggle('zoomed', zoomed);
+    svg.querySelectorAll('.mk[data-oz]').forEach(function (m) { var p = PLAN[m.getAttribute('data-oz')]; if (p) m.setAttribute('transform', pzMk(p)); });
+  });
+  document.querySelectorAll('.pz-v').forEach(function (b) { b.textContent = Math.round(100000 / w) + ' %'; });
+  planHot(null);
+}
+function pzAt(svg, cx, cy, f) {
+  var Z = pzBox(), r = svg.getBoundingClientRect(); if (!r.width || !r.height) return;
+  var fx = (cx - r.left) / r.width, fy = (cy - r.top) / r.height, w = Math.max(PZ_MIN, Math.min(1000, Z.w / f));
+  pzSet(Z.x + fx * Z.w - fx * w, Z.y + fy * Z.h - fy * (w * PLAN_VH / 1000), w);
+}
+function pzSvg(e) { return e.target && e.target.closest ? e.target.closest('.plan-svg') : null; }
+// trackpad pinch arrives as wheel + ctrlKey (Chrome, Firefox, Edge); two-finger scroll pans once zoomed
+document.addEventListener('wheel', function (e) {
+  var svg = pzSvg(e); if (!svg) return;
+  var Z = pzBox();
+  if (e.ctrlKey || e.metaKey) { e.preventDefault(); pzAt(svg, e.clientX, e.clientY, Math.exp(-e.deltaY * (e.deltaMode ? .05 : .01))); return; }
+  if (Z.w >= 999.5) return;
+  var r = svg.getBoundingClientRect(), u = Z.w / r.width * (e.deltaMode === 1 ? 16 : 1), ox = Z.x, oy = Z.y;
+  pzSet(Z.x + e.deltaX * u, Z.y + e.deltaY * u, Z.w);
+  if (Z.x !== ox || Z.y !== oy) e.preventDefault(); // at the edge the page scrolls on
+}, { passive: false });
+// Safari sends pinch as gesture events
+document.addEventListener('gesturestart', function (e) { if (pzSvg(e)) { e.preventDefault(); pzG = 1; } });
+document.addEventListener('gesturechange', function (e) { var svg = pzSvg(e); if (!svg) return; e.preventDefault(); pzAt(svg, e.clientX, e.clientY, e.scale / pzG); pzG = e.scale; });
+document.addEventListener('gestureend', function (e) { if (pzSvg(e)) e.preventDefault(); });
+// drag to pan, two fingers on a touchscreen to pinch
+document.addEventListener('pointerdown', function (e) {
+  var svg = pzSvg(e); if (!svg || e.button) return;
+  pzPts[e.pointerId] = { x: e.clientX, y: e.clientY };
+  var ids = Object.keys(pzPts);
+  if (ids.length === 2) { var a = pzPts[ids[0]], b = pzPts[ids[1]]; pzPinch = { d: Math.hypot(a.x - b.x, a.y - b.y), svg: svg }; pzDrag = null; return; }
+  pzMoved = false;
+  if (pzBox().w >= 999.5) return;
+  if (e.pointerType === 'mouse') e.preventDefault();
+  pzDrag = { x: e.clientX, y: e.clientY, zx: pzBox().x, zy: pzBox().y, svg: svg };
+});
+document.addEventListener('pointermove', function (e) {
+  if (!pzPts[e.pointerId]) return;
+  pzPts[e.pointerId] = { x: e.clientX, y: e.clientY };
+  if (pzPinch) {
+    var ids = Object.keys(pzPts); if (ids.length < 2) return;
+    var a = pzPts[ids[0]], b = pzPts[ids[1]], d = Math.hypot(a.x - b.x, a.y - b.y);
+    if (pzPinch.d) pzAt(pzPinch.svg, (a.x + b.x) / 2, (a.y + b.y) / 2, d / pzPinch.d);
+    pzPinch.d = d; pzMoved = true; return;
+  }
+  if (!pzDrag) return;
+  var dx = e.clientX - pzDrag.x, dy = e.clientY - pzDrag.y;
+  if (!pzMoved && Math.hypot(dx, dy) < 4) return;
+  if (!pzMoved) { pzMoved = true; pzDrag.svg.classList.add('panning'); }
+  var Z = pzBox(), u = Z.w / pzDrag.svg.getBoundingClientRect().width;
+  pzSet(pzDrag.zx - dx * u, pzDrag.zy - dy * u, Z.w);
+});
+function pzEnd(e) {
+  delete pzPts[e.pointerId];
+  if (Object.keys(pzPts).length < 2) pzPinch = null;
+  if (pzDrag) { pzDrag.svg.classList.remove('panning'); pzDrag = null; }
+}
+document.addEventListener('pointerup', pzEnd);
+document.addEventListener('pointercancel', pzEnd);
+// a drag must not also click the marker under the pointer
+document.addEventListener('click', function (e) { if (pzMoved && pzSvg(e)) { e.stopPropagation(); e.preventDefault(); } pzMoved = false; }, true);
+document.addEventListener('dblclick', function (e) {
+  var svg = pzSvg(e); if (!svg || e.target.closest('.mk')) return;
+  e.preventDefault(); pzAt(svg, e.clientX, e.clientY, pzBox().w <= PZ_MIN + 1 ? 1 / 8 : 2);
+});
+
 var hotOz = null, hotMk = null;
 function planHot(oz, mkEl) {
   if (oz === hotOz && mkEl === hotMk) return; hotOz = oz; hotMk = mkEl;
@@ -2451,8 +2515,10 @@ function planHot(oz, mkEl) {
   var plan = mkEl.closest('.plan'), tip = plan && plan.querySelector('.plan-tip'), p = PLAN[oz], r = derive().full.find(function (x) { return x.oz === oz; });
   if (!tip || !r) return;
   tip.innerHTML = '<span class="mono">' + oz + ' · Konfidenz ' + r.conf + ' %</span><b>' + esc(r.kurz) + '</b><span>' + (r.np ? 'Noch kein Preis' : eur(r.ep) + ' je ' + r.einheit) + '</span>';
-  tip.style.left = (p[0] / 10) + '%'; tip.style.top = (p[1] / PLAN_VH * 100) + '%';
-  tip.classList.toggle('flip', p[0] > 620);
+  var Z = pzBox(), fx = (p[0] - Z.x) / Z.w, fy = (p[1] - Z.y) / Z.h;
+  if (fx < 0 || fx > 1 || fy < 0 || fy > 1) return;
+  tip.style.left = (fx * 100) + '%'; tip.style.top = (fy * 100) + '%';
+  tip.classList.toggle('flip', fx > .62);
   tip.classList.add('on');
 }
 document.addEventListener('mouseover', function (e) {
@@ -2502,12 +2568,6 @@ function startExport() {
 }
 
 var A = {
-  theme: function () {
-    var next = isDark() ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
-    try { localStorage.setItem('lvm-theme', next); } catch (e) {}
-    render();
-  },
   tab: function (ds) { set({ tab: ds.v }); },
   analyze: function () {
     if (S.analyzing) return;
@@ -2653,6 +2713,12 @@ var A = {
   floor: function (ds) { set({ floor: ds.v }); },
   planToggle: function () { var v = !planShown(); if (P.live) store('lvm-plan-' + P.id, v); set({ planShow: v }); },
   planFull: function (ds) { planHot(null); set({ planFull: ds.v === '1' }); },
+  pz: function (ds) {
+    var Z = pzBox(), v = +ds.v;
+    if (!v) { pzSet(0, 0, 1000); return; }
+    var w = Math.max(PZ_MIN, Math.min(1000, Z.w / (v > 0 ? 1.5 : 1 / 1.5)));
+    pzSet(Z.x + (Z.w - w) / 2, Z.y + (Z.h - w * PLAN_VH / 1000) / 2, w);
+  },
   whyToggle: function () { set({ whyOpen: !S.whyOpen }); },
   dtab: function (ds) { set({ dtab: ds.v }); },
   resetEp: function () { var p0 = cur(); if (p0 && p0.srvManual) { toast('Der eigene Preis ist im Backend gespeichert. Gib einen neuen Preis ein, um ihn zu ersetzen.'); return; } var p = cur(), e = Object.assign({}, S.eps), g = Object.assign({}, S.sugg), c = Object.assign({}, S.confirmed); delete e[p.oz]; delete g[p.oz]; delete c[p.oz]; set({ eps: e, sugg: g, confirmed: c, editEp: false, flashEp: 1 }); S.flashEp = 0; toast('KI-Vorschlag für ' + p.oz + ' wiederhergestellt'); },
@@ -2881,7 +2947,7 @@ document.addEventListener('pointerout', function (e) {
   if (btn && !(e.relatedTarget && btn.contains(e.relatedTarget))) endHold();
 });
 
-try { var th = localStorage.getItem('lvm-theme'); if (th) document.documentElement.setAttribute('data-theme', th); } catch (e) {}
+try { localStorage.removeItem('lvm-theme'); } catch (e) {}
 ['dragover', 'drop'].forEach(function (ev) {
   document.addEventListener(ev, function (e) {
     var z = e.target.closest && e.target.closest('[data-drop]');
