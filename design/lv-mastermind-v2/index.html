@@ -1177,27 +1177,26 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .st-ok,.st-bad{display:inline-flex;align-items:center;gap:6px}
 .st-ok i,.st-bad i{width:7px;height:7px;border-radius:50%;background:var(--ok,#2f9e6b)}
 .st-bad{color:var(--bad,#c4452c)}.st-bad i{background:var(--bad,#c4452c)}
-.st-lead{max-width:640px;margin:10px 0 0;line-height:1.55}
-.start .st-up{margin-top:28px;max-width:860px}
+.start{max-width:720px;margin:0 auto;padding-top:40px;text-align:center}
+.st-lead{max-width:600px;margin:12px auto 0;line-height:1.55}
+.start .st-up{margin-top:32px;text-align:left}
 .dropz{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:40px 24px 24px;border:1.5px dashed var(--line-2);cursor:pointer;transition:border-color .15s,background .15s}
 .dropz:hover{border-color:var(--ink);background:var(--paper-2)}
 .dropz-i{display:grid;place-items:center;width:44px;height:44px;border:1px solid var(--line-2);margin-bottom:6px}
 .dropz>b{font-size:20px;font-weight:500;letter-spacing:-.01em}
 .dropz>.muted{font-size:13px}
 .dropz-f{display:flex;gap:8px 18px;flex-wrap:wrap;justify-content:center;margin-top:6px;font-size:.62rem;color:var(--ink-3)}
-.dropz-l{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;margin-top:22px;text-align:left}
-.uf{border:1px solid var(--line);background:var(--card);padding:12px 14px;min-width:0}
-.uf-h{font-size:.6rem;margin-bottom:8px}
-.uf ul{list-style:none;margin:0;padding:0}
-.uf li{display:flex;align-items:center;gap:10px;min-width:0}
-.uf-n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;font-size:13px}
-.uf-s{color:var(--ink-3);font-size:.6rem;flex:none}
-.uf .ic{width:26px;height:26px;flex:none}
-.uf-e{margin:0;color:var(--ink-3);font-size:13px}
-@media (max-width:640px){.dropz-l{grid-template-columns:1fr}}
+.uf{list-style:none;margin:16px 0 0;padding:0;border:1px solid var(--line);text-align:left}
+.uf li{display:flex;align-items:center;gap:12px;min-width:0;padding:10px 10px 10px 14px}
+.uf li+li{border-top:1px solid var(--line)}
+.uf-i{display:grid;place-items:center;flex:none;color:var(--ink-3)}.uf-i .i{width:16px;height:16px}
+.uf-n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;font-size:13.5px}
+.uf-t{flex:none;font-size:.6rem;padding:2px 7px;border:1px solid var(--line-2);color:var(--ink-2)}
+.uf-s{color:var(--ink-3);font-size:.62rem;flex:none;min-width:52px;text-align:right}
+.uf .ic{width:28px;height:28px;flex:none}
 .st-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:20px;margin-top:28px;align-items:start}
 .st-up .up-err{margin-top:14px}
-.st-up .up-btns{justify-content:flex-start}
+.st-up .up-btns{justify-content:center}
 .st-up .up-grid{margin-top:18px}
 .smp{list-style:none;margin:6px -26px -24px;padding:0}
 .smp li{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:14px 26px;border-top:1px solid var(--line)}
@@ -2589,22 +2588,19 @@ function takeFiles(files) {
 var LV_EXT = /\.(x83|d83|d84|d86)$/i, PLAN_EXT = /\.(png|jpe?g)$/i;
 function freshUp() { return { phase: 'form', lv: null, plan: null, copy: false, err: '' }; }
 function upRow(kind, f) {
-  return '<li data-k="uf' + kind + '"><span class="uf-n">' + esc(f.name) + '</span><span class="uf-s mono">' + fmt(Math.max(1, f.size / 1024)) + ' KB</span>' +
+  return '<li data-k="uf' + kind + '"><span class="uf-i">' + IC.doc + '</span><span class="uf-n">' + esc(f.name) + '</span><span class="uf-t mono">' + (kind === 'lv' ? 'LV' : 'Bauplan') + '</span><span class="uf-s mono">' + fmt(Math.max(1, f.size / 1024)) + ' KB</span>' +
     '<button class="ic" data-act="upRemove" data-v="' + kind + '" aria-label="' + esc(f.name) + ' entfernen">' + IC.x + '</button></li>';
 }
 function vStart() {
   var U = S.up || (S.up = freshUp());
-  var list = function (title, kind, f, empty) {
-    return '<div class="uf"><div class="mono faint uf-h">' + title + '</div>' + (f ? '<ul>' + upRow(kind, f) + '</ul>' : '<p class="uf-e">' + empty + '</p>') + '</div>';
-  };
   return '<div class="start" data-k="start">' +
     '<h1>Neues Projekt</h1><p class="st-lead muted">Lade ein Leistungsverzeichnis hoch. Jede Position bekommt einen Preis aus euren Alt-LVs, eine Konfidenz und eine Quelle. Ein Bauplan prüft zusätzlich die Mengen.</p>' +
     '<section class="card st-up" aria-label="Projekt hochladen">' +
       '<label class="dropz' + (U.lv || U.plan ? ' has' : '') + '" data-drop="any" data-k="dropz"><input type="file" class="sr" multiple accept=".x83,.d83,.d84,.d86,.X83,.D83,.D84,.D86,.png,.jpg,.jpeg" data-file="any">' +
         '<span class="dropz-i">' + IC.down + '</span><b>Upload your project</b><span class="muted">Dateien hierher ziehen oder klicken</span>' +
         '<span class="dropz-f mono"><span>LV · GAEB .X83 / .D83 / .D84 / .D86</span><span>Bauplan · PNG / JPG (optional)</span></span>' +
-        '<span class="dropz-l">' + list('Leistungsverzeichnis', 'lv', U.lv, 'Noch kein LV') + list('Bauplan (optional)', 'plan', U.plan, 'Kein Bauplan') + '</span>' +
       '</label>' +
+      (U.lv || U.plan ? '<ul class="uf">' + (U.lv ? upRow('lv', U.lv) : '') + (U.plan ? upRow('plan', U.plan) : '') + '</ul>' : '') +
       (U.err ? '<div class="up-err">' + IC.warn + '<span>' + esc(U.err) + '</span></div>' : '') +
       '<div class="up-btns"><button class="btn btn-primary" data-act="upGo"' + (U.lv ? '' : ' disabled') + '>Analyse starten' + IC.arrow + '</button></div>' +
     '</section></div>';
