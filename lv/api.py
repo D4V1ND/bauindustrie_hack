@@ -94,7 +94,7 @@ class JudgeCall(BaseModel):
 
 @app.post("/projects", status_code=202, response_model=Status)
 def start(project: str = Form(..., description="short project ID, e.g. H1: letters, digits and '-'"),
-          lv: UploadFile = File(..., description="the new LV: GAEB XML (.x83) or GAEB 90 (.d83, .d84, .d86)"),
+          lv: UploadFile = File(..., description="the new LV: GAEB XML (.x83), GAEB 90 (.d83, .d84, .d86), Excel (.xlsx) or PDF (.pdf)"),
           plan: UploadFile | None = File(None, description="optional construction plan: PNG, JPG or PDF"),
           copy_only: bool = Form(False, description="only copy exact matches: no AI, no cost, no plan check")) -> Status:
     """Starts a run: steps 0 to 4 on the LV and, with a plan, the plan check beside them. Answers at once; poll

@@ -10,6 +10,8 @@ from functools import cache
 from itertools import groupby
 from pathlib import Path
 
+import openpyxl
+import pymupdf
 from pypdf import PdfReader
 from pypdf.errors import PyPdfError
 
@@ -18,6 +20,7 @@ from lv.model import LV, LineItem
 # One spelling per unit. A unit that is not listed is kept as written, without a trailing dot.
 UNITS = {
     "st": "St", "stk": "St", "stck": "St", "stück": "St",
+    "psch": "psch", "pau": "psch", "pausch": "psch",  # P6 PDFs print PSCH, Psch and pau (pauschal: a lump sum)
     "std.": "h",  # with the dot only: P2's own unit list defines "Std" as piece x day ("Stück x Tag")
     "m²": "m2", "qm": "m2",
     "m³": "m3", "cbm": "m3",
@@ -191,7 +194,204 @@ def _flow(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
-READERS = {".x83": read_x83, ".d83": read_gaeb90, ".d84": read_gaeb90, ".d86": read_gaeb90}
+# --- Excel (.xlsx) and PDF prints (.pdf): numbered rows -----------------------------------------------------------
+# Both list numbered rows in LV order. A row is an item when it has a quantity, a unit or a price; otherwise it is
+# a section title. A section's level is the number of parts in its number ("15.1" is 2); it stays open for the
+# items below it until a section of the same or a higher level starts.
+
+# An item number in a PDF: digits, or parts joined by dots (15.1.10. · 1.18 · 1.2..5 · .1 · TE.L0.0009). Strict,
+# because long-text lines can start in the number column. In Excel the column says it: no space and a digit.
+OZ = re.compile(r"^(?=\S*\d)(?:\d+|[0-9A-Z]*(?:\.+[0-9A-Z]*)+)$")
+OZ_CELL = re.compile(r"^\S*\d\S*$")
+
+
+@dataclass
+class Row:
+    oz: str
+    lines: list[str]  # short text first, then the long text's lines
+    quantity: float | None = None
+    unit: str = ""
+    unit_price: float | None = None
+    total_price: float | None = None
+    optional: bool = False
+    item: bool = False
+
+
+def _rows_to_items(rows: list[Row], project: str, read_by: str) -> list[LineItem]:
+    sections: list[tuple[str, str]] = []
+    items: list[LineItem] = []
+    for row in rows:
+        lines = [_flow(line) for line in row.lines if line and line.strip()]
+        if not row.item:
+            level = len([part for part in row.oz.split(".") if part])
+            while sections and len([part for part in sections[-1][0].split(".") if part]) >= level:
+                sections.pop()
+            sections.append((row.oz, lines[0] if lines else ""))
+            continue
+        items.append(LineItem(
+            id=f"{project}/{row.oz}", oz=row.oz, section=[f"{n} {title}".strip() for n, title in sections],
+            short_text=lines[0] if lines else "", long_text=" ".join(lines[1:]),
+            quantity=row.quantity, unit=clean_unit(row.unit), unit_price=row.unit_price, total_price=row.total_price,
+            kind="optional" if row.optional else "normal", read_by=read_by))
+    return items
+
+
+# Excel: the header row is found by its column names. Checked in this order, so "Einheitspreis" is not "Einheit"
+# and "Mengeneinheit" is not "Menge". Names of 3 letters or fewer must match whole, longer ones as a beginning.
+COLUMNS = (("long", ("langtext",)), ("kind", ("art", "positionsart")),
+           ("unit_price", ("einheitspreis", "ep")), ("total_price", ("gesamtpreis", "gesamtbetrag", "gp")),
+           ("unit", ("me", "einheit", "mengeneinheit")), ("quantity", ("menge",)),
+           ("oz", ("oz", "ordnungszahl", "position", "pos", "posnr", "nr")),
+           ("short", ("kurztext", "bezeichnung", "leistungsbeschreibung", "beschreibung", "leistung", "text")))
+NEEDED = ("oz", "short", "quantity", "unit")
+
+
+def read_xlsx(path: Path, project: str) -> LV:
+    """The first sheet. A row without a number but with text continues the long text of the item above it."""
+    try:
+        sheet = openpyxl.load_workbook(path, read_only=True, data_only=True).worksheets[0]
+    except Exception as error:  # openpyxl's ways of saying "not a usable workbook"
+        raise ValueError(f"Cannot read {path.name} as an Excel file: {error}")
+    table = [list(row) for row in sheet.iter_rows(values_only=True)]
+    found = next(((n, columns) for n, row in enumerate(table[:50]) if all(k in (columns := _columns(row)) for k in NEEDED)),
+                 None)
+    if found is None:
+        raise ValueError(f"{path.name}: no header row with the columns OZ, Kurztext, Menge and Einheit (or Pos., "
+                         "Bezeichnung, Menge, ME) in the first 50 rows.")
+    start, columns = found
+    cell = lambda row, key: row[columns[key]] if key in columns and columns[key] < len(row) else None
+    rows: list[Row] = []
+    for values in table[start + 1:]:
+        oz = _text_of(cell(values, "oz"))
+        texts = [_text_of(cell(values, key)) for key in ("short", "long")]
+        if not OZ_CELL.match(oz):
+            if rows and any(texts) and cell(values, "quantity") is None:
+                rows[-1].lines.append(" ".join(text for text in texts if text))
+            continue
+        row = Row(oz=oz.rstrip(".") or oz, lines=texts, quantity=_number(cell(values, "quantity")),
+                  unit=_text_of(cell(values, "unit")), unit_price=_number(cell(values, "unit_price")),
+                  total_price=_number(cell(values, "total_price")),
+                  optional="bedarf" in _text_of(cell(values, "kind")).lower())
+        row.item = row.quantity is not None or bool(row.unit) or row.unit_price is not None
+        if row.unit_price is not None and row.total_price is not None and row.quantity is not None and \
+                abs(row.quantity * row.unit_price - row.total_price) > max(0.01, abs(row.total_price) * 0.001):
+            raise ValueError(f"{path.name}, item {row.oz}: quantity x unit price is not the total price. "
+                             "A column may be read as the wrong one.")
+        rows.append(row)
+    items = _rows_to_items(rows, project, "excel")
+    if not items:
+        raise ValueError(f"Found no line items in {path.name}: no row below the header has a quantity, unit or price.")
+    name = next((_text_of(value) for row in table[:start] for value in row if _text_of(value)), "")
+    return LV(project=project, name=name, date=None, source_file=path.name, items=items)
+
+
+def _columns(row: list) -> dict[str, int]:
+    columns: dict[str, int] = {}
+    for n, value in enumerate(row):
+        name = re.sub(r"[^a-zäöüß]", "", _text_of(value).lower())
+        key = next((key for key, names in COLUMNS
+                    if any(name == known or (len(known) > 3 and name.startswith(known)) for known in names)), None)
+        if name and key and key not in columns:
+            columns[key] = n
+    return columns
+
+
+def _text_of(value) -> str:
+    return "" if value is None else str(value).strip()
+
+
+def _number(value) -> float | None:
+    """A number cell, or German written as text ("1.234,50")."""
+    if value is None or isinstance(value, bool):
+        return None
+    if isinstance(value, int | float):
+        return float(value)
+    text = str(value).strip()
+    return _german(text) if re.fullmatch(r"-?\d{1,3}(?:\.\d{3})*(?:,\d+)?|-?\d+(?:,\d+)?", text) else None
+
+
+# PDF: the print layout of the dataset's P6 ("Anfrage", columns OZ, Leistungsbeschreibung, Menge ME, Einheitspreis,
+# Gesamtbetrag). Read by code: text lines are put in page order by position, which also puts back the lines the
+# dataset's anonymiser moved to the end of a page. No price is taken from a PDF: an LV read from one is unpriced.
+QUANTITY = re.compile(r"^(\d{1,3}(?:\.\d{3})*,\d+)(?:\s+(\S+))?$")
+STOP = ("Zuzüglich der gesetzlichen Mehrwertsteuer", "Das LV besteht aus")  # the closing page: VAT and signature
+
+
+def read_pdf(path: Path, project: str) -> LV:
+    try:
+        doc = pymupdf.open(path)
+    except Exception as error:  # pymupdf's ways of saying "not a usable PDF"
+        raise ValueError(f"Cannot read {path.name} as a PDF: {error}")
+    rows: list[Row] = []
+    names: dict[str, str] = {}
+    for page in doc:
+        lines = _page_lines(page)
+        head = next((n for n, line in enumerate(lines) if any(t == "Leistungsbeschreibung" for _, t in line)), None)
+        if head is None:
+            continue
+        for line in lines[:head]:
+            if line[0][1] in ("Projekt:", "LV:"):
+                names.setdefault(line[0][1], " ".join(t for _, t in line[1:]))
+        text_x = next(x for x, t in lines[head] if t == "Leistungsbeschreibung")
+        quantity_x = next((x for x, t in lines[head] if t.startswith("Menge")), 300.0)
+        price_x = next((x for x, t in lines[head] if t.startswith("Einheitspreis")), 380.0)
+        for line in lines[head + 1:]:
+            x, first = line[0]
+            words = re.sub(r"\.{4,}", " ", " ".join(t for _, t in line)).split()
+            joined = " ".join(words)
+            if first.startswith("Seite:") or any(t.startswith("Seite:") for _, t in line):
+                break
+            if joined.startswith(STOP):
+                return _pdf_lv(path, project, rows, names)
+            if not joined:  # only dots: a line to write in, when it stands in the text column
+                if rows and not rows[-1].item and x < quantity_x - 20:
+                    rows[-1].lines.append(" ".join(t for _, t in line))
+                continue
+            if first == "Summe" or re.fullmatch(r"Übertrag:?|(in EUR ?)+", joined):
+                continue
+            if x < text_x - 5 and OZ.match(first):
+                rows.append(Row(oz=first.rstrip(".") or first, lines=[" ".join(t for _, t in line[1:])]))
+            elif rows and not rows[-1].item and x >= quantity_x - 20 and (match := QUANTITY.match(
+                    " ".join(re.sub(r"\.{4,}", " ", " ".join(t for x, t in line if x < price_x - 5)).split()))):
+                rows[-1].quantity, rows[-1].unit, rows[-1].item = _german(match[1]), match[2] or "", True
+            elif rows and not rows[-1].item:
+                rows[-1].lines.append(" ".join(t for _, t in line))
+    return _pdf_lv(path, project, rows, names)
+
+
+def _pdf_lv(path: Path, project: str, rows: list[Row], names: dict[str, str]) -> LV:
+    for row in rows:  # "*** Bedarfsposition ohne GB" before the short text marks an optional item; other marks stay
+        marks = [line for line in row.lines if line.strip().startswith("***")][:1]
+        if row.lines and marks and row.lines[0] == marks[0] or row.lines and not row.lines[0].strip():
+            first = row.lines.pop(0)
+            row.optional = "bedarf" in first.lower()
+            if first.strip() and not row.optional:
+                row.lines.insert(1 if row.lines else 0, first)
+    items = _rows_to_items(rows, project, "pdf")
+    if not items:
+        raise ValueError(f"Found no line items in {path.name}. Only one PDF layout can be read: a print with the "
+                         "columns OZ, Leistungsbeschreibung, Menge ME, Einheitspreis, Gesamtbetrag.")
+    name = " – ".join(part for part in (names.get("Projekt:", ""), names.get("LV:", "")) if part)
+    return LV(project=project, name=_flow(name), date=None, source_file=path.name, items=items)
+
+
+def _page_lines(page) -> list[list[tuple[float, str]]]:
+    """The page's text as lines top to bottom, each a list of (x, text) left to right. Pieces less than 3 points
+    apart in height are one line: an item number sits a little lower than its short text."""
+    pieces = sorted((span["bbox"][1], span["bbox"][0], span["text"].strip())
+                    for block in page.get_text("dict")["blocks"] for line in block.get("lines", [])
+                    for span in line["spans"] if span["text"].strip())
+    lines: list[tuple[float, list[tuple[float, str]]]] = []
+    for y, x, text in pieces:
+        if lines and y - lines[-1][0] < 3:
+            lines[-1][1].append((x, text))
+        else:
+            lines.append((y, [(x, text)]))
+    return [sorted(line) for _, line in lines]
+
+
+READERS = {".x83": read_x83, ".d83": read_gaeb90, ".d84": read_gaeb90, ".d86": read_gaeb90, ".xlsx": read_xlsx,
+           ".pdf": read_pdf}
 
 
 # --- texts from PDF prints of an LV whose prices come from another file (P3) -------------------------------------

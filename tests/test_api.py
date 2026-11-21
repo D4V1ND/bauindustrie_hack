@@ -46,7 +46,7 @@ def test_an_upload_runs_the_pipeline_and_the_result_takes_comments(client):
 def test_bad_uploads_and_unknown_projects_are_refused_before_anything_runs(client):
     lv = {"lv": ("new.x83", b"<GAEB/>")}
     assert client.post("/projects", data={"project": "H1_judge"}, files=lv).status_code == 422
-    assert client.post("/projects", data={"project": "H1"}, files={"lv": ("new.pdf", b"%PDF")}).status_code == 422
+    assert client.post("/projects", data={"project": "H1"}, files={"lv": ("new.docx", b"PK")}).status_code == 422
     assert client.post("/projects", data={"project": "H1", "copy_only": "true"},
                        files={**lv, "plan": ("plan.png", b"png")}).status_code == 422
     assert not api.runs

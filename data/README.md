@@ -4,7 +4,12 @@
 - **Original:** Google Drive folder "Challenge A Dataset", shared by the hackathon organisers ("makeathon"):
   https://drive.google.com/drive/folders/1wS4UMVghBL8T5opmZ2UBmBu0kr6U8zIB
 - **Local copy:** `data/raw/Challenge A Dataset/`, 44 files, 25.7 MB, downloaded as a zip on 2026-11-20 and unzipped unchanged.
-- **Not in git:** `data/raw/` is not committed (no `.gitignore` entry yet, so don't `git add .`).
+- **In git:** the 44 dataset files in `data/raw/Challenge A Dataset/` are committed (the tests read them).
+- **Generated test LVs:** `data/raw/generated/`, written by `python -m lv.samples` from the GAEB files of P1, P2,
+  P4 and P5: `<project>_a.xlsx` (columns OZ, Kurztext, Langtext, Menge, Einheit, EP, GP, Art),
+  `<project>_b.xlsx` (Pos., Bezeichnung, Menge, ME, Einheitspreis, Gesamtpreis, Positionsart; long text in the row
+  below) and `<project>.pdf` (P6's print layout, no prices). P2's Excel files carry prices. Not real files: real
+  Excel LVs may name their columns differently.
 
 ## Projects
 

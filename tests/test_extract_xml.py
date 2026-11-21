@@ -88,8 +88,8 @@ def test_a_new_lv_has_no_prices(lvs):
 
 
 def test_unknown_file_type_is_refused():
-    with pytest.raises(ValueError, match="pdf"):
-        read(RAW / "Leistungsverzeichnis.pdf", "P3")
+    with pytest.raises(ValueError, match="docx"):
+        read(RAW / "LV-Positionen.docx", "P3")
 
 
 def test_price_command_writes_the_result_file(tmp_path):
