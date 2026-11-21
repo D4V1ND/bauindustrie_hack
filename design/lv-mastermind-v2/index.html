@@ -1103,25 +1103,6 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .lv-split .lv-bar .pill{padding:0 9px}
 .lv-split .lv-bar .tools{gap:8px}
 
-/* ---- Konfidenzbericht ---- */
-.btn-rep{height:40px}
-.btn-rep svg{width:15px;height:15px}
-.repfs{position:fixed;inset:0;z-index:40;display:grid;place-items:center;padding:28px}
-.rep-win{position:relative;width:min(960px,100%);height:calc(100vh - 56px);display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);animation:planpop .4s var(--ease)}
-.rep-bar{display:flex;align-items:center;gap:8px;padding:10px 12px 10px 18px;border-bottom:1px solid var(--line)}
-.rep-bar .mono{color:var(--ink-3);font-size:.6rem}
-.rep-bar .btn svg{width:13px;height:13px}
-.rep-scroll{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;background:#e9e6df;padding:28px}
-.rep-scroll .rp{box-shadow:0 10px 30px -18px rgba(0,0,0,.35)}
-@media print{
-  body.printing-rep #app>*:not(.repfs){display:none!important}
-  body.printing-rep{background:#fff!important}
-  body.printing-rep .repfs{position:static;display:block;padding:0}
-  body.printing-rep .planfs-bg,body.printing-rep .rep-bar{display:none!important}
-  body.printing-rep .rep-win{border:0;box-shadow:none;height:auto;animation:none}
-  body.printing-rep .rep-scroll{overflow:visible;background:#fff;padding:0}
-  body.printing-rep .rep-scroll .rp{box-shadow:none;padding:0;max-width:none}
-}
 /* ---- live backend: project menu, upload, empty plan ---- */
 .pmw{position:relative;display:inline-flex}
 .crumb-b{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:3px;color:var(--ink-2)}
@@ -1642,7 +1623,6 @@ function vHero(d) {
     '<div style="min-width:0">' +
     '<h1>' + esc(P.name) + '</h1></div>' +
     '<div class="hero-actions">' +
-      '<button class="btn btn-quiet btn-rep" data-act="report" data-v="1">' + IC.doc + 'Konfidenzbericht</button>' +
       '<button class="btn btn-primary btn-export" data-act="export">' + IC.down + 'Export GAEB X84<span class="xsep"></span><span class="xamt">' + eur(Math.round(d.tot)) + '</span>' + IC.arrow + '</button>' +
     '</div></div>';
 }
@@ -1868,57 +1848,6 @@ function vTable(d) {
 }
 
 
-// ================= Konfidenzbericht (export) =================
-var REPCSS = '.rp{font-family:Geist,system-ui,sans-serif;color:#141414;background:#fff;max-width:860px;margin:0 auto;padding:56px 60px 64px;font-size:13px;line-height:1.5}' +
-  '.rp *{box-sizing:border-box}.rp .m{font-family:"Geist Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#7a7770}' +
-  '.rp h1{font-size:30px;font-weight:300;letter-spacing:-.03em;margin:10px 0 4px}.rp h2{font-size:15px;font-weight:500;margin:0 0 12px}' +
-  '.rp .hd{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding-bottom:22px;border-bottom:2px solid #141414}' +
-  '.rp .sec{margin-top:30px}.rp .kpi{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;border:1px solid #e3e0d8;margin-top:24px}' +
-  '.rp .kpi>div{padding:16px 18px;border-left:1px solid #e3e0d8}.rp .kpi>div:first-child{border-left:0}.rp .kpi b{display:block;font-size:26px;font-weight:300;letter-spacing:-.03em;margin-top:6px}' +
-  '.rp .bar{display:flex;height:14px;margin-top:10px;background:#efece5}.rp .bar i{display:block;height:100%}' +
-  '.rp .z{background:#b8332b}.rp .l{background:#d9772f}.rp .md{background:#c9a227}.rp .h{background:#8a877f}' +
-  '.rp .lg{display:flex;flex-wrap:wrap;gap:16px;margin-top:10px}.rp .lg span{display:inline-flex;align-items:center;gap:6px}.rp .lg i{width:9px;height:9px;display:inline-block}' +
-  '.rp table{width:100%;border-collapse:collapse}.rp th{text-align:left;font-family:"Geist Mono",ui-monospace,monospace;font-size:9.5px;font-weight:400;letter-spacing:.08em;text-transform:uppercase;color:#7a7770;padding:8px 8px;border-bottom:1px solid #141414}' +
-  '.rp td{padding:9px 8px;border-bottom:1px solid #e3e0d8;vertical-align:top}.rp td.r,.rp th.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}.rp .oz{font-family:"Geist Mono",ui-monospace,monospace;font-size:11px;color:#7a7770;white-space:nowrap}' +
-  '.rp .c{font-family:"Geist Mono",ui-monospace,monospace;font-weight:500}.rp .c.z,.rp .c.l{background:none;color:#b8332b}.rp .c.md{background:none;color:#b07a10}.rp .c.h{background:none;color:#5d5a53}' +
-  '.rp .why{color:#5d5a53;font-size:12px}.rp .note{margin-top:34px;padding-top:14px;border-top:1px solid #e3e0d8;color:#7a7770;font-size:11.5px}' +
-  '.rp .mini{display:inline-block;width:70px;height:5px;background:#efece5;vertical-align:middle;margin-left:8px}.rp .mini i{display:block;height:100%}';
-function repData(d) {
-  var rows = d.full.map(function (r) { return Object.assign({}, r, { c: S.confirmed[r.oz] ? 100 : r.conf }); });
-  var w = 0, c = 0; rows.forEach(function (r) { var k = cw(r); w += k; c += k * r.c; });
-  var bk = [['z', 'Ohne Preis · 0 %', function (r) { return r.conf === 0; }], ['l', '1 – 49 %', function (r) { return r.conf > 0 && r.conf < 50; }], ['md', '50 – 74 %', function (r) { return r.conf >= 50 && r.conf < 75; }], ['h', '≥ 75 %', function (r) { return r.conf >= 75; }]].map(function (b) {
-    var xs = rows.filter(b[2]); return { k: b[0], label: b[1], n: xs.length, gp: xs.reduce(function (a, r) { return a + r.gp; }, 0) };
-  });
-  var gw = {}, order = [];
-  rows.forEach(function (r) { if (!gw[r.gewerk]) { gw[r.gewerk] = { n: 0, gp: 0, cw: 0, low: 0, np: 0 }; order.push(r.gewerk); } var g = gw[r.gewerk]; g.n++; g.gp += r.gp; g.cw += r.gp * r.c; if (r.conf < 50) g.low++; if (r.np) g.np++; });
-  var gws = order.map(function (k) { var g = gw[k]; return { name: k, n: g.n, gp: g.gp, conf: g.gp ? Math.round(g.cw / g.gp) : 0, low: g.low, np: g.np }; }).sort(function (a, b) { return a.conf - b.conf; });
-  return { rows: rows, conf: Math.round(c / w), tot: w, bk: bk, gws: gws,
-    np: rows.filter(function (r) { return r.np; }), low: rows.filter(function (r) { return !r.np && r.conf < 50; }).sort(function (a, b) { return a.conf - b.conf; }),
-    ok: d.all.filter(function (r) { return S.confirmed[r.oz]; }).length, core: d.all.length };
-}
-function repHTML(d) {
-  var R = repData(d), now = new Date(), date = now.toLocaleDateString('de-DE') + ', ' + now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-  var cls = function (v) { return v === 0 ? 'z' : v < 50 ? 'l' : v < 75 ? 'md' : 'h'; };
-  var list = function (xs, empty) { return xs.length ? '<table><thead><tr><th>OZ</th><th>Leistung</th><th>Grund</th><th class="r">Menge</th><th class="r">Konf.</th></tr></thead><tbody>' + xs.map(function (r) { return '<tr><td class="oz">' + r.oz + '</td><td>' + esc(r.kurz) + '<div class="why">' + esc(r.gewerk) + '</div></td><td class="why">' + esc(r.why) + '</td><td class="r">' + qty(r.menge) + ' ' + esc(r.einheit) + '</td><td class="r"><span class="c ' + cls(r.conf) + '">' + r.conf + ' %</span></td></tr>'; }).join('') + '</tbody></table>' : '<p class="why">' + empty + '</p>'; };
-  return '<div class="rp">' +
-    '<div class="hd"><div><div class="m">Konfidenzbericht · ' + esc(P.id) + '</div><h1>' + esc(P.name) + '</h1><div class="why">' + (P.live ? esc(P.file) + ' · ' + fmt(P.n) + ' Positionen' + '' : 'Öffentliche Ausschreibung · VOB/A') + '</div></div><div class="m" style="text-align:right">Stand<br><span style="color:#141414">' + date + '</span><br><br>LV Mastermind</div></div>' +
-    '<div class="kpi"><div><div class="m">Gesamtkonfidenz (GP-gewichtet)</div><b>' + R.conf + ' %</b><div class="bar"><i class="' + cls(R.conf) + '" style="width:' + R.conf + '%"></i></div></div>' +
-      '<div><div class="m">Positionen</div><b>' + fmt(R.rows.length) + '</b></div><div><div class="m">Ohne Preis</div><b style="color:#b8332b">' + R.np.length + '</b></div><div><div class="m">Bestätigt</div><b>' + R.ok + ' / ' + R.core + '</b></div></div>' +
-    '<div class="sec"><h2>Verteilung nach Konfidenz</h2><div class="m">Anteil am Volumen (GP)</div><div class="bar">' + R.bk.map(function (b) { return '<i class="' + b.k + '" style="width:' + (b.gp / R.tot * 100) + '%"></i>'; }).join('') + '</div>' +
-      '<table style="margin-top:14px"><thead><tr><th>Konfidenz</th><th class="r">Positionen</th><th class="r">GP</th><th class="r">Anteil Volumen</th></tr></thead><tbody>' + R.bk.map(function (b) { return '<tr><td><span class="lg" style="margin:0"><span><i class="' + b.k + '"></i>' + b.label + '</span></span></td><td class="r">' + fmt(b.n) + '</td><td class="r">' + (b.k === 'z' ? '–' : eur(Math.round(b.gp))) + '</td><td class="r">' + fmt(b.gp / R.tot * 100, 1) + ' %</td></tr>'; }).join('') + '</tbody></table></div>' +
-    '<div class="sec"><h2>Positionen ohne Preis · zuerst bearbeiten</h2>' + list(R.np, 'Alle Positionen haben einen Preis.') + '</div>' +
-    '<div class="sec"><h2>Niedrige Konfidenz (unter 50 %)</h2>' + list(R.low, 'Keine Positionen unter 50 %.') + '</div>' +
-    '<div class="sec"><h2>Konfidenz je Gewerk</h2><table><thead><tr><th>Gewerk</th><th class="r">Pos.</th><th class="r">GP</th><th class="r">Unter 50 %</th><th class="r">Konfidenz</th></tr></thead><tbody>' +
-      R.gws.map(function (g) { return '<tr><td>' + esc(g.name) + (g.np ? ' <span class="c z" style="font-size:11px">· ' + g.np + ' ohne Preis</span>' : '') + '</td><td class="r">' + fmt(g.n) + '</td><td class="r">' + eur(Math.round(g.gp)) + '</td><td class="r">' + g.low + '</td><td class="r"><span class="c ' + cls(g.conf) + '">' + g.conf + ' %</span><span class="mini"><i class="' + cls(g.conf) + '" style="width:' + g.conf + '%"></i></span></td></tr>'; }).join('') + '</tbody></table></div>' +
-    '<div class="note">Konfidenz = Sicherheit der KI-Preisschätzung je Position, gewichtet mit dem Gesamtpreis. Bestätigte Positionen zählen mit 100 %. Positionen mit 0 % haben keine vergleichbare Referenz in den Alt-LVs und sind in der Angebotssumme nicht enthalten. Grundlage: ' + (P.live ? esc(P.lib) : '3 Alt-LVs, 9.120 bepreiste Positionen') + '.</div>' +
-  '</div>';
-}
-function vReport(d) {
-  if (!S.report) return '';
-  return '<div class="repfs" data-k="repfs"><div class="planfs-bg" data-act="report" data-v="0"></div><div class="rep-win" role="dialog" aria-label="Konfidenzbericht"><div class="rep-bar"><span class="mono">Konfidenzbericht · Vorschau</span><span style="flex:1"></span>' +
-    '<button class="btn btn-sm btn-quiet" data-act="repHtml">' + IC.down + 'HTML</button><button class="btn btn-sm btn-primary" data-act="repPrint">' + IC.doc + 'Als PDF drucken</button><button class="ic" data-act="report" data-v="0" aria-label="Vorschau schließen" title="Schließen (Esc)">' + IC.x + '</button></div>' +
-    '<div class="rep-scroll"><style>' + REPCSS + '</style>' + repHTML(d) + '</div></div></div>';
-}
 function vDock(d) {
   var pr = d.all.filter(function (r) { return S.picked[r.oz]; });
   if (!pr.length) return '';
@@ -2134,7 +2063,7 @@ function view() {
   var d = derive();
   return vHeader() + '<main>' + vHero(d) +
     '<div class="grid2">' + vCost() + '</div><div class="grid2 row2">' + vSummary(d) + '</div>' + vTable(d) +
-    '</main>' + vDock(d) + vReport(d) + (S.planFull ? '<div class="planfs" data-k="planfs"><div class="planfs-bg" data-act="planFull" data-v="0"></div>' + vPlan(d, true) + '</div>' : '') + vDrawer(d) + vPreview(d) + vFx() + vUpload() + vToast();
+    '</main>' + vDock(d) + (S.planFull ? '<div class="planfs" data-k="planfs"><div class="planfs-bg" data-act="planFull" data-v="0"></div>' + vPlan(d, true) + '</div>' : '') + vDrawer(d) + vPreview(d) + vFx() + vUpload() + vToast();
 }
 
 // ================= tiny DOM morph (keeps nodes, so CSS animations only play on real changes) =================
@@ -2486,14 +2415,6 @@ var A = {
     set(st); toast(a.done);
   },
   aiClose: function () { clearTimeout(aiT); var a = document.activeElement; if (a && a.blur) a.blur(); if (S.aiOpen) aiShut(); },
-  report: function (ds) { set({ report: ds.v === '1' }); },
-  repPrint: function () { document.body.classList.add('printing-rep'); window.print(); setTimeout(function () { document.body.classList.remove('printing-rep'); }, 500); },
-  repHtml: function () {
-    var html = '<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Konfidenzbericht ' + esc(P.short) + '</title><link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500&family=Geist+Mono&display=swap" rel="stylesheet"><style>body{margin:0;background:#f4f2ec}' + REPCSS + '</style></head><body>' + repHTML(derive()) + '</body></html>';
-    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([html], { type: 'text/html' })); a.download = 'Konfidenzbericht_' + slug(P.short) + '.html';
-    document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
-    toast('Konfidenzbericht_' + slug(P.short) + '.html heruntergeladen');
-  },
   floor: function (ds) { set({ floor: ds.v }); },
   planToggle: function () { var v = !planShown(); if (P.live) store('lvm-plan-' + P.id, v); set({ planShow: v }); },
   planFull: function (ds) { planHot(null); set({ planFull: ds.v === '1' }); },
@@ -2697,7 +2618,6 @@ document.addEventListener('keydown', function (e) {
     if (S.menu) { var mt = document.querySelector('[data-act="menu"][data-v="' + S.menu + '"]'); set({ menu: null }); if (mt) mt.focus(); return; }
     if (S.adv) { cancelAdvance(); render(); return; }
     if (S.aiOpen) { A.aiClose(); return; }
-    if (S.report) { set({ report: false }); return; }
     if (S.planFull && !S.sel) { set({ planFull: false }); return; }
     if (S.fx && S.fx.phase !== 'run') set({ fx: null });
     else if (S.preview) set({ preview: null });
