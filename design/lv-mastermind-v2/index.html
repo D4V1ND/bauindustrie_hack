@@ -862,9 +862,9 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .gwh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:8px}
 .gwh b{font-weight:500;font-size:13.5px}
 .gwh .mono{color:var(--ink-3)}
-.gwl{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
-.gwl li{border-bottom:1px solid var(--line)}
-.gwl button{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:grid;grid-template-columns:38px minmax(0,1fr) auto 14px;gap:12px;align-items:center;padding:10px 4px;transition:background .15s}
+.gwl{list-style:none;margin:0;padding:0}
+.gwl li+li{border-top:1px solid var(--line)}
+.gwl button{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) auto 14px;gap:14px;align-items:center;padding:10px 4px;transition:background .15s}
 .gwl button:hover{background:var(--paper-2)}
 .gwl button:focus-visible{outline:2px solid var(--signal);outline-offset:-2px}
 .gwl button>svg{width:14px;height:14px;color:var(--ink-3);transition:transform .2s var(--ease)}
@@ -2009,7 +2009,7 @@ function vDrawer(d) {
   {
     var gsum = sameAll.reduce(function (a, r) { return a + r.gp; }, p.gp);
     gwPanel = 
-      (same.length ? '<ol class="gwl">' + same.map(function (r) { var ok2 = !!S.confirmed[r.oz]; return '<li data-k="g' + r.oz + '"><button data-act="open" data-oz="' + r.oz + '"><span class="rsk ' + (r.np ? 'na' : ck(r.conf)) + '"><b>' + (r.np ? '–' : r.conf + '<small>%</small>') + '</b><i class="rbar"><i style="width:' + r.conf + '%"></i></i></span><span class="gwm"><span class="mono">' + r.oz + '</span><span class="gwk">' + esc(r.kurz) + '</span></span><span class="gwr">' + (r.np ? '' : '<b>' + eur(r.gp) + '</b>') + (r.np ? '<span class="mtag offen"><i></i>Preis fehlt</span>' : ok2 ? '<span class="mtag ok"><i></i>bestätigt</span>' : '<span class="mtag ' + r.mode + '"><i></i>' + r.conf + ' %</span>') + '</span>' + IC.arrow + '</button></li>'; }).join('') + '</ol>' +
+      (same.length ? '<ol class="gwl">' + same.map(function (r) { var ok2 = !!S.confirmed[r.oz]; return '<li data-k="g' + r.oz + '"><button data-act="open" data-oz="' + r.oz + '"><span class="gwm"><span class="mono">' + r.oz + '</span><span class="gwk">' + esc(r.kurz) + '</span></span><span class="gwr">' + (r.np ? '' : '<b>' + eur(r.gp) + '</b>') + (r.np ? '<span class="mtag offen"><i></i>Preis fehlt</span>' : ok2 ? '<span class="mtag ok"><i></i>bestätigt</span>' : '<span class="mtag ' + r.mode + '"><i></i>' + r.conf + ' %</span>') + '</span>' + IC.arrow + '</button></li>'; }).join('') + '</ol>' +
         '<button class="lnk gwall" data-act="gewerkAll" data-v="' + esc(p.gewerk) + '">' + (sameAll.length > same.length ? 'Alle ' + (sameAll.length + 1) + ' im LV anzeigen' : 'Alle im LV filtern') + '</button>'
       : '<p class="pempty gw-e">Einzige Position in diesem Gewerk.</p>');
     var gmeta = (sameAll.length + 1) + ' Pos.' + (gsum > 0 ? ' · ' + eur(gsum) : '');
