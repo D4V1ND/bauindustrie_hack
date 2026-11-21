@@ -874,6 +874,11 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .gwall{margin-top:12px;font-size:12.5px}
 .gwsec .comm-h{height:39px}
 .gwsec .comm-h b{color:var(--ink);font-weight:400}
+.gw-t{display:flex;align-items:baseline;gap:10px;min-width:0;flex:1}
+.gw-t .mono{color:var(--ink-3);flex:none}
+.gw-t b{font-weight:500!important;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.gw-m{color:var(--ink-3);white-space:nowrap;flex:none}
+.gwsec .gw-e{color:var(--ink-3);font-size:13px;padding:6px 0 2px}
 .gwsec .panel{padding:8px 0 4px}
 
 .whymore{display:grid;grid-template-rows:0fr;transition:grid-template-rows .4s var(--ease)}
@@ -2002,8 +2007,9 @@ function vDrawer(d) {
     gwPanel = 
       (same.length ? '<ol class="gwl">' + same.map(function (r) { var ok2 = !!S.confirmed[r.oz]; return '<li data-k="g' + r.oz + '"><button data-act="open" data-oz="' + r.oz + '"><span class="rsk ' + ck(r.conf) + '"><b>' + r.conf + '<small>%</small></b><i class="rbar"><i style="width:' + r.conf + '%"></i></i></span><span class="gwm"><span class="mono">' + r.oz + '</span><span class="gwk">' + esc(r.kurz) + '</span></span><span class="gwr"><b>' + (r.np ? 'Kein Preis' : eur(r.gp)) + '</b>' + (r.np ? '<span class="mtag offen"><i></i>Preis fehlt</span>' : ok2 ? '<span class="mtag ok"><i></i>bestätigt</span>' : '<span class="mtag ' + r.mode + '"><i></i>' + r.conf + ' %</span>') + '</span>' + IC.arrow + '</button></li>'; }).join('') + '</ol>' +
         '<button class="lnk gwall" data-act="gewerkAll" data-v="' + esc(p.gewerk) + '">' + (sameAll.length > same.length ? 'Alle ' + (sameAll.length + 1) + ' im LV anzeigen' : 'Alle im LV filtern') + '</button>'
-      : '<p class="pempty">Keine weiteren Positionen in diesem Gewerk.</p>');
-    gwPanel = '<section class="comm gwsec" aria-label="Gewerk"><button class="mini" data-act="aiClose" tabindex="-1"><span class="mono">Gewerk</span><b>' + esc(p.gewerk) + '</b><span class="muted">' + (sameAll.length + 1) + ' Pos. · Σ ' + eur(gsum) + '</span></button><div class="comm-h"><span class="mono">Gewerk · <b>' + esc(p.gewerk) + '</b></span><span class="mono">' + (sameAll.length + 1) + ' Pos. · Σ ' + eur(gsum) + '</span></div><div class="panel">' + gwPanel + '</div></section>';
+      : '<p class="pempty gw-e">Einzige Position in diesem Gewerk.</p>');
+    var gmeta = (sameAll.length + 1) + ' Pos.' + (gsum > 0 ? ' · ' + eur(gsum) : '');
+    gwPanel = '<section class="comm gwsec" aria-label="Gewerk"><button class="mini" data-act="aiClose" tabindex="-1"><span class="mono">Gewerk</span><b>' + esc(p.gewerk) + '</b><span class="muted">' + (sameAll.length + 1) + ' Pos. · Σ ' + eur(gsum) + '</span></button><div class="comm-h"><span class="gw-t"><span class="mono">Gewerk</span><b title="' + esc(p.gewerk) + '">' + esc(p.gewerk) + '</b></span><span class="mono gw-m">' + gmeta + '</span></div><div class="panel">' + gwPanel + '</div></section>';
   }
   if (dt === 'team') {
     panel = (cm.length ? '<ol class="feed">' + cm.map(function (c, i) { var m = T[c.by]; return '<li data-k="c' + i + '"><span class="av" style="background:' + m.color + '">' + m.ini + '</span><div class="fb"><div class="fh"><b>' + m.name + '</b><span>' + esc(c.time) + '</span></div><p>' + esc(c.t) + '</p></div></li>'; }).join('') + '</ol>' : '<p class="pempty">Noch nichts besprochen. Erwähne Kolleg:innen mit @.</p>') +
