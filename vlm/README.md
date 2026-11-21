@@ -13,6 +13,10 @@ cd vlm
 ```
 Zwischenergebnisse werden in `out/` zwischengespeichert (`--neu` liest neu).
 
+Aus der Pipeline (vom Projektordner aus): `python -m lv price <LV> --project P4 --plan <Plan>`. Das LV liest dann der
+GAEB-Reader aus Schritt 0 (nicht `gaeb_llm.py`), das Ergebnis steht in `data/out/<Projekt>_plan.json`.
+`OPENAI_API_KEY` und `OPENAI_MODEL` dürfen dafür auch in der `.env` im Projektordner stehen.
+
 Ausgabe `out/<lv>_ergebnis.json`: `eingaben`, `positionen` (mit `pruefung`, `befund_ids`), `befunde`
 (`beschreibung`, `marker` mit relativen x/y, `entscheidung`), `zusammenfassung`.
 
