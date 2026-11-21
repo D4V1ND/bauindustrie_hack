@@ -1123,18 +1123,10 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .up-note{margin:12px 0 0;font-size:10.5px}
 .plan-empty{flex:1;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:12px;padding:28px 24px;color:var(--ink-2);font-size:13px;line-height:1.55}
 .plan-empty>.i{width:26px;height:26px;color:var(--ink-3)}.plan-empty p{margin:0;max-width:340px}
-/* no plan: a horizontal bar above the table by default; opened, the panel sits left and the table narrows */
-.lv-split.pn-min{grid-template-columns:minmax(0,1fr);gap:10px}
-.plan-min{position:static}
-.plan-tab{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:12px;min-height:48px;padding:0 16px;color:var(--ink-2);font-size:13px;transition:background .15s,color .15s}
-.plan-tab:hover{background:var(--paper-2);color:var(--ink)}
-.plan-tab:focus-visible{outline:2px solid var(--signal);outline-offset:-2px}
-.plan-tab .i{width:17px;height:17px;flex:none;color:var(--ink-3)}
-.plan-tab .mono{color:var(--ink-3);font-size:.6rem}
-.plan-tab b{font-weight:500;color:var(--ink)}
-.plan-tab .pt-open{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font:.6rem/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
-.plan-tab:hover .pt-open{color:var(--ink)}
-.plan-cl .i{transform:rotate(180deg)}
+/* plan panel toggled from the table toolbar */
+.lv-split.plan-off{grid-template-columns:minmax(0,1fr)}
+.lv-split>.plan{animation:planin .35s var(--ease)}
+@keyframes planin{from{opacity:0;transform:translateX(-16px)}}
 .verdict2.warn{color:var(--warn)}
 @media (max-width:640px){.up-grid,.up-f{grid-template-columns:1fr}.pmenu{width:min(340px,calc(100vw - 32px))}}
 .cmts .panel{padding:12px 0 6px}
@@ -1451,7 +1443,9 @@ var S = { tab: 'home', filter: 'all', sel: null, q: '', sort: { k: 'conf', d: 1 
   picked: {}, owners: {}, confirmed: {}, bundled: {}, collapsed: {}, toast: null, dtab: '', sugg: {}, editEp: false, epDraft: '', eps: {},
   accepted: {}, justOk: {}, comments: {}, cmt: '', notes: {}, noteDraft: '', compose: null, seqs: {}, chats: {}, draft: '', thinking: false,
   preview: null, fx: null, holding: false, analyzing: false, analyzed: 'heute, 08:47 · vor 12 Min.', flashEp: 0, focusEp: false,
-  scope: 'key', lvLimit: 60, mg: {}, planOpen: false };
+  scope: 'key', lvLimit: 60, mg: {}, planShow: null };
+// plan panel next to the table: open by default when there is a plan; the toolbar toggle is remembered per project
+function planShown() { return S.planShow === null || S.planShow === undefined ? !!(P.plan || !P.live) : S.planShow; }
 
 // ================= helpers =================
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -1478,6 +1472,7 @@ var IC = {
   chev: '<svg class="i" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>',
   x: '<svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>',
   layers: '<svg class="i" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg>',
+  panel: '<svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16"/><path d="M9 4v16"/></svg>',
   copy: '<svg class="i" viewBox="0 0 24 24"><rect x="8" y="8" width="13" height="13"/><path d="M16 8V3H3v13h5"/></svg>',
   chat: '<svg class="i" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>',
   home: '<svg class="i" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>',
@@ -1664,9 +1659,7 @@ function pm(xy) { return 'X ' + fmt((xy[0] - 80) / 20, 1) + ' m · Y ' + fmt((62
 function vPlan(d, full) {
   var shown = {}; d.rows.forEach(function (r) { shown[r.oz] = true; });
   var fl = FLOORS.indexOf(S.floor) >= 0 ? S.floor : FLOORS[0];
-  // no plan: a collapsed strip by default, opens into the hint panel (the table gives up the space)
-  if (P.live && !P.plan && !S.planOpen) return '<aside class="plan plan-none plan-min" aria-label="Bauplan"><button class="plan-tab" data-act="planOpen" data-v="1" aria-expanded="false">' + IC.layers + '<span class="mono">Bauplan</span><b>Nicht hochgeladen</b><span class="pt-open">Öffnen' + IC.chev + '</span></button></aside>';
-  if (P.live && !P.plan) return '<aside class="plan plan-none" aria-label="Bauplan"><div class="plan-h"><div><span class="mono">Bauplan</span><b>Nicht hochgeladen</b></div><button class="ic plan-cl" data-act="planOpen" data-v="0" aria-expanded="true" aria-label="Bauplan-Feld einklappen" title="Einklappen">' + IC.chev + '</button></div>' +
+  if (P.live && !P.plan) return '<aside class="plan plan-none" aria-label="Bauplan"><div class="plan-h"><div><span class="mono">Bauplan</span><b>Nicht hochgeladen</b></div><button class="ic" data-act="planToggle" aria-label="Bauplan ausblenden" title="Ausblenden">' + IC.x + '</button></div>' +
     '<div class="plan-empty">' + IC.layers + '<p>Lade beim nächsten Upload einen Bauplan (PNG oder JPG) als Kontext hoch. Dann prüft das Backend die Mengen gegen den Plan und die Positionen erscheinen hier.</p><button class="btn btn-sm btn-quiet" data-act="newProj">' + IC.plus + 'Neues Projekt mit Plan</button></div></aside>';
   var img = P.live && /\.(png|jpe?g)$/i.test(P.plan.file);
   var o = '<svg class="plan-svg" viewBox="0 0 1000 ' + PLAN_VH + '" role="img" aria-label="' + (P.live ? 'Bauplan ' + esc(P.plan.file) : 'Grundriss Erdgeschoss') + ' mit Positionen">';
@@ -1745,7 +1738,7 @@ function vTable(d) {
       '</div>' +
       '<div class="lv-stats"><div class="lv-stat"><span class="mono">Bestätigt</span><b>' + okN + '<small> / ' + d.all.length + '</small></b><i class="lv-meter"><i style="width:' + (okN / d.all.length * 100) + '%"></i></i></div>' +
         '<div class="lv-stat"><span class="mono">Summe angezeigt</span><b>' + eur(sum) + '</b><i class="lv-meter"><i style="width:' + Math.min(100, sum / d.tot * 100) + '%;background:var(--ink)"></i></i></div></div></div>' +
-    '<div class="lv-split' + (P.live && !P.plan && !S.planOpen ? ' pn-min' : '') + '">' + vPlan(d) + '<div class="lv-main"><div class="lv-bar"><div class="filters" role="group" aria-label="Filter">' + filters.map(function (x) {
+    '<div class="lv-split' + (planShown() ? '' : ' plan-off') + '">' + (planShown() ? vPlan(d) : '') + '<div class="lv-main"><div class="lv-bar"><div class="filters" role="group" aria-label="Filter">' + filters.map(function (x) {
       var on = d.f === x[0];
       return '<button class="pill' + (on ? ' on' : '') + '" aria-pressed="' + on + '" data-act="filter" data-v="' + x[0] + '">' + x[1] + '<span class="cnt">' + d.base.filter(d.fdef[x[0]]).length + '</span></button>';
     }).join('') +
@@ -1753,6 +1746,7 @@ function vTable(d) {
     '</div><div class="tools"><label class="search">' + IC.search + '<span class="sr">Positionen filtern</span><input id="q-lv" type="search" data-in="q" value="' + esc(S.q) + '" placeholder="OZ, Text oder Gewerk…"></label>' +
         '<span class="vsep" aria-hidden="true"></span>' +
         '<div class="seg" role="group" aria-label="Darstellung"><button class="' + (S.density === 'compact' ? 'on' : '') + '" data-act="density" data-v="compact" aria-pressed="' + (S.density === 'compact') + '">Kompakt</button><button class="' + (S.density === 'details' ? 'on' : '') + '" data-act="density" data-v="details" aria-pressed="' + (S.density === 'details') + '">Langtext</button></div>' +
+        '<button class="btn btn-quiet' + (planShown() ? ' on' : '') + '" data-act="planToggle" aria-pressed="' + planShown() + '" title="' + (planShown() ? 'Bauplan ausblenden' : 'Bauplan einblenden') + '">' + IC.panel + 'Bauplan</button>' +
         '<button class="btn btn-quiet' + (S.group ? ' on' : '') + '" data-act="group" aria-pressed="' + S.group + '">' + IC.layers + 'Nach Gewerk</button>' +
         '<button class="btn btn-quiet" data-act="csv" title="CSV kopieren">' + IC.copy + 'CSV</button></div></div>' +
     '<div class="tbl"><div role="table" aria-label="Positionen des Leistungsverzeichnisses">' +
@@ -2360,7 +2354,7 @@ var A = {
     toast('Konfidenzbericht_' + slug(P.short) + '.html heruntergeladen');
   },
   floor: function (ds) { set({ floor: ds.v }); },
-  planOpen: function (ds) { set({ planOpen: ds.v === '1' }); },
+  planToggle: function () { var v = !planShown(); if (P.live) store('lvm-plan-' + P.id, v); set({ planShow: v }); },
   planFull: function (ds) { planHot(null); set({ planFull: ds.v === '1' }); },
   whyToggle: function () { set({ whyOpen: !S.whyOpen }); },
   dtab: function (ds) { set({ dtab: ds.v }); },
@@ -2422,7 +2416,7 @@ function vUpload() {
 function pingApi() { return api('/projects').then(function (l) { S.apiOk = true; S.projList = l; render(); return l; }, function () { S.apiOk = false; S.projList = false; render(); return false; }); }
 function resetView() {
   cancelAdvance();
-  Object.assign(S, { sel: null, picked: {}, confirmed: P.live ? (store('lvm-ok-' + P.id) || {}) : {}, bundled: {}, eps: {}, mg: {}, sugg: {}, justOk: {}, chats: {},
+  Object.assign(S, { planShow: P.live ? store('lvm-plan-' + P.id) : null, sel: null, picked: {}, confirmed: P.live ? (store('lvm-ok-' + P.id) || {}) : {}, bundled: {}, eps: {}, mg: {}, sugg: {}, justOk: {}, chats: {},
     scope: 'key', lvLimit: 60, filter: 'all', gewerk: '', q: '', floor: FLOORS[0], planFull: false, report: false, projOpen: false, tab: 'home', home: false });
   first = true;
 }
