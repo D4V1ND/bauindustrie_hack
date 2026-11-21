@@ -996,6 +996,13 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .plan-tip{letter-spacing:normal;text-transform:none;font-family:var(--sans)}
 .plan-tip .mono{font-family:var(--mono);letter-spacing:.04em}
 
+
+.gwl button{position:relative}
+.gwl button:hover{background:transparent}
+.gwl button::before{content:"";position:absolute;left:-16px;top:-1px;bottom:-1px;width:2px;background:var(--ink);transform:scaleY(0);transition:transform .22s var(--ease)}
+.gwl button:hover::before{transform:none}
+.gwk{transition:color .15s;text-decoration:underline;text-decoration-color:transparent;text-underline-offset:3px;transition:text-decoration-color .2s}
+.gwl button:hover .gwk{text-decoration-color:var(--ink-3)}
 </style>
 </head>
 <body>
