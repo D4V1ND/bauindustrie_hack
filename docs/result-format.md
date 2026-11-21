@@ -49,9 +49,9 @@ Regenerate both schemas after a change to `lv/model.py` or the judge's answer sh
 |---|---|---|
 | `method` | `"copied"`, `"similar"`, `"adjusted"`, `"reference"`, `"none"` | how the result came about (table below) |
 | `median` | number or null | **the price to show** per unit; set only for `copied`, `similar`, `adjusted` |
-| `min`, `max` | number or null | range of the past prices behind it |
+| `min`, `max` | number or null | range of the past prices behind it. For `none`: only a span, the lowest and highest price in `judged`, not a price |
 | `mean`, `count` | number or null, integer | average of those prices, and how many there are |
-| `sources` | array of sources | the past items the price rests on (`copied`, `similar`, `adjusted`), or the references shown instead of a price (`reference`) |
+| `sources` | array of sources | the past items the price rests on (`copied`, `similar`, `adjusted`), or the related items the suggested price comes from (`reference`) |
 | `judged` | array of sources | the 3 best candidates the judge looked at, best first, each with its `why`. The judge reads 5; the file keeps 3 |
 | `reason` | string | one sentence from the judge, or a fixed sentence when code decided alone |
 | `rule`, `calculation`, `result` | string, string, number | only for `adjusted`: e.g. `"linear interpolation by DN"`, `"80 + (125 - 100) / (150 - 100) x (120 - 80)"`, `100.0` |
@@ -63,8 +63,8 @@ Regenerate both schemas after a change to `lv/model.py` or the judge's answer sh
 | `copied` | the library holds the same item word for word | the price, as exact |
 | `similar` | the judge called a library item the same thing | the price, with its source(s) |
 | `adjusted` | two sizes around the target were found; the price is interpolated | the price, with both sources and the calculation |
-| `reference` | related library items, but none the same | no price; the sources as "related, not the same" |
-| `none` | nothing usable | no price |
+| `reference` | related library items (`size_only`, `type_only`), but none the same | `median` as the suggested price: the middle price of the sources, shown as "related, not the same" |
+| `none` | every candidate `different`, or nothing found | no price, confidence 0; `min`–`max` as a span from the 3 items in `judged`, when set |
 
 ### A source (`sources[]` and `judged[]`)
 
@@ -80,10 +80,10 @@ Regenerate both schemas after a change to `lv/model.py` or the judge's answer sh
 ### `summary`
 
 ```json
-{"methods": {"copied": {"items": 0, "total": 0.0}, "similar": {"items": 9, "total": 12720.6},
-             "adjusted": {"items": 0, "total": 0.0}, "reference": {"items": 28, "total": 0.0},
-             "none": {"items": 13, "total": 0.0}},
- "total": 12720.6}
+{"methods": {"copied": {"items": 0, "total": 0.0}, "similar": {"items": 5, "total": 10952.0},
+             "adjusted": {"items": 0, "total": 0.0}, "reference": {"items": 33, "total": 142315.46},
+             "none": {"items": 12, "total": 0.0}},
+ "total": 153267.46}
 ```
 
 `items` counts every item; `total` adds up `median × quantity` over the normal items with a price.
@@ -179,16 +179,16 @@ Scores run from 0 (safe) to 100. They are places on a scale, not probabilities.
 | `missing` | array of strings | what the text does not state, at most 3 short phrases |
 | `description_reason` | string | one sentence from the model |
 | `value` | number or null | roughly what the item is worth. **A weight, never a price to show** |
-| `value_basis` | `"price"`, `"reference"`, `"assumed"` | found or entered price × quantity; middle price of the related items × quantity; or the value of a typical item |
+| `value_basis` | `"price"`, `"reference"`, `"assumed"` | found or entered price × quantity, or the value of a typical item; `reference` only in results from before 21 Nov 2026 |
 
 Example, P5 "Transporter", 5 h:
 
 ```json
 {
   "score": 65,
-  "confidence": 0,
+  "confidence": 35,
   "price_risk": 75,
-  "price_reason": "Only related past items were found, none the same. No price.",
+  "price_reason": "Only related past items were found, none the same: the price is their middle price.",
   "description": "gaps",
   "description_risk": 50,
   "missing": [
@@ -197,14 +197,14 @@ Example, P5 "Transporter", 5 h:
   ],
   "description_reason": "A transporter hourly rate needs a vehicle size or payload, and it is unclear whether the driver is included.",
   "value": 456.0,
-  "value_basis": "reference"
+  "value_basis": "price"
 }
 ```
 
 ### `risk_summary` (step 4)
 
 ```json
-{"score": 51, "confidence": 5, "value": 167595.45, "basis": {"price": 5, "reference": 33, "assumed": 12}}
+{"score": 51, "confidence": 47, "value": 167595.46, "basis": {"price": 38, "reference": 0, "assumed": 12}}
 ```
 
 `score` is the items' scores weighted by `value`, over the normal items. `confidence` is the items' confidence
@@ -408,7 +408,8 @@ every located item numbered and a legend, and a spreadsheet of all items.
 - The predicted price is `prediction.median`, and only when `method` is `copied`, `similar` or `adjusted`. Show
   `min`–`max` and `count` next to it when `count` > 1.
 - Every price must show its source(s): `id`, `short_text`, `unit_price`. Traceability is a hard requirement.
-- `reference` and `none` have no price. Never fill one in from `judged` or `sources`.
+- `none` has no price. Show its `min`–`max` as a span next to the 3 items of `judged`, never as a price, and keep it
+  out of every total.
 - `judged` is ordered best first. If its first entry has the verdict `same`, that is the match and its `why` says why;
   every other entry's `why` says why it is not the match.
 - Totals come from `summary`; do not add up items yourself.

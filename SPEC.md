@@ -182,8 +182,8 @@ items only and names the number of optional items below. With `--copy-only` step
 ## Step 3: price lookup with evidence
 
 A lookup, not an estimate. An item gets a price only when the price library holds the same item, or the same item
-in a smaller and a larger size. Otherwise it gets the nearest past items as **references**, without a price, or
-nothing. Low coverage is accepted; a wrong price is not.
+in a smaller and a larger size. Otherwise it gets the nearest related past items as **references**, whose middle price is the suggested
+price, or nothing (with only a span from the nearest items, which differ). Low coverage is accepted; a wrong price is not.
 
 Why this strict: in tests on this dataset, exact matches across projects were close to 0%. A loose "similar" rule
 priced 17–30% of items and was typically 80–120% off. The strict rule below priced about 1% of 720 hidden items,
@@ -259,8 +259,10 @@ for an item, the item gets `none`.
 - `adjusted`: the nearest smaller and the nearest larger `size_only` candidate, linear interpolation:
   `smaller price + (target size − smaller size) ÷ (larger size − smaller size) × (larger price − smaller price)`,
   rounded to the cent. Both candidates must name the same dimension and the same target size.
-- `reference`: the best `size_only` and `type_only` candidates, at most 3, are listed with their unit prices. No price is
-  proposed.
+- `reference`: the best `size_only` and `type_only` candidates, at most 3, are listed with their unit prices. Their median
+  is the suggested price, counted in the total (changed 21 Nov 2026; before, a reference had no price).
+- `none`: no price. When the judge answered, `min` and `max` are the lowest and highest price of the 3 candidates kept
+  in `judged`, which all differ: a span to show, never a price.
 - The judge reads the whole shortlist of 5. The prediction keeps the best 3 in `judged`, best first: what the price
   rests on, then `same`, `size_only`, `type_only`, `different`. On P5 a shortlist of 3 would have lost one of five
   prices (the match sat at place 5), so the cut is made after the judge, not before.
@@ -270,10 +272,10 @@ Each item gains a `prediction`:
 | Field | Meaning |
 |---|---|
 | `method` | `copied`, `similar`, `adjusted`, `reference` or `none` |
-| `min`, `max` | range of the past prices behind the prediction; empty for `reference` and `none` |
+| `min`, `max` | range of the past prices behind the prediction; for `none` only the span of `judged`, empty without it |
 | `median` | the value used for totals. For `adjusted` it is the calculated result |
 | `mean` | average of the same prices. For `adjusted` it is the calculated result |
-| `count` | number of past prices behind the prediction; 0 for `reference` and `none` |
+| `count` | number of past prices behind the prediction, or behind the span for `none` |
 | `sources` | list of `{id, short_text, unit_price, verdict, difference, why}`: every past item used or shown. `verdict` is `exact` for `copied` |
 | `judged` | the same shape, with the judge's `why`, for the best 3 candidates the judge gave a verdict on, best first |
 | `rule`, `calculation`, `result` | only for `adjusted`, e.g. `linear interpolation by DN`, `80 + (125 - 100) / (150 - 100) x (120 - 80)`, `100.0` |
@@ -336,8 +338,7 @@ estimator; they sit at the top of `lv/risk.py`.
 | Order | When | `value` | `value_basis` |
 |---|---|---|---|
 | 1 | step 3 found a price | `median` × quantity | `price` |
-| 2 | only related items (`reference`) | middle unit price of the listed sources × quantity | `reference` |
-| 3 | neither | the middle value of all items of orders 1 and 2: a typical item | `assumed` |
+| 2 | no price (`none`) | the middle value of all items of order 1: a typical item | `assumed` |
 
 `risk_summary.score` is the sum of value × score over the **normal items**, divided by the sum of their values.
 `risk_summary.basis` counts the normal items per value basis, so a reader sees how much of the weighting is assumed.
@@ -347,8 +348,8 @@ Each item's `risk`: `score`, `confidence`, `price_risk`, `price_reason`, `descri
 or empty), `description_risk`, `missing[]`, `description_reason`, `value`, `value_basis`.
 
 **Confidence**, the number to show an estimator: 100 − `score` for an item with a price, 0 for an item without one
-(`reference` and `none`). `risk_summary.confidence` weighs it by value like the score, so an LV where step 3 found
-few prices has a low confidence (P5: 5, P4: 3). It is a place on a scale, not a measured chance of being right.
+(`none`). `risk_summary.confidence` weighs it by value like the score, so an LV where step 3 found
+few prices has a low confidence (P5: 47 since references have a price, 5 before). It is a place on a scale, not a measured chance of being right.
 
 **Comments.** `lv comment <project> <item number> [--price N] [--text "..."] [--doubt]` saves the estimator's
 comment on one item in `data/out/<project>.json` and recalculates every score; the descriptions checked before are

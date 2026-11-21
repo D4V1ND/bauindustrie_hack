@@ -1,4 +1,5 @@
 #!/bin/sh
+# LV_PASSCODE: set it on the host, or anyone with the URL can read results and start paid runs (README, "Passcode").
 # LV_DATA: where results and uploads live. Point it at a persistent volume (e.g. /data) so they survive a redeploy.
 set -e
 export LV_DATA="${LV_DATA:-/app/data}"

@@ -19,9 +19,9 @@ class Source(BaseModel):
 class Prediction(BaseModel):
     """Step 3: what the lookup in the price library found for one line item (SPEC.md, step 3)."""
     method: Literal["copied", "similar", "adjusted", "reference", "none"]
-    min: float | None = None
+    min: float | None = None  # for "none": only a span, from the nearest past items in `judged`, which differ
     max: float | None = None
-    median: float | None = None  # the value used for totals
+    median: float | None = None  # the suggested price (Vorschlagspreis), used for totals; None for "none"
     mean: float | None = None
     count: int = 0  # number of past prices behind min, max, median and mean
     sources: list[Source] = []
@@ -46,7 +46,8 @@ class Risk(BaseModel):
     missing: list[str] = []  # what the text does not state, at most 3 short phrases
     description_reason: str = ""
     value: float | None = None  # roughly what the item is worth; a weight for the LV's score, never a price to show
-    value_basis: Literal["price", "reference", "assumed"]  # found price, related items' prices, or a typical item
+    value_basis: Literal["price", "reference", "assumed"]  # found price or a typical item; "reference" only in
+    # results from before 21 Nov 2026, when a reference had no price
 
 
 class RiskSummary(BaseModel):

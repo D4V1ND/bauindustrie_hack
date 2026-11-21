@@ -1,5 +1,6 @@
 import json
 import re
+import statistics
 from pathlib import Path
 
 import pytest
@@ -217,18 +218,22 @@ def test_adjusted_uses_the_nearest_smaller_and_the_nearest_larger_size_and_keeps
     [said("P1/100", "size_only", 100, 125), said("P1/150", "size_only", 150, 125, dimension="PN")],  # two dimensions
     [said("P1/100", "size_only"), said("P1/150", "size_only", 150, 125)],                  # a size is missing
 ])
-def test_reference_lists_the_sources_and_proposes_no_price(judged):
+def test_a_reference_proposes_the_middle_price_of_the_related_items(judged):
     found = found_with(*judged)
 
-    assert (found.method, found.min, found.max, found.median, found.mean, found.count) == ("reference", None, None, None, None, 0)
+    prices = [s.unit_price for s in found.sources]
+    assert (found.method, found.min, found.max, found.count) == ("reference", min(prices), max(prices), len(judged))
+    assert found.median == round(statistics.median(prices), 2) and found.median is not None
     assert {s.id for s in found.sources} == {j.cand for j in judged}
     assert all(s.unit_price > 0 for s in found.sources) and found.rule is None and found.reason
 
 
-def test_none_when_every_candidate_is_different():
+def test_none_when_every_candidate_is_different_gives_only_the_span_of_the_nearest():
     found = found_with(said("P1/100", "different"), said("P1/150", "different"), reason="All are other products.")
 
     assert (found.method, found.sources, found.median, found.reason) == ("none", [], None, "All are other products.")
+    prices = [s.unit_price for s in found.judged]
+    assert (found.min, found.max, found.count) == (min(prices), max(prices), 2) and found.min < found.max
 
 
 def test_a_verdict_for_an_item_that_was_not_offered_is_ignored():
@@ -304,14 +309,18 @@ def test_the_rules_the_judge_gets_are_the_estimators_rules():
     assert set(Verdicts.model_fields) == {"id", "judged", "reason"}  # the shape named in the rules' "Output" part
 
 
-def test_total_counts_similar_and_adjusted_but_not_reference():
+def test_total_counts_every_suggested_price_but_not_the_span_of_none():
     new = lv("P4", item("P4/1", "Flansch DN 125, PN 10", "Glatter Flansch, Edelstahl", quantity=3.0))
     predict(new, flanges(), judge=FakeJudge(said("P1/100", "size_only", 100, 125), said("P1/150", "size_only", 150, 125)))
     assert (new.summary.total, new.summary.methods["adjusted"].total) == (300.0, 300.0)
 
     new = a_flange()
     predict(new, flanges(), judge=FakeJudge(said("P1/100", "type_only")))
-    assert (new.summary.total, new.summary.methods["reference"].items) == (0.0, 1)
+    assert (new.summary.total, new.summary.methods["reference"].items) == (240.0, 1)  # 3 x 80
+
+    new = a_flange()
+    predict(new, flanges(), judge=FakeJudge(said("P1/100", "different")))
+    assert (new.summary.total, new.items[0].prediction.min) == (0.0, 80.0)
 
 
 def test_every_source_is_a_real_item_of_the_price_library():

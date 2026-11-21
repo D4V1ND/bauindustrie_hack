@@ -7,15 +7,16 @@ the run's log. Start it with:  python -m uvicorn lv.api:app --port 8000
 import json
 import os
 import re
+import secrets
 import subprocess
 import sys
 import threading
 from pathlib import Path
 from typing import Literal
 
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
 
 from lv import assistant, index
@@ -28,12 +29,29 @@ from lv.risk import comment
 
 PROJECT = re.compile(r"[A-Za-z0-9-]{1,40}")  # no "_", so a project never collides with <project>_judge.json
 LOG_LINES = 40  # lines of the run's log in a status answer
+# Set on the server: every call then needs it, as the header X-Passcode (or ?passcode= where a header cannot be sent,
+# e.g. an <img> of the plan). Not set (on your own computer): the API is open.
+PASSCODE = os.environ.get("LV_PASSCODE", "").strip()
+OPEN = {"/assistant", "/docs", "/openapi.json"}  # pages without data: the chat panel asks for the passcode itself
 
 app = FastAPI(title="LV pricing API", version="1.0",
               description="Prices a new LV (GAEB file) from past LVs, scores its risk and, with a construction plan, "
                           "checks its quantities against the plan.")
+
+
+@app.middleware("http")
+async def passcode(request: Request, call_next):
+    """ponytail: one shared passcode for the whole team; per-person logins if the tool goes beyond the hackathon."""
+    given = request.headers.get("x-passcode") or request.query_params.get("passcode") or ""
+    if PASSCODE and request.method != "OPTIONS" and request.url.path not in OPEN \
+            and not secrets.compare_digest(given.encode(), PASSCODE.encode()):
+        return JSONResponse({"detail": "Wrong or missing passcode (header X-Passcode)."}, 401)
+    return await call_next(request)
+
+
+# Added after the passcode check, so it wraps it: a 401 carries the CORS headers and the frontend can read it.
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])  # ponytail: any
-# origin, fine for the hackathon; name the frontend's origin before it runs anywhere public
+# origin; the passcode guards the data. Name the frontend's origin if the passcode is ever not enough
 runs: dict[str, subprocess.Popen] = {}  # project -> its latest run started by this server
 saving = assistant.saving  # one lock for every result file write, shared with the assistant; ponytail: per-project locks if many estimators comment at once
 

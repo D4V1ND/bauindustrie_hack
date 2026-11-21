@@ -9,7 +9,7 @@ def item(id: str, method: str, quantity: float = 1.0, prices: tuple = (), short_
     """A line item as step 3 leaves it: `prices` are the unit prices of its sources."""
     sources = [Source(id=f"P1/{n}", unit_price=price, verdict="same" if method == "similar" else "type_only")
                for n, price in enumerate(prices)]
-    priced = method in ("copied", "similar", "adjusted")
+    priced = method in ("copied", "similar", "adjusted", "reference")
     prediction = Prediction(method=method, sources=sources, count=len(prices) if priced else 0,
                             min=min(prices) if priced else None, max=max(prices) if priced else None,
                             median=sorted(prices)[len(prices) // 2] if priced else None)
@@ -54,15 +54,15 @@ def test_the_score_is_60_percent_price_risk_and_40_percent_description_risk():
     assert a.description_reason == "Because."
 
 
-def test_the_value_comes_from_the_price_then_from_the_related_items_then_from_a_typical_item():
+def test_the_value_comes_from_the_price_then_from_a_typical_item():
     lv = an_lv(item("a", "similar", quantity=10, prices=(20.0,)),             # 200 by its price
-               item("b", "reference", quantity=2, prices=(100.0, 300.0, 200.0)),  # 2 x the middle price 200 = 400
+               item("b", "reference", quantity=2, prices=(100.0, 300.0, 200.0)),  # 2 x its price, the middle 200 = 400
                item("c", "none", quantity=999))                                # nothing: the middle of 200 and 400
 
     assess(lv, None)
 
-    assert [(i.risk.value, i.risk.value_basis) for i in lv.items] == [(200.0, "price"), (400.0, "reference"), (300.0, "assumed")]
-    assert lv.risk_summary.basis == {"price": 1, "reference": 1, "assumed": 1} and lv.risk_summary.value == 900.0
+    assert [(i.risk.value, i.risk.value_basis) for i in lv.items] == [(200.0, "price"), (400.0, "price"), (300.0, "assumed")]
+    assert lv.risk_summary.basis == {"price": 2, "reference": 0, "assumed": 1} and lv.risk_summary.value == 900.0
 
 
 def test_the_lv_score_weighs_items_by_value_and_leaves_optional_items_out():
@@ -90,13 +90,13 @@ def test_identical_items_are_checked_once_and_an_unanswered_item_keeps_its_price
 
 def test_confidence_is_100_minus_the_score_with_a_price_and_0_without():
     lv = an_lv(item("a", "similar", quantity=10, prices=(10.0,)),  # value 100, risk 25
-               item("b", "reference", quantity=30, prices=(10.0,)),  # value 300, no price
+               item("b", "reference", quantity=30, prices=(10.0,)),  # value 300, risk 75
                item("c", "none"))                                    # typical value 200, no price
 
     assess(lv, None)
 
-    assert [i.risk.confidence for i in lv.items] == [75, 0, 0]
-    assert lv.risk_summary.confidence == 12  # 100 x 75 / (100 + 300 + 200) = 12.5, and Python rounds half to even
+    assert [i.risk.confidence for i in lv.items] == [75, 25, 0]
+    assert lv.risk_summary.confidence == 25  # (100 x 75 + 300 x 25) / (100 + 300 + 200)
 
 
 def test_a_comment_with_a_price_gives_confidence_100_and_keeps_the_checked_description():
