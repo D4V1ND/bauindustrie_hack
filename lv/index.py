@@ -34,11 +34,13 @@ WEIGHTS = {"short": 0.5, "comments": 0.3, "long": 0.2}  # short text first, comm
 LONG_CHARS = 1500  # characters of the long text that are embedded: material, size and scope come first
 RRF_K = 60  # reciprocal rank fusion of the word ranking and the meaning ranking, as in lv.match
 DEPTH = 40  # each ranking offers its best 40 before they are merged
+BEAT = 30  # seconds: a running build touches its .building marker this often
+STALE = 120  # seconds: a marker not touched for this long was left by a build that died
 # Voyage's limits without a payment method: 3 calls and 10,000 tokens a minute. Raise both in .env once a payment
 # method is added (VOYAGE_RPM, VOYAGE_TPM), and indexing gets much faster.
 CALL_TOKENS = 8000  # estimated tokens per Voyage call
 CHARS_PER_TOKEN = 3  # a cautious estimate for German LV text
-EMBED_CACHE = Path(__file__).resolve().parent.parent / "data" / "embeddings" / f"{ai.EMBED_MODEL}-rag.json"
+EMBED_CACHE = ai.EMBED_FILE.with_name(f"{ai.EMBED_MODEL}-rag.json")  # under LV_DATA, like the step 3 vectors
 # Question words that say nothing about the item; without this "Preis pro m3" finds "Pumpe ... pro h".
 STOP = set("""was wie wo wer welche welcher welches welchen kostet kosten gekostet kostete preis preise preisspanne
 pro je fur für mit und oder in im von vom zu zum zur ist sind war waren wir haben hatten habe hat schon bisher
@@ -115,6 +117,13 @@ def build(lv: LV, data: Path, source: str, embed: Embed | None = None, say: Call
     folder.mkdir(parents=True, exist_ok=True)
     marker = folder / f"{lv.project}.building"
     marker.write_text(str(os.getpid()))
+    done = threading.Event()
+
+    def touch() -> None:  # keeps the marker fresh, so state() can tell a running build from a dead one
+        while not done.wait(BEAT):
+            os.utime(marker)
+    beat = threading.Thread(target=touch, daemon=True)
+    beat.start()
     try:
         made = cards(lv, source)
         if embed:
@@ -133,6 +142,8 @@ def build(lv: LV, data: Path, source: str, embed: Embed | None = None, say: Call
         _write(folder / f"{lv.project}.json", index.model_dump_json())
         return index
     finally:
+        done.set()
+        beat.join()
         marker.unlink(missing_ok=True)
 
 
@@ -162,7 +173,8 @@ def _quietly(texts: list[str]) -> None:
 
 def state(data: Path, project: str, source: str) -> Literal["ready", "indexing", "stale", "missing"]:
     folder = data / "index"
-    if (folder / f"{project}.building").exists():
+    marker = folder / f"{project}.building"
+    if marker.exists() and time.time() - marker.stat().st_mtime < STALE:  # an older one: its build died
         return "indexing"
     path = folder / f"{project}.json"
     if not path.exists():

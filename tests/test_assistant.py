@@ -1,5 +1,7 @@
 """The assistant's index, tools, tabs and waiting rule, without Claude or Voyage: the model is a scripted fake."""
 import json
+import os
+import time
 from types import SimpleNamespace
 
 import pytest
@@ -101,6 +103,19 @@ def test_bidder_questions_and_memory_are_saved_and_writes_wait_for_the_run(data)
     busy = assistant.Session(data, tab, running=lambda p: True)
     with pytest.raises(assistant.ToolError, match="running"):
         busy.save_comment("01.0010", "x", None, False)
+
+
+def test_a_dead_build_does_not_block_and_the_library_must_be_indexed_too(data):
+    marker = data / "index" / "P1.building"
+    marker.write_text("12345")
+    assert index.state(data, "P1", "library") == "indexing"  # a build that touches its marker is running
+    old = time.time() - index.STALE - 1
+    os.utime(marker, (old, old))
+    assert index.state(data, "P1", "library") == "ready"  # untouched for 2 minutes: its build died
+    (data / "index" / "P1.json").unlink()
+    started = []
+    ready = assistant.readiness(data, "H1", lambda p: None, lambda p, source: started.append((p, source)))
+    assert ready.state == "indexing" and "P1" in ready.message and started == [("P1", "library")]
 
 
 @pytest.fixture

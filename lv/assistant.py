@@ -184,30 +184,32 @@ class Readiness(BaseModel):
 def readiness(data: Path, project: str | None, run_state: Callable[[str], str | None],
               start_index: Callable[[str, str], None]) -> Readiness:
     """Whether the assistant may answer for this tab. While the tender's run is going (extraction, pricing,
-    indexing), it may not. An index that is missing or older than its result file is built in the background."""
+    indexing), it may not; nor while the tender or a library project has no index yet, because a search would miss
+    them. An index that is missing or older than its result file is built in the background."""
+    def built(name: str, source: str) -> bool:
+        found = index.state(data, name, source)
+        if found in ("missing", "stale"):
+            start_index(name, source)
+        return found == "ready"
+
     library = sorted(path.stem for path in (data / "library").glob("*.json"))
-    for name in library:
-        if index.state(data, name, "library") in ("missing", "stale"):
-            start_index(name, "library")
-    if project is None:
-        return Readiness(state="ready", message="", library=library)
-    run = run_state(project)
-    if run == "running":
-        return Readiness(state="extracting", library=library, message=(
-            f"Die Extraktion von {project} läuft noch. Ich kann Fragen zu diesem LV beantworten, sobald sie fertig "
-            "und alles für mich indexiert ist. Bitte warte, bis die Extraktion abgeschlossen ist."))
-    if not (data / "out" / f"{project}.json").exists():
-        return Readiness(state="failed" if run == "failed" else "missing", library=library, message=(
-            f"Für {project} gibt es noch kein Ergebnis" + (", die letzte Extraktion ist fehlgeschlagen." if run ==
-                                                            "failed" else ". Lade zuerst ein LV hoch.")))
-    built = index.state(data, project, "tender")
-    if built in ("missing", "stale"):
-        start_index(project, "tender")
-        built = "indexing"
-    if built == "indexing":
+    waiting = [name for name in library if not built(name, "library")]
+    if project is not None:
+        run = run_state(project)
+        if run == "running":
+            return Readiness(state="extracting", library=library, message=(
+                f"Die Extraktion von {project} läuft noch. Ich kann Fragen zu diesem LV beantworten, sobald sie "
+                "fertig und alles für mich indexiert ist. Bitte warte, bis die Extraktion abgeschlossen ist."))
+        if not (data / "out" / f"{project}.json").exists():
+            return Readiness(state="failed" if run == "failed" else "missing", library=library, message=(
+                f"Für {project} gibt es noch kein Ergebnis" + (", die letzte Extraktion ist fehlgeschlagen." if run ==
+                                                                "failed" else ". Lade zuerst ein LV hoch.")))
+        if not built(project, "tender"):
+            waiting.insert(0, project)
+    if waiting:
         return Readiness(state="indexing", library=library, message=(
-            f"Die Positionen von {project} werden gerade für mich indexiert. Bitte warte einen Moment, bis das "
-            "fertig ist."))
+            f"Die Positionen von {', '.join(waiting)} werden gerade für mich indexiert. Bitte warte einen Moment, "
+            "bis das fertig ist."))
     return Readiness(state="ready", message="", library=library)
 
 
