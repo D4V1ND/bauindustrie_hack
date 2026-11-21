@@ -966,7 +966,7 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .lv-split .lv-bar .tools{padding:8px 10px;justify-content:space-between;flex-wrap:nowrap}
 .lv-split .lv-bar .search{flex:1;width:auto;min-width:120px}
 .lv-split .lv-bar .vsep{display:none}
-.lv-split .lv-grid{grid-template-columns:22px 40px minmax(0,1fr) 118px 96px 32px;gap:10px;padding:0 12px}
+.lv-split .lv-grid{grid-template-columns:22px 52px minmax(0,1fr) 118px 96px 32px;gap:10px;padding:0 12px}
 .lv-split .lv-r{padding-top:12px;padding-bottom:12px}
 .lv-split .lv-r.hot{background:var(--signal-bg)}
 .thl{display:flex;align-items:center;gap:6px}.thl i{font-style:normal;color:var(--line-2)}
@@ -1034,6 +1034,12 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .confirm.need .cbadge{color:var(--bad)}
 .npn{font-weight:500;color:var(--bad)}
 .plan-lg .lgt{margin-right:2px}
+
+.lv-split .lv-main,.lv-split .lv-bar,.lv-split .lv-bar .filters,.lv-split .lv-bar .tools{min-width:0}
+.lv-split .lv-bar .filters{scrollbar-width:none}
+.lv-split .lv-bar .filters::-webkit-scrollbar{display:none}
+.lv-split .lv-bar .pill{padding:0 9px}
+.lv-split .lv-bar .tools{gap:8px}
 </style>
 </head>
 <body>
@@ -1498,7 +1504,7 @@ function vTable(d) {
     var on = S.sort.k === k;
     return '<span role="columnheader" aria-sort="' + (on ? (S.sort.d < 0 ? 'descending' : 'ascending') : 'none') + '"' + (right ? ' style="text-align:right"' : '') + '><button class="sort' + (on ? ' on' : '') + '" data-act="sort" data-v="' + k + '">' + sortDef[k] + (on ? ' <b>' + (S.sort.d < 0 ? '↓' : '↑') + '</b>' : '') + '</button></span>';
   };
-  var filters = [['all', 'Alle'], ['noprice', 'Ohne Preis'], ['low', 'Konfidenz < 50 %'], ['review', 'Zu prüfen'], ['cost', 'Kostentreiber 80 %'], ['bundle', 'Bündelbar']];
+  var filters = [['all', 'Alle'], ['noprice', 'Ohne Preis'], ['low', 'Konf. < 50 %'], ['review', 'Zu prüfen'], ['cost', 'Kostentreiber'], ['bundle', 'Bündelbar']];
   var allPicked = d.rows.length > 0 && d.rows.every(function (r) { return S.picked[r.oz]; });
   var body = '', isAll = S.scope === 'all', vis = isAll ? d.rows.slice(0, S.lvLimit) : d.rows, genN = d.full.length - d.all.length;
   if (S.group) {
