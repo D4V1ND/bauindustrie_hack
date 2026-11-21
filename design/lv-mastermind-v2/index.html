@@ -127,7 +127,7 @@ svg.i{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-widt
 
 /* ---------- layout ---------- */
 main{max-width:1360px;margin:0 auto;padding:36px 32px 120px}
-.hero{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap}
+.hero{position:relative;z-index:40;display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap}
 .eyebrow{display:flex;gap:.9rem;align-items:center;flex-wrap:wrap;color:var(--ink-3)}
 .eyebrow .num{color:var(--ink)}
 h1{margin:12px 0 0;font-size:clamp(2rem,4.2vw,3.3rem);line-height:1.02;font-weight:300;letter-spacing:-.045em;text-wrap:balance}
@@ -255,7 +255,7 @@ h1{margin:12px 0 0;font-size:clamp(2rem,4.2vw,3.3rem);line-height:1.02;font-weig
 .lv-bar{display:flex;justify-content:space-between;align-items:center;gap:10px 16px;flex-wrap:wrap;padding:10px 12px;border:1px solid var(--line);border-bottom:0;background:var(--paper-2)}
 .lv-bar .filters,.lv-bar .tools{margin:0;gap:6px}
 .lv-bar .pill,.lv-bar .btn,.lv-bar .search,.lv-bar .ftag{height:32px}
-.lv-bar .search{width:220px;background:var(--card)}
+.lv-bar .search{width:180px;background:var(--card)}
 .lv-bar .seg{height:32px;padding:2px}
 .lv-bar .seg button{height:26px}
 .lv-bar .btn{padding:0 .75rem;font-size:.64rem}
@@ -402,6 +402,40 @@ h1{margin:12px 0 0;font-size:clamp(2rem,4.2vw,3.3rem);line-height:1.02;font-weig
 .mi .mt{flex:1;min-width:0}
 .mi small{display:block;font-size:11.5px;color:var(--ink-3)}
 .mi .chk{color:var(--signal);display:flex}
+.menu.left{left:0;right:auto;transform-origin:top left}
+.ffpop{width:250px;max-width:calc(100vw - 32px);padding:0}
+.ffsearch{display:flex;align-items:center;gap:8px;padding:0 10px;height:38px;border-bottom:1px solid var(--line);color:var(--ink-3)}
+.ffsearch input{all:unset;flex:1;min-width:0;font:400 13px/1 var(--sans);color:var(--ink)}
+.ffsearch input::placeholder{color:var(--ink-3)}
+.fflist{max-height:300px;overflow:auto;padding:4px}
+.ffopt .mono{font-size:11px}
+.ffback{color:var(--ink-3)}
+.ffsep{display:block;height:1px;background:var(--line);margin:4px -4px}
+.ffempty{margin:0;padding:18px 10px;text-align:center;font-size:12.5px;color:var(--ink-3)}
+.ffnote{margin:4px 10px 8px;font-size:11.5px;color:var(--ink-3)}
+.ffbox{width:14px;height:14px;border:1px solid var(--ink-3);display:flex;align-items:center;justify-content:center;flex:none;color:var(--signal)}
+.ffbox svg{width:12px;height:12px}
+.mi.on .ffbox{border-color:var(--ink)}
+.ffopt:not(.on) .ffbox{opacity:0}
+.ffopt:hover .ffbox,.ffopt:focus-visible .ffbox{opacity:1}
+.ffdot{width:8px;height:8px;border-radius:50%;flex:none;display:inline-block}
+.ffic{display:flex;flex:none}
+.ffic svg,.fc-k svg,.fc-add svg,.ffback svg,.fc-b .ffic svg{width:14px;height:14px}
+.ffchip{display:inline-flex;align-items:stretch;gap:1px;height:26px;font:400 12px/1 var(--sans)}
+.ffchip>*{display:flex;align-items:center}
+.fc-k{gap:6px;padding:0 8px;background:var(--paper-3);color:var(--ink)}
+.fc-b{all:unset;box-sizing:border-box;height:100%;display:flex;align-items:center;gap:6px;padding:0 8px;background:var(--paper-3);color:var(--ink-3);cursor:pointer;transition:color .15s,background .15s;white-space:nowrap}
+.fc-b:hover,.fc-b[aria-expanded="true"]{color:var(--ink);background:var(--paper-2)}
+.fc-icons{display:flex;align-items:center;gap:2px}
+.fc-icons:empty{display:none}
+.fc-x{all:unset;box-sizing:border-box;width:26px;justify-content:center;background:var(--paper-3);color:var(--ink-3);cursor:pointer;font-size:14px}
+.fc-x:hover{color:var(--ink);background:var(--paper-2)}
+.fc-clear,.fc-add{all:unset;box-sizing:border-box;height:26px;display:inline-flex;align-items:center;gap:6px;padding:0 9px;font:400 12px/1 var(--sans);cursor:pointer;color:var(--ink-3);transition:color .15s,background .15s}
+.fc-clear{border:1px solid var(--line)}
+.fc-clear:hover,.fc-add:hover,.fc-add[aria-expanded="true"]{color:var(--ink);background:var(--paper-2)}
+.fc-add.icon{width:26px;padding:0;justify-content:center}
+.ffbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:8px 12px;border:1px solid var(--line);border-top:0;background:var(--card)}
+.lv-bar .btn .cnt{margin-left:6px;min-width:16px;height:16px;padding:0 4px;display:inline-flex;align-items:center;justify-content:center;background:var(--paper);color:var(--ink)}
 .mi+.mi.none{border-top:1px solid var(--line);margin-top:4px;padding-top:10px}
 .own:hover{background:var(--paper-2)}
 .rl{display:flex;align-items:center;gap:7px;margin-top:12px;font-size:12.5px}
@@ -1021,8 +1055,8 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .lv-split .lv-bar{flex-direction:column;align-items:stretch;gap:0;padding:0}
 .lv-split .lv-bar .filters{padding:0 6px;border-bottom:1px solid var(--line);overflow-x:auto;flex-wrap:nowrap}
 .lv-split .lv-bar .pill{min-height:46px;padding:0 10px;white-space:nowrap}
-.lv-split .lv-bar .tools{padding:8px 10px;justify-content:space-between;flex-wrap:nowrap}
-.lv-split .lv-bar .search{flex:1;width:auto;min-width:120px}
+.lv-split .lv-bar .tools{padding:8px 10px;justify-content:flex-start;flex-wrap:nowrap}
+.lv-split .lv-bar .search{flex:0 1 180px;width:auto;min-width:120px}
 .lv-split .lv-bar .vsep{display:none}
 .lv-split .lv-grid{grid-template-columns:22px 52px minmax(0,1fr) 118px 96px 32px;gap:10px;padding:0 12px}
 .lv-split .lv-r{padding-top:12px;padding-bottom:12px}
@@ -1456,7 +1490,7 @@ function toPos(it) {
   var mode = MODE[m] || 'offen';
   if (mode !== 'offen' && conf < 50) mode = 'unsicher';
   return { oz: it.oz, kurz: it.short_text || it.oz, lang: it.long_text || it.short_text || '', menge: it.quantity || 0, einheit: it.unit || '', gewerk: gwName(it),
-    ep: own != null ? own : med, aiEp: med, srvManual: own != null, risk: rk.score || 0, conf: conf, mode: mode, why: why, method: m, opt: it.kind === 'optional', owner: '', val: rk.value || 0, cmts: it.comments || [],
+    ep: own != null ? own : med, aiEp: med, srvManual: own != null, risk: rk.score || 0, conf: conf, mode: mode, why: why, method: m, typ: it.item_type || '', planSt: it.plan ? it.plan.status || '' : '', opt: it.kind === 'optional', owner: '', val: rk.value || 0, cmts: it.comments || [],
     lo: own != null ? own : pr.min != null ? Math.min(pr.min, med) : med, hi: own != null ? own : pr.max != null ? Math.max(pr.max, med) : med, sg: own == null && !med ? suggest(pr) : null };
 }
 function toRich(it, extra) {
@@ -1515,7 +1549,7 @@ function loadLV(lv, st) {
 function slug(s) { return String(s).replace(/[^\wäöüÄÖÜß-]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 60) || 'LV'; }
 
 // ================= state =================
-var S = { tab: 'home', filter: 'all', sel: null, q: '', sort: { k: 'conf', d: 1 }, density: 'compact', group: false, gewerk: '', owner: '',
+var S = { tab: 'home', filter: 'all', sel: null, q: '', sort: { k: 'conf', d: 1 }, density: 'compact', group: false, ff: [], ffView: null, ffQ: '', focusFf: false, owner: '',
   picked: {}, owners: {}, confirmed: {}, bundled: {}, collapsed: {}, toast: null, dtab: '', sugg: {}, editEp: false, epDraft: '', eps: {},
   accepted: {}, justOk: {}, comments: {}, cmt: '', notes: {}, noteDraft: '', compose: null, seqs: {}, chats: {}, draft: '', thinking: false,
   preview: null, fx: null, holding: false, analyzing: false, analyzed: 'heute, 08:47 · vor 12 Min.', flashEp: 0, focusEp: false,
@@ -1570,6 +1604,67 @@ function particles(cls, n, dist) {
 // ================= derived data =================
 function ownerOf(r) { return S.owners[r.oz] !== undefined ? S.owners[r.oz] : (r.owner || ''); }
 function cmtN(oz) { var rr = D.rich[oz] || {}; return (rr.comments || []).length + (S.comments[oz] || []).length; }
+// ================= filter menu =================
+// Each facet: its label, the value a row has, and the names of known values (in this order; others follow A to Z).
+// Options inside a facet are alternatives (OR); different facets narrow each other (AND).
+var FACETS = [
+  { k: 'gewerk', label: 'Gewerk', icon: 'hat', of: function (r) { return r.gewerk; } },
+  { k: 'quelle', label: 'Preisquelle', icon: 'tag', of: function (r) { return r.manual ? 'own' : r.method || ''; },
+    names: { copied: '1:1 aus Alt-LV', similar: 'Gleichwertige Position', adjusted: 'Interpoliert', reference: 'Verwandte Positionen (Median)', none: 'Keine Referenz', own: 'Eigener Preis' },
+    dots: { copied: 'var(--ok)', similar: 'var(--ok)', adjusted: 'var(--signal)', reference: 'var(--warn)', none: 'var(--bad)', own: 'var(--ink)' } },
+  { k: 'status', label: 'Status', icon: 'dash', of: function (r) { return S.confirmed[r.oz] ? 'ok' : r.gen && !r.manual ? 'auto' : !(r.ep > 0) ? 'noprice' : 'open'; },
+    names: { open: 'Offen', noprice: 'Offen · ohne Preis', ok: 'Bestätigt', auto: 'Automatisch übernommen' },
+    icons: { open: 'circle', noprice: 'dash', ok: 'check', auto: 'check' }, tints: { open: 'var(--ink)', noprice: 'var(--bad)', ok: 'var(--ok)', auto: 'var(--ink-3)' } },
+  { k: 'typ', label: 'Kategorie', icon: 'box', of: function (r) { return r.typ || ''; } },
+  { k: 'konf', label: 'Konfidenz', icon: 'gauge', of: function (r) { return !(r.ep > 0) ? '' : r.conf >= 75 ? 'hi' : r.conf >= 50 ? 'mid' : 'lo'; },
+    names: { lo: 'Niedrig · unter 50 %', mid: 'Mittel · 50–74 %', hi: 'Hoch · ab 75 %' }, dots: { lo: 'var(--bad)', mid: 'var(--warn)', hi: 'var(--ok)' } },
+  { k: 'hint', label: 'Hinweis', icon: 'flag', of: function (r) { return [r.isDriver ? 'driver' : '', r.why.indexOf('Bündelbar') === 0 || S.bundled[r.oz] ? 'bundle' : '']; },
+    names: { driver: 'Kostentreiber · 80 % des Volumens', bundle: 'Bündelbar' } },
+  { k: 'plan', label: 'Bauplan', icon: 'plan', of: function (r) { return r.planSt || ''; },
+    names: { differs: 'Menge weicht ab', not_in_plan: 'Nicht im Plan', units_differ: 'Einheit weicht ab', ok_unstable: 'Zählung schwankt', ok: 'Stimmt mit Plan', not_checked: 'Nicht geprüft' },
+    dots: { differs: 'var(--bad)', not_in_plan: 'var(--warn)', units_differ: 'var(--warn)', ok_unstable: 'var(--warn)', ok: 'var(--ok)', not_checked: 'var(--ink-3)' } }
+];
+var FI = {  // small line icons for the filter bar (lucide shapes)
+  filter: '<svg class="i" viewBox="0 0 24 24"><path d="M3 6h18M7 12h10M10 18h4"/></svg>',
+  hat: '<svg class="i" viewBox="0 0 24 24"><path d="M3 18h18M5 18v-3a7 7 0 0 1 14 0v3M10 8V5h4v3"/></svg>',
+  tag: '<svg class="i" viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8" r="1.2"/></svg>',
+  dash: '<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" stroke-dasharray="3.5 3"/></svg>',
+  circle: '<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/></svg>',
+  check: '<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>',
+  box: '<svg class="i" viewBox="0 0 24 24"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/></svg>',
+  plan: '<svg class="i" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17"/><path d="M3.5 12h8v8.5M11.5 3.5V8M15 12h5.5"/></svg>',
+  back: '<svg class="i" viewBox="0 0 24 24"><path d="m14 6-6 6 6 6"/></svg>',
+  gauge: '<svg class="i" viewBox="0 0 24 24"><path d="M4 17a8 8 0 1 1 16 0"/><path d="m12 17 4-5"/></svg>',
+  flag: '<svg class="i" viewBox="0 0 24 24"><path d="M5 21V4h11l-2 4 2 4H5"/></svg>'
+};
+function facet(k) { return FACETS.filter(function (f) { return f.k === k; })[0]; }
+function ffName(f, v) { return (f.names && f.names[v]) || v; }
+function ffValIcon(f, v) {
+  if (f.dots) return '<i class="ffdot" style="background:' + (f.dots[v] || 'var(--ink-3)') + '"></i>';
+  if (f.icons) return '<span class="ffic" style="color:' + f.tints[v] + '">' + FI[f.icons[v]] + '</span>';
+  return '';
+}
+// S.ff: [{ id, k, not, vals }]. A filter keeps rows whose value is (or, with "not", is not) one of vals; all filters must hold.
+function ffPass(r, skipK) {
+  return (S.ff || []).every(function (x) {
+    if (x.k === skipK || !x.vals.length) return true;
+    var mine = ffVals(facet(x.k), r), hit = x.vals.some(function (v) { return mine.indexOf(v) >= 0; });
+    return x.not ? !hit : hit;
+  });
+}
+function ffVals(f, r) { return [].concat(f.of(r)).map(String).filter(Boolean); }
+function ffN() { return (S.ff || []).filter(function (x) { return x.vals.length; }).length; }
+function ffCounts(d, k) {  // option counts for facet k, given every other facet's filters
+  var f = facet(k), c = {};
+  d.pre.forEach(function (r) { if (!ffPass(r, k)) return; ffVals(f, r).forEach(function (v) { c[v] = (c[v] || 0) + 1; }); });
+  return c;
+}
+function ffOpts(d, k, q) {  // the facet's values, known ones in their order, then A to Z; filtered by the search text
+  var f = facet(k), c = ffCounts(d, k), known = Object.keys(f.names || {});
+  return Object.keys(c).sort(function (a, b) { var x = known.indexOf(a), y = known.indexOf(b); return x >= 0 || y >= 0 ? (x < 0 ? 99 : x) - (y < 0 ? 99 : y) : a.localeCompare(b, 'de'); })
+    .filter(function (v) { return !q || ffName(f, v).toLowerCase().indexOf(q) >= 0; }).map(function (v) { return { v: v, n: c[v] }; });
+}
+
 function derive() {
   var row = function (p, i, gen) {
     var ep = S.eps[p.oz] !== undefined ? S.eps[p.oz] : p.ep, mg = S.mg[p.oz] !== undefined ? S.mg[p.oz] : p.menge;
@@ -1586,14 +1681,16 @@ function derive() {
   dpool.slice().sort(function (a, b) { return b.gp - a.gp; }).forEach(function (r) { if (acc < 0.8 * dtot && r.gp > 0) { driver[r.oz] = true; acc += r.gp; } });
   var q = S.q.trim().toLowerCase();
   var base = (S.scope === 'all' ? full : all).filter(function (r) {
-    if (S.gewerk && r.gewerk !== S.gewerk) return false;
     if (S.owner && ownerOf(r) !== S.owner) return false;
-    if (q && (r.oz + ' ' + r.kurz + ' ' + r.lang + ' ' + r.gewerk).toLowerCase().indexOf(q) < 0) return false;
+    if (q && (r.oz + ' ' + r.kurz + ' ' + r.lang + ' ' + r.gewerk + ' ' + (r.typ || '')).toLowerCase().indexOf(q) < 0) return false;
     return true;
   });
+  full.forEach(function (r) { r.isDriver = !!driver[r.oz]; });
+  var pre = base;  // before the facets: the filter menu counts its options on this
+  base = base.filter(function (r) { return ffPass(r, ''); });
   var fdef = {
     all: function () { return true; },
-    noprice: function (r) { return r.conf === 0; },
+    noprice: function (r) { return !(r.ep > 0); },  // no price at all (a reference item's suggested price counts as a price)
     low: function (r) { return r.conf < 50; },
     review: function (r) { return !S.confirmed[r.oz] && r.mode !== 'übernommen'; },
     cost: function (r) { return !!driver[r.oz]; },
@@ -1603,7 +1700,7 @@ function derive() {
   var rows = base.filter(fdef[f]);
   var k = S.sort.k, d = S.sort.d;
   rows.sort(function (a, b) { var x = a[k], y = b[k]; return (typeof x === 'string' ? x.localeCompare(y, 'de') : x - y) * d; });
-  return { all: all, full: full, tot: tot, maxGp: maxGp, driver: driver, base: base, fdef: fdef, f: f, rows: rows };
+  return { all: all, full: full, tot: tot, maxGp: maxGp, driver: driver, base: base, pre: pre, fdef: fdef, f: f, rows: rows };
 }
 function lookup(key, d) {
   var p = d.all.find(function (x) { return x.oz === key; });
@@ -1639,8 +1736,65 @@ function vHero(d) {
     '<h1>' + esc(P.name) + '</h1></div>' +
     '<div class="hero-actions">' +
       '<button class="btn btn-quiet btn-rep" data-act="report" data-v="1">' + IC.doc + 'Konfidenzbericht</button>' +
-      '<button class="btn btn-primary btn-export" data-act="export">' + IC.down + 'Export GAEB X84<span class="xsep"></span><span class="xamt">' + eur(Math.round(d.tot)) + '</span>' + IC.arrow + '</button>' +
+      '<div class="mw"><button class="btn btn-primary btn-export" data-act="menu" data-v="export" aria-haspopup="true" aria-expanded="' + (S.menu === 'export') + '">' + IC.down + 'Export<span class="xsep"></span><span class="xamt">' + eur(Math.round(d.tot)) + '</span>' + IC.chev + '</button>' +
+        (S.menu === 'export' ? '<div class="menu" role="menu" data-k="mexport"><div class="menu-h mono">Exportieren als</div>' +
+          '<button class="mi" role="menuitem" data-act="exportAs" data-v="gaeb"><span class="mt">GAEB X84<small>Angebot mit allen Preisen</small></span></button>' +
+          '<button class="mi" role="menuitem" data-act="exportAs" data-v="csv"><span class="mt">CSV kopieren<small>Die angezeigten Positionen, in die Zwischenablage</small></span></button></div>' : '') + '</div>' +
     '</div></div>';
+}
+
+function ffSearch(ph) {
+  return '<label class="ffsearch">' + IC.search + '<input id="ffq" data-in="ffQ" value="' + esc(S.ffQ || '') + '" placeholder="' + esc(ph) + '" autocomplete="off"></label>';
+}
+function vFilterChips(d) {
+  var q = (S.ffQ || '').trim().toLowerCase(), out = '';
+  if (!ffN()) return '';
+  (S.ff || []).forEach(function (x) {
+    if (!x.vals.length) return;
+    var f = facet(x.k), many = x.vals.length > 1, ops = many ? ['ist eine von', 'ist keine von'] : ['ist', 'ist nicht'];
+    var opM = 'ffop:' + x.id, valM = 'ffval:' + x.id;
+    out += '<div class="ffchip" data-k="fc' + x.id + '">' +
+      '<span class="fc-k">' + FI[f.icon] + f.label + '</span>' +
+      '<div class="mw"><button class="fc-b" data-act="ffMenu" data-v="' + opM + '" aria-haspopup="true" aria-expanded="' + (S.menu === opM) + '">' + ops[x.not ? 1 : 0] + '</button>' +
+        (S.menu === opM ? '<div class="menu left ffpop" role="menu" data-k="m' + opM + '">' + ops.map(function (o, i) {
+          return '<button class="mi' + ((i === 1) === !!x.not ? ' on' : '') + '" role="menuitemradio" aria-checked="' + ((i === 1) === !!x.not) + '" data-act="ffOp" data-id="' + x.id + '" data-v="' + i + '">' + o + '</button>'; }).join('') + '</div>' : '') + '</div>' +
+      '<div class="mw"><button class="fc-b" data-act="ffMenu" data-v="' + valM + '" aria-haspopup="true" aria-expanded="' + (S.menu === valM) + '"><span class="fc-icons">' + x.vals.slice(0, 3).map(function (v) { return ffValIcon(f, v); }).join('') + '</span>' +
+        (many ? x.vals.length + ' ausgewählt' : esc(ffName(f, x.vals[0]))) + '</button>' +
+        (S.menu === valM ? (function () {
+          var opts = ffOpts(d, x.k, q), sel = opts.filter(function (o) { return x.vals.indexOf(o.v) >= 0; }), rest = opts.filter(function (o) { return x.vals.indexOf(o.v) < 0; });
+          x.vals.forEach(function (v) { if (!sel.some(function (o) { return o.v === v; }) && (!q || ffName(f, v).toLowerCase().indexOf(q) >= 0)) sel.push({ v: v, n: 0 }); });
+          var item = function (o, on) { return '<button class="mi ffopt' + (on ? ' on' : '') + '" role="menuitemcheckbox" aria-checked="' + on + '" data-act="ffVal" data-id="' + x.id + '" data-v="' + esc(o.v) + '"><span class="ffbox">' + (on ? IC.tick : '') + '</span>' + ffValIcon(f, o.v) + '<span class="mt">' + esc(ffName(f, o.v)) + '</span><span class="mono faint">' + o.n + '</span></button>'; };
+          return '<div class="menu left ffpop" role="menu" data-k="m' + valM + '">' + ffSearch(f.label) + '<div class="fflist">' +
+            sel.map(function (o) { return item(o, true); }).join('') + (sel.length && rest.length ? '<i class="ffsep"></i>' : '') + rest.map(function (o) { return item(o, false); }).join('') +
+            (sel.length || rest.length ? '' : '<p class="ffempty">Keine Treffer</p>') + '</div></div>';
+        })() : '') + '</div>' +
+      '<button class="fc-x" data-act="ffRemove" data-v="' + x.id + '" aria-label="Filter ' + f.label + ' entfernen">×</button></div>';
+  });
+  out += '<button class="fc-clear" data-act="ffClear">Zurücksetzen</button>';
+  return '<div class="ffbar" data-k="ffbar">' + out + '</div>';
+}
+function vFilterAdd(d) {  // the "Filter" button: first the facet, then its value
+  var q = (S.ffQ || '').trim().toLowerCase(), n = ffN();
+  var open = S.menu === 'ffadd', view = open && S.ffView ? facet(S.ffView) : null, pop = '';
+  if (open) {
+    var body;
+    if (view) {
+      var opts = ffOpts(d, view.k, q), extra = '';
+      if (view.k === 'plan' && P.plan) {
+        var miss = (P.plan.findings || []).filter(function (x) { return x.kind === 'missing_in_lv'; }).length;
+        if (miss) extra = '<p class="ffnote">' + miss + (miss === 1 ? ' Bauteil im Plan fehlt' : ' Bauteile im Plan fehlen') + ' im LV · im Bauplan markiert</p>';
+      }
+      body = '<button class="mi ffback" data-act="ffView" data-v="">' + FI.back + '<span class="mt">' + view.label + '</span></button>' +
+        opts.map(function (o) { return '<button class="mi ffopt" data-act="ffAdd" data-v="' + esc(o.v) + '">' + ffValIcon(view, o.v) + '<span class="mt">' + esc(ffName(view, o.v)) + '</span><span class="mono faint">' + o.n + '</span></button>'; }).join('') +
+        (opts.length ? '' : '<p class="ffempty">Keine Treffer</p>') + extra;
+    } else {
+      var fs = FACETS.filter(function (f) { return ffOpts(d, f.k, '').length && (!q || f.label.toLowerCase().indexOf(q) >= 0); });
+      body = fs.map(function (f) { return '<button class="mi ffopt" data-act="ffView" data-v="' + f.k + '"><span class="ffic">' + FI[f.icon] + '</span><span class="mt">' + f.label + '</span></button>'; }).join('') +
+        (fs.length ? '' : '<p class="ffempty">Keine Treffer</p>');
+    }
+    pop = '<div class="menu ffpop" role="menu" data-k="mffadd' + (view ? view.k : '') + '">' + ffSearch(view ? view.label + '…' : 'Filter…') + '<div class="fflist">' + body + '</div></div>';
+  }
+  return '<div class="mw"><button class="btn btn-quiet' + (n ? ' on' : '') + '" data-act="ffMenu" data-v="ffadd" aria-haspopup="true" aria-expanded="' + open + '" aria-label="Filter hinzufügen">' + FI.filter + 'Filter' + (n ? '<span class="cnt">' + n + '</span>' : '') + '</button>' + pop + '</div>';
 }
 
 function vMenu(id, cur, up) {
@@ -1840,21 +1994,14 @@ function vTable(d) {
   var sum = d.rows.reduce(function (a, r) { return a + r.gp; }, 0);
   var okN = d.all.filter(function (r) { return S.confirmed[r.oz]; }).length;
   return '<section aria-label="Leistungsverzeichnis" class="rise" style="--d:380ms">' +
-    '<div class="lv-head"><div><div class="mono faint"><span style="color:var(--ink)">03</span> Leistungsverzeichnis</div><div class="lv-title">' + (isAll ? fmt(d.rows.length) + ' Positionen <small>· gesamtes LV</small>' : d.rows.length + ' wichtige Positionen <small>· von ' + fmt(d.full.length) + '</small>') + '</div>' +
+    '<div class="lv-head"><div><div class="mono faint"><span style="color:var(--ink)">03</span> Leistungsverzeichnis</div>' +
       '</div>' +
-      '<div class="lv-stats">' + (function () { var sf = safeRows(d); return sf.length ? '<button class="btn btn-primary bulksafe" data-act="bulkSafe" title="Konfidenz ab 75 % und höchstens 2 % des LV-Volumens">' + IC.tick + (sf.length === 1 ? '1 sicheren Preis übernehmen' : sf.length + ' sichere Preise übernehmen') + '</button>' : ''; })() + '<div class="lv-stat"><span class="mono">Bestätigt</span><b>' + okN + '<small> / ' + d.all.length + '</small></b><i class="lv-meter"><i style="width:' + (okN / d.all.length * 100) + '%"></i></i></div>' +
-        '<div class="lv-stat"><span class="mono">Summe angezeigt</span><b>' + eur(sum) + '</b><i class="lv-meter"><i style="width:' + Math.min(100, sum / d.tot * 100) + '%;background:var(--ink)"></i></i></div></div></div>' +
-    vBulkNote(d) + '<div class="lv-split' + (planShown() ? '' : ' plan-off') + '">' + (planShown() ? vPlan(d) : '') + '<div class="lv-main"><div class="lv-bar"><div class="filters" role="group" aria-label="Filter">' + filters.map(function (x) {
-      var on = d.f === x[0];
-      return '<button class="pill' + (on ? ' on' : '') + '" aria-pressed="' + on + '" data-act="filter" data-v="' + x[0] + '">' + x[1] + '<span class="cnt">' + d.base.filter(d.fdef[x[0]]).length + '</span></button>';
-    }).join('') +
-      (S.gewerk ? '<span class="ftag" data-k="fg">Gewerk: ' + esc(S.gewerk) + '<button data-act="gewerk" data-v="" aria-label="Gewerk-Filter entfernen">×</button></span>' : '') +
-    '</div><div class="tools"><label class="search">' + IC.search + '<span class="sr">Positionen filtern</span><input id="q-lv" type="search" data-in="q" value="' + esc(S.q) + '" placeholder="OZ, Text oder Gewerk…"></label>' +
+      '<div class="lv-stats">' + (function () { var sf = safeRows(d); return sf.length ? '<button class="btn btn-primary bulksafe" data-act="bulkSafe" title="Konfidenz ab 75 % und höchstens 2 % des LV-Volumens">' + IC.tick + (sf.length === 1 ? '1 sicheren Preis übernehmen' : sf.length + ' sichere Preise übernehmen') + '</button>' : ''; })() + '<div class="lv-stat"><span class="mono">Bestätigt</span><b>' + okN + '<small> / ' + d.all.length + '</small></b><i class="lv-meter"><i style="width:' + (okN / d.all.length * 100) + '%"></i></i></div></div></div>' +
+    vBulkNote(d) + '<div class="lv-split' + (planShown() ? '' : ' plan-off') + '">' + (planShown() ? vPlan(d) : '') + '<div class="lv-main"><div class="lv-bar"><div class="tools"><label class="search">' + IC.search + '<span class="sr">Positionen filtern</span><input id="q-lv" type="search" data-in="q" value="' + esc(S.q) + '" placeholder="Suchen…" title="OZ, Text, Gewerk oder Kategorie"></label>' + vFilterAdd(d) +
         '<span class="vsep" aria-hidden="true"></span>' +
-        '<div class="seg" role="group" aria-label="Darstellung"><button class="' + (S.density === 'compact' ? 'on' : '') + '" data-act="density" data-v="compact" aria-pressed="' + (S.density === 'compact') + '">Kompakt</button><button class="' + (S.density === 'details' ? 'on' : '') + '" data-act="density" data-v="details" aria-pressed="' + (S.density === 'details') + '">Langtext</button></div>' +
+        '<div class="seg" role="group" aria-label="Darstellung"><button class="' + (S.density === 'compact' ? 'on' : '') + '" data-act="density" data-v="compact" aria-pressed="' + (S.density === 'compact') + '">Kompakt</button><button class="' + (S.density === 'details' ? 'on' : '') + '" data-act="density" data-v="details" aria-pressed="' + (S.density === 'details') + '">Full</button></div>' +
         (hasPlan() ? '<button class="btn btn-quiet' + (planShown() ? ' on' : '') + '" data-act="planToggle" aria-pressed="' + planShown() + '" title="' + (planShown() ? 'Bauplan ausblenden' : 'Bauplan einblenden') + '">' + IC.panel + 'Bauplan</button>' : '') +
-        '<button class="btn btn-quiet' + (S.group ? ' on' : '') + '" data-act="group" aria-pressed="' + S.group + '">' + IC.layers + 'Nach Gewerk</button>' +
-        '<button class="btn btn-quiet" data-act="csv" title="CSV kopieren">' + IC.copy + 'CSV</button></div></div>' +
+        '</div></div>' + vFilterChips(d) +
     '<div class="tbl"><div role="table" aria-label="Positionen des Leistungsverzeichnisses">' +
       '<div class="lv-grid th mono" role="row"><span role="columnheader"><input type="checkbox" class="cb' + (!allPicked && d.rows.some(function (r) { return S.picked[r.oz]; }) ? ' some' : '') + '"' + (allPicked ? ' checked' : '') + ' data-act="pickAll" aria-label="Alle angezeigten Positionen auswählen"></span>' +
         th('conf') + '<span role="columnheader" class="thl">' + th('oz').replace(/^<span[^>]*>|<\/span>$/g, '') + '<i>/</i>' + th('kurz').replace(/^<span[^>]*>|<\/span>$/g, '') + '</span>' + th('ep', 1) + th('gp', 1) + '<span role="columnheader" style="text-align:center">OK</span></div>' +
@@ -1978,8 +2125,9 @@ function vDrawer(d) {
   var devWarn = !noAi && (S.editEp ? (dd !== null && Math.abs(dd) > 10) : Math.abs(md) > 10);
   var nextOpen = nav.list.slice(nav.idx + 1).find(function (r) { return !S.confirmed[r.oz]; });
 
+  // No price and no suggestion: nothing to accept, so no card (the price field's "Preis eingeben" stays).
   var cta = p.np
-    ? '<button class="confirm need" data-k="ctanp" data-act="startEdit"><span class="cbadge">' + IC.pen + '</span><span class="cl"><b>' + (p.sg ? 'Vorschlag prüfen' : 'Erst Preis eingeben') + '</b><small>' + (p.sg ? 'Niedrige Konfidenz · Vorschlag übernehmen oder eigenen Preis eingeben' : 'Keine passende Position in den alten LVs') + '</small></span><span class="ca"><small>Menge</small><b>' + qty(p.menge) + ' ' + p.einheit + '</b></span></button>'
+    ? (p.sg ? '<button class="confirm need" data-k="ctanp" data-act="startEdit"><span class="cbadge">' + IC.pen + '</span><span class="cl"><b>Vorschlag prüfen</b><small>Niedrige Konfidenz · Vorschlag übernehmen oder eigenen Preis eingeben</small></span><span class="ca"><small>Menge</small><b>' + qty(p.menge) + ' ' + p.einheit + '</b></span></button>' : '')
     : p.gen
     ? '<div class="okline auto" data-k="okauto">' + IC.tick + (p.manual ? 'Eigener Preis gespeichert · zählt direkt ins Angebot' : '1:1 aus Alt-LV · keine Bestätigung nötig') + (p.manual ? '<button class="lnk" data-act="resetEp">Rückgängig</button>' : '') + '</div>'
     : ok
@@ -2086,7 +2234,7 @@ function vDrawer(d) {
         (S.thinking ? '<div class="cp-m agent" data-k="cth"><span class="agent-ic">' + IC.star + '</span><div class="bub thinking"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>' : '') +
       '</div></section></div></div>' +
     '</div></div>' +
-    '<div class="dw-cta" data-k="cta-bar">' + (devWarn && !ok && !p.gen && !noAi ? '<p class="hint" data-k="hint">' + IC.warn + '<span>Mehr als 10 % neben der Empfehlung. Gedrückt halten, um den eigenen Preis zu bestätigen.</span></p>' : '') + cta + '</div>' +
+    (cta ? '<div class="dw-cta" data-k="cta-bar">' + (devWarn && !ok && !p.gen && !noAi ? '<p class="hint" data-k="hint">' + IC.warn + '<span>Mehr als 10 % neben der Empfehlung. Gedrückt halten, um den eigenen Preis zu bestätigen.</span></p>' : '') + cta + '</div>' : '') +
     '<footer class="ask">' +
       '<div class="askin"><span style="color:var(--signal);display:flex">' + IC.star + '</span><label style="flex:1;display:flex"><span class="sr">Frage an den Agenten</span><input data-in="draft" data-enter="sendDraft" value="' + esc(S.draft) + '" placeholder="Agent fragen zu ' + p.oz + '…"></label><button class="send" data-act="sendDraft" aria-label="Senden">' + IC.arrow + '</button></div></footer>' +
   '</aside>';
@@ -2172,6 +2320,7 @@ function render() {
   var tab = root.querySelector('.tab.on'), ind = root.querySelector('.tab-ind');
   if (tab && ind) { ind.style.left = tab.offsetLeft + 'px'; ind.style.width = tab.offsetWidth + 'px'; }
   var lg = root.querySelector('.cp-log'); if (lg) lg.scrollTop = lg.scrollHeight;
+  if (S.focusFf) { S.focusFf = false; var fq = document.getElementById('ffq'); if (fq) fq.focus(); }
   if (S.focusEp) { S.focusEp = false; var e = document.getElementById('epin'); if (e) { e.focus(); e.select(); } }
   if (first) { first = false; countUp(); }
   if (P.live) store('lvm-ok-' + P.id, S.confirmed);
@@ -2396,7 +2545,28 @@ var A = {
   },
   sort: function (ds) { var on = S.sort.k === ds.v; set({ sort: { k: ds.v, d: on ? -S.sort.d : ((ds.v === 'oz' || ds.v === 'kurz' || ds.v === 'conf') ? 1 : -1) } }); },
   filter: function (ds) { set({ filter: ds.v }); },
-  gewerk: function (ds) { set({ gewerk: ds.v }); },
+  gewerk: function (ds) { var ff = (S.ff || []).filter(function (x) { return x.k !== 'gewerk'; }); if (ds.v) ff.push({ id: 'g' + Date.now(), k: 'gewerk', not: false, vals: [ds.v] }); set({ ff: ff, lvLimit: 60 }); },
+  ffMenu: function (ds) { var o = S.menu === ds.v; set({ menu: o ? null : ds.v, ffView: null, ffQ: '', focusFf: !o }); },
+  ffView: function (ds) { set({ ffView: ds.v || null, ffQ: '', focusFf: true }); },
+  ffAdd: function (ds) {  // a value from the "Filter" menu: joins a positive filter of that facet, else starts one
+    var k = S.ffView, ff = (S.ff || []).map(function (x) { return Object.assign({}, x, { vals: x.vals.slice() }); });
+    var cur = ff.filter(function (x) { return x.k === k && !x.not; })[0];
+    if (cur) { if (cur.vals.indexOf(ds.v) < 0) cur.vals.push(ds.v); } else ff.push({ id: k + Date.now(), k: k, not: false, vals: [ds.v] });
+    set({ ff: ff, menu: null, ffView: null, ffQ: '', lvLimit: 60 });
+  },
+  ffVal: function (ds) {
+    var ff = (S.ff || []).map(function (x) {
+      if (x.id !== ds.id) return x;
+      var v = x.vals.indexOf(ds.v) >= 0 ? x.vals.filter(function (y) { return y !== ds.v; }) : x.vals.concat([ds.v]);
+      return Object.assign({}, x, { vals: v });
+    });
+    var gone = ff.some(function (x) { return x.id === ds.id && !x.vals.length; });
+    set({ ff: ff.filter(function (x) { return x.vals.length; }), menu: gone ? null : S.menu, lvLimit: 60 });
+  },
+  ffOp: function (ds) { set({ ff: (S.ff || []).map(function (x) { return x.id === ds.id ? Object.assign({}, x, { not: ds.v === '1' }) : x; }), menu: null }); },
+  ffRemove: function (ds) { set({ ff: (S.ff || []).filter(function (x) { return x.id !== ds.v; }), menu: null }); },
+  ffClear: function () { set({ ff: [], menu: null }); },
+  ffClear: function () { set({ ff: {} }); },
   gewerkAll: function (ds) { set({ gewerk: ds.v, scope: 'all', lvLimit: 60, sel: null }); var t = document.querySelector('.lv-head'); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); },
   scope: function (ds) { set({ scope: ds.v, lvLimit: 60, filter: ds.v === 'all' ? S.filter : S.filter }); },
   priceNow: function (ds) { openPos(ds.oz); A.startEdit(); },
@@ -2406,6 +2576,7 @@ var A = {
   density: function (ds) { set({ density: ds.v }); },
   group: function () { set({ group: !S.group }); },
   collapse: function (ds) { var c = Object.assign({}, S.collapsed); c[ds.v] = !c[ds.v]; set({ collapsed: c }); },
+  exportAs: function (ds) { S.menu = null; if (ds.v === 'csv') A.csv(); else A.export(); render(); },
   csv: function () {
     var rows = derive().rows, q = function (t) { return '"' + String(t).replace(/"/g, '""') + '"'; };
     var lines = ['OZ;Kurztext;Gewerk;Menge;Einheit;EP;GP;Konfidenz;Status'].concat(rows.map(function (r) { return [r.oz, q(r.kurz), q(r.gewerk), fmt(r.menge, r.menge % 1 ? 1 : 0), r.einheit, fmt(r.ep, 2), fmt(r.gp, 2), r.risk, S.confirmed[r.oz] ? 'bestätigt' : r.mode].join(';'); }));
@@ -2668,7 +2839,7 @@ document.addEventListener('input', function (e) {
   if (!k) return;
   S[k] = e.target.value;
   if (k === 'upId') S.upIdTouched = true;
-  if (k === 'q' || k === 'epDraft') render();
+  if (k === 'q' || k === 'epDraft' || k === 'ffQ') render();
 });
 document.addEventListener('change', function (e) {
   if (e.target.getAttribute && e.target.getAttribute('data-file')) { takeFiles(e.target.files); e.target.value = ''; return; }
