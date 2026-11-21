@@ -327,10 +327,34 @@ Known limits: a value from related items inherits their prices, token prices inc
 little, most values are assumed (P4: 178 of 296 items had no candidate the judge accepted); the flags of the first
 brainstorm (same item at two prices, outdated prices, quantity against plan) are not built.
 
+## Plan check (optional)
+
+When a construction plan (Bauplan) is given, `lv price … --plan <plan>` also compares the LV's quantities with it
+and writes a second file, `data/out/<project>_plan.json`. Without `--plan` nothing changes. The LV is required;
+the plan is optional.
+
+| Part | Who | How |
+|---|---|---|
+| The LV's items | code | Step 0's reader, the same items as the price lookup (`lv/plan.py`, `positions`). The prototype's own GAEB reading by an LLM (`vlm/gaeb_llm.py`) is not used |
+| Read the plan | AI (OpenAI vision model, `OPENAI_MODEL`) | `vlm/extract_plan.py`: countable components with counts and approximate x/y markers, read 3 times; the median count is used and counts that vary are flagged |
+| Compare | code, then AI | `vlm/compare.py`: matches by plan codes (F1, T3) and dimensions first, then lets the model match the rest by majority vote; writes findings per item (quantity differs, not in the plan, in the plan but not in the LV, units not comparable) with markers and an open decision field |
+
+The plan check runs after the LV result is saved, so a failing plan check loses nothing of it. A plan that is not
+an image or PDF, a missing file, or a missing `OPENAI_API_KEY` / `OPENAI_MODEL` (in the root `.env` or in `vlm/.env`)
+stops the command before anything runs; `--copy-only` and `--plan` cannot be combined.
+
+The two files join on `oz`: an item of `<project>.json` and its entry in the plan file's `positionen` have the same
+item number. The plan file's shape is the prototype's own, with German keys (`positionen`, `befunde`,
+`zusammenfassung`); see `vlm/README.md` and `docs/result-format.md`.
+
+Known limits: not run end to end in this repository yet (no plan file and no OpenAI key here); only items in pieces
+(`St`) are compared by count; the plan check uses a second AI provider (OpenAI) next to Claude and Voyage.
+
 ## Tech stack
 
 - Python 3.13, pip, `.venv` (Windows, PowerShell).
 - GAEB reading and text search: standard library only. PDF text reading: `pypdf`.
+- Plan check: an OpenAI vision model through the `openai` package; `pymupdf` renders PDF plans to images.
 - Search by meaning: Voyage AI `voyage-4` through the `voyageai` package (Anthropic has no embedding model). No
   vector database: about 1,000 saved vectors are compared in memory.
 - AI: Claude API through `langchain-anthropic`, used thinly: chat model, structured output, `.batch()` with a
@@ -357,6 +381,7 @@ brainstorm (same item at two prices, outdated prices, quantity against plan) are
 .venv\Scripts\python.exe -m lv ingest "<prices file>" --project P3 --texts "<print 1.pdf>" "<print 2.pdf>"   # prices and texts in separate files
 .venv\Scripts\python.exe -m lv price "<new LV file>" --project P4         # flow B
 .venv\Scripts\python.exe -m lv price "<new LV file>" --project P4 --copy-only   # steps 0 and 1 and exact matches only, no AI
+.venv\Scripts\python.exe -m lv price "<new LV file>" --project P4 --plan "<plan.pdf>"   # also compare with a construction plan
 .venv\Scripts\python.exe -m lv.ai                                         # one real AI call, to check the key
 .venv\Scripts\python.exe -m lv check --hide P2                            # accuracy check (not built yet)
 .venv\Scripts\python.exe -m pytest
@@ -373,6 +398,7 @@ lv/
   categorise.py   step 2: trade list, item type list, assignment, overview
   predict.py      step 3: judge input, verdicts to prediction, interpolation, statistics, totals
   risk.py         step 4: price risk, description check, value, the LV's risk score
+  plan.py         plan check: step 0's items to the VLM prototype, which reads and compares the plan
   ai.py           model setup, API key and prompts
 tests/            one small test file per module
 data/raw/         the dataset, unchanged

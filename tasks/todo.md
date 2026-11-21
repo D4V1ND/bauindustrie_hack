@@ -410,6 +410,20 @@ Built before tasks 6 and 7: step 3 does not need trades or item types.
     less on P4). Not built.
   - Files: `lv/risk.py`, `lv/model.py`, `lv/ai.py`, `lv/__main__.py`, `tests/test_risk.py`, docs and views.
 
+- [x] **Task 19: Optional plan check, linking the VLM prototype (PR #2) to the pipeline** (small)
+  - Does: `lv price … --plan <plan>` also reads a construction plan with the prototype's OpenAI vision model
+    (`vlm/extract_plan.py`, 3 readings), compares it with the LV in `vlm/compare.py` and writes
+    `data/out/<project>_plan.json`. The LV comes from step 0's reader through `lv/plan.py`, not from
+    `vlm/gaeb_llm.py`. A bad plan file, `--copy-only`, or a missing OpenAI key stops the command before anything runs;
+    the plan check runs after the LV result is saved.
+  - Merged first: PR #1 (steps 0 to 4) and PR #2 (the VLM prototype); the one conflict, `.gitignore`, keeps both lists.
+  - Checked: tests for the item adapter, for the prototype's comparison on step 0 items without any AI call
+    (a matching count, a differing count with its marker, an item in m2 left unchecked), and for the early stops; by
+    hand, a real image without an OpenAI key stops with the prototype's message and writes nothing.
+  - Not checked: a real plan run. This repository has no plan file and no OpenAI key.
+  - Files: `lv/plan.py`, `lv/__main__.py`, `tests/test_plan.py`, `requirements.txt`, `SPEC.md`, `docs/result-format.md`,
+    `vlm/README.md`.
+
 ### Checkpoint: step 3
 - [x] All tests pass without network and without a key.
 - [x] `lv price --copy-only` on P2's own `.X83` copies only correct prices.

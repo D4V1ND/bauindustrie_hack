@@ -283,6 +283,19 @@ To find an item's call: the entry whose `items` contains the item's `id`, or its
 identical item. An item may appear in two calls when its first answer did not fit and it was asked again on its
 own; the later call is the one that counted.
 
+## `<project>_plan.json` (only with a plan)
+
+Written by `lv price … --plan <plan>`. The shape is the VLM prototype's (`vlm/README.md`), with German keys:
+
+| Field | Meaning |
+|---|---|
+| `eingaben` | the LV file and the plan (`id`, `datei`, `breite_px`, `hoehe_px`) |
+| `positionen[]` | the LV's items: `oz`, `gruppe`, `kurztext`, `menge`, `einheit`, plus `pruefung` (`ok`, `ok_instabil`, `abweichung`, `nicht_im_plan`, `einheit_nicht_vergleichbar`, `nicht_geprueft`) and `befund_ids` |
+| `befunde[]` | findings: `id`, `oz` (null for a plan component missing in the LV), `art`, `schwere` (`fehler`, `risiko`, `hinweis`), `titel`, `beschreibung`, `lv` and `plan` quantities, `marker[]` with `x`, `y` relative to the plan image (0 to 1, from the top left; `breite` and `hoehe` for a frame), and `entscheidung` (`status: "offen"`, for the estimator) |
+| `zusammenfassung` | number of findings per `schwere`, and how many items were compared |
+
+Join it to `<project>.json` on `oz`. Show a finding's markers on the plan image when its item is selected.
+
 ## Rules for showing results
 
 - The predicted price is `prediction.median`, and only when `method` is `copied`, `similar` or `adjusted`. Show

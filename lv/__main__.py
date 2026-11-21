@@ -1,11 +1,11 @@
-"""Command line: python -m lv ingest|price <LV file> --project <ID>"""
+"""Command line: python -m lv ingest|price <LV file> --project <ID> [--plan <plan>]"""
 import argparse
 import json
 import re
 import time
 from pathlib import Path
 
-from lv import ai
+from lv import ai, plan
 from lv.categorise import Assignments, Proposal, assign, overview, propose
 from lv.extract import add_texts, read
 from lv.match import group_label
@@ -32,7 +32,19 @@ def main(argv: list[str] | None = None, data: Path = DATA) -> None:
             command.add_argument("--copy-only", action="store_true",
                                  help="only copy the prices of exact matches: no item types, no search, no AI, "
                                       "no API key needed")
+            command.add_argument("--plan", type=Path, metavar="PLAN",
+                                 help="a construction plan (PNG, JPG or PDF): also compare the LV's quantities with it "
+                                      "and write <project>_plan.json (needs OPENAI_API_KEY and OPENAI_MODEL)")
     args = parser.parse_args(argv)
+    plan_ai = None
+    if getattr(args, "plan", None):  # checked first, so a missing plan or key costs nothing
+        if args.copy_only:
+            raise SystemExit("The plan check asks AI models, so it cannot run with --copy-only.")
+        try:
+            plan.check_file(args.plan)
+        except ValueError as error:
+            raise SystemExit(str(error))
+        plan_ai = plan.client()
 
     try:
         lv = read(args.file, args.project)
@@ -77,6 +89,14 @@ def main(argv: list[str] | None = None, data: Path = DATA) -> None:
         log = path.with_name(f"{lv.project}_judge.json")
         log.write_text(json.dumps(judge_log, ensure_ascii=False, indent=1), encoding="utf-8")
         print(f"{len(judge_log)} judge calls with the judge's thinking -> {log}")
+    if plan_ai:  # after the LV result is saved: a failing plan check loses nothing of it
+        print(f"plan check: {args.plan.name} with {plan_ai[1]}, read {plan.RUNS} times")
+        start = time.monotonic()
+        result = plan.check(lv, args.plan, plan_ai)
+        out = path.with_name(f"{lv.project}_plan.json")
+        out.write_text(json.dumps(result, ensure_ascii=False, indent=1), encoding="utf-8")
+        counts = result["zusammenfassung"]
+        print(f"  {counts['befunde']} findings, {counts['geprueft']} items compared, {time.monotonic() - start:.0f} s -> {out}")
 
 
 def _ask(job: str, model: str, effort: str, rules: str, questions: list[str], shape: type,

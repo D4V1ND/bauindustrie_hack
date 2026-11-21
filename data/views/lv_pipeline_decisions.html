@@ -464,6 +464,7 @@ h3{margin:44px 0 14px;font:700 clamp(17px,2vw,20px)/1.25 var(--display);color:va
           <tr><th scope="row">Judge whether a past item is the same thing</th><td data-l="Model">Claude Sonnet 5.5</td><td data-l="Effort">xhigh</td><td data-l="Calls">1 per item type, at most 15 items</td></tr>
           <tr><th scope="row">Turn item texts into vectors for the search by meaning</th><td data-l="Model">Voyage AI <code>voyage-4</code></td><td data-l="Effort">none</td><td data-l="Calls">once per text, then saved</td></tr>
           <tr><th scope="row">Say whether an item's description is complete enough to price</th><td data-l="Model">Claude Sonnet 5.5</td><td data-l="Effort">xhigh</td><td data-l="Calls">1 per 25 items</td></tr>
+          <tr><th scope="row">Read a construction plan, only when one is given</th><td data-l="Model">OpenAI vision model (<code>OPENAI_MODEL</code>)</td><td data-l="Effort">default</td><td data-l="Calls">3 readings per plan, plus up to 3 for matching</td></tr>
         </tbody>
       </table>
     </div>
@@ -949,6 +950,7 @@ Answer for every item id, each once:
           <tr><th scope="row">PDF reading</th><td data-l="Where it stands">Built for P3, by code. P6 exists only as PDFs in other layouts and cannot be read yet.</td></tr>
           <tr><th scope="row">Near-zero prices and lump sums</th><td data-l="Where it stands">Open, set aside for now (21 Nov): two near-zero prices reached a price through the search by meaning. A flat cut-off would not work, because real prices can be that low too (holding a fence costs 0.03 per metre and day in P2). No rule yet for these, or for lump sums that depend on the project.</td></tr>
           <tr><th scope="row">A second judge opinion</th><td data-l="Where it stands">Decided for now: one judge call per item. Asking twice and flagging a disagreement as "unsure" was proposed and set aside.</td></tr>
+          <tr><th scope="row">Plan check</th><td data-l="Where it stands">Linked: <code>lv price … --plan</code> runs the VLM prototype (PR #2) on step 0's items and writes <code>&lt;project&gt;_plan.json</code>, joined to the result file by item number. Not run end to end here yet (no plan file, no OpenAI key). Open: one AI provider or two, and German or English keys in the plan file.</td></tr>
           <tr><th scope="row">Voyage rate limit</th><td data-l="Where it stands">Without a payment method Voyage allows 3 calls and 10,000 tokens a minute: embedding the library took 9 minutes, once. Vectors are saved, so a new LV only embeds its own items.</td></tr>
           <tr><th scope="row">Accuracy check command</th><td data-l="Where it stands">Specified, not built: hide one past project, predict it from the others, compare.</td></tr>
           <tr><th scope="row">Trade list</th><td data-l="Where it stands">Open: 17 stand-in names are used until an official list is chosen.</td></tr>
