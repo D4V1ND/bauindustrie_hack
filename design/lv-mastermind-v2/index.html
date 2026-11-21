@@ -812,6 +812,38 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .cost .conf-h{align-items:flex-end}
 .cost .conf-v{font-size:.72rem}
 .cost .conf-v b{font-size:44px}
+.cost .est>.mono{font-size:.62rem}
+.big.rng{font-size:clamp(2.2rem,4vw,3.4rem);white-space:nowrap}
+.big.rng small{font-size:.45em;letter-spacing:0;color:var(--ink-2)}
+.srcs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;border-top:1px solid var(--line);padding-top:20px}
+.src{display:flex;flex-direction:column;gap:6px;padding:16px 16px 14px;border:1px solid var(--line);border-top:4px solid var(--ok);background:var(--ok-bg);min-width:0}
+.src.mid{border-top-color:var(--warn);background:var(--warn-bg)}
+.src.lo{border-top-color:var(--bad);background:var(--bad-bg)}
+.src>b{font:300 40px/1 var(--sans);letter-spacing:-.03em;color:var(--ok)}
+.src.mid>b{color:var(--warn)}.src.lo>b{color:var(--bad)}
+.src-l{font-size:15px;font-weight:500;color:var(--ink);line-height:1.3}
+.src small{font-size:12px;color:var(--ink-2);line-height:1.4}
+@media (max-width:1000px){.srcs{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.srcs{grid-template-columns:1fr}}
+.drv-ol{list-style:none;counter-reset:drv;margin:0;padding:0}
+.drv-ol li{counter-increment:drv;border-top:1px solid var(--line)}
+.drv-ol li:first-child{border-top:0}
+.drv-ol .drv{padding:9px 6px}
+.drv-ol .drv-t{align-items:baseline;gap:12px}
+.drv-ol .drv-t>span:first-child::before{content:counter(drv) ".";display:inline-block;min-width:22px;font:12px var(--mono);color:var(--ink-3)}
+.drv-ol .drv-t b{font-weight:500;white-space:nowrap;flex:none}
+.np.sgp{color:var(--warn)}
+.sgbox{display:flex;flex-direction:column;gap:6px;width:100%;padding:12px 14px;border:1px dashed var(--warn);background:var(--warn-bg)}
+.sg-ep{font:300 30px/1 var(--sans);letter-spacing:-.03em;color:var(--ink)}
+.sg-ep small{font-size:12px;color:var(--ink-3);letter-spacing:0}
+.sg-r{font-size:12px;color:var(--ink-2)}
+.sg-b{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.bulksafe{align-self:center;white-space:nowrap}
+.agentnote{display:flex;gap:14px;align-items:flex-start;margin:0 0 16px;padding:14px 16px;border:1px solid var(--ink);background:var(--card)}
+.an-i{flex:none;display:grid;place-items:center;width:32px;height:32px;background:var(--signal-bg);color:var(--signal)}
+.an-t{flex:1;min-width:0}.an-t>b{font-weight:600}
+.an-t p{margin:4px 0 10px;font-size:13.5px;line-height:1.55;color:var(--ink-2)}
+.agentnote>.ic{flex:none}
 @media (max-width:900px){.cost-main{grid-template-columns:1fr;gap:28px}}
 /* gauge box (left) + summary box (right) */
 .row2{margin-top:20px;align-items:stretch}
@@ -1146,6 +1178,23 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .st-ok i,.st-bad i{width:7px;height:7px;border-radius:50%;background:var(--ok,#2f9e6b)}
 .st-bad{color:var(--bad,#c4452c)}.st-bad i{background:var(--bad,#c4452c)}
 .st-lead{max-width:640px;margin:10px 0 0;line-height:1.55}
+.start .st-up{margin-top:28px;max-width:860px}
+.dropz{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:40px 24px 24px;border:1.5px dashed var(--line-2);cursor:pointer;transition:border-color .15s,background .15s}
+.dropz:hover{border-color:var(--ink);background:var(--paper-2)}
+.dropz-i{display:grid;place-items:center;width:44px;height:44px;border:1px solid var(--line-2);margin-bottom:6px}
+.dropz>b{font-size:20px;font-weight:500;letter-spacing:-.01em}
+.dropz>.muted{font-size:13px}
+.dropz-f{display:flex;gap:8px 18px;flex-wrap:wrap;justify-content:center;margin-top:6px;font-size:.62rem;color:var(--ink-3)}
+.dropz-l{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;margin-top:22px;text-align:left}
+.uf{border:1px solid var(--line);background:var(--card);padding:12px 14px;min-width:0}
+.uf-h{font-size:.6rem;margin-bottom:8px}
+.uf ul{list-style:none;margin:0;padding:0}
+.uf li{display:flex;align-items:center;gap:10px;min-width:0}
+.uf-n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;font-size:13px}
+.uf-s{color:var(--ink-3);font-size:.6rem;flex:none}
+.uf .ic{width:26px;height:26px;flex:none}
+.uf-e{margin:0;color:var(--ink-3);font-size:13px}
+@media (max-width:640px){.dropz-l{grid-template-columns:1fr}}
 .st-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:20px;margin-top:28px;align-items:start}
 .st-up .up-err{margin-top:14px}
 .st-up .up-btns{justify-content:flex-start}
@@ -1374,6 +1423,14 @@ function ownPrice(it) {
   var c = (it.comments || []).filter(function (x) { return x.price != null || x.effect === 'doubt'; }).pop();
   return c && c.price != null ? c.price : null;
 }
+// unpriced item: a suggestion from the related old items the backend looked at (low confidence, needs a check)
+function suggest(pr) {
+  // only old items the judge called the same kind of work; "different" ones say nothing about this price
+  var rel = (pr.sources && pr.sources.length ? pr.sources : (pr.judged || []).filter(function (x) { return x.verdict && x.verdict !== 'different'; })).map(function (x) { return x.unit_price; }).filter(function (v) { return v > 0; }).sort(function (a, b) { return a - b; });
+  if (!rel.length) return null;
+  var m = rel.length >> 1, med = rel.length % 2 ? rel[m] : (rel[m - 1] + rel[m]) / 2;
+  return { ep: Math.round(med * 100) / 100, lo: rel[0], hi: rel[rel.length - 1], n: rel.length };
+}
 function toPos(it) {
   var pr = it.prediction || {}, rk = it.risk || {}, m = pr.method || 'none', own = ownPrice(it), med = pr.median || 0, conf = rk.confidence || 0;
   var why = own != null ? 'Eigener Preis' : (WHY[m] || m);
@@ -1383,7 +1440,8 @@ function toPos(it) {
   var mode = MODE[m] || 'offen';
   if (mode !== 'offen' && conf < 50) mode = 'unsicher';
   return { oz: it.oz, kurz: it.short_text || it.oz, lang: it.long_text || it.short_text || '', menge: it.quantity || 0, einheit: it.unit || '', gewerk: gwName(it),
-    ep: own != null ? own : med, aiEp: med, srvManual: own != null, risk: rk.score || 0, conf: conf, mode: mode, why: why, method: m, opt: it.kind === 'optional', owner: '', val: rk.value || 0, cmts: it.comments || [] };
+    ep: own != null ? own : med, aiEp: med, srvManual: own != null, risk: rk.score || 0, conf: conf, mode: mode, why: why, method: m, opt: it.kind === 'optional', owner: '', val: rk.value || 0, cmts: it.comments || [],
+    lo: own != null ? own : pr.min != null ? Math.min(pr.min, med) : med, hi: own != null ? own : pr.max != null ? Math.max(pr.max, med) : med, sg: own == null && !med ? suggest(pr) : null };
 }
 function toRich(it, extra) {
   var pr = it.prediction || {}, rk = it.risk || {}, srcs = pr.sources || [], jd = pr.judged || [], R = {};
@@ -1445,7 +1503,8 @@ var S = { tab: 'home', filter: 'all', sel: null, q: '', sort: { k: 'conf', d: 1 
   preview: null, fx: null, holding: false, analyzing: false, analyzed: 'heute, 08:47 · vor 12 Min.', flashEp: 0, focusEp: false,
   scope: 'key', lvLimit: 60, mg: {}, planShow: null };
 // plan panel next to the table: open by default when there is a plan; the toolbar toggle is remembered per project
-function planShown() { return S.planShow === null || S.planShow === undefined ? !!(P.plan || !P.live) : S.planShow; }
+function hasPlan() { return !!(P.plan || !P.live); }
+function planShown() { return hasPlan() && (S.planShow === null || S.planShow === undefined ? true : S.planShow); }
 
 // ================= helpers =================
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -1585,17 +1644,48 @@ function cmeter(v, n) {
   for (var i = 0; i < n; i++) o += '<i' + (i < on ? ' class="on"' : '') + ' style="--i:' + i + '"></i>';
   return o + '</span>';
 }
+// total as a range: priced items from their lowest to highest old price, unpriced items from their suggestion
+function priceRange(rows) {
+  var lo = 0, hi = 0, sgN = 0, openN = 0;
+  rows.forEach(function (r) {
+    if (r.opt) return;
+    var own = S.eps[r.oz] !== undefined || r.srvManual;
+    if (!r.np) { lo += r.menge * (own ? r.ep : Math.min(r.lo != null ? r.lo : r.ep, r.ep)); hi += r.menge * (own ? r.ep : Math.max(r.hi != null ? r.hi : r.ep, r.ep)); }
+    else if (r.sg) { lo += r.menge * r.sg.lo; hi += r.menge * r.sg.hi; sgN++; }
+    else openN++;
+  });
+  return { lo: lo, hi: hi, sgN: sgN, openN: openN };
+}
+function moneyRange(a, b) {
+  if (Math.round(a) === Math.round(b)) { var one = b >= 1e6 ? [fmt(b / 1e6, 2), 'Mio. €'] : b >= 1e5 ? [fmt(b / 1e3, 0), 'Tsd. €'] : [fmt(Math.round(b)), '€']; return one; }
+  if (b >= 1e6) return [fmt(a / 1e6, 2) + ' – ' + fmt(b / 1e6, 2), 'Mio. €'];
+  if (b >= 1e5) return [fmt(a / 1e3, 0) + ' – ' + fmt(b / 1e3, 0), 'Tsd. €'];
+  return [fmt(Math.round(a)) + ' – ' + fmt(Math.round(b)), '€'];
+}
 function vCost() {
   var d0 = derive(), all = P.live ? d0.full : d0.all, w = 0, c = 0;
   all.forEach(function (r) { var k = cw(r); w += k; c += k * (S.confirmed[r.oz] ? 100 : r.conf); });
-  var conf = Math.round(c / (w || 1)), big = d0.tot >= 1e6 ? [d0.tot / 1e6, 2, 'Mio. €'] : [d0.tot / 1e3, 0, 'Tsd. €'], npN = all.filter(function (r) { return r.np; }).length;
+  var conf = Math.round(c / (w || 1)), R = priceRange(all), rg = moneyRange(R.lo, R.hi), n = all.length || 1;
+  var cnt = { copied: 0, similar: 0, adjusted: 0, open: 0 };
+  all.forEach(function (r) {
+    if (r.np) cnt.open++;
+    else if (r.method === 'adjusted') cnt.adjusted++;
+    else if (r.method === 'similar' || r.method === 'reference' || r.method === 'none') cnt.similar++;
+    else cnt.copied++;
+  });
+  var boxes = [['hi', cnt.copied, 'Aus altem LV übernommen', 'Gleicher Text in einem früheren LV, Preis 1:1'],
+    ['hi', cnt.similar, 'Ähnliche Position aus altem LV', 'Gleichwertige Leistung, Preis übernommen'],
+    ['mid', cnt.adjusted, 'Angepasst (Größe/Material)', 'Aus ähnlichen Positionen umgerechnet'],
+    ['lo', cnt.open, 'Noch kein Preis, bitte prüfen', R.sgN ? 'Nur ein Vorschlag aus verwandten Positionen' : 'Keine passende Position in den alten LVs']];
+  var note = 'netto · Spanne aus den Preisen der alten LVs' + (R.sgN ? ' · inkl. ' + (R.sgN === 1 ? 'Vorschlag für 1 Position' : 'Vorschlägen für ' + R.sgN + ' Positionen') + ' ohne Preis' : '') + (R.openN ? ' · <b class="npn">' + R.openN + (R.openN === 1 ? ' Position' : ' Positionen') + ' ohne Vorschlag</b> nicht enthalten' : '');
   return '<section class="card cost rise' + (S.analyzing ? ' scan' : '') + '" style="flex:1 1 100%;--d:200ms" aria-label="Kostenschätzung">' +
     '<div class="card-h"><span class="mono"><b>01</b> Kostenschätzung</span><span class="mono">' + (P.live ? esc(P.lib) : '3 Alt-LVs · 9.120 bepreiste Positionen') + '</span></div>' +
-    '<div class="cost-main"><div class="est"><span class="big"><span data-count="' + big[0].toFixed(big[1]) + '" data-dec="' + big[1] + '">' + fmt(big[0], big[1]) + '</span> ' + big[2] + '</span><span class="muted">netto · ' + (P.live ? 'Schätzung aus den Alt-LVs' : 'finale KI-Schätzung') + (npN ? ' · <b class="npn">' + npN + ' Positionen ohne Preis</b> nicht enthalten' : '') + '</span></div>' +
-    '<div class="estconf"><div class="conf-h"><span class="conf-l">Konfidenz<small>Sicherheit der Preisschätzung, gewichtet nach Volumen</small></span><span class="conf-v ' + confLvl(conf) + '" data-k="cv' + conf + '"><b>' + conf + ' %</b>' + confWord(conf) + '</span></div>' +
+    '<div class="cost-main"><div class="est"><span class="mono faint">Gesamtpreis von – bis</span><span class="big rng">' + rg[0] + ' <small>' + rg[1] + '</small></span><span class="muted">' + note + '</span></div>' +
+    '<div class="estconf"><div class="conf-h"><span class="conf-l">Konfidenz<small>Wie sicher die Preise sind, gewichtet nach Volumen</small></span><span class="conf-v ' + confLvl(conf) + '" data-k="cv' + conf + '"><b>' + conf + ' %</b>' + confWord(conf) + '</span></div>' +
       cmeter(conf, 50) + '<div class="conf-s"><span>0</span><span>50</span><span>100</span></div></div></div>' +
-    (P.live ? '<div class="estfacts"><div><span class="mono">Textgleich kopiert</span><b>' + fmt(P.methods.copied) + '</b></div><div><span class="mono">Gleichwertig / interpoliert</span><b>' + fmt(P.methods.similar + P.methods.adjusted) + '</b></div><div><span class="mono">Ohne Preis</span><b style="color:' + (npN ? 'var(--bad)' : 'var(--ok)') + '">' + fmt(npN) + '</b></div></div>'
-      : '<div class="estfacts"><div><span class="mono">Prognose Zuschlag</span><b>1,21 Mio. €</b></div><div><span class="mono">Abstand</span><b style="color:var(--ok)">−5,8 %</b></div><div><span class="mono">Ø ähnliche Ausschreibungen</span><b>1,19 Mio. €</b></div></div>') +
+    '<div class="srcs" role="list" aria-label="Woher die Preise kommen">' + boxes.map(function (b) {
+      return '<div class="src ' + b[0] + '" role="listitem"><b>' + fmt(b[1]) + '</b><span class="src-l">' + b[2] + '</span><small>' + b[3] + ' · ' + Math.round(b[1] / n * 100) + ' % der Positionen</small></div>';
+    }).join('') + '</div>' +
   '</section>';
 }
 
@@ -1618,20 +1708,20 @@ function vSummary(d) {
       .concat(P.plan ? [['ok', fmt(fd.length), 'Plan-Befunde']] : []);
   }
   var txt = parts.map(function (s) { return s.length > 1 ? '<button class="lnk" data-act="open" data-oz="' + s[1] + '">' + esc(s[0]) + '</button>' : esc(s[0]); }).join('');
-  var drivers = (P.live ? d.full : d.all).slice().sort(function (a, b) { return b.gp - a.gp; }).slice(0, 5);
+  var drivers = (P.live ? d.full : d.all).filter(function (r) { return r.gp > 0; }).sort(function (a, b) { return b.gp - a.gp; }).slice(0, 5);
   if (!P.live) stats = [['', '812', 'Positionen 1:1 übernommen'], ['blue', '389', 'adaptiert'], ['warn', '83', 'unsicher, bitte prüfen'], ['', '38 → 9', 'Positionen bündelbar'], ['ok', '≈ 31.000 €', 'Nachtragspotenzial (4 Pos.)']];
   return '<section class="card sum rise' + (S.analyzing ? ' scan' : '') + '" style="flex:2 1 640px;--d:320ms" aria-label="Zusammenfassung">' +
     '<div class="card-h"><span class="mono"><b>02</b> Zusammenfassung</span><span class="mono" style="display:flex;gap:6px;align-items:center;color:var(--signal)">' + IC.star + 'KI · jede Aussage mit Quelle</span></div>' +
     '<div class="sum2"><p class="sum-p">' + txt + '</p>' +
     '<div class="sum-drv"><div class="mono faint" style="margin-bottom:8px">Top-Kostentreiber</div>' +
-      drivers.map(function (r, i) { return '<button class="drv" data-act="open" data-oz="' + r.oz + '"><span class="drv-t"><span>' + esc(r.kurz) + '</span><b style="font-weight:500">' + eur(r.gp) + '</b></span><span class="drv-bar"><i style="width:' + Math.round(r.gp / drivers[0].gp * 100) + '%;--i:' + i + '"></i></span></button>'; }).join('') +
+      '<ol class="drv-ol">' + drivers.map(function (r) { return '<li><button class="drv" data-act="open" data-oz="' + r.oz + '"><span class="drv-t"><span>' + esc(r.kurz) + '</span><b>' + eur(r.gp) + '</b></span></button></li>'; }).join('') + '</ol>' +
     '</div></div>' +
   '</section>';
 }
 
 function vRow(r, d) {
   var ow = ownerOf(r), m = ow ? T[ow] : null, ok = !!S.confirmed[r.oz], pk = !!S.picked[r.oz], fresh = S.justOk[r.oz] !== undefined, n = cmtN(r.oz), k = ck(r.conf);
-  var chip = r.np ? '<span class="mtag offen"><i></i>Preis fehlt</span>' : r.gen ? '<span class="mtag ' + (r.manual ? 'adaptiert' : '') + '"><i></i>' + (r.manual ? 'manuell' : '1:1 · ' + r.conf + ' %') + '</span>' : ok ? '<span class="mtag ok"><i></i>' + (r.manual ? 'manuell' : 'bestätigt') + '</span>' : '<span class="mtag ' + r.mode + '"><i></i>' + r.mode + ' · ' + r.conf + ' %</span>';
+  var chip = r.np ? (r.sg ? '<span class="mtag unsicher"><i></i>Vorschlag · prüfen</span>' : '<span class="mtag offen"><i></i>Preis fehlt</span>') : r.gen ? '<span class="mtag ' + (r.manual ? 'adaptiert' : '') + '"><i></i>' + (r.manual ? 'manuell' : '1:1 · ' + r.conf + ' %') + '</span>' : ok ? '<span class="mtag ok"><i></i>' + (r.manual ? 'manuell' : 'bestätigt') + '</span>' : '<span class="mtag ' + r.mode + '"><i></i>' + r.mode + ' · ' + r.conf + ' %</span>';
   return '<div class="lv-grid lv-r' + (pk ? ' picked' : '') + (r.oz === S.sel ? ' sel' : '') + (r.np ? ' noprice' : '') + (r.gen ? ' gen' : '') + (ok ? ' is-ok' : '') + (fresh ? ' fx-ok' : '') + '" style="--i:' + (fresh ? S.justOk[r.oz] : 0) + '" role="row" data-k="r' + r.oz + '" data-act="open" data-oz="' + r.oz + '">' +
     '<span role="cell" class="c2">' + (r.gen ? '' : '<input type="checkbox" class="cb"' + (pk ? ' checked' : '') + ' data-act="pick" data-oz="' + r.oz + '" aria-label="Position ' + r.oz + ' auswählen">') + '</span>' +
     '<span role="cell"><span class="rsk ' + k + '" title="Konfidenz ' + r.conf + ' % · ' + esc(r.why) + '"><b>' + r.conf + '<small>%</small></b><i class="rbar"><i style="width:' + Math.max(r.conf, 0) + '%"></i></i></span></span>' +
@@ -1642,7 +1732,7 @@ function vRow(r, d) {
       (cmtList(r).length ? '<span class="cmtn" title="' + cmtList(r).length + ' Kommentare">' + IC.chat + cmtList(r).length + '</span>' : '') +
       (S.bundled[r.oz] ? '<span class="chip bundle">Bündel · ' + esc(S.bundled[r.oz]) + '</span>' : '') +
       '</span></span>' +
-    '<span role="cell" class="c2" style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">' + (r.np ? '<span class="np">Kein Preis</span>' : '<span style="font-size:13px;font-weight:500">' + eur(r.ep) + '</span>') + '<span class="qty">' + qty(r.menge) + ' ' + r.einheit + '</span>' + chip + '</span>' +
+    '<span role="cell" class="c2" style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">' + (r.np ? (r.sg ? '<span class="np sgp" title="Vorschlag aus verwandten Positionen, niedrige Konfidenz">≈ ' + eur(r.sg.ep) + '</span>' : '<span class="np">Kein Preis</span>') : '<span style="font-size:13px;font-weight:500">' + eur(r.ep) + '</span>') + '<span class="qty">' + qty(r.menge) + ' ' + r.einheit + '</span>' + chip + '</span>' +
     '<span role="cell" class="num c2"><span style="font-size:14px;font-weight:500">' + (r.np ? '<span class="np">–</span>' : r.opt ? '<span class="np" title="Bedarfsposition, nicht in der Summe">Bedarf</span>' : eur(r.gp)) + '</span><span class="gpbar" title="' + fmt(r.gp / d.tot * 100, 1) + ' % des Volumens"><i style="width:' + Math.max(4, Math.round(r.gp / d.maxGp * 100)) + '%;background:' + (d.driver[r.oz] ? 'var(--signal)' : 'var(--ink-3)') + '"></i></span></span>' +
     '<span role="cell">' + (r.np ? '<button class="okbtn need" data-act="priceNow" data-oz="' + r.oz + '" aria-label="Preis für ' + r.oz + ' eingeben" title="Preis eingeben">' + IC.pen + '</button>' : r.gen ? '<span class="auto1" title="1:1 übernommen, keine Bestätigung nötig">1:1</span>' : '<button class="okbtn' + (ok ? ' is-ok' : '') + (fresh && ok ? ' fx' : '') + '" data-act="toggleOk" data-oz="' + r.oz + '" aria-pressed="' + ok + '" aria-label="' + (ok ? 'Bestätigung zurücknehmen' : 'Preis bestätigen') + '" title="' + (ok ? 'Bestätigung zurücknehmen' : 'Preis bestätigen') + '">' + IC.tickRaw + (fresh && ok && S.justOk[r.oz] === 0 ? particles('conf', 10, 34) : '') + '</button>') + '</span>' +
   '</div>';
@@ -1659,8 +1749,6 @@ function pm(xy) { return 'X ' + fmt((xy[0] - 80) / 20, 1) + ' m · Y ' + fmt((62
 function vPlan(d, full) {
   var shown = {}; d.rows.forEach(function (r) { shown[r.oz] = true; });
   var fl = FLOORS.indexOf(S.floor) >= 0 ? S.floor : FLOORS[0];
-  if (P.live && !P.plan) return '<aside class="plan plan-none" aria-label="Bauplan"><div class="plan-h"><div><span class="mono">Bauplan</span><b>Nicht hochgeladen</b></div><button class="ic" data-act="planToggle" aria-label="Bauplan ausblenden" title="Ausblenden">' + IC.x + '</button></div>' +
-    '<div class="plan-empty">' + IC.layers + '<p>Lade beim nächsten Upload einen Bauplan (PNG oder JPG) als Kontext hoch. Dann prüft das Backend die Mengen gegen den Plan und die Positionen erscheinen hier.</p><button class="btn btn-sm btn-quiet" data-act="newProj">' + IC.plus + 'Neues Projekt mit Plan</button></div></aside>';
   var img = P.live && /\.(png|jpe?g)$/i.test(P.plan.file);
   var o = '<svg class="plan-svg" viewBox="0 0 1000 ' + PLAN_VH + '" role="img" aria-label="' + (P.live ? 'Bauplan ' + esc(P.plan.file) : 'Grundriss Erdgeschoss') + ' mit Positionen">';
   if (P.live) o += img ? '<image href="' + esc(API + '/projects/' + encodeURIComponent(P.id) + '/files/' + encodeURIComponent(P.plan.file)) + '" x="0" y="0" width="1000" height="' + PLAN_VH + '" preserveAspectRatio="none"/>'
@@ -1702,7 +1790,7 @@ function vPlan(d, full) {
   o += '</svg>';
   var hi = (P.live ? d.full : d.all).filter(function (r) { return PLAN[r.oz] && shown[r.oz]; }).length;
   return '<aside class="plan' + (full ? ' plan-full' : '') + '" aria-label="Bauplan' + (full ? ' Vollbild' : '') + '">' +
-    '<div class="plan-h"><div class="plan-ctl" style="margin-left:auto">' +
+    '<div class="plan-h"><div class="plan-ctl" style="margin-left:auto">' + (full ? '' : '<button class="ic" data-act="planToggle" aria-label="Bauplan ausblenden" title="Ausblenden">' + IC.x + '</button>') +
       (full ? '<button class="ic pfs-b" data-act="planFull" data-v="0" aria-label="Vollbild schließen" title="Schließen (Esc)">' + IC.x + '</button>' : '<button class="ic pfs-b" data-act="planFull" data-v="1" aria-label="Bauplan im Vollbild" title="Vollbild">' + IC.expand + '</button>') + '</div></div>' +
     '<div class="plan-c">' + o + '<div class="plan-tip" aria-hidden="true"></div></div>' +
     '<div class="plan-f"><span class="mono plan-xy">' + hi + ' Positionen verortet' + (P.live ? '' : ' · M 1:100') + '</span><span class="plan-lg"><span class="lgt">Konfidenz</span><i class="hi"></i>&lt; 50<i class="mid"></i>&lt; 75<i class="lo"></i>≥ 75<i class="ok"></i>bestätigt</span></div>' +
@@ -1736,9 +1824,9 @@ function vTable(d) {
   return '<section aria-label="Leistungsverzeichnis" class="rise" style="--d:380ms">' +
     '<div class="lv-head"><div><div class="mono faint"><span style="color:var(--ink)">03</span> Leistungsverzeichnis</div><div class="lv-title">' + (isAll ? fmt(d.rows.length) + ' Positionen <small>· gesamtes LV</small>' : d.rows.length + ' wichtige Positionen <small>· von ' + fmt(d.full.length) + '</small>') + '</div>' +
       '</div>' +
-      '<div class="lv-stats"><div class="lv-stat"><span class="mono">Bestätigt</span><b>' + okN + '<small> / ' + d.all.length + '</small></b><i class="lv-meter"><i style="width:' + (okN / d.all.length * 100) + '%"></i></i></div>' +
+      '<div class="lv-stats">' + (function () { var sf = safeRows(d); return sf.length ? '<button class="btn btn-primary bulksafe" data-act="bulkSafe" title="Konfidenz ab 75 % und höchstens 2 % des LV-Volumens">' + IC.tick + (sf.length === 1 ? '1 sicheren Preis übernehmen' : sf.length + ' sichere Preise übernehmen') + '</button>' : ''; })() + '<div class="lv-stat"><span class="mono">Bestätigt</span><b>' + okN + '<small> / ' + d.all.length + '</small></b><i class="lv-meter"><i style="width:' + (okN / d.all.length * 100) + '%"></i></i></div>' +
         '<div class="lv-stat"><span class="mono">Summe angezeigt</span><b>' + eur(sum) + '</b><i class="lv-meter"><i style="width:' + Math.min(100, sum / d.tot * 100) + '%;background:var(--ink)"></i></i></div></div></div>' +
-    '<div class="lv-split' + (planShown() ? '' : ' plan-off') + '">' + (planShown() ? vPlan(d) : '') + '<div class="lv-main"><div class="lv-bar"><div class="filters" role="group" aria-label="Filter">' + filters.map(function (x) {
+    vBulkNote(d) + '<div class="lv-split' + (planShown() ? '' : ' plan-off') + '">' + (planShown() ? vPlan(d) : '') + '<div class="lv-main"><div class="lv-bar"><div class="filters" role="group" aria-label="Filter">' + filters.map(function (x) {
       var on = d.f === x[0];
       return '<button class="pill' + (on ? ' on' : '') + '" aria-pressed="' + on + '" data-act="filter" data-v="' + x[0] + '">' + x[1] + '<span class="cnt">' + d.base.filter(d.fdef[x[0]]).length + '</span></button>';
     }).join('') +
@@ -1746,7 +1834,7 @@ function vTable(d) {
     '</div><div class="tools"><label class="search">' + IC.search + '<span class="sr">Positionen filtern</span><input id="q-lv" type="search" data-in="q" value="' + esc(S.q) + '" placeholder="OZ, Text oder Gewerk…"></label>' +
         '<span class="vsep" aria-hidden="true"></span>' +
         '<div class="seg" role="group" aria-label="Darstellung"><button class="' + (S.density === 'compact' ? 'on' : '') + '" data-act="density" data-v="compact" aria-pressed="' + (S.density === 'compact') + '">Kompakt</button><button class="' + (S.density === 'details' ? 'on' : '') + '" data-act="density" data-v="details" aria-pressed="' + (S.density === 'details') + '">Langtext</button></div>' +
-        '<button class="btn btn-quiet' + (planShown() ? ' on' : '') + '" data-act="planToggle" aria-pressed="' + planShown() + '" title="' + (planShown() ? 'Bauplan ausblenden' : 'Bauplan einblenden') + '">' + IC.panel + 'Bauplan</button>' +
+        (hasPlan() ? '<button class="btn btn-quiet' + (planShown() ? ' on' : '') + '" data-act="planToggle" aria-pressed="' + planShown() + '" title="' + (planShown() ? 'Bauplan ausblenden' : 'Bauplan einblenden') + '">' + IC.panel + 'Bauplan</button>' : '') +
         '<button class="btn btn-quiet' + (S.group ? ' on' : '') + '" data-act="group" aria-pressed="' + S.group + '">' + IC.layers + 'Nach Gewerk</button>' +
         '<button class="btn btn-quiet" data-act="csv" title="CSV kopieren">' + IC.copy + 'CSV</button></div></div>' +
     '<div class="tbl"><div role="table" aria-label="Positionen des Leistungsverzeichnisses">' +
@@ -1873,7 +1961,7 @@ function vDrawer(d) {
   var nextOpen = nav.list.slice(nav.idx + 1).find(function (r) { return !S.confirmed[r.oz]; });
 
   var cta = p.np
-    ? '<button class="confirm need" data-k="ctanp" data-act="startEdit"><span class="cbadge">' + IC.pen + '</span><span class="cl"><b>Erst Preis eingeben</b><small>Keine KI-Schätzung für diese Position</small></span><span class="ca"><small>Menge</small><b>' + qty(p.menge) + ' ' + p.einheit + '</b></span></button>'
+    ? '<button class="confirm need" data-k="ctanp" data-act="startEdit"><span class="cbadge">' + IC.pen + '</span><span class="cl"><b>' + (p.sg ? 'Vorschlag prüfen' : 'Erst Preis eingeben') + '</b><small>' + (p.sg ? 'Niedrige Konfidenz · Vorschlag übernehmen oder eigenen Preis eingeben' : 'Keine passende Position in den alten LVs') + '</small></span><span class="ca"><small>Menge</small><b>' + qty(p.menge) + ' ' + p.einheit + '</b></span></button>'
     : p.gen
     ? '<div class="okline auto" data-k="okauto">' + IC.tick + (p.manual ? 'Eigener Preis gespeichert · zählt direkt ins Angebot' : '1:1 aus Alt-LV · keine Bestätigung nötig') + (p.manual ? '<button class="lnk" data-act="resetEp">Rückgängig</button>' : '') + '</div>'
     : ok
@@ -1940,16 +2028,18 @@ function vDrawer(d) {
         '<div><dt>Menge</dt><dd>' + qty(p.menge) + ' ' + p.einheit + '</dd></div></dl>' +
       (p.conf < 75 ? '<div class="rl ' + k + '">' + IC.warn + '<span>' + esc(p.why) + '</span></div>' : '') + '</div></header>' +
     '<div class="dw-body"><div class="dw-swap ' + (S.leaving ? 'leaving' : S.swapDir) + '" data-k="b' + p.oz + '">' +
-      '<section class="price' + (ok ? ' is-ok' : '') + (S.editEp ? ' is-edit' : '') + '" aria-label="Preis"><button class="mini" data-act="aiClose" tabindex="-1"><span class="mono">' + (p.np ? 'Preis' : p.manual ? 'Eigener Preis' : 'KI-Preis') + '</span><b>' + (p.np ? 'fehlt' : eur(p.ep)) + '</b><span class="muted">' + (p.np ? 'Keine KI-Schätzung' : 'je ' + p.einheit + ' · GP ' + eur(p.gp)) + '</span><span class="conf-v ' + confLvl(p.conf) + '"><b>' + p.conf + ' %</b></span></button><div class="ptop"><div class="pmain">' +
-        '<div class="mono lab">' + (p.np ? 'Kein Preisvorschlag möglich' : p.manual ? (noAi ? 'Eigener Preis · ohne KI-Vorschlag' : 'Eigener Preis · ' + pct(md) + ' zum KI-Vorschlag') : 'KI-Preisvorschlag') + '</div>' +
+      '<section class="price' + (ok ? ' is-ok' : '') + (S.editEp ? ' is-edit' : '') + '" aria-label="Preis"><button class="mini" data-act="aiClose" tabindex="-1"><span class="mono">' + (p.np ? 'Preis' : p.manual ? 'Eigener Preis' : 'KI-Preis') + '</span><b>' + (p.np ? 'fehlt' : eur(p.ep)) + '</b><span class="muted">' + (p.np ? (p.sg ? 'Vorschlag ≈ ' + eur(p.sg.ep) + ' · bitte prüfen' : 'Keine KI-Schätzung') : 'je ' + p.einheit + ' · GP ' + eur(p.gp)) + '</span><span class="conf-v ' + confLvl(p.conf) + '"><b>' + p.conf + ' %</b></span></button><div class="ptop"><div class="pmain">' +
+        '<div class="mono lab">' + (p.np ? (p.sg ? 'Vorschlag · niedrige Konfidenz, bitte prüfen' : 'Kein Preisvorschlag möglich') : p.manual ? (noAi ? 'Eigener Preis · ohne KI-Vorschlag' : 'Eigener Preis · ' + pct(md) + ' zum KI-Vorschlag') : 'KI-Preisvorschlag') + '</div>' +
         '<div class="prow">' + (S.editEp
           ? '<label class="epedit"><span class="sr">Einheitspreis in Euro</span><input id="epin" inputmode="decimal" autocomplete="off" data-in="epDraft" data-enter="saveEp" value="' + esc(S.epDraft) + '"><span class="cur">€</span></label>'
+          : p.np && p.sg ? '<div class="sgbox" data-k="sg' + p.oz + '"><span class="sg-ep">≈ ' + eur(p.sg.ep) + '<small> je ' + esc(p.einheit) + '</small></span><span class="sg-r">' + (p.sg.hi > p.sg.lo ? 'Spanne ' + eur(p.sg.lo) + ' – ' + eur(p.sg.hi) + ' · ' : '') + 'aus ' + p.sg.n + ' verwandten Position' + (p.sg.n > 1 ? 'en' : '') + '</span>' +
+              '<span class="sg-b"><button class="btn btn-sm btn-primary" data-act="takeSugg">Vorschlag übernehmen</button><button class="btn btn-sm btn-quiet" data-act="startEdit">Eigenen Preis eingeben</button></span></div>'
           : p.np ? '<button class="ep epnp" data-k="epnp" data-act="startEdit" aria-label="Preis eingeben">Preis eingeben<span class="pen">' + IC.pen + '</span></button>'
           : '<button class="ep' + (S.flashEp ? ' flash' : '') + '" data-k="ep' + p.ep + '" data-act="startEdit" title="Preis bearbeiten" aria-label="Einheitspreis ' + eur(p.ep) + ', bearbeiten">' + eur(p.ep) + '<span class="pen">' + IC.pen + '</span></button>') +
           (p.np && !S.editEp ? '' : '<span class="muted">je ' + p.einheit + '</span>') + '</div>' +
         (S.editEp
           ? '<div class="sub edhint"><span>' + (dd === null ? 'Gültigen Preis eingeben' : noAi ? 'GP ' + eur(Math.round(dv * 100) / 100 * p.menge) : Math.abs(dd) < 0.05 ? 'entspricht dem KI-Vorschlag' : '<b style="color:' + (Math.abs(dd) > 10 ? 'var(--warn)' : 'var(--ink)') + '">' + pct(dd) + '</b> zum KI-Vorschlag · GP ' + eur(Math.round(dv * 100) / 100 * p.menge)) + '</span><span class="keys"><kbd>Enter</kbd> übernehmen <kbd>Esc</kbd> verwerfen</span></div>'
-          : p.np ? '<div class="sub">' + qty(p.menge) + ' ' + p.einheit + ' · GP wird nach der Eingabe berechnet</div>'
+          : p.np ? '<div class="sub">' + qty(p.menge) + ' ' + p.einheit + (p.sg ? ' · GP ≈ ' + eur(p.sg.ep * p.menge) + (p.sg.hi > p.sg.lo ? ' (' + eur(p.sg.lo * p.menge) + ' – ' + eur(p.sg.hi * p.menge) + ')' : '') : ' · GP wird nach der Eingabe berechnet') + '</div>'
           : '<div class="sub">GP <b>' + eur(p.gp) + '</b> · ' + fmt(p.gp / TOTAL * 100, 2) + ' % des LV · ' + qty(p.menge) + ' ' + p.einheit +
             (p.manual && !p.srvManual ? ' · <button class="lnk" data-act="resetEp">' + (noAi ? 'Preis entfernen' : 'KI-Vorschlag ' + eur(p.aiEp) + ' wiederherstellen') + '</button>' : '') +
             (P.live && !p.manual && !p.np ? ' · <button class="lnk" data-act="doubt" title="Senkt die Konfidenz dieser Position im Backend">Preis anzweifeln</button>' : '') + '</div>') +
@@ -2079,6 +2169,26 @@ function countUp() {
 }
 var toastId = 0, toastT;
 function toast(t) { clearTimeout(toastT); set({ toast: { t: t, id: ++toastId } }); toastT = setTimeout(function () { set({ toast: null }); }, 2800); }
+// "safe": a price with confidence >= 75 % whose GP is at most 2 % of the LV and that still needs a confirmation
+function safeRows(d) {
+  var cap = 0.02 * (d.tot || 0);
+  return d.full.filter(function (r) { return !r.np && !r.gen && !r.opt && !S.confirmed[r.oz] && r.conf >= 75 && r.gp <= cap; });
+}
+function openRows(d) { return d.full.filter(function (r) { return !r.opt && !r.gen && !S.confirmed[r.oz]; }); }
+function vBulkNote(d) {
+  var B = S.bulkNote; if (!B) return '';
+  var open = openRows(d), np = open.filter(function (r) { return r.np; }), low = open.filter(function (r) { return !r.np && r.conf < 50; }),
+    big = open.filter(function (r) { return !r.np && r.conf >= 50; }), first = np.concat(low, big).sort(function (a, b) { return (b.val || b.gp) - (a.val || a.gp); }).slice(0, 3);
+  var parts = [];
+  if (np.length) parts.push(np.length + ' ohne Preis');
+  if (low.length) parts.push(low.length + ' mit niedriger Konfidenz');
+  if (big.length) parts.push(big.length + ' sicher, aber teuer genug für einen Blick');
+  return '<div class="agentnote" data-k="bulknote"><span class="an-i">' + IC.star + '</span><div class="an-t"><b>Agent</b>' +
+    '<p>' + (B.n === 1 ? '1 sicherer Preis übernommen' : B.n + ' sichere Preise übernommen') + ' (Σ ' + eur(B.sum) + '). ' + (open.length ? 'Noch offen: ' + open.length + (open.length === 1 ? ' Position' : ' Positionen') + ', davon ' + parts.join(', ') + '.' + (first.length ? ' Zuerst ansehen: ' : '') : 'Es ist nichts mehr offen.') +
+    first.map(function (r, i) { return (i ? ', ' : '') + '<button class="lnk" data-act="open" data-oz="' + r.oz + '">' + esc(r.oz + ' ' + r.kurz) + '</button>'; }).join('') + (first.length ? '.' : '') + '</p>' +
+    (open.length ? '<button class="btn btn-sm btn-quiet" data-act="filter" data-v="review">Offene anzeigen</button>' : '') + '</div>' +
+    '<button class="ic" data-act="bulkNoteClose" aria-label="Hinweis schließen">' + IC.x + '</button></div>';
+}
 function flagOk(list) {
   var j = Object.assign({}, S.justOk);
   list.forEach(function (oz, i) { j[oz] = i; });
@@ -2282,6 +2392,15 @@ var A = {
     var lines = ['OZ;Kurztext;Gewerk;Menge;Einheit;EP;GP;Konfidenz;Status'].concat(rows.map(function (r) { return [r.oz, q(r.kurz), q(r.gewerk), fmt(r.menge, r.menge % 1 ? 1 : 0), r.einheit, fmt(r.ep, 2), fmt(r.gp, 2), r.risk, S.confirmed[r.oz] ? 'bestätigt' : r.mode].join(';'); }));
     try { navigator.clipboard.writeText(lines.join('\n')).then(function () { toast(rows.length + ' Zeilen als CSV kopiert'); }, function () { toast('Kopieren nicht möglich'); }); } catch (e) { toast('Kopieren nicht möglich'); }
   },
+  bulkSafe: function () {
+    var d = derive(), sf = safeRows(d); if (!sf.length) return;
+    var c = Object.assign({}, S.confirmed); sf.forEach(function (r) { c[r.oz] = true; });
+    flagOk(sf.map(function (r) { return r.oz; }));
+    set({ confirmed: c, bulkNote: { n: sf.length, sum: sf.reduce(function (a, r) { return a + r.gp; }, 0) } });
+    toast(sf.length === 1 ? '1 sicherer Preis übernommen' : sf.length + ' sichere Preise übernommen');
+  },
+  bulkNoteClose: function () { set({ bulkNote: null }); },
+  takeSugg: function () { var p = cur(); if (!p || !p.sg) return; S.epDraft = String(p.sg.ep); saveEp(); },
   bulkOk: function () {
     var pr = derive().all.filter(function (r) { return S.picked[r.oz]; });
     if (!pr.length) return;
@@ -2372,8 +2491,8 @@ var A = {
 function vProjMenu() {
   if (!S.projOpen) return '';
   var L = S.projList;
-  return '<div class="pmenu" role="menu" data-k="pmenu"><div class="menu-h mono">Projekte · ' + esc(API) + '</div>' +
-    (L === null ? '<div class="pm-e mono faint">Lädt…</div>' : L === false ? '<div class="pm-e">Backend nicht erreichbar.</div>' : !L.length ? '<div class="pm-e">Noch keine Projekte analysiert.</div>' :
+  return '<div class="pmenu" role="menu" data-k="pmenu"><div class="menu-h mono">Projekte</div>' +
+    (L === null ? '<div class="pm-e mono faint">Lädt…</div>' : L === false ? '<div class="pm-e">Projekte konnten nicht geladen werden.</div>' : !L.length ? '<div class="pm-e">Noch keine Projekte analysiert.</div>' :
       L.map(function (p) {
         return '<button class="pm-i' + (P.live && P.id === p.project ? ' on' : '') + '" data-act="loadProj" data-v="' + esc(p.project) + '"' + (p.items == null ? ' disabled' : '') + '><span><b>' + esc((store('lvm-meta-' + p.project) || {}).name || p.project) + '</b><small>' + esc(p.project) + (p.items != null ? ' · ' + fmt(p.items) + ' Pos.' : '') + (p.total != null ? ' · ' + eur(Math.round(p.total)) : '') + '</small></span>' +
           '<span class="mono ' + (p.status === 'failed' ? 'pm-bad' : 'faint') + '">' + (p.status === 'running' ? 'läuft…' : p.status === 'failed' ? 'Fehler' : p.confidence != null ? p.confidence + ' %' : '') + '</span></button>';
@@ -2386,32 +2505,20 @@ function upFile(kind, f, acc, hint) {
 }
 function vUpload() {
   var U = S.up; if (!U) return '';
-  var head = '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span class="mono faint">Neues Projekt · Backend ' + esc(API) + '</span>' +
+  var head = '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span class="mono faint">Neues Projekt</span>' +
     (U.phase === 'run' ? '' : '<button class="ic" data-act="upClose" aria-label="Schließen">' + IC.x + '</button>') + '</div>';
   if (U.phase === 'run' || U.phase === 'err') {
     var sec = Math.round(((U.t1 || Date.now()) - U.t0) / 1000);
     return '<div class="scrim" data-k="up"><div class="modal upm" role="dialog" aria-modal="true" aria-label="Analyse läuft" data-stop="1">' + head +
       '<h3 class="up-h">' + (U.phase === 'err' ? 'Analyse fehlgeschlagen' : 'LV wird analysiert') + '</h3>' +
-      '<p class="muted up-p">' + esc(U.id) + ' · ' + esc(U.lvName) + (U.planName ? ' + ' + esc(U.planName) : '') + ' · ' + (U.copy ? 'Schnelltest ohne KI' : 'volle Analyse mit KI') + ' · ' + sec + ' s</p>' +
+      '<p class="muted up-p">' + esc(U.lvName) + (U.planName ? ' + ' + esc(U.planName) : '') + ' · ' + sec + ' s</p>' +
       (U.phase === 'err' ? '<div class="up-err">' + IC.warn + '<span>' + esc(U.err) + '</span></div>' : '<div class="up-bar"><i></i></div>') +
       '<pre class="up-log" data-k="ulog">' + esc((U.log || []).slice(-12).join('\n') || 'Warte auf die ersten Zeilen…') + '</pre>' +
       (U.phase === 'err' ? '<div class="up-btns"><button class="btn btn-quiet" data-act="upClose">Schließen</button><button class="btn btn-primary" data-act="upBack">Zurück zum Formular</button></div>' :
         '<p class="mono faint up-note">Eine volle Analyse fragt KI-Modelle und dauert einige Minuten. Das Fenster kann offen bleiben.</p>') +
       '</div></div>';
   }
-  if (U.phase === 'form') return '';
-  return '<div class="scrim" data-k="up"><div class="modal upm" role="dialog" aria-modal="true" aria-label="Neues Projekt" data-stop="1">' + head +
-    '<h3 class="up-h">LV hochladen</h3><p class="muted up-p">Das LV wird gegen die Alt-LVs der Preisbibliothek bepreist. Ein Bauplan als Kontext prüft zusätzlich die Mengen.</p>' +
-    (S.apiOk === false ? '<div class="up-err">' + IC.warn + '<span>Backend unter ' + esc(API) + ' nicht erreichbar. Läuft <code>uvicorn lv.api:app</code>? Andere Adresse: Seite mit <code>?api=https://…</code> öffnen.</span></div>' : '') +
-    '<div class="up-grid">' +
-      upFile('lv', U.lv, '.x83,.d83,.d84,.d86,.X83,.D83,.D84,.D86', ['Leistungsverzeichnis wählen', 'GAEB .x83, .d83, .d84, .d86 · Pflicht']) +
-      upFile('plan', U.plan, '.png,.jpg,.jpeg,.pdf', ['Kontext: Bauplan (optional)', 'PNG oder JPG für Markierungen, PDF geht auch']) +
-    '</div>' +
-    '<div class="up-f"><label><span class="mono faint">Projekt-ID</span><input class="fld" data-in="upId" value="' + esc(S.upId) + '" placeholder="z. B. KITA-RIEM" maxlength="40"></label>' +
-      '<label><span class="mono faint">Name (optional)</span><input class="fld" data-in="upName" value="' + esc(S.upName) + '" placeholder="z. B. Neubau Grundschule"></label></div>' +
-    '<button class="up-chk' + (U.copy ? ' on' : '') + '" data-act="upCopy" aria-pressed="' + !!U.copy + '"><span class="cb2">' + (U.copy ? IC.tickRaw : '') + '</span><span><b>Schnelltest ohne KI</b><small>Nur textgleiche Positionen kopieren. Sekunden statt Minuten, keine Kosten, kein Bauplan.</small></span></button>' +
-    (U.err ? '<div class="up-err">' + IC.warn + '<span>' + esc(U.err) + '</span></div>' : '') +
-    '<div class="up-btns"><button class="btn btn-quiet" data-act="upClose">Abbrechen</button><button class="btn btn-primary" data-act="upGo"' + (U.lv ? '' : ' disabled') + '>Analyse starten' + IC.arrow + '</button></div></div></div>';
+  return '';
 }
 function pingApi() { return api('/projects').then(function (l) { S.apiOk = true; S.projList = l; render(); return l; }, function () { S.apiOk = false; S.projList = false; render(); return false; }); }
 function resetView() {
@@ -2457,61 +2564,39 @@ function pollRun(id) {
   }, function (e) { if (!S.up) return; S.up.log = (S.up.log || []).concat(['Status nicht abrufbar: ' + e.message]); render(); upT = setTimeout(function () { pollRun(id); }, 4000); });
 }
 function suggestId(name) { return String(name || '').replace(/\.[^.]+$/, '').replace(/[^A-Za-z0-9-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'LV-1'; }
-function takeFile(kind, f) {
-  if (!S.up || !f) return;
-  S.up[kind] = f; S.up.err = '';
-  if (kind === 'lv' && !S.upIdTouched) S.upId = suggestId(f.name);
-  if (kind === 'plan') S.up.copy = false;
+function takeFiles(files) {
+  if (!S.up || !files || !files.length) return;
+  var bad = [];
+  Array.prototype.forEach.call(files, function (f) {
+    if (LV_EXT.test(f.name)) S.up.lv = f; else if (PLAN_EXT.test(f.name)) S.up.plan = f; else bad.push(f.name);
+  });
+  S.up.err = bad.length ? 'Nicht unterstützt: ' + bad.join(', ') + '. Erlaubt sind GAEB .X83/.D83/.D84/.D86 und PNG/JPG.' : '';
   render();
 }
 
-// ================= start page: upload + demo samples =================
-// Unpriced LVs from the Challenge A dataset in ./samples. Every click is a fresh run on the backend.
-var SAMPLES = [
-  { id: 'BSP-RINGSCHLUSS', file: 'ringschluss-brunnenwasser.x83', name: 'Ringschluss Brunnenwasser', n: 248, kind: 'Rohrleitungsbau' },
-  { id: 'BSP-MASCHINENTECHNIK', file: 'maschinentechnik-anlagenbau.x83', name: 'Maschinentechnik Anlagenbau', n: 159, kind: 'Anlagenbau' },
-  { id: 'BSP-TIEFBAU', file: 'tiefbau-verlegung.x83', name: 'Tiefbau und Verlegung', n: 296, kind: 'Tiefbau' },
-  { id: 'BSP-KURZ', file: 'kurz-lv-50.x83', name: 'Kurzes LV', n: 50, kind: 'Kurzes LV' }
-];
-
-// Plan samples: a fictional plan with its matching LV and an LV with deliberate quantity errors (vlm test set).
-var PLAN_SAMPLES = [
-  { id: 'BSP-KINO-GRUNDRISS', name: 'Kino Saal 3 · Grundriss A-201', img: 'kino_grundriss.png', lv: 'kino-grundriss.x83', bad: 'kino-grundriss-fehler.x83', n: 26, what: 'Sitze, Türen, Lautsprecher, Bodenflächen' },
-  { id: 'BSP-KINO-DECKE', name: 'Kino Saal 3 · Deckenspiegel A-401', img: 'kino_deckenspiegel.png', lv: 'kino-deckenspiegel.x83', bad: 'kino-deckenspiegel-fehler.x83', n: 13, what: 'Leuchten, Rauchmelder, Lüftungsgitter' },
-  { id: 'BSP-HOERSAAL', name: 'Hörsaal H1 · Grundriss A-110', img: 'hoersaal_grundriss.png', lv: 'hoersaal.x83', bad: 'hoersaal-fehler.x83', n: 52, what: 'Fenster, Türen, Sitze, Ausstattung' }
-];
-function freshUp() { var c = store('lvm-copy'); return { phase: 'form', lv: null, plan: null, copy: c === null ? true : !!c, err: '' }; }
+// ================= start page: one drop zone for the LV and an optional plan =================
+var LV_EXT = /\.(x83|d83|d84|d86)$/i, PLAN_EXT = /\.(png|jpe?g)$/i;
+function freshUp() { return { phase: 'form', lv: null, plan: null, copy: false, err: '' }; }
+function upRow(kind, f) {
+  return '<li data-k="uf' + kind + '"><span class="uf-n">' + esc(f.name) + '</span><span class="uf-s mono">' + fmt(Math.max(1, f.size / 1024)) + ' KB</span>' +
+    '<button class="ic" data-act="upRemove" data-v="' + kind + '" aria-label="' + esc(f.name) + ' entfernen">' + IC.x + '</button></li>';
+}
 function vStart() {
-  var U = S.up || (S.up = freshUp()), off = S.apiOk === false;
-  var api0 = S.apiOk === true ? '<span class="st-ok"><i></i>Backend verbunden</span>' : off ? '<span class="st-bad"><i></i>Backend nicht erreichbar</span>' : '<span class="faint">Backend wird geprüft…</span>';
-  var form = '<section class="card st-up" aria-label="LV hochladen"><div class="card-h"><span class="mono"><b>01</b> LV hochladen</span><span class="mono faint">GAEB .x83 · .d83 · .d84 · .d86</span></div>' +
-    (off ? '<div class="up-err">' + IC.warn + '<span>Backend unter ' + esc(API) + ' nicht erreichbar. Lokal: <code>uvicorn lv.api:app</code> starten. Andere Adresse: Seite mit <code>?api=https://…</code> öffnen.</span></div>' : '') +
-    '<div class="up-grid">' +
-      upFile('lv', U.lv, '.x83,.d83,.d84,.d86,.X83,.D83,.D84,.D86', ['LV hierher ziehen oder klicken', 'Leistungsverzeichnis · Pflicht']) +
-      upFile('plan', U.plan, '.png,.jpg,.jpeg,.pdf', ['Kontext: Bauplan (optional)', 'PNG oder JPG für Markierungen, PDF geht auch']) +
-    '</div>' +
-    '<div class="up-f"><label><span class="mono faint">Projekt-ID</span><input class="fld" data-in="upId" value="' + esc(S.upId || '') + '" placeholder="z. B. KITA-RIEM" maxlength="40"></label>' +
-      '<label><span class="mono faint">Name (optional)</span><input class="fld" data-in="upName" value="' + esc(S.upName || '') + '" placeholder="z. B. Neubau Grundschule"></label></div>' +
-    '<button class="up-chk' + (U.copy ? ' on' : '') + '" data-act="upCopy" aria-pressed="' + !!U.copy + '"><span class="cb2">' + (U.copy ? IC.tickRaw : '') + '</span><span><b>Schnelltest ohne KI</b><small>Nur textgleiche Positionen aus den Alt-LVs übernehmen. Sekunden statt Minuten, keine Kosten, ohne Bauplan. Aus: volle KI-Analyse, braucht API-Schlüssel im Backend.</small></span></button>' +
-    (U.err ? '<div class="up-err">' + IC.warn + '<span>' + esc(U.err) + '</span></div>' : '') +
-    '<div class="up-btns"><button class="btn btn-primary" data-act="upGo"' + (U.lv && !off ? '' : ' disabled') + '>' + (U.copy ? 'Schnelltest starten' : 'Analyse starten') + IC.arrow + '</button></div></section>';
-  var samples = '<section class="card st-smp" aria-label="Beispiel-LVs"><div class="card-h"><span class="mono"><b>02</b> Beispiel-LVs aus dem Datensatz</span><span class="mono faint">Unbepreiste LVs der Challenge · Klick startet den Lauf</span></div>' +
-    '<ol class="smp">' + SAMPLES.map(function (x, i) {
-      return '<li data-k="smp' + i + '"><div class="smp-t"><b>' + esc(x.name) + '</b><small class="mono">' + esc(x.file) + ' · ' + x.n + ' Positionen · ohne Preise</small></div>' +
-        '<div class="smp-b"><button class="btn btn-sm btn-quiet" data-act="sample" data-i="' + i + '" data-mode="copy"' + (off ? ' disabled' : '') + '>Schnelltest</button>' +
-        '<button class="btn btn-sm btn-primary" data-act="sample" data-i="' + i + '" data-mode="ai"' + (off ? ' disabled' : '') + ' title="Volle Analyse mit KI, braucht API-Schlüssel im Backend">KI-Analyse</button></div></li>';
-    }).join('') + '</ol></section>';
-  var plans = '<section class="card st-plans" aria-label="Beispiele mit Bauplan"><div class="card-h"><span class="mono"><b>03</b> Beispiele mit Bauplan</span><span class="mono faint">Fiktive Testpläne · volle Analyse mit KI und Planprüfung</span></div>' +
-    '<p class="st-note muted">Zu jedem Plan gibt es das passende LV und eine Variante, in der Mengen absichtlich nicht zum Plan passen. Die Planprüfung soll diese Abweichungen finden.</p>' +
-    '<div class="pls">' + PLAN_SAMPLES.map(function (x, i) {
-      return '<div class="pl" data-k="pl' + i + '"><a class="pl-img" href="samples/plan/' + x.img + '" target="_blank" rel="noopener" title="Plan öffnen"><img src="samples/plan/' + x.img + '" alt="' + esc(x.name) + '"></a>' +
-        '<div class="pl-t"><b>' + esc(x.name) + '</b><small class="mono">' + x.n + ' Positionen · prüft ' + esc(x.what) + '</small></div>' +
-        '<div class="pl-b"><button class="btn btn-sm btn-quiet" data-act="planSample" data-i="' + i + '" data-v="ok"' + (off ? ' disabled' : '') + '>Passendes LV</button>' +
-        '<button class="btn btn-sm btn-primary" data-act="planSample" data-i="' + i + '" data-v="bad"' + (off ? ' disabled' : '') + '>LV mit Fehlern</button></div></div>';
-    }).join('') + '</div></section>';
-  return '<div class="start" data-k="start"><div class="eyebrow mono"><span class="num">Start</span>' + api0 + '</div>' +
-    '<h1>Neues LV analysieren</h1><p class="st-lead muted">Lade ein Leistungsverzeichnis hoch. Jede Position bekommt einen Preis aus euren Alt-LVs, eine Konfidenz und eine Quelle. Ein Bauplan als Kontext prüft zusätzlich die Mengen.</p>' +
-    '<div class="st-grid">' + form + samples + '</div>' + plans + '</div>';
+  var U = S.up || (S.up = freshUp());
+  var list = function (title, kind, f, empty) {
+    return '<div class="uf"><div class="mono faint uf-h">' + title + '</div>' + (f ? '<ul>' + upRow(kind, f) + '</ul>' : '<p class="uf-e">' + empty + '</p>') + '</div>';
+  };
+  return '<div class="start" data-k="start">' +
+    '<h1>Neues Projekt</h1><p class="st-lead muted">Lade ein Leistungsverzeichnis hoch. Jede Position bekommt einen Preis aus euren Alt-LVs, eine Konfidenz und eine Quelle. Ein Bauplan prüft zusätzlich die Mengen.</p>' +
+    '<section class="card st-up" aria-label="Projekt hochladen">' +
+      '<label class="dropz' + (U.lv || U.plan ? ' has' : '') + '" data-drop="any" data-k="dropz"><input type="file" class="sr" multiple accept=".x83,.d83,.d84,.d86,.X83,.D83,.D84,.D86,.png,.jpg,.jpeg" data-file="any">' +
+        '<span class="dropz-i">' + IC.down + '</span><b>Upload your project</b><span class="muted">Dateien hierher ziehen oder klicken</span>' +
+        '<span class="dropz-f mono"><span>LV · GAEB .X83 / .D83 / .D84 / .D86</span><span>Bauplan · PNG / JPG (optional)</span></span>' +
+        '<span class="dropz-l">' + list('Leistungsverzeichnis', 'lv', U.lv, 'Noch kein LV') + list('Bauplan (optional)', 'plan', U.plan, 'Kein Bauplan') + '</span>' +
+      '</label>' +
+      (U.err ? '<div class="up-err">' + IC.warn + '<span>' + esc(U.err) + '</span></div>' : '') +
+      '<div class="up-btns"><button class="btn btn-primary" data-act="upGo"' + (U.lv ? '' : ' disabled') + '>Analyse starten' + IC.arrow + '</button></div>' +
+    '</section></div>';
 }
 var STARTA = {
   home: function () {
@@ -2521,29 +2606,7 @@ var STARTA = {
     try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
     render(); window.scrollTo({ top: 0 }); pingApi();
   },
-  planSample: function (ds) {
-    var x = PLAN_SAMPLES[+ds.i]; if (!x) return;
-    var bad = ds.v === 'bad', lvName = bad ? x.bad : x.lv;
-    if (!S.up) S.up = freshUp();
-    S.up.err = '';
-    var get = function (f) { return fetch('samples/plan/' + f).then(function (r) { if (!r.ok) throw new Error('Beispiel ' + f + ' nicht gefunden'); return r.blob(); }); };
-    Promise.all([get(lvName), get(x.img)]).then(function (b) {
-      S.up.lv = new File([b[0]], lvName); S.up.plan = new File([b[1]], x.img, { type: 'image/png' }); S.up.copy = false;
-      S.upId = x.id + (bad ? '-FEHLER' : ''); S.upName = x.name + (bad ? ' (LV mit Fehlern)' : ''); S.upDeadline = ''; S.upIdTouched = true;
-      A.upGo();
-    }).catch(function (e) { S.up.err = e.message; render(); });
-  },
-  sample: function (ds) {
-    var x = SAMPLES[+ds.i]; if (!x) return;
-    if (!S.up) S.up = freshUp();
-    S.up.err = '';
-    fetch('samples/' + x.file).then(function (r) { if (!r.ok) throw new Error('Beispiel ' + x.file + ' nicht gefunden'); return r.blob(); }).then(function (b) {
-      var ai = ds.mode !== 'copy';
-      S.up.lv = new File([b], x.file); S.up.plan = null; S.up.copy = !ai;
-      S.upId = x.id + (ai ? '-KI' : ''); S.upName = x.name + (ai ? ' (KI)' : ''); S.upDeadline = ''; S.upIdTouched = true;
-      A.upGo();
-    }).catch(function (e) { S.up.err = e.message; render(); });
-  }
+  upRemove: function (ds, e) { if (e) e.preventDefault(); if (S.up) { S.up[ds.v] = null; S.up.err = ''; render(); } }
 };
 var LIVEA = {
   projects: function () { var o = !S.projOpen; set({ projOpen: o, projList: o ? null : S.projList }); if (o) pingApi(); },
@@ -2555,19 +2618,18 @@ var LIVEA = {
   newProj: function () { STARTA.home(); },
   upClose: function () { clearTimeout(upT); if (S.home && S.up) { S.up.phase = 'form'; render(); } else set({ up: null }); },
   upBack: function () { S.up.phase = 'form'; S.up.err = ''; render(); },
-  upCopy: function () { S.up.copy = !S.up.copy; store('lvm-copy', S.up.copy); if (S.up.copy && S.up.plan) S.up.plan = null; render(); },
   upGo: function () {
-    var U = S.up, id = String(S.upId || '').trim();
-    if (!U.lv) { U.err = 'Bitte ein LV wählen.'; render(); return; }
-    if (!/^[A-Za-z0-9-]{1,40}$/.test(id)) { U.err = 'Projekt-ID: nur Buchstaben, Ziffern und „-“, höchstens 40 Zeichen.'; render(); return; }
+    var U = S.up;
+    if (!U.lv) { U.err = 'Bitte ein LV hochladen.'; render(); return; }
+    // the project id comes from the LV file name plus a short suffix, so a new upload never overwrites an old run
+    var id = suggestId(U.lv.name).slice(0, 33) + '-' + Date.now().toString(36).slice(-6).toUpperCase();
     var fd = new FormData(); fd.append('project', id); fd.append('lv', U.lv);
-    if (U.plan && !U.copy) fd.append('plan', U.plan);
-    if (U.copy) fd.append('copy_only', 'true');
-    store('lvm-meta-' + id, { name: String(S.upName || '').trim() });
-    Object.assign(U, { phase: 'run', id: id, lvName: U.lv.name, planName: U.plan && !U.copy ? U.plan.name : '', log: [], t0: Date.now(), t1: 0, err: '' });
+    if (U.plan) fd.append('plan', U.plan);
+    store('lvm-meta-' + id, { name: U.lv.name.replace(/\.[^.]+$/, '') });
+    Object.assign(U, { phase: 'run', id: id, lvName: U.lv.name, planName: U.plan ? U.plan.name : '', log: [], t0: Date.now(), t1: 0, err: '' });
     render();
     api('/projects', { method: 'POST', body: fd }).then(function (st) { U.log = st.log || []; render(); upT = setTimeout(function () { pollRun(id); }, 1200); },
-      function (e) { U.phase = 'form'; U.err = e.message === 'Failed to fetch' ? 'Backend unter ' + API + ' nicht erreichbar.' : e.message; render(); });
+      function (e) { U.phase = 'form'; U.err = e.message === 'Failed to fetch' ? 'Der Upload hat nicht geklappt. Bitte gleich noch einmal versuchen.' : e.message; render(); });
   },
   doubt: function () { var p = cur(); if (p) postComment(p.oz, { doubt: true, text: 'Preis passt nicht (Dashboard)' }, 'Zweifel an ' + p.oz); }
 };
@@ -2593,7 +2655,7 @@ document.addEventListener('input', function (e) {
   if (k === 'q' || k === 'epDraft') render();
 });
 document.addEventListener('change', function (e) {
-  if (e.target.getAttribute && e.target.getAttribute('data-file')) { takeFile(e.target.getAttribute('data-file'), e.target.files && e.target.files[0]); return; }
+  if (e.target.getAttribute && e.target.getAttribute('data-file')) { takeFiles(e.target.files); e.target.value = ''; return; }
   var k = e.target.getAttribute && e.target.getAttribute('data-change');
   if (!k) return;
   var v = e.target.value;
@@ -2652,7 +2714,7 @@ try { var th = localStorage.getItem('lvm-theme'); if (th) document.documentEleme
     var z = e.target.closest && e.target.closest('[data-drop]');
     if (!z && !S.up) return;
     e.preventDefault();
-    if (ev === 'drop' && z) takeFile(z.getAttribute('data-drop'), e.dataTransfer.files && e.dataTransfer.files[0]);
+    if (ev === 'drop' && z) takeFiles(e.dataTransfer.files);
   });
 });
 DEMO = { D: D, LVX: LVX, TOTAL: TOTAL, PLAN: PLAN, P: P, FLOORS: FLOORS, PLAN_VH: PLAN_VH };
