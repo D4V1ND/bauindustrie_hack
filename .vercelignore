@@ -1,0 +1,6 @@
+# Only the static frontend goes to Vercel; the backend (lv/, data/) runs elsewhere.
+/*
+!vercel.json
+!design
+design/*
+!design/lv-mastermind-v2

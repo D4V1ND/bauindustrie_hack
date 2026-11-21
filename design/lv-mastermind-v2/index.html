@@ -1060,11 +1060,65 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
   body.printing-rep .rep-scroll{overflow:visible;background:#fff;padding:0}
   body.printing-rep .rep-scroll .rp{box-shadow:none;padding:0;max-width:none}
 }
+/* ---- live backend: project menu, upload, empty plan ---- */
+.pmw{position:relative;display:inline-flex}
+.crumb-b{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:3px;color:var(--ink-2)}
+.crumb-b:hover,.crumb-b[aria-expanded="true"]{color:var(--signal)}
+.crumb-b .i{width:13px;height:13px}
+.livebadge{margin-left:10px;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border:1px solid var(--ok);color:var(--ok)}
+.livebadge.demo{border-color:var(--line-2);color:var(--ink-3)}
+.pmenu{position:absolute;top:calc(100% + 10px);left:-10px;z-index:70;width:340px;max-height:60vh;overflow:auto;background:var(--paper);border:1px solid var(--ink);box-shadow:var(--shadow);animation:pop .3s var(--spring);font-size:13px;color:var(--ink)}
+.pmenu .menu-h{padding:10px 14px;border-bottom:1px solid var(--line);font-size:10px;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pm-i{all:unset;box-sizing:border-box;width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--line)}
+.pm-i:hover{background:var(--paper-2)}.pm-i.on{box-shadow:inset 3px 0 0 var(--signal)}
+.pm-i[disabled]{opacity:.5;cursor:default}
+.pm-i b{display:block;font-weight:500}.pm-i small{display:block;color:var(--ink-3);font-size:11.5px;margin-top:2px}
+.pm-bad{color:var(--bad)}
+.pm-e{padding:12px 14px;color:var(--ink-2);border-bottom:1px solid var(--line)}
+.pm-new{all:unset;box-sizing:border-box;width:100%;display:flex;align-items:center;gap:8px;padding:11px 14px;cursor:pointer;color:var(--signal);font-weight:500}
+.pm-new:hover{background:var(--paper-2)}
+.upm{width:min(620px,100%)}
+.up-h{margin:8px 0 6px;font-size:24px;font-weight:300;letter-spacing:-.03em}
+.up-p{margin:0 0 16px;font-size:13px;line-height:1.55}
+.up-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.updrop{display:flex;align-items:center;gap:12px;padding:14px;border:1px dashed var(--line-2);cursor:pointer;min-width:0;transition:border-color .15s,background .15s}
+.updrop:hover{border-color:var(--ink);background:var(--paper-2)}
+.updrop.has{border-style:solid;border-color:var(--ink)}
+.updrop-i{flex:none;display:grid;place-items:center;width:32px;height:32px;border:1px solid var(--line-2)}
+.updrop.has .updrop-i{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.updrop-t{min-width:0}.updrop-t b{display:block;font-weight:500;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.updrop-t small{display:block;color:var(--ink-3);font-size:11.5px;margin-top:2px}
+.up-f{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:10px;margin-top:14px}
+.up-f label{display:grid;gap:5px;min-width:0}.up-f .fld{width:100%;flex:none}
+.up-chk{all:unset;box-sizing:border-box;width:100%;display:flex;gap:12px;align-items:flex-start;margin-top:14px;padding:12px 14px;border:1px solid var(--line);cursor:pointer}
+.up-chk:hover{border-color:var(--ink-3)}.up-chk b{font-weight:500;font-size:13px}.up-chk small{display:block;color:var(--ink-3);font-size:12px;margin-top:2px}
+.cb2{flex:none;width:16px;height:16px;border:1px solid var(--ink-3);display:grid;place-items:center;margin-top:1px}
+.up-chk.on .cb2{background:var(--ink);border-color:var(--ink)}.cb2 svg{width:12px;height:12px;fill:none;stroke:var(--paper);stroke-width:2.5}
+.up-err{display:flex;gap:8px;align-items:flex-start;margin-top:14px;padding:10px 12px;border:1px solid var(--bad);color:var(--bad);font-size:12.5px;line-height:1.5}
+.up-err .i{flex:none;margin-top:1px}.up-err code{font-family:var(--mono);font-size:11.5px}
+.up-btns{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+.up-bar{height:3px;background:var(--line);overflow:hidden;position:relative}
+.up-bar i{position:absolute;inset:0 auto 0 0;width:35%;background:var(--signal);animation:upbar 1.4s var(--ease) infinite}
+@keyframes upbar{from{left:-35%}to{left:100%}}
+.up-log{margin:14px 0 0;height:210px;overflow:auto;padding:12px 14px;background:var(--paper-2);border:1px solid var(--line);font:11.5px/1.6 var(--mono);white-space:pre-wrap;word-break:break-word;color:var(--ink-2)}
+.up-note{margin:12px 0 0;font-size:10.5px}
+.plan-empty{flex:1;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:12px;padding:28px 24px;color:var(--ink-2);font-size:13px;line-height:1.55}
+.plan-empty>.i{width:26px;height:26px;color:var(--ink-3)}.plan-empty p{margin:0;max-width:340px}
+.verdict2.warn{color:var(--warn)}
+@media (max-width:640px){.up-grid,.up-f{grid-template-columns:1fr}.pmenu{width:min(340px,calc(100vw - 32px))}}
+.cmts .panel{padding:12px 0 6px}
+.cml{list-style:none;margin:0 0 10px;padding:0}
+.cml li{padding:9px 0;border-bottom:1px solid var(--line);font-size:13px;line-height:1.5}
+.cml li p{margin:0;white-space:pre-wrap}.cml li small{color:var(--ink-3);font-size:11px}
+.cmt-tag{display:inline-block;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;padding:1px 5px;margin-bottom:4px;border:1px solid var(--line-2);color:var(--ink-2)}
+.cmt-note{margin:6px 0 0;font-size:10px}
+.cmtn{display:inline-flex;align-items:center;gap:3px;font-size:11px;color:var(--ink-3)}.cmtn .i{width:12px;height:12px}
 </style>
 </head>
 <body>
 <div class="glow" aria-hidden="true"></div>
 <div id="app"></div>
+<script src="config.js"></script>
 <script>
 (function () {
 'use strict';
@@ -1220,6 +1274,101 @@ var LVX = (function () {
   return out;
 })();
 
+// ================= backend (lv/api.py) =================
+// P: the project shown. Demo data until a project from the API is loaded.
+var P = { live: false, id: 'P-2026-114', name: 'Neubau Kita Sonnenhof, München-Riem', short: 'Kita Sonnenhof' };
+var FLOORS = ['EG', '1.OG'], PLAN_VH = 700;
+var API = (function () {
+  var q = null; try { q = new URLSearchParams(location.search).get('api'); } catch (e) {}
+  try { if (q) localStorage.setItem('lvm-api', q); var s = localStorage.getItem('lvm-api'); if (s) return s.replace(/\/+$/, ''); } catch (e) {}
+  if (window.LV_API) return String(window.LV_API).replace(/\/+$/, '');
+  return (location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) ? 'http://localhost:8000' : '/api';
+})();
+function api(path, opt) {
+  return fetch(API + path, opt).then(function (r) {
+    return r.json().catch(function () { return {}; }).then(function (j) {
+      if (!r.ok) throw new Error(typeof j.detail === 'string' ? j.detail : j.detail ? JSON.stringify(j.detail) : 'HTTP ' + r.status);
+      return j;
+    });
+  });
+}
+function store(k, v) { try { if (v === undefined) return JSON.parse(localStorage.getItem(k) || 'null'); localStorage.setItem(k, JSON.stringify(v)); } catch (e) { return null; } }
+var MODE = { copied: 'übernommen', similar: 'adaptiert', adjusted: 'adaptiert', reference: 'offen', none: 'offen' };
+var WHY = { copied: 'Textgleich in Alt-LV', similar: 'Gleichwertige Position in Alt-LV', adjusted: 'Interpoliert aus Alt-LV', reference: 'Nur verwandte Positionen, kein Preis', none: 'Keine Referenz in den Alt-LVs' };
+var VERD = { exact: 'textgleich', same: 'gleichwertig', size_only: 'andere Größe', type_only: 'gleiche Art', different: 'anders' };
+function gwName(it) {
+  if (it.trade && it.trade !== 'Sonstiges') return it.trade;
+  var s = (it.section || [])[0] || it.trade || 'Ohne Abschnitt';
+  return s.replace(/^[\d.]+\s+/, '') || s;
+}
+function ownPrice(it) {
+  var c = (it.comments || []).filter(function (x) { return x.price != null || x.effect === 'doubt'; }).pop();
+  return c && c.price != null ? c.price : null;
+}
+function toPos(it) {
+  var pr = it.prediction || {}, rk = it.risk || {}, m = pr.method || 'none', own = ownPrice(it), med = pr.median || 0, conf = rk.confidence || 0;
+  var why = own != null ? 'Eigener Preis' : (WHY[m] || m);
+  if (own == null && (it.comments || []).some(function (c) { return c.effect === 'doubt'; })) why = 'Preis angezweifelt · ' + why;
+  if (rk.missing && rk.missing.length) why += ' · fehlt: ' + rk.missing[0];
+  if (it.plan && it.plan.status === 'differs') why = 'Plan ' + qty(it.plan.quantity || 0) + ' ' + (it.plan.unit || '') + ', LV ' + qty(it.quantity || 0) + ' · ' + why;
+  var mode = MODE[m] || 'offen';
+  if (mode !== 'offen' && conf < 50) mode = 'unsicher';
+  return { oz: it.oz, kurz: it.short_text || it.oz, lang: it.long_text || it.short_text || '', menge: it.quantity || 0, einheit: it.unit || '', gewerk: gwName(it),
+    ep: own != null ? own : med, aiEp: med, srvManual: own != null, risk: rk.score || 0, conf: conf, mode: mode, why: why, method: m, opt: it.kind === 'optional', owner: '', val: rk.value || 0, cmts: it.comments || [] };
+}
+function toRich(it, extra) {
+  var pr = it.prediction || {}, rk = it.risk || {}, srcs = pr.sources || [], jd = pr.judged || [], R = {};
+  var proj = function (id) { return 'Alt-LV ' + String(id).split('/')[0]; };
+  srcs.concat(jd).forEach(function (s) {
+    if (extra[s.id]) return;
+    extra[s.id] = { oz: String(s.id).split('/').slice(1).join('/'), proj: proj(s.id), kurz: s.short_text, lang: s.why || s.difference || s.short_text, menge: 0, einheit: it.unit || '', ep: s.unit_price, note: s.why || s.difference || '' };
+  });
+  R.brief = pr.reason || rk.price_reason || '';
+  if (rk.description_reason && rk.description !== 'complete') R.brief += (R.brief ? ' ' : '') + rk.description_reason;
+  R.segs = [[R.brief + (srcs.length ? ' Quelle: ' : '')]];
+  srcs.slice(0, 3).forEach(function (s, i) { if (i) R.segs.push([', ']); R.segs.push([s.short_text + ' (' + proj(s.id) + ', ' + eur(s.unit_price) + ')', s.id]); });
+  if (pr.method === 'adjusted') R.steps = [['Regel', pr.rule || '–'], ['Rechnung', pr.calculation || '–'], ['EP', eur(pr.result || pr.median || 0)]];
+  else if (pr.median) R.steps = srcs.slice(0, 4).map(function (s) { return ['EP ' + s.id, eur(s.unit_price)]; })
+    .concat(pr.count > 1 ? [['Spanne (' + pr.count + ' Preise)', eur(pr.min) + ' – ' + eur(pr.max)]] : []).concat([['EP (Median)', eur(pr.median)]]);
+  else R.steps = [['Preis', 'keiner gefunden']];
+  R.steps.push(['Preisrisiko · Beschreibung', (rk.price_risk != null ? rk.price_risk : '–') + ' · ' + (rk.description || 'nicht geprüft')]);
+  var seen = {}; R.similar = [];
+  srcs.concat(jd).forEach(function (s) { if (seen[s.id]) return; seen[s.id] = 1; R.similar.push([s.id, VERD[s.verdict] || s.verdict]); });
+  R.judge = pr.judge_call;
+  return R;
+}
+var DEMO = null;
+function loadLV(lv, st) {
+  if (!DEMO) DEMO = { D: D, LVX: LVX, TOTAL: TOTAL, PLAN: PLAN, P: P, FLOORS: FLOORS, PLAN_VH: PLAN_VH };
+  var items = lv.items || [], pos = items.map(toPos), rich = {}, extra = {};
+  items.forEach(function (it) { rich[it.oz] = toRich(it, extra); });
+  // "Wichtige": everything a person should look at. Exact copies go to "Gesamtes LV" without confirmation.
+  var key = pos.filter(function (p) { return p.method !== 'copied' || p.srvManual; });
+  if (key.length < 5) key = pos.slice().sort(function (a, b) { return b.menge * b.ep - a.menge * a.ep; }).slice(0, 15);
+  var inKey = {}; key.forEach(function (p) { inKey[p.oz] = 1; });
+  var rest = pos.filter(function (p) { return !inKey[p.oz]; });
+  D = { team: D.team, pos: key, extra: extra, rich: rich };
+  LVX = rest;
+  TOTAL = (lv.summary && lv.summary.total) || pos.reduce(function (a, p) { return a + p.menge * p.ep; }, 0) || 1;
+  PLAN = {}; FLOORS = ['Blatt 1']; PLAN_VH = 700;
+  var pl = lv.plan;
+  if (pl && pl.width_px && pl.height_px) PLAN_VH = Math.round(1000 * pl.height_px / pl.width_px);
+  if (pl) items.forEach(function (it) {
+    var mk = it.plan && (it.plan.markers || []).filter(function (m) { return (m.page || 1) === 1; })[0];
+    if (mk) PLAN[it.oz] = [Math.round(mk.x * 1000), Math.round(mk.y * PLAN_VH), 'Blatt 1'];
+  });
+  var meth = (lv.summary && lv.summary.methods) || {}, n = function (k) { return (meth[k] || {}).items || 0; };
+  var lib = '';
+  ((st && st.log) || []).forEach(function (l) { var m = /price library: (\d+) line items with a price from (\d+) project/.exec(l); if (m) lib = m[2] + ' Alt-LVs · ' + fmt(+m[1]) + ' bepreiste Positionen'; });
+  var meta = store('lvm-meta-' + lv.project) || {};
+  var gws = {}; pos.forEach(function (p) { gws[p.gewerk] = 1; });
+  P = { live: true, id: lv.project, name: meta.name || lv.name || lv.project, short: meta.name || lv.name || lv.project, file: lv.source_file || '', date: lv.date,
+    deadline: meta.deadline || '', lib: lib || 'Preisbibliothek des Backends', n: items.length, gewerke: Object.keys(gws).length,
+    methods: { copied: n('copied'), similar: n('similar'), adjusted: n('adjusted'), reference: n('reference'), none: n('none') },
+    risk: lv.risk_summary || {}, plan: pl || null, priced: lv.priced };
+}
+function slug(s) { return String(s).replace(/[^\wäöüÄÖÜß-]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 60) || 'LV'; }
+
 // ================= state =================
 var S = { tab: 'home', filter: 'all', sel: null, q: '', sort: { k: 'conf', d: 1 }, density: 'compact', group: false, gewerk: '', owner: '',
   picked: {}, owners: {}, confirmed: {}, bundled: {}, collapsed: {}, toast: null, dtab: '', sugg: {}, editEp: false, epDraft: '', eps: {},
@@ -1273,20 +1422,19 @@ function particles(cls, n, dist) {
 function ownerOf(r) { return S.owners[r.oz] !== undefined ? S.owners[r.oz] : (r.owner || ''); }
 function cmtN(oz) { var rr = D.rich[oz] || {}; return (rr.comments || []).length + (S.comments[oz] || []).length; }
 function derive() {
-  var all = D.pos.map(function (p) {
-    var ep = S.eps[p.oz] !== undefined ? S.eps[p.oz] : p.ep;
-    var mg = S.mg[p.oz] !== undefined ? S.mg[p.oz] : p.menge;
-    return Object.assign({}, p, { ep: ep, menge: mg, aiEp: p.ep, manual: S.eps[p.oz] !== undefined, gp: mg * ep, np: p.conf === 0 && S.eps[p.oz] === undefined });
-  });
-  var tot = all.reduce(function (a, r) { return a + r.gp; }, 0);
-  var maxGp = Math.max.apply(null, all.map(function (r) { return r.gp; }));
-  var driver = {}, acc = 0;
-  all.slice().sort(function (a, b) { return b.gp - a.gp; }).forEach(function (r) { if (acc < 0.8 * tot) { driver[r.oz] = true; acc += r.gp; } });
-  var full = all.concat(LVX.map(function (p, i) {
+  var row = function (p, i, gen) {
     var ep = S.eps[p.oz] !== undefined ? S.eps[p.oz] : p.ep, mg = S.mg[p.oz] !== undefined ? S.mg[p.oz] : p.menge;
-    return { oz: p.oz, kurz: p.kurz, lang: p.kurz + '. Text unverändert aus dem Alt-LV übernommen.', menge: mg, einheit: p.einheit, gewerk: p.gewerk, ep: ep, aiEp: p.ep, manual: S.eps[p.oz] !== undefined, gp: mg * ep,
-      risk: 2 + (i * 7) % 11, np: false, mode: 'übernommen', conf: 88 + (i * 5) % 12, why: '1:1 aus Alt-LV', owner: '', gen: true };
-  }));
+    var r = Object.assign({ risk: 2 + (i * 7) % 11, mode: 'übernommen', conf: 88 + (i * 5) % 12, why: '1:1 aus Alt-LV', owner: '', lang: p.kurz + '. Text unverändert aus dem Alt-LV übernommen.' }, p,
+      { ep: ep, menge: mg, aiEp: p.aiEp != null ? p.aiEp : p.ep, manual: S.eps[p.oz] !== undefined || !!p.srvManual, gp: p.opt ? 0 : mg * ep, gen: gen || !!p.gen });
+    r.np = r.conf === 0 && S.eps[p.oz] === undefined && !p.srvManual;
+    return r;
+  };
+  var all = D.pos.map(function (p, i) { return row(p, i, false); });
+  var full = all.concat(LVX.map(function (p, i) { return row(p, i, true); }));
+  var tot = full.reduce(function (a, r) { return a + r.gp; }, 0);
+  var maxGp = Math.max.apply(null, full.map(function (r) { return r.gp; }).concat([1]));
+  var driver = {}, acc = 0, dpool = P.live ? full : all, dtot = dpool.reduce(function (a, r) { return a + r.gp; }, 0);
+  dpool.slice().sort(function (a, b) { return b.gp - a.gp; }).forEach(function (r) { if (acc < 0.8 * dtot && r.gp > 0) { driver[r.oz] = true; acc += r.gp; } });
   var q = S.q.trim().toLowerCase();
   var base = (S.scope === 'all' ? full : all).filter(function (r) {
     if (S.gewerk && r.gewerk !== S.gewerk) return false;
@@ -1327,19 +1475,27 @@ function isDark() {
 // ================= views =================
 function vHeader() {
   return '<header class="top"><div class="top-in">' +
-    '<div class="brand"><span class="mark" aria-hidden="true"></span><b>LV Mastermind</b><span class="crumb">/ <a href="#">Projekte</a> /</span><span>Kita Sonnenhof</span></div>' +
+    '<div class="brand"><span class="mark" aria-hidden="true"></span><b>LV Mastermind</b><span class="crumb">/ <span class="pmw"><button class="crumb-b" data-act="projects" aria-expanded="' + !!S.projOpen + '">Projekte' + IC.chev + '</button>' + vProjMenu() + '</span> /</span><span>' + esc(P.short) + '</span>' + (P.live ? '<span class="livebadge mono">Live</span>' : '<span class="livebadge demo mono">Demo</span>') + '</div>' +
     '<div class="top-r">' +
       '<label class="search">' + IC.search + '<span class="sr">Positionen durchsuchen</span><input id="q-top" type="search" data-in="q" value="' + esc(S.q) + '" placeholder="Position, OZ oder Gewerk…"><span class="kbd">/</span></label>' +
       '<button class="theme-btn" data-act="theme" aria-label="Farbschema wechseln"><span class="theme-icon"></span>' + (isDark() ? 'Hell' : 'Dunkel') + '</button>' +
-      '<button class="btn btn-primary">' + IC.plus + 'Neues Projekt</button>' +
+      '<button class="btn btn-primary" data-act="newProj">' + IC.plus + 'Neues Projekt</button>' +
     '</div></div></header>';
 }
 
+function deDate(s) { var t = new Date(s); return isNaN(t) ? String(s) : t.toLocaleDateString('de-DE'); }
+function daysTo(s) { return Math.max(0, Math.ceil((new Date(s) - new Date()) / 864e5)); }
+function liveMeta() {
+  var lib = P.lib.split(' · '), fd = (P.plan && P.plan.findings) || [];
+  return [['Projekt-ID', P.id, P.priced ? 'LV enthält schon Preise' : 'Neues LV ohne Preise'], ['LV-Datei', P.file || '–', P.date ? 'vom ' + deDate(P.date) : 'GAEB'],
+    ['Abgabefrist', P.deadline ? deDate(P.deadline) : '–', P.deadline ? 'noch ' + daysTo(P.deadline) + ' Tage' : 'beim Upload angeben'], ['Leistungsverzeichnis', fmt(P.n) + ' Positionen', P.gewerke + ' Gewerke'],
+    ['Bauplan', P.plan ? P.plan.file : 'keiner', P.plan ? fd.length + ' Befunde · ' + (P.plan.checked || 0) + ' Pos. geprüft' : 'beim Upload als Kontext'], ['Preisbasis', lib[0], lib[1] || 'Alt-LVs mit Preisen']];
+}
 function vHero(d) {
   var okN = d.all.filter(function (r) { return S.confirmed[r.oz]; }).length;
   return '<div class="hero rise">' +
-    '<div style="min-width:0"><div class="eyebrow mono"><span class="num">[P-2026-114]</span><span>Öffentliche Ausschreibung</span><span class="live"><i></i>Analysiert ' + esc(S.analyzed) + '</span></div>' +
-    '<h1>Neubau Kita Sonnenhof, München-Riem</h1></div>' +
+    '<div style="min-width:0"><div class="eyebrow mono"><span class="num">[' + esc(P.id) + ']</span><span>' + (P.live ? 'Leistungsverzeichnis' : 'Öffentliche Ausschreibung') + '</span><span class="live"><i></i>' + (P.live ? 'Backend · ' + fmt(P.n) + ' Positionen analysiert' : 'Analysiert ' + esc(S.analyzed)) + '</span></div>' +
+    '<h1>' + esc(P.name) + '</h1></div>' +
     '<div class="hero-actions">' +
       '<button class="btn btn-quiet btn-rep" data-act="report" data-v="1">' + IC.doc + 'Konfidenzbericht</button>' +
       '<button class="btn btn-primary btn-export" data-act="export">' + IC.down + 'Export GAEB X84<span class="xsep"></span><span class="xamt">' + eur(Math.round(d.tot)) + '</span>' + IC.arrow + '</button>' +
@@ -1349,13 +1505,14 @@ function vHero(d) {
       '<div class="ticks" role="img" aria-label="' + okN + ' von ' + d.all.length + ' Preisen bestätigt">' + d.all.slice().sort(function (a, b) { return a.oz.localeCompare(b.oz); }).map(function (r) {
         return '<span class="tick-s' + (S.confirmed[r.oz] ? ' ok' : '') + (S.justOk[r.oz] !== undefined ? ' bump' : '') + '" title="' + r.oz + '"></span>';
       }).join('') + '</div>' +
-      '<div class="deadline"><span class="mono faint">Abgabe in</span><b>21 Tagen</b><span class="mono faint">12.12. · 11:00</span></div>' +
+      (P.live ? (P.deadline ? '<div class="deadline"><span class="mono faint">Abgabe in</span><b>' + daysTo(P.deadline) + ' Tagen</b><span class="mono faint">' + deDate(P.deadline) + '</span></div>' : '<div class="deadline"><span class="mono faint">LV</span><b>' + fmt(P.n) + '</b><span class="mono faint">Positionen</span></div>')
+        : '<div class="deadline"><span class="mono faint">Abgabe in</span><b>21 Tagen</b><span class="mono faint">12.12. · 11:00</span></div>') +
     '</div>' +
-    '<dl class="meta rise" style="--d:140ms">' + [
+    '<dl class="meta rise" style="--d:140ms">' + (P.live ? liveMeta() : [
       ['Bauherr', 'Kommune (anonymisiert)', 'Öffentlicher Auftraggeber'], ['Vergabe', 'Öffentlich, VOB/A', 'Einheitspreisvertrag'],
       ['Abgabefrist', '12.12.2026, 11:00', 'noch 21 Tage'], ['Leistungsverzeichnis', 'GAEB X83', '1.284 Positionen · 11 Gewerke'],
       ['Pläne', '14 Blätter', 'Grundrisse, Schnitte, Statik'], ['Verantwortlich', 'Thomas Berger', 'Oberkalkulation']
-    ].map(function (m) { return '<div><dt class="mono">' + m[0] + '</dt><dd>' + m[1] + '</dd><dd>' + m[2] + '</dd></div>'; }).join('') + '</dl>' +
+    ]).map(function (m) { return '<div><dt class="mono">' + m[0] + '</dt><dd>' + m[1] + '</dd><dd>' + m[2] + '</dd></div>'; }).join('') + '</dl>' +
     '<nav class="tabs" aria-label="Projektbereiche">' +
       '<button class="tab' + (S.tab === 'home' ? ' on' : '') + '" data-act="tab" data-v="home" aria-current="' + (S.tab === 'home') + '">' + IC.home + 'Home</button>' +
       '<button class="tab' + (S.tab === 'kontext' ? ' on' : '') + '" data-act="tab" data-v="kontext" aria-current="' + (S.tab === 'kontext') + '">' + IC.doc + 'Kontext</button>' +
@@ -1382,23 +1539,25 @@ function cmeter(v, n) {
   return o + '</span>';
 }
 function vCost() {
-  var all = derive().all, w = 0, c = 0;
-  all.forEach(function (r) { w += r.gp; c += r.gp * (S.confirmed[r.oz] ? 100 : r.conf); });
-  var conf = Math.round(c / w);
+  var d0 = derive(), all = P.live ? d0.full : d0.all, w = 0, c = 0;
+  all.forEach(function (r) { var k = cw(r); w += k; c += k * (S.confirmed[r.oz] ? 100 : r.conf); });
+  var conf = Math.round(c / (w || 1)), big = d0.tot >= 1e6 ? [d0.tot / 1e6, 2, 'Mio. €'] : [d0.tot / 1e3, 0, 'Tsd. €'], npN = all.filter(function (r) { return r.np; }).length;
   return '<section class="card cost rise' + (S.analyzing ? ' scan' : '') + '" style="flex:2 1 560px;--d:200ms" aria-label="Kostenschätzung">' +
-    '<div class="card-h"><span class="mono"><b>[01]</b> Kostenschätzung</span><span class="mono">3 Alt-LVs · 9.120 bepreiste Positionen</span></div>' +
-    '<div class="est"><span class="big"><span data-count="1.14" data-dec="2">1,14</span> Mio. €</span><span class="muted">netto · finale KI-Schätzung' + (function () { var n = derive().all.filter(function (r) { return r.np; }).length; return n ? ' · <b class="npn">' + n + ' Positionen ohne Preis</b> nicht enthalten' : ''; })() + '</span></div>' +
+    '<div class="card-h"><span class="mono"><b>[01]</b> Kostenschätzung</span><span class="mono">' + (P.live ? esc(P.lib) : '3 Alt-LVs · 9.120 bepreiste Positionen') + '</span></div>' +
+    '<div class="est"><span class="big"><span data-count="' + big[0].toFixed(big[1]) + '" data-dec="' + big[1] + '">' + fmt(big[0], big[1]) + '</span> ' + big[2] + '</span><span class="muted">netto · ' + (P.live ? 'Schätzung aus den Alt-LVs' : 'finale KI-Schätzung') + (npN ? ' · <b class="npn">' + npN + ' Positionen ohne Preis</b> nicht enthalten' : '') + '</span></div>' +
     '<div class="estconf"><div class="conf-h"><span class="mono">Konfidenz</span><span class="conf-v ' + confLvl(conf) + '" data-k="cv' + conf + '"><b>' + conf + ' %</b>' + confWord(conf) + '</span></div>' +
       cmeter(conf, 50) + '<div class="conf-s"><span>0</span><span>50</span><span>100</span></div></div>' +
-    '<div class="estfacts"><div><span class="mono">Prognose Zuschlag</span><b>1,21 Mio. €</b></div><div><span class="mono">Abstand</span><b style="color:var(--ok)">−5,8 %</b></div><div><span class="mono">Ø ähnliche Ausschreibungen</span><b>1,19 Mio. €</b></div></div>' +
+    (P.live ? '<div class="estfacts"><div><span class="mono">Textgleich kopiert</span><b>' + fmt(P.methods.copied) + '</b></div><div><span class="mono">Gleichwertig / interpoliert</span><b>' + fmt(P.methods.similar + P.methods.adjusted) + '</b></div><div><span class="mono">Ohne Preis</span><b style="color:' + (npN ? 'var(--bad)' : 'var(--ok)') + '">' + fmt(npN) + '</b></div></div>'
+      : '<div class="estfacts"><div><span class="mono">Prognose Zuschlag</span><b>1,21 Mio. €</b></div><div><span class="mono">Abstand</span><b style="color:var(--ok)">−5,8 %</b></div><div><span class="mono">Ø ähnliche Ausschreibungen</span><b>1,19 Mio. €</b></div></div>') +
   '</section>';
 }
 
-function dial() {
+function dial(sc, ghost) {
+  sc = sc == null ? 72 : sc;
   var cx = 130, cy = 128, r = 100;
   var pt = function (v, rr) { var a = Math.PI * (1 - v / 100); return [(cx + rr * Math.cos(a)).toFixed(2), (cy - rr * Math.sin(a)).toFixed(2)]; };
   var arc = function (a, b, rr) { var p = pt(a, rr), q = pt(b, rr); return 'M' + p[0] + ' ' + p[1] + ' A' + rr + ' ' + rr + ' 0 0 1 ' + q[0] + ' ' + q[1]; };
-  var o = '<svg class="dial" viewBox="0 0 260 142" role="img" aria-label="Bid-Score 72 von 100, vorher 66. Bieten ab 60.">';
+  var o = '<svg class="dial" viewBox="0 0 260 142" role="img" aria-label="Bid-Score ' + sc + ' von 100. Bieten ab 60.">';
   o += '<path class="rail r1" pathLength="1" d="' + arc(0, 39.4, r + 9) + '"/><path class="rail r2" pathLength="1" d="' + arc(40.6, 59.4, r + 9) + '"/><path class="rail r3" pathLength="1" d="' + arc(60.6, 100, r + 9) + '"/>';
   o += '<path class="base" d="' + arc(0, 100, r) + '"/>';
   for (var v = 0, n = 0; v <= 100; v += 2.5, n++) {
@@ -1408,31 +1567,60 @@ function dial() {
   }
   var z1 = pt(20, r + 20), z3 = pt(80, r + 20);
   o += '<text class="zl" x="' + z1[0] + '" y="' + z1[1] + '" text-anchor="end" fill="var(--bad)">NO BID</text><text class="zl" x="' + z3[0] + '" y="' + z3[1] + '" fill="var(--ok)">BID</text>';
-  var g = pt(66, r - 14);
-  o += '<line class="ghost" x1="' + cx + '" y1="' + cy + '" x2="' + g[0] + '" y2="' + g[1] + '"><title>Vorher 66</title></line>';
-  o += '<g class="ndl"><line x1="' + cx + '" y1="' + (cy + 10) + '" x2="' + cx + '" y2="' + (cy - r + 14) + '"/><circle cx="' + cx + '" cy="' + (cy - r + 14) + '" r="2.5"/></g>';
+  if (ghost != null) { var g = pt(ghost, r - 14); o += '<line class="ghost" x1="' + cx + '" y1="' + cy + '" x2="' + g[0] + '" y2="' + g[1] + '"><title>Vorher ' + ghost + '</title></line>'; }
+  o += '<g class="ndl" style="transform:rotate(' + ((sc - 50) * 1.8).toFixed(1) + 'deg)"><line x1="' + cx + '" y1="' + (cy + 10) + '" x2="' + cx + '" y2="' + (cy - r + 14) + '"/><circle cx="' + cx + '" cy="' + (cy - r + 14) + '" r="2.5"/></g>';
   o += '<rect class="hub" x="' + (cx - 5) + '" y="' + (cy - 5) + '" width="10" height="10"/></svg>';
   return o;
 }
 
+// weight of an item in the LV confidence: the backend's risk.value (live), else the price
+function cw(r) { return P.live ? (r.opt ? 0 : r.val || r.gp) : r.gp; }
+function bidLive() {
+  var d = derive(), rows = d.full.filter(function (r) { return !r.opt; }), n = rows.length || 1, npN = rows.filter(function (r) { return r.np; }).length, share = Math.round((n - npN) / n * 100), w = 0, c = 0;
+  rows.forEach(function (r) { var k = cw(r); w += k; c += k * (S.confirmed[r.oz] ? 100 : r.conf); });
+  var conf = w ? Math.round(c / w) : 0, size = d.tot >= 5e5 && d.tot <= 5e6, score = Math.round(0.5 * conf + 0.3 * share + 0.2 * (size ? 100 : 30));
+  return { score: score, f: [[size ? 'p' : 'm', size ? '+' : '–', 'Volumen ' + eur(Math.round(d.tot)) + (size ? ' passt in den Korridor 0,5–5 Mio. €' : ' liegt außerhalb des Korridors 0,5–5 Mio. €')],
+    [share >= 80 ? 'p' : 'm', share >= 80 ? '+' : '–', share + ' % der Positionen mit Preis aus der eigenen Preisbasis'],
+    [conf >= 70 ? 'p' : 'm', conf >= 70 ? '+' : '–', 'Konfidenz ' + conf + ' %, gewichtet mit dem Gesamtpreis'],
+    npN ? ['m', '–', npN + ' Positionen ohne Preis, zuerst bearbeiten'] : ['p', '+', 'Alle Positionen haben einen Preis']] };
+}
 function vBid() {
+  if (P.live) {
+    var B = bidLive(), verdict = B.score >= 60 ? 'Bieten empfohlen' : B.score >= 40 ? 'Genau prüfen' : 'Eher nicht bieten';
+    return '<section class="card bid rise" style="flex:1 1 340px;--d:260ms" aria-label="Bid / No Bid">' +
+      '<div class="card-h"><span class="mono"><b>[02]</b> Bid / No Bid</span><span class="mono">Größe · Abdeckung · Konfidenz</span></div>' +
+      '<div class="bid-head">' + dial(B.score) +
+      '<div class="bid-side"><div class="bid-n"><b data-count="' + B.score + '" data-dec="0">' + B.score + '</b><span>/ 100</span></div><span class="verdict2' + (B.score >= 60 ? '' : ' warn') + '"><i></i>' + verdict + '</span></div></div>' +
+      '<ul class="factors">' + B.f.map(function (x, i) { return '<li style="--i:' + i + '"><span class="sign ' + x[0] + '">' + x[1] + '</span><span>' + esc(x[2]) + '</span></li>'; }).join('') + '</ul></section>';
+  }
   var f = [['p', '+', 'Projektgröße passt in euren Korridor (0,5–5 Mio. €)'], ['p', '+', '84 % der Positionen direkt aus eigener Preisbasis'], ['p', '+', 'Kalkulation 5,8 % unter prognostiziertem Zuschlag'], ['m', '–', '3 Positionen ohne Preis (Konfidenz 0 %), alle pauschal']];
   return '<section class="card bid rise' + (S.analyzing ? ' scan' : '') + '" style="flex:1 1 340px;--d:260ms" aria-label="Bid / No Bid">' +
     '<div class="card-h"><span class="mono"><b>[02]</b> Bid / No Bid</span><span class="mono">Vorher 66 · <b style="color:var(--ok)">▲ +6</b></span></div>' +
-    '<div class="bid-head">' + dial() +
+    '<div class="bid-head">' + dial(72, 66) +
     '<div class="bid-side"><div class="bid-n"><b data-count="72" data-dec="0">72</b><span>/ 100</span></div><span class="verdict2"><i></i>Bieten empfohlen</span></div></div>' +
     '<ul class="factors">' + f.map(function (x, i) { return '<li style="--i:' + i + '"><span class="sign ' + x[0] + '">' + x[1] + '</span><span>' + x[2] + '</span></li>'; }).join('') + '</ul>' +
   '</section>';
 }
 
 function vSummary(d) {
-  var parts = [['Neubau einer 4-gruppigen Kita in Massivbauweise, drei Geschosse, ca. 1.900 m² BGF. Das LV hat 1.284 Positionen in 11 Gewerken, aber nur 20 Positionen machen 80 % des Volumens aus. Kostentreiber sind die '],
+  var stats, parts = [['Neubau einer 4-gruppigen Kita in Massivbauweise, drei Geschosse, ca. 1.900 m² BGF. Das LV hat 1.284 Positionen in 11 Gewerken, aber nur 20 Positionen machen 80 % des Volumens aus. Kostentreiber sind die '],
     ['Holz-Alu-Fenster', '02.01.0010'], [', der '], ['Betonstahl', '01.02.0020'], [' und die '], ['Stahlbetonwände', '01.03.0040'],
     ['. Das größte Risiko liegt in der pauschal ausgeschriebenen '], ['Beschallungsanlage', '04.05.0030'], [' ohne Spezifikation, im '], ['Fundamentbeton', '01.04.0010'],
     [', der der Statik widerspricht, und in der unklaren Bodenklasse beim '], ['Erdaushub', '03.02.0100'], ['. Im Plan sind 71 Fenster eingezeichnet, im LV 64: Nachtragspotenzial.']];
+  if (P.live) {
+    var M = P.methods, top = d.full.filter(function (r) { return r.gp > 0; }).sort(function (a, b) { return b.gp - a.gp; }).slice(0, 3),
+      open = d.full.filter(function (r) { return r.np; }).sort(function (a, b) { return (b.val || 0) - (a.val || 0); }).slice(0, 3), fd = (P.plan && P.plan.findings) || [];
+    var lk = function (xs) { var o = []; xs.forEach(function (r, i) { if (i) o.push([i === xs.length - 1 ? ' und ' : ', ']); o.push([r.kurz, r.oz]); }); return o; };
+    parts = [[P.name + ': ' + fmt(P.n) + ' Positionen in ' + P.gewerke + ' Gewerken. ' + fmt(M.copied) + ' sind textgleich in den Alt-LVs, ' + fmt(M.similar + M.adjusted) + ' gleichwertig oder interpoliert, ' + fmt(M.reference + M.none) + ' ohne Preis.' + (top.length ? ' Größte Positionen: ' : '')]]
+      .concat(lk(top)).concat([[top.length ? '.' : '']]).concat(open.length ? [[' Ohne Preis und am wertvollsten: ']].concat(lk(open)).concat([['.']]) : [])
+      .concat([[P.plan ? ' Der Bauplan wurde geprüft: ' + fd.length + ' Befunde zu den Mengen.' : ' Kein Bauplan hochgeladen, die Mengen sind nicht gegen den Plan geprüft.']]);
+    var lowN = d.full.filter(function (r) { return !r.np && r.conf < 50; }).length, npN2 = d.full.filter(function (r) { return r.np; }).length;
+    stats = [['', fmt(M.copied), 'Positionen 1:1 übernommen'], ['blue', fmt(M.similar + M.adjusted), 'adaptiert'], ['warn', fmt(lowN), 'unsicher, bitte prüfen'], [npN2 ? 'warn' : 'ok', fmt(npN2), 'ohne Preis']]
+      .concat(P.plan ? [['ok', fmt(fd.length), 'Plan-Befunde']] : []);
+  }
   var txt = parts.map(function (s) { return s.length > 1 ? '<button class="lnk" data-act="open" data-oz="' + s[1] + '">' + esc(s[0]) + '</button>' : esc(s[0]); }).join('');
-  var drivers = d.all.slice().sort(function (a, b) { return b.gp - a.gp; }).slice(0, 5);
-  var stats = [['', '812', 'Positionen 1:1 übernommen'], ['blue', '389', 'adaptiert'], ['warn', '83', 'unsicher, bitte prüfen'], ['', '38 → 9', 'Positionen bündelbar'], ['ok', '≈ 31.000 €', 'Nachtragspotenzial (4 Pos.)']];
+  var drivers = (P.live ? d.full : d.all).slice().sort(function (a, b) { return b.gp - a.gp; }).slice(0, 5);
+  if (!P.live) stats = [['', '812', 'Positionen 1:1 übernommen'], ['blue', '389', 'adaptiert'], ['warn', '83', 'unsicher, bitte prüfen'], ['', '38 → 9', 'Positionen bündelbar'], ['ok', '≈ 31.000 €', 'Nachtragspotenzial (4 Pos.)']];
   return '<section class="card rise' + (S.analyzing ? ' scan' : '') + '" style="margin-top:20px;--d:320ms" aria-label="Zusammenfassung">' +
     '<div class="card-h"><span class="mono"><b>[03]</b> Zusammenfassung</span><span class="mono" style="display:flex;gap:6px;align-items:center;color:var(--signal)">' + IC.star + 'KI · jede Aussage mit Quelle</span></div>' +
     '<div style="display:flex;gap:36px;flex-wrap:wrap;margin-top:14px"><p class="sum-p">' + txt + '</p>' +
@@ -1453,10 +1641,11 @@ function vRow(r, d) {
       (S.density === 'details' ? '<span class="lang">' + esc(r.lang) + '</span>' : '') +
       '<span class="rmeta"><button class="gw" data-act="gewerk" data-v="' + esc(r.gewerk) + '" title="Nur ' + esc(r.gewerk) + ' anzeigen">' + esc(r.gewerk) + '</button>' +
       (r.gen ? '<span class="why lo">' + esc(r.why) + '</span>' : '<span class="why ' + k + '">' + IC.warn + esc(r.why) + '</span>') +
+      (cmtList(r).length ? '<span class="cmtn" title="' + cmtList(r).length + ' Kommentare">' + IC.chat + cmtList(r).length + '</span>' : '') +
       (S.bundled[r.oz] ? '<span class="chip bundle">Bündel · ' + esc(S.bundled[r.oz]) + '</span>' : '') +
       '</span></span>' +
     '<span role="cell" class="c2" style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">' + (r.np ? '<span class="np">Kein Preis</span>' : '<span style="font-size:13px;font-weight:500">' + eur(r.ep) + '</span>') + '<span class="qty">' + qty(r.menge) + ' ' + r.einheit + '</span>' + chip + '</span>' +
-    '<span role="cell" class="num c2"><span style="font-size:14px;font-weight:500">' + (r.np ? '<span class="np">–</span>' : eur(r.gp)) + '</span><span class="gpbar" title="' + fmt(r.gp / d.tot * 100, 1) + ' % des Volumens"><i style="width:' + Math.max(4, Math.round(r.gp / d.maxGp * 100)) + '%;background:' + (d.driver[r.oz] ? 'var(--signal)' : 'var(--ink-3)') + '"></i></span></span>' +
+    '<span role="cell" class="num c2"><span style="font-size:14px;font-weight:500">' + (r.np ? '<span class="np">–</span>' : r.opt ? '<span class="np" title="Bedarfsposition, nicht in der Summe">Bedarf</span>' : eur(r.gp)) + '</span><span class="gpbar" title="' + fmt(r.gp / d.tot * 100, 1) + ' % des Volumens"><i style="width:' + Math.max(4, Math.round(r.gp / d.maxGp * 100)) + '%;background:' + (d.driver[r.oz] ? 'var(--signal)' : 'var(--ink-3)') + '"></i></span></span>' +
     '<span role="cell">' + (r.np ? '<button class="okbtn need" data-act="priceNow" data-oz="' + r.oz + '" aria-label="Preis für ' + r.oz + ' eingeben" title="Preis eingeben">' + IC.pen + '</button>' : r.gen ? '<span class="auto1" title="1:1 übernommen, keine Bestätigung nötig">1:1</span>' : '<button class="okbtn' + (ok ? ' is-ok' : '') + (fresh && ok ? ' fx' : '') + '" data-act="toggleOk" data-oz="' + r.oz + '" aria-pressed="' + ok + '" aria-label="' + (ok ? 'Bestätigung zurücknehmen' : 'Preis bestätigen') + '" title="' + (ok ? 'Bestätigung zurücknehmen' : 'Preis bestätigen') + '">' + IC.tickRaw + (fresh && ok && S.justOk[r.oz] === 0 ? particles('conf', 10, 34) : '') + '</button>') + '</span>' +
   '</div>';
 }
@@ -1471,8 +1660,14 @@ var PLAN = {
 function pm(xy) { return 'X ' + fmt((xy[0] - 80) / 20, 1) + ' m · Y ' + fmt((620 - xy[1]) / 20, 1) + ' m'; }
 function vPlan(d, full) {
   var shown = {}; d.rows.forEach(function (r) { shown[r.oz] = true; });
-  var fl = S.floor || 'EG';
-  var o = '<svg class="plan-svg" viewBox="0 0 1000 700" role="img" aria-label="Grundriss Erdgeschoss mit Positionen">';
+  var fl = FLOORS.indexOf(S.floor) >= 0 ? S.floor : FLOORS[0];
+  if (P.live && !P.plan) return '<aside class="plan plan-none" aria-label="Bauplan"><div class="plan-h"><div><span class="mono">Bauplan</span><b>Nicht hochgeladen</b></div></div>' +
+    '<div class="plan-empty">' + IC.layers + '<p>Lade beim nächsten Upload einen Bauplan (PNG oder JPG) als Kontext hoch. Dann prüft das Backend die Mengen gegen den Plan und die Positionen erscheinen hier.</p><button class="btn btn-sm btn-quiet" data-act="newProj">' + IC.plus + 'Neues Projekt mit Plan</button></div></aside>';
+  var img = P.live && /\.(png|jpe?g)$/i.test(P.plan.file);
+  var o = '<svg class="plan-svg" viewBox="0 0 1000 ' + PLAN_VH + '" role="img" aria-label="' + (P.live ? 'Bauplan ' + esc(P.plan.file) : 'Grundriss Erdgeschoss') + ' mit Positionen">';
+  if (P.live) o += img ? '<image href="' + esc(API + '/projects/' + encodeURIComponent(P.id) + '/files/' + encodeURIComponent(P.plan.file)) + '" x="0" y="0" width="1000" height="' + PLAN_VH + '" preserveAspectRatio="none"/>'
+    : '<rect class="slab" x="0" y="0" width="1000" height="' + PLAN_VH + '"/><text class="rl2" x="500" y="' + (PLAN_VH / 2) + '">PLAN ALS PDF · FÜR DIE ANSICHT PNG ODER JPG HOCHLADEN</text>';
+  if (!P.live) {
   o += '<defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="8" class="hl"/></pattern></defs>';
   // axes
   var ax = [80, 260, 420, 540, 700, 920], al = 'ABCDEF';
@@ -1497,22 +1692,23 @@ function vPlan(d, full) {
    ['GRUPPE 1', 155, 450], ['GRUPPE 2', 305, 450], ['GRUPPE 3', 455, 450], ['GRUPPE 4', 605, 450], ['MEHRZWECKRAUM', 800, 450]].forEach(function (r) { o += '<text class="rl2" x="' + r[1] + '" y="' + r[2] + '">' + r[0] + '</text>'; });
   // dimension
   o += '<path class="dim" d="M80 678H920M80 670V686M920 670V686"/><text class="dimt" x="500" y="694">42,00 m</text>';
+  }
   // crosshair
   // markers
-  d.all.forEach(function (r) {
+  (P.live ? d.full : d.all).forEach(function (r) {
     var p = PLAN[r.oz]; if (!p) return;
     var k = S.confirmed[r.oz] ? 'ok' : ck(r.conf), off = p[2] !== fl;
     o += '<g class="mk ' + k + (off ? ' off' : '') + (shown[r.oz] ? '' : ' dim') + (r.oz === S.sel ? ' sel' : '') + '" data-act="open" data-oz="' + r.oz + '" transform="translate(' + p[0] + ' ' + p[1] + ')" tabindex="0" role="button" aria-label="' + esc(r.oz + ' ' + r.kurz) + '">' +
       '<circle class="mk-ring" r="24"/><rect class="mk-b" x="-14" y="-14" width="28" height="28"/><text class="mk-t" y="4.5">' + (S.confirmed[r.oz] ? '✓' : r.np ? '€?' : r.conf) + '</text></g>';
   });
   o += '</svg>';
-  var hi = d.all.filter(function (r) { return PLAN[r.oz] && shown[r.oz]; }).length;
+  var hi = (P.live ? d.full : d.all).filter(function (r) { return PLAN[r.oz] && shown[r.oz]; }).length;
   return '<aside class="plan' + (full ? ' plan-full' : '') + '" aria-label="Bauplan' + (full ? ' Vollbild' : '') + '">' +
-    '<div class="plan-h"><div><span class="mono">Bauplan</span><b>A-102 · Grundriss</b></div>' +
-      '<div class="plan-ctl"><div class="seg" role="group" aria-label="Geschoss">' + ['EG', '1.OG'].map(function (g) { return '<button class="' + (fl === g ? 'on' : '') + '" data-act="floor" data-v="' + g + '" aria-pressed="' + (fl === g) + '">' + g + '</button>'; }).join('') + '</div>' +
+    '<div class="plan-h"><div><span class="mono">Bauplan</span><b>' + (P.live ? esc(P.plan.file) : 'A-102 · Grundriss') + '</b></div>' +
+      '<div class="plan-ctl"><div class="seg" role="group" aria-label="Geschoss">' + FLOORS.map(function (g) { return '<button class="' + (fl === g ? 'on' : '') + '" data-act="floor" data-v="' + g + '" aria-pressed="' + (fl === g) + '">' + g + '</button>'; }).join('') + '</div>' +
       (full ? '<button class="ic pfs-b" data-act="planFull" data-v="0" aria-label="Vollbild schließen" title="Schließen (Esc)">' + IC.x + '</button>' : '<button class="ic pfs-b" data-act="planFull" data-v="1" aria-label="Bauplan im Vollbild" title="Vollbild">' + IC.expand + '</button>') + '</div></div>' +
     '<div class="plan-c">' + o + '<div class="plan-tip" aria-hidden="true"></div></div>' +
-    '<div class="plan-f"><span class="mono plan-xy">' + hi + ' Positionen verortet · M 1:100</span><span class="plan-lg"><span class="lgt">Konfidenz</span><i class="hi"></i>&lt; 50<i class="mid"></i>&lt; 75<i class="lo"></i>≥ 75<i class="ok"></i>bestätigt</span></div>' +
+    '<div class="plan-f"><span class="mono plan-xy">' + hi + ' Positionen verortet' + (P.live ? '' : ' · M 1:100') + '</span><span class="plan-lg"><span class="lgt">Konfidenz</span><i class="hi"></i>&lt; 50<i class="mid"></i>&lt; 75<i class="lo"></i>≥ 75<i class="ok"></i>bestätigt</span></div>' +
   '</aside>';
 }
 
@@ -1524,7 +1720,7 @@ function vTable(d) {
   };
   var filters = [['all', 'Alle'], ['noprice', 'Ohne Preis'], ['low', 'Konf. < 50 %'], ['review', 'Zu prüfen'], ['cost', 'Kostentreiber'], ['bundle', 'Bündelbar']];
   var allPicked = d.rows.length > 0 && d.rows.every(function (r) { return S.picked[r.oz]; });
-  var body = '', isAll = S.scope === 'all', vis = isAll ? d.rows.slice(0, S.lvLimit) : d.rows, genN = d.full.length - d.all.length;
+  var body = '', isAll = S.scope === 'all', vis = d.rows.slice(0, S.lvLimit), genN = d.full.length - d.all.length;
   if (S.group) {
     var order = [], groups = {};
     vis.forEach(function (r) { if (!groups[r.gewerk]) { groups[r.gewerk] = []; order.push(r.gewerk); } groups[r.gewerk].push(r); });
@@ -1536,8 +1732,8 @@ function vTable(d) {
       if (!closed) groups[g].forEach(function (r) { body += vRow(r, d); });
     });
   } else vis.forEach(function (r) { body += vRow(r, d); });
-  if (body && isAll && d.rows.length > vis.length) body += '<button class="lv-more" data-k="more" data-act="more"><span>' + fmt(vis.length) + ' von ' + fmt(d.rows.length) + ' angezeigt</span><b>Weitere 60 laden' + IC.chev + '</b></button>';
-  if (body && !isAll) body += '<button class="lv-more" data-k="more" data-act="scope" data-v="all"><span>+ ' + fmt(genN) + ' weitere Positionen · 1:1 aus Alt-LV übernommen</span><b>Gesamtes LV anzeigen' + IC.arrow + '</b></button>';
+  if (body && d.rows.length > vis.length) body += '<button class="lv-more" data-k="more" data-act="more"><span>' + fmt(vis.length) + ' von ' + fmt(d.rows.length) + ' angezeigt</span><b>Weitere 60 laden' + IC.chev + '</b></button>';
+  else if (body && !isAll && genN) body += '<button class="lv-more" data-k="more" data-act="scope" data-v="all"><span>+ ' + fmt(genN) + ' weitere Positionen · ' + (P.live ? 'textgleich aus Alt-LV kopiert' : '1:1 aus Alt-LV übernommen') + '</span><b>Gesamtes LV anzeigen' + IC.arrow + '</b></button>';
   var sum = d.rows.reduce(function (a, r) { return a + r.gp; }, 0);
   var okN = d.all.filter(function (r) { return S.confirmed[r.oz]; }).length;
   return '<section aria-label="Leistungsverzeichnis" class="rise" style="--d:380ms">' +
@@ -1582,7 +1778,7 @@ var REPCSS = '.rp{font-family:Geist,system-ui,sans-serif;color:#141414;backgroun
   '.rp .mini{display:inline-block;width:70px;height:5px;background:#efece5;vertical-align:middle;margin-left:8px}.rp .mini i{display:block;height:100%}';
 function repData(d) {
   var rows = d.full.map(function (r) { return Object.assign({}, r, { c: S.confirmed[r.oz] ? 100 : r.conf }); });
-  var w = 0, c = 0; rows.forEach(function (r) { w += r.gp; c += r.gp * r.c; });
+  var w = 0, c = 0; rows.forEach(function (r) { var k = cw(r); w += k; c += k * r.c; });
   var bk = [['z', 'Ohne Preis · 0 %', function (r) { return r.conf === 0; }], ['l', '1 – 49 %', function (r) { return r.conf > 0 && r.conf < 50; }], ['md', '50 – 74 %', function (r) { return r.conf >= 50 && r.conf < 75; }], ['h', '≥ 75 %', function (r) { return r.conf >= 75; }]].map(function (b) {
     var xs = rows.filter(b[2]); return { k: b[0], label: b[1], n: xs.length, gp: xs.reduce(function (a, r) { return a + r.gp; }, 0) };
   });
@@ -1598,7 +1794,7 @@ function repHTML(d) {
   var cls = function (v) { return v === 0 ? 'z' : v < 50 ? 'l' : v < 75 ? 'md' : 'h'; };
   var list = function (xs, empty) { return xs.length ? '<table><thead><tr><th>OZ</th><th>Leistung</th><th>Grund</th><th class="r">Menge</th><th class="r">Konf.</th></tr></thead><tbody>' + xs.map(function (r) { return '<tr><td class="oz">' + r.oz + '</td><td>' + esc(r.kurz) + '<div class="why">' + esc(r.gewerk) + '</div></td><td class="why">' + esc(r.why) + '</td><td class="r">' + qty(r.menge) + ' ' + esc(r.einheit) + '</td><td class="r"><span class="c ' + cls(r.conf) + '">' + r.conf + ' %</span></td></tr>'; }).join('') + '</tbody></table>' : '<p class="why">' + empty + '</p>'; };
   return '<div class="rp">' +
-    '<div class="hd"><div><div class="m">Konfidenzbericht · P-2026-114</div><h1>Neubau Kita Sonnenhof, München-Riem</h1><div class="why">Öffentliche Ausschreibung · VOB/A · Abgabe 12.12.2026, 11:00</div></div><div class="m" style="text-align:right">Stand<br><span style="color:#141414">' + date + '</span><br><br>LV Mastermind</div></div>' +
+    '<div class="hd"><div><div class="m">Konfidenzbericht · ' + esc(P.id) + '</div><h1>' + esc(P.name) + '</h1><div class="why">' + (P.live ? esc(P.file) + ' · ' + fmt(P.n) + ' Positionen' + (P.deadline ? ' · Abgabe ' + deDate(P.deadline) : '') : 'Öffentliche Ausschreibung · VOB/A · Abgabe 12.12.2026, 11:00') + '</div></div><div class="m" style="text-align:right">Stand<br><span style="color:#141414">' + date + '</span><br><br>LV Mastermind</div></div>' +
     '<div class="kpi"><div><div class="m">Gesamtkonfidenz (GP-gewichtet)</div><b>' + R.conf + ' %</b><div class="bar"><i class="' + cls(R.conf) + '" style="width:' + R.conf + '%"></i></div></div>' +
       '<div><div class="m">Positionen</div><b>' + fmt(R.rows.length) + '</b></div><div><div class="m">Ohne Preis</div><b style="color:#b8332b">' + R.np.length + '</b></div><div><div class="m">Bestätigt</div><b>' + R.ok + ' / ' + R.core + '</b></div></div>' +
     '<div class="sec"><h2>Verteilung nach Konfidenz</h2><div class="m">Anteil am Volumen (GP)</div><div class="bar">' + R.bk.map(function (b) { return '<i class="' + b.k + '" style="width:' + (b.gp / R.tot * 100) + '%"></i>'; }).join('') + '</div>' +
@@ -1607,7 +1803,7 @@ function repHTML(d) {
     '<div class="sec"><h2>Niedrige Konfidenz (unter 50 %)</h2>' + list(R.low, 'Keine Positionen unter 50 %.') + '</div>' +
     '<div class="sec"><h2>Konfidenz je Gewerk</h2><table><thead><tr><th>Gewerk</th><th class="r">Pos.</th><th class="r">GP</th><th class="r">Unter 50 %</th><th class="r">Konfidenz</th></tr></thead><tbody>' +
       R.gws.map(function (g) { return '<tr><td>' + esc(g.name) + (g.np ? ' <span class="c z" style="font-size:11px">· ' + g.np + ' ohne Preis</span>' : '') + '</td><td class="r">' + fmt(g.n) + '</td><td class="r">' + eur(Math.round(g.gp)) + '</td><td class="r">' + g.low + '</td><td class="r"><span class="c ' + cls(g.conf) + '">' + g.conf + ' %</span><span class="mini"><i class="' + cls(g.conf) + '" style="width:' + g.conf + '%"></i></span></td></tr>'; }).join('') + '</tbody></table></div>' +
-    '<div class="note">Konfidenz = Sicherheit der KI-Preisschätzung je Position, gewichtet mit dem Gesamtpreis. Bestätigte Positionen zählen mit 100 %. Positionen mit 0 % haben keine vergleichbare Referenz in den Alt-LVs und sind in der Angebotssumme nicht enthalten. Grundlage: 3 Alt-LVs, 9.120 bepreiste Positionen.</div>' +
+    '<div class="note">Konfidenz = Sicherheit der KI-Preisschätzung je Position, gewichtet mit dem Gesamtpreis. Bestätigte Positionen zählen mit 100 %. Positionen mit 0 % haben keine vergleichbare Referenz in den Alt-LVs und sind in der Angebotssumme nicht enthalten. Grundlage: ' + (P.live ? esc(P.lib) : '3 Alt-LVs, 9.120 bepreiste Positionen') + '.</div>' +
   '</div>';
 }
 function vReport(d) {
@@ -1627,7 +1823,7 @@ function vDock(d) {
 }
 
 function vKontext() {
-  var ctx = [
+  var ctx = P.live ? liveCtx() : [
     { tag: '[K1] Dokumente', title: 'Ausschreibungsunterlagen', sub: 'Vom Bauherrn, analysiert am 21.11.2026', items: [['LV_Kita_Sonnenhof.X83', '1.284 Pos.', 'var(--signal)'], ['Grundrisse EG–2. OG (A-101–A-103)', 'PDF · 3 Blätter', 'var(--signal)'], ['Schnitte & Ansichten', 'PDF · 6 Blätter', 'var(--signal)'], ['Statik Positionsplan (S-01–S-05)', 'PDF · 5 Blätter', 'var(--signal)']] },
     { tag: '[K2] Preisbasis', title: 'Eigene Alt-LVs mit Preisen', sub: 'Nur eigene Daten, keine Internetpreise', items: [['Grundschule Trudering 2024', '2.910 Pos.', 'var(--ok)'], ['Turnhalle Pasing 2025', '1.650 Pos.', 'var(--ok)'], ['Kita Freiham 2023', '1.120 Pos.', 'var(--ok)'], ['Baupreisindex Q3/2026', '+4,2 % ggü. 2024', 'var(--warn)']] },
     { tag: '[K3] Regeln', title: 'Kalkulationslogik', sub: 'Festgelegt, für jeden Vorschlag nachvollziehbar', items: [['Preis übernehmen bei Abweichung', '≤ ±10 %', 'var(--ink)'], ['Gleiche Texte bündeln', 'automatisch', 'var(--ink)'], ['Materialfaktor Edelstahl', '× 3,0 ggü. Stahl', 'var(--ink)'], ['Örtlicher Preis', 'Beton, Erdbau', 'var(--ink)']] }
@@ -1638,8 +1834,20 @@ function vKontext() {
   }).join('') + '</div>';
 }
 
+function liveCtx() {
+  var M = P.methods, fd = (P.plan && P.plan.findings) || [], sev = { error: 'var(--bad)', risk: 'var(--warn)', note: 'var(--ink-3)' };
+  var c = [
+    { tag: '[K1] Dokumente', title: 'Hochgeladene Unterlagen', sub: 'Vom Backend gelesen und analysiert', items: [[P.file || 'LV', fmt(P.n) + ' Pos.', 'var(--signal)'], P.plan ? [P.plan.file, 'Bauplan · ' + (P.plan.checked || 0) + ' Pos. geprüft', 'var(--signal)'] : ['Kein Bauplan', 'optional beim Upload', 'var(--line-2)']] },
+    { tag: '[K2] Preisbasis', title: 'Eigene Alt-LVs mit Preisen', sub: P.lib + ' · nur eigene Daten', items: [['Textgleich kopiert', fmt(M.copied) + ' Pos.', 'var(--ok)'], ['Gleichwertig laut KI-Richter', fmt(M.similar) + ' Pos.', 'var(--ok)'], ['Nach Größe interpoliert', fmt(M.adjusted) + ' Pos.', 'var(--warn)'], ['Nur verwandt / nichts gefunden', fmt(M.reference) + ' / ' + fmt(M.none), 'var(--bad)']] },
+    { tag: '[K3] Regeln', title: 'Kalkulationslogik', sub: 'Fest im Backend, für jede Position nachvollziehbar', items: [['Textgleiche Position', 'Preis 1:1 · Risiko 5', 'var(--ink)'], ['Gleichwertige Position', 'Median · Risiko 25', 'var(--ink)'], ['Zwei Größen gefunden', 'interpoliert · Risiko 45', 'var(--ink)'], ['Konfidenz', '100 − Risiko, ohne Preis 0', 'var(--ink)']] }
+  ];
+  if (fd.length) c.push({ tag: '[K4] Plan-Prüfung', title: 'Befunde aus dem Bauplan', sub: fd.length + ' Befunde, offen für die Kalkulation', items: fd.slice(0, 8).map(function (f) { return [(f.oz ? f.oz + ' · ' : '') + f.title, f.plan_quantity != null ? 'Plan ' + qty(f.plan_quantity) + ' ' + (f.plan_unit || '') : f.severity, sev[f.severity] || 'var(--ink)']; }) });
+  return c;
+}
+
 // ---- drawer ----
 function candidates(p, R) {
+  if (P.live) { var st = R.steps || [['EP', eur(p.aiEp)]]; return { cands: [{ ep: p.aiEp, label: 'Empfehlung', why: R.brief || p.why, steps: st }], src: '', steps: st, segs: R.segs || [[p.why]] }; }
   var src = p.mode === 'übernommen' ? 'Grundschule Trudering 2024' : 'Kita Freiham 2023';
   var aiEp = p.aiEp, baseEp = p.mode === 'übernommen' ? aiEp : Math.round(aiEp / 1.042 * 100) / 100;
   var steps = R.steps || (p.mode === 'übernommen' ? [['Basis-EP ' + src, eur(aiEp)], ['Anpassung', 'keine'], ['EP', eur(aiEp)]] : [['Basis-EP ' + src, eur(baseEp)], ['Baupreisindex Q3/2026', '+4,2 %'], ['EP', eur(aiEp)]]);
@@ -1757,15 +1965,23 @@ function vDrawer(d) {
           ? '<div class="sub edhint"><span>' + (dd === null ? 'Gültigen Preis eingeben' : noAi ? 'GP ' + eur(Math.round(dv * 100) / 100 * p.menge) : Math.abs(dd) < 0.05 ? 'entspricht dem KI-Vorschlag' : '<b style="color:' + (Math.abs(dd) > 10 ? 'var(--warn)' : 'var(--ink)') + '">' + pct(dd) + '</b> zum KI-Vorschlag · GP ' + eur(Math.round(dv * 100) / 100 * p.menge)) + '</span><span class="keys"><kbd>Enter</kbd> übernehmen <kbd>Esc</kbd> verwerfen</span></div>'
           : p.np ? '<div class="sub">' + qty(p.menge) + ' ' + p.einheit + ' · GP wird nach der Eingabe berechnet</div>'
           : '<div class="sub">GP <b>' + eur(p.gp) + '</b> · ' + fmt(p.gp / TOTAL * 100, 2) + ' % des LV · ' + qty(p.menge) + ' ' + p.einheit +
-            (p.manual ? ' · <button class="lnk" data-act="resetEp">' + (noAi ? 'Preis entfernen' : 'KI-Vorschlag ' + eur(p.aiEp) + ' wiederherstellen') + '</button>' : '') + '</div>') +
+            (p.manual && !p.srvManual ? ' · <button class="lnk" data-act="resetEp">' + (noAi ? 'Preis entfernen' : 'KI-Vorschlag ' + eur(p.aiEp) + ' wiederherstellen') + '</button>' : '') +
+            (P.live && !p.manual && !p.np ? ' · <button class="lnk" data-act="doubt" title="Senkt die Konfidenz dieser Position im Backend">Preis anzweifeln</button>' : '') + '</div>') +
         (ok ? '<div class="stamp' + (fresh ? ' fx' : '') + '" data-k="st"><span class="sq">' + IC.tickRaw + '</span><span><b>Bestätigt</b><small>' + (p.manual ? 'Eigener Preis' : 'KI-Preis') + ' · T. Berger</small></span></div>' : '') + '</div>' +
         '<div class="pconf"><span class="mono">Konfidenz</span><span class="conf-v ' + confLvl(p.conf) + '"><b>' + p.conf + ' %</b>' + confWord(p.conf) + '</span>' + cmeter(p.conf, 10) + '</div></div>' +
-        (noAi ? '<div class="why2"><div class="mono lab">Warum kein Preis</div><p>' + esc(p.why) + '. In euren Alt-LVs gibt es keine vergleichbare Position. Kalkuliere den Preis selbst oder hol ein Lieferantenangebot ein.</p></div></section>' :
+        (noAi ? '<div class="why2"><div class="mono lab">Warum kein Preis</div><p>' + esc(P.live && R.brief ? R.brief : p.why) + '. In euren Alt-LVs gibt es keine vergleichbare Position. Kalkuliere den Preis selbst oder hol ein Lieferantenangebot ein.</p></div></section>' :
         '<div class="why2' + (S.whyOpen ? ' open' : '') + '"><div class="mono lab">Begründung</div><p>' + esc(C.cands[0].why) + '</p>' +
           '<div class="whymore" aria-hidden="' + !S.whyOpen + '"><div class="whyin"><div class="calc2">' + C.steps.map(function (s, j) { return '<div class="cs' + (j === C.steps.length - 1 ? ' last' : '') + '"><span>' + esc(s[0]) + '</span><span>' + esc(s[1]) + '</span></div>'; }).join('') + '</div>' +
           ((R.similar || []).length ? '<div class="refs"><span class="mono">Quellen</span>' + R.similar.map(function (x) { var e = D.extra[x[0]]; return e ? '<button class="ref" data-act="preview" data-key="' + x[0] + '">' + esc(e.proj) + '<small>' + esc(x[1]) + '</small></button>' : ''; }).join('') + '</div>' : '') +
         '</div></div><button class="whytg" data-act="whyToggle" aria-expanded="' + !!S.whyOpen + '">' + (S.whyOpen ? 'Weniger anzeigen' : 'Berechnung &amp; Quellen anzeigen') + IC.chev + '</button></div></section>') +
-      '<div class="lower"><div class="lowin">' + gwPanel + '</div></div>' +
+      '<div class="lower"><div class="lowin">' + (function () {
+        var L = cmtList(p);
+        return '<section class="comm cmts" aria-label="Kommentare"><div class="comm-h"><span class="mono">Kommentare</span><span class="mono">' + L.length + '</span></div><div class="panel">' +
+          (L.length ? '<ol class="cml">' + L.map(function (c, i) { return '<li data-k="cm' + i + '">' + (c.tag ? '<span class="cmt-tag mono">' + esc(c.tag) + '</span>' : '') + '<p>' + esc(c.t || '–') + '</p>' + (c.time ? '<small>' + esc(c.time) + '</small>' : '') + '</li>'; }).join('') + '</ol>'
+            : '<p class="pempty">Noch keine Kommentare zu dieser Position.</p>') +
+          '<div class="composer"><label><span class="sr">Kommentar</span><input data-in="cmt" data-enter="sendCmt" value="' + esc(S.cmt) + '" placeholder="Kommentar zu ' + esc(p.oz) + ' schreiben…"></label><button data-act="sendCmt" aria-label="Kommentar speichern">' + IC.arrow + '</button></div>' +
+          (P.live ? '<p class="mono faint cmt-note">Wird im Backend gespeichert</p>' : '') + '</div></section>';
+      })() + gwPanel + '</div></div>' +
       '<div class="aiwrap"><div class="aiin"><section class="aichat" role="region" aria-label="Chat mit dem Agenten zu ' + p.oz + '">' +
       '<div class="cp-h"><span class="agent-ic">' + IC.star + '</span><span><b>Agent</b><small>' + p.oz + ' · ' + esc(p.kurz) + '</small></span><span class="cp-live"><i></i>online</span><button class="ic" data-act="aiClose" aria-label="Chat schließen">' + IC.x + '</button></div>' +
       '<div class="cp-log" data-k="cplog' + p.oz + '">' +
@@ -1803,7 +2019,7 @@ function vFx() {
   var btns = fx.phase === 'ask'
     ? '<button class="btn btn-quiet" data-act="fxClose">Erst prüfen</button><button class="btn btn-primary" data-act="fxRun">Trotzdem exportieren' + IC.arrow + '</button>'
     : fx.phase === 'done' && fx.kind === 'export'
-      ? '<button class="btn btn-quiet" data-act="fxClose">Schließen</button><button class="btn btn-primary" data-act="download">' + IC.down + 'Kita_Sonnenhof.X84</button>' : '';
+      ? '<button class="btn btn-quiet" data-act="fxClose">Schließen</button><button class="btn btn-primary" data-act="download">' + IC.down + esc(slug(P.short)) + '.X84</button>' : '';
   return '<div class="scrim" data-k="fx-' + fx.kind + '"><div class="fxcard" role="dialog" aria-modal="true" aria-labelledby="fxT" aria-live="polite">' +
     '<div class="fxv ' + cls + '"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="fx-track" cx="60" cy="60" r="52"/><circle class="fx-ring" cx="60" cy="60" r="52"/>' +
       (fx.phase === 'ask' ? '<path class="fx-warn" d="M60 36v30M60 82v.5"/>' : '<path class="fx-check" d="M38 62l15 15 30-33"/>') + '</svg><span class="burst"></span><span class="burst b2"></span>' + (fx.phase === 'done' ? particles('spark', 14, 90) : '') + '</div>' +
@@ -1819,7 +2035,7 @@ function view() {
   var d = derive();
   return vHeader() + '<main>' + vHero(d) +
     (S.tab === 'home' ? '<div class="grid2">' + vCost() + vBid() + '</div>' + vSummary(d) + vTable(d) : vKontext()) +
-    '</main>' + vDock(d) + vReport(d) + (S.planFull ? '<div class="planfs" data-k="planfs"><div class="planfs-bg" data-act="planFull" data-v="0"></div>' + vPlan(d, true) + '</div>' : '') + vDrawer(d) + vPreview(d) + vFx() + vToast();
+    '</main>' + vDock(d) + vReport(d) + (S.planFull ? '<div class="planfs" data-k="planfs"><div class="planfs-bg" data-act="planFull" data-v="0"></div>' + vPlan(d, true) + '</div>' : '') + vDrawer(d) + vPreview(d) + vFx() + vUpload() + vToast();
 }
 
 // ================= tiny DOM morph (keeps nodes, so CSS animations only play on real changes) =================
@@ -1862,6 +2078,8 @@ function render() {
   var lg = root.querySelector('.cp-log'); if (lg) lg.scrollTop = lg.scrollHeight;
   if (S.focusEp) { S.focusEp = false; var e = document.getElementById('epin'); if (e) { e.focus(); e.select(); } }
   if (first) { first = false; countUp(); }
+  if (P.live) store('lvm-ok-' + P.id, S.confirmed);
+  var ul = root.querySelector('.up-log'); if (ul) ul.scrollTop = ul.scrollHeight;
 }
 function set(p) { Object.assign(S, p); render(); }
 function countUp() {
@@ -1924,6 +2142,7 @@ function confirmCurrent() {
     var e = Object.assign({}, S.eps), g = Object.assign({}, S.sugg);
     if (Math.abs(v - p.aiEp) < 0.005) delete e[p.oz]; else e[p.oz] = v;
     delete g[p.oz]; patch.eps = e; patch.sugg = g;
+    if (P.live && Math.abs(v - p.ep) >= 0.005) postComment(p.oz, { price: v, text: 'Eigener Preis im Dashboard' }, 'EP ' + p.oz);
   }
   var c = Object.assign({}, S.confirmed); c[p.oz] = true; patch.confirmed = c;
   flagOk([p.oz]);
@@ -1943,6 +2162,7 @@ function saveEp() {
   set({ eps: e, sugg: g, confirmed: c, editEp: false, flashEp: 1 });
   S.flashEp = 0;
   toast('EP ' + p.oz + ': ' + eur(v) + ' · GP ' + eur(v * p.menge));
+  if (P.live && Math.abs(v - p.ep) >= 0.005) postComment(p.oz, { price: v, text: 'Eigener Preis im Dashboard' }, 'EP ' + p.oz);
 }
 var aiT = null, aiScroll = 0;
 function aiShut() { set({ aiOpen: false }); var bd = document.querySelector('.dw-body'); if (bd) setTimeout(function () { bd.scrollTo({ top: aiScroll, behavior: 'smooth' }); }, 420); }
@@ -1969,10 +2189,10 @@ function planHot(oz, mkEl) {
   document.querySelectorAll('.mk[data-oz="' + oz + '"]').forEach(function (m) { m.classList.add('hot'); m.parentNode.appendChild(m); });
   var row = document.querySelector('.lv-r[data-oz="' + oz + '"]'); if (row) row.classList.add('hot');
   if (!mkEl) return; // from a table row: only the marker lights up
-  var plan = mkEl.closest('.plan'), tip = plan && plan.querySelector('.plan-tip'), p = PLAN[oz], r = derive().all.find(function (x) { return x.oz === oz; });
+  var plan = mkEl.closest('.plan'), tip = plan && plan.querySelector('.plan-tip'), p = PLAN[oz], r = derive().full.find(function (x) { return x.oz === oz; });
   if (!tip || !r) return;
   tip.innerHTML = '<span class="mono">' + oz + ' · Konfidenz ' + r.conf + ' %</span><b>' + esc(r.kurz) + '</b><span>' + (r.np ? 'Noch kein Preis' : eur(r.ep) + ' je ' + r.einheit) + '</span>';
-  tip.style.left = (p[0] / 10) + '%'; tip.style.top = (p[1] / 7) + '%';
+  tip.style.left = (p[0] / 10) + '%'; tip.style.top = (p[1] / PLAN_VH * 100) + '%';
   tip.classList.toggle('flip', p[0] > 620);
   tip.classList.add('on');
 }
@@ -1991,24 +2211,29 @@ function send(text) {
   set({ chats: ch, draft: '', thinking: true });
   setTimeout(function () { var c2 = Object.assign({}, S.chats); c2[oz] = (c2[oz] || []).concat([{ role: 'agent', t: reply(p, text) }]); set({ chats: c2, thinking: false }); }, 1500);
 }
+function cmtList(p) {
+  if (P.live) return (p.cmts || []).map(function (c) { return { t: c.text, tag: c.price != null ? 'Preis ' + eur(c.price) : c.effect === 'doubt' ? 'Zweifel' : '' }; });
+  return (S.comments[p.oz] || []).map(function (c) { return { t: c.t, tag: '', time: c.time }; });
+}
 function addComment() {
   var v = S.cmt.trim(); if (!v || !S.sel) return;
+  if (P.live) { var oz = S.sel; set({ cmt: '' }); postComment(oz, { text: v }, 'Kommentar zu ' + oz); return; }
   var c = Object.assign({}, S.comments); c[S.sel] = (c[S.sel] || []).concat([{ by: 'TB', time: 'gerade eben', t: v }]);
   set({ comments: c, cmt: '' });
 }
 function download() {
   var d = derive();
   var x = function (s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); };
-  var items = d.all.map(function (r) {
+  var items = (P.live ? d.full : d.all).filter(function (r) { return !r.np; }).map(function (r) {
     return '      <Item RNoPart="' + r.oz + '"><Qty>' + r.menge + '</Qty><QU>' + x(r.einheit) + '</QU><UP>' + r.ep.toFixed(2) + '</UP><IT>' + r.gp.toFixed(2) + '</IT><Description><OutlineText>' + x(r.kurz) + '</OutlineText></Description></Item>';
   }).join('\n');
-  var xml = '<?xml version="1.0" encoding="UTF-8"?>\n<!-- Mock-Export LV Mastermind (Demo-Daten) -->\n<GAEB xmlns="http://www.gaeb.de/GAEB_DA_XML/DA84/3.3">\n  <GAEBInfo><Version>3.3</Version><ProgSystem>LV Mastermind</ProgSystem></GAEBInfo>\n  <Award><DP>84</DP><BoQ><BoQInfo><Name>Neubau Kita Sonnenhof</Name></BoQInfo><BoQBody>\n' + items + '\n  </BoQBody></BoQ></Award>\n</GAEB>\n';
+  var xml = '<?xml version="1.0" encoding="UTF-8"?>\n<!-- ' + (P.live ? 'Export LV Mastermind, Projekt ' + x(P.id) : 'Mock-Export LV Mastermind (Demo-Daten)') + ' -->\n<GAEB xmlns="http://www.gaeb.de/GAEB_DA_XML/DA84/3.3">\n  <GAEBInfo><Version>3.3</Version><ProgSystem>LV Mastermind</ProgSystem></GAEBInfo>\n  <Award><DP>84</DP><BoQ><BoQInfo><Name>' + x(P.name) + '</Name></BoQInfo><BoQBody>\n' + items + '\n  </BoQBody></BoQ></Award>\n</GAEB>\n';
   var a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([xml], { type: 'application/xml' }));
-  a.download = 'Kita_Sonnenhof.X84';
+  a.download = slug(P.short) + '.X84';
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
-  toast('Kita_Sonnenhof.X84 heruntergeladen');
+  toast(slug(P.short) + '.X84 heruntergeladen');
 }
 function startExport() {
   var d = derive();
@@ -2136,16 +2361,16 @@ var A = {
   report: function (ds) { set({ report: ds.v === '1' }); },
   repPrint: function () { document.body.classList.add('printing-rep'); window.print(); setTimeout(function () { document.body.classList.remove('printing-rep'); }, 500); },
   repHtml: function () {
-    var html = '<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Konfidenzbericht Kita Sonnenhof</title><link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500&family=Geist+Mono&display=swap" rel="stylesheet"><style>body{margin:0;background:#f4f2ec}' + REPCSS + '</style></head><body>' + repHTML(derive()) + '</body></html>';
-    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([html], { type: 'text/html' })); a.download = 'Konfidenzbericht_Kita_Sonnenhof.html';
+    var html = '<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Konfidenzbericht ' + esc(P.short) + '</title><link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500&family=Geist+Mono&display=swap" rel="stylesheet"><style>body{margin:0;background:#f4f2ec}' + REPCSS + '</style></head><body>' + repHTML(derive()) + '</body></html>';
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([html], { type: 'text/html' })); a.download = 'Konfidenzbericht_' + slug(P.short) + '.html';
     document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
-    toast('Konfidenzbericht_Kita_Sonnenhof.html heruntergeladen');
+    toast('Konfidenzbericht_' + slug(P.short) + '.html heruntergeladen');
   },
   floor: function (ds) { set({ floor: ds.v }); },
   planFull: function (ds) { planHot(null); set({ planFull: ds.v === '1' }); },
   whyToggle: function () { set({ whyOpen: !S.whyOpen }); },
   dtab: function (ds) { set({ dtab: ds.v }); },
-  resetEp: function () { var p = cur(), e = Object.assign({}, S.eps), g = Object.assign({}, S.sugg), c = Object.assign({}, S.confirmed); delete e[p.oz]; delete g[p.oz]; delete c[p.oz]; set({ eps: e, sugg: g, confirmed: c, editEp: false, flashEp: 1 }); S.flashEp = 0; toast('KI-Vorschlag für ' + p.oz + ' wiederhergestellt'); },
+  resetEp: function () { var p0 = cur(); if (p0 && p0.srvManual) { toast('Der eigene Preis ist im Backend gespeichert. Gib einen neuen Preis ein, um ihn zu ersetzen.'); return; } var p = cur(), e = Object.assign({}, S.eps), g = Object.assign({}, S.sugg), c = Object.assign({}, S.confirmed); delete e[p.oz]; delete g[p.oz]; delete c[p.oz]; set({ eps: e, sugg: g, confirmed: c, editEp: false, flashEp: 1 }); S.flashEp = 0; toast('KI-Vorschlag für ' + p.oz + ' wiederhergestellt'); },
   sendCmt: addComment,
   compose: function (ds) { set({ compose: ds.v, dtab: 'ext' }); },
   cancelCompose: function () { set({ compose: null }); },
@@ -2155,9 +2380,135 @@ var A = {
   sendDraft: function () { send(S.draft); }
 };
 
+// ================= projects, upload, backend sync =================
+function vProjMenu() {
+  if (!S.projOpen) return '';
+  var L = S.projList;
+  return '<div class="pmenu" role="menu" data-k="pmenu"><div class="menu-h mono">Projekte · ' + esc(API) + '</div>' +
+    '<button class="pm-i' + (P.live ? '' : ' on') + '" data-act="loadProj" data-v="demo"><span><b>Kita Sonnenhof</b><small>Demo-Daten</small></span><span class="mono faint">Demo</span></button>' +
+    (L === null ? '<div class="pm-e mono faint">Lädt…</div>' : L === false ? '<div class="pm-e">Backend nicht erreichbar.</div>' : !L.length ? '<div class="pm-e">Noch keine Projekte. Lade ein LV hoch.</div>' :
+      L.map(function (p) {
+        return '<button class="pm-i' + (P.live && P.id === p.project ? ' on' : '') + '" data-act="loadProj" data-v="' + esc(p.project) + '"' + (p.items == null ? ' disabled' : '') + '><span><b>' + esc((store('lvm-meta-' + p.project) || {}).name || p.project) + '</b><small>' + esc(p.project) + (p.items != null ? ' · ' + fmt(p.items) + ' Pos.' : '') + (p.total != null ? ' · ' + eur(Math.round(p.total)) : '') + '</small></span>' +
+          '<span class="mono ' + (p.status === 'failed' ? 'pm-bad' : 'faint') + '">' + (p.status === 'running' ? 'läuft…' : p.status === 'failed' ? 'Fehler' : p.confidence != null ? p.confidence + ' %' : '') + '</span></button>';
+      }).join('')) +
+    '<button class="pm-new" data-act="newProj">' + IC.plus + 'Neues Projekt hochladen</button></div>';
+}
+function upFile(kind, f, acc, hint) {
+  return '<label class="updrop' + (f ? ' has' : '') + '" data-drop="' + kind + '" data-k="ud' + kind + '"><input type="file" class="sr" accept="' + acc + '" data-file="' + kind + '">' +
+    '<span class="updrop-i">' + (f ? IC.tick : IC.down) + '</span><span class="updrop-t"><b>' + (f ? esc(f.name) : hint[0]) + '</b><small>' + (f ? fmt(Math.max(1, f.size / 1024)) + ' KB · Klicken zum Ersetzen' : hint[1]) + '</small></span></label>';
+}
+function vUpload() {
+  var U = S.up; if (!U) return '';
+  var head = '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span class="mono faint">Neues Projekt · Backend ' + esc(API) + '</span>' +
+    (U.phase === 'run' ? '' : '<button class="ic" data-act="upClose" aria-label="Schließen">' + IC.x + '</button>') + '</div>';
+  if (U.phase === 'run' || U.phase === 'err') {
+    var sec = Math.round(((U.t1 || Date.now()) - U.t0) / 1000);
+    return '<div class="scrim" data-k="up"><div class="modal upm" role="dialog" aria-modal="true" aria-label="Analyse läuft" data-stop="1">' + head +
+      '<h3 class="up-h">' + (U.phase === 'err' ? 'Analyse fehlgeschlagen' : 'LV wird analysiert') + '</h3>' +
+      '<p class="muted up-p">' + esc(U.id) + ' · ' + esc(U.lvName) + (U.planName ? ' + ' + esc(U.planName) : '') + ' · ' + (U.copy ? 'Schnelltest ohne KI' : 'volle Analyse mit KI') + ' · ' + sec + ' s</p>' +
+      (U.phase === 'err' ? '<div class="up-err">' + IC.warn + '<span>' + esc(U.err) + '</span></div>' : '<div class="up-bar"><i></i></div>') +
+      '<pre class="up-log" data-k="ulog">' + esc((U.log || []).slice(-12).join('\n') || 'Warte auf die ersten Zeilen…') + '</pre>' +
+      (U.phase === 'err' ? '<div class="up-btns"><button class="btn btn-quiet" data-act="upClose">Schließen</button><button class="btn btn-primary" data-act="upBack">Zurück zum Formular</button></div>' :
+        '<p class="mono faint up-note">Eine volle Analyse fragt KI-Modelle und dauert einige Minuten. Das Fenster kann offen bleiben.</p>') +
+      '</div></div>';
+  }
+  return '<div class="scrim" data-k="up"><div class="modal upm" role="dialog" aria-modal="true" aria-label="Neues Projekt" data-stop="1">' + head +
+    '<h3 class="up-h">LV hochladen</h3><p class="muted up-p">Das LV wird gegen die Alt-LVs der Preisbibliothek bepreist. Ein Bauplan als Kontext prüft zusätzlich die Mengen.</p>' +
+    (S.apiOk === false ? '<div class="up-err">' + IC.warn + '<span>Backend unter ' + esc(API) + ' nicht erreichbar. Läuft <code>uvicorn lv.api:app</code>? Andere Adresse: Seite mit <code>?api=https://…</code> öffnen.</span></div>' : '') +
+    '<div class="up-grid">' +
+      upFile('lv', U.lv, '.x83,.d83,.d84,.d86,.X83,.D83,.D84,.D86', ['Leistungsverzeichnis wählen', 'GAEB .x83, .d83, .d84, .d86 · Pflicht']) +
+      upFile('plan', U.plan, '.png,.jpg,.jpeg,.pdf', ['Kontext: Bauplan (optional)', 'PNG oder JPG für Markierungen, PDF geht auch']) +
+    '</div>' +
+    '<div class="up-f"><label><span class="mono faint">Projekt-ID</span><input class="fld" data-in="upId" value="' + esc(S.upId) + '" placeholder="z. B. KITA-RIEM" maxlength="40"></label>' +
+      '<label><span class="mono faint">Name (optional)</span><input class="fld" data-in="upName" value="' + esc(S.upName) + '" placeholder="Neubau Kita Sonnenhof"></label>' +
+      '<label><span class="mono faint">Abgabefrist (optional)</span><input class="fld" type="date" data-in="upDeadline" value="' + esc(S.upDeadline) + '"></label></div>' +
+    '<button class="up-chk' + (U.copy ? ' on' : '') + '" data-act="upCopy" aria-pressed="' + !!U.copy + '"><span class="cb2">' + (U.copy ? IC.tickRaw : '') + '</span><span><b>Schnelltest ohne KI</b><small>Nur textgleiche Positionen kopieren. Sekunden statt Minuten, keine Kosten, kein Bauplan.</small></span></button>' +
+    (U.err ? '<div class="up-err">' + IC.warn + '<span>' + esc(U.err) + '</span></div>' : '') +
+    '<div class="up-btns"><button class="btn btn-quiet" data-act="upClose">Abbrechen</button><button class="btn btn-primary" data-act="upGo"' + (U.lv ? '' : ' disabled') + '>Analyse starten' + IC.arrow + '</button></div></div></div>';
+}
+function pingApi() { return api('/projects').then(function (l) { S.apiOk = true; S.projList = l; render(); return l; }, function () { S.apiOk = false; S.projList = false; render(); return false; }); }
+function resetView() {
+  cancelAdvance();
+  Object.assign(S, { sel: null, picked: {}, confirmed: P.live ? (store('lvm-ok-' + P.id) || {}) : {}, bundled: {}, eps: {}, mg: {}, sugg: {}, justOk: {}, chats: {},
+    scope: 'key', lvLimit: 60, filter: 'all', gewerk: '', q: '', floor: FLOORS[0], planFull: false, report: false, projOpen: false, tab: 'home' });
+  first = true;
+}
+function loadProject(id) {
+  return Promise.all([api('/projects/' + encodeURIComponent(id)), api('/projects/' + encodeURIComponent(id) + '/status').catch(function () { return null; })]).then(function (r) {
+    loadLV(r[0], r[1]); resetView();
+    try { history.replaceState(null, '', '#p=' + encodeURIComponent(id)); } catch (e) {}
+    render(); window.scrollTo({ top: 0 });
+  });
+}
+function showDemo() {
+  if (!DEMO) return;
+  D = DEMO.D; LVX = DEMO.LVX; TOTAL = DEMO.TOTAL; PLAN = DEMO.PLAN; P = DEMO.P; FLOORS = DEMO.FLOORS; PLAN_VH = DEMO.PLAN_VH;
+  resetView(); try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+  render();
+}
+function itemPatched(item, sum) {
+  var np = toPos(item), lists = [D.pos, LVX];
+  lists.forEach(function (L) { var i = L.findIndex(function (x) { return x.oz === np.oz; }); if (i >= 0) { np.gen = L[i].gen; L[i] = np; } });
+  D.rich[np.oz] = toRich(item, D.extra);
+  if (sum) P.risk = sum;
+  var e = Object.assign({}, S.eps); delete e[np.oz]; S.eps = e;
+}
+function postComment(oz, body, msg) {
+  if (!P.live) return;
+  api('/projects/' + encodeURIComponent(P.id) + '/items/' + encodeURIComponent(oz) + '/comments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+    .then(function (res) { itemPatched(res.item, res.risk_summary); render(); toast(msg + ' · gespeichert'); }, function (err) { toast('Nicht gespeichert: ' + err.message); });
+}
+var upT = null;
+function pollRun(id) {
+  clearTimeout(upT);
+  api('/projects/' + encodeURIComponent(id) + '/status').then(function (st) {
+    if (!S.up || S.up.id !== id) return;
+    S.up.log = st.log || [];
+    if (st.status === 'running') { render(); upT = setTimeout(function () { pollRun(id); }, 2500); return; }
+    if (st.status === 'failed') { S.up.phase = 'err'; S.up.t1 = Date.now(); S.up.err = st.error || 'Die Analyse ist abgebrochen.'; render(); return; }
+    loadProject(id).then(function () { S.up = null; render(); toast(id + ' analysiert · ' + P.n + ' Positionen'); }, function (e) { S.up.phase = 'err'; S.up.err = e.message; render(); });
+  }, function (e) { if (!S.up) return; S.up.log = (S.up.log || []).concat(['Status nicht abrufbar: ' + e.message]); render(); upT = setTimeout(function () { pollRun(id); }, 4000); });
+}
+function suggestId(name) { return String(name || '').replace(/\.[^.]+$/, '').replace(/[^A-Za-z0-9-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'LV-1'; }
+function takeFile(kind, f) {
+  if (!S.up || !f) return;
+  S.up[kind] = f; S.up.err = '';
+  if (kind === 'lv' && !S.upIdTouched) S.upId = suggestId(f.name);
+  if (kind === 'plan') S.up.copy = false;
+  render();
+}
+var LIVEA = {
+  projects: function () { var o = !S.projOpen; set({ projOpen: o, projList: o ? null : S.projList }); if (o) pingApi(); },
+  loadProj: function (ds) {
+    S.projOpen = false;
+    if (ds.v === 'demo') { showDemo(); return; }
+    render(); loadProject(ds.v).catch(function (e) { toast('Laden fehlgeschlagen: ' + e.message); });
+  },
+  newProj: function () { S.projOpen = false; S.upId = S.upId || ''; S.upName = ''; S.upDeadline = ''; S.upIdTouched = false; set({ up: { phase: 'form', lv: null, plan: null, copy: false } }); pingApi(); },
+  upClose: function () { clearTimeout(upT); set({ up: null }); },
+  upBack: function () { S.up.phase = 'form'; S.up.err = ''; render(); },
+  upCopy: function () { S.up.copy = !S.up.copy; if (S.up.copy && S.up.plan) S.up.plan = null; render(); },
+  upGo: function () {
+    var U = S.up, id = String(S.upId || '').trim();
+    if (!U.lv) { U.err = 'Bitte ein LV wählen.'; render(); return; }
+    if (!/^[A-Za-z0-9-]{1,40}$/.test(id)) { U.err = 'Projekt-ID: nur Buchstaben, Ziffern und „-“, höchstens 40 Zeichen.'; render(); return; }
+    var fd = new FormData(); fd.append('project', id); fd.append('lv', U.lv);
+    if (U.plan && !U.copy) fd.append('plan', U.plan);
+    if (U.copy) fd.append('copy_only', 'true');
+    store('lvm-meta-' + id, { name: String(S.upName || '').trim(), deadline: S.upDeadline || '' });
+    Object.assign(U, { phase: 'run', id: id, lvName: U.lv.name, planName: U.plan && !U.copy ? U.plan.name : '', log: [], t0: Date.now(), t1: 0, err: '' });
+    render();
+    api('/projects', { method: 'POST', body: fd }).then(function (st) { U.log = st.log || []; render(); upT = setTimeout(function () { pollRun(id); }, 1200); },
+      function (e) { U.phase = 'form'; U.err = e.message === 'Failed to fetch' ? 'Backend unter ' + API + ' nicht erreichbar.' : e.message; render(); });
+  },
+  doubt: function () { var p = cur(); if (p) postComment(p.oz, { doubt: true, text: 'Preis passt nicht (Dashboard)' }, 'Zweifel an ' + p.oz); }
+};
+Object.assign(A, LIVEA);
+
 // ================= events =================
 document.addEventListener('click', function (e) {
   if (S.menu && !e.target.closest('.mw')) { S.menu = null; render(); }
+  if (S.projOpen && !e.target.closest('.pmw')) { S.projOpen = false; render(); }
   var el = e.target.closest('[data-act]');
   if (!el) return;
   // clicks inside a modal card should not hit the scrim's close action
@@ -2170,9 +2521,11 @@ document.addEventListener('input', function (e) {
   var k = e.target.getAttribute && e.target.getAttribute('data-in');
   if (!k) return;
   S[k] = e.target.value;
+  if (k === 'upId') S.upIdTouched = true;
   if (k === 'q' || k === 'epDraft') render();
 });
 document.addEventListener('change', function (e) {
+  if (e.target.getAttribute && e.target.getAttribute('data-file')) { takeFile(e.target.getAttribute('data-file'), e.target.files && e.target.files[0]); return; }
   var k = e.target.getAttribute && e.target.getAttribute('data-change');
   if (!k) return;
   var v = e.target.value;
@@ -2191,6 +2544,8 @@ document.addEventListener('keydown', function (e) {
     if (sib && sib.classList.contains('mi')) sib.focus(); return;
   }
   if (e.key === 'Escape') {
+    if (S.projOpen) { set({ projOpen: false }); return; }
+    if (S.up) { if (S.up.phase !== 'run') A.upClose(); return; }
     if (S.menu) { var mt = document.querySelector('[data-act="menu"][data-v="' + S.menu + '"]'); set({ menu: null }); if (mt) mt.focus(); return; }
     if (S.adv) { cancelAdvance(); render(); return; }
     if (S.aiOpen) { A.aiClose(); return; }
@@ -2224,7 +2579,18 @@ document.addEventListener('pointerout', function (e) {
 });
 
 try { var th = localStorage.getItem('lvm-theme'); if (th) document.documentElement.setAttribute('data-theme', th); } catch (e) {}
+['dragover', 'drop'].forEach(function (ev) {
+  document.addEventListener(ev, function (e) {
+    var z = e.target.closest && e.target.closest('[data-drop]');
+    if (!z && !S.up) return;
+    e.preventDefault();
+    if (ev === 'drop' && z) takeFile(z.getAttribute('data-drop'), e.dataTransfer.files && e.dataTransfer.files[0]);
+  });
+});
+DEMO = { D: D, LVX: LVX, TOTAL: TOTAL, PLAN: PLAN, P: P, FLOORS: FLOORS, PLAN_VH: PLAN_VH };
 render();
+var bootId = (/[#&]p=([^&]+)/.exec(location.hash) || [])[1];
+if (bootId) loadProject(decodeURIComponent(bootId)).catch(function (e) { toast('Projekt ' + decodeURIComponent(bootId) + ' nicht geladen: ' + e.message); });
 })();
 </script>
 </body>
