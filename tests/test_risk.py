@@ -1,5 +1,8 @@
-from lv.model import LV, LineItem, Prediction, Source
-from lv.risk import Checked, Checks, assess
+import pytest
+
+from lv.__main__ import main
+from lv.model import LV, LineItem, Prediction, Source, load, save
+from lv.risk import Checked, Checks, assess, comment
 
 
 def item(id: str, method: str, quantity: float = 1.0, prices: tuple = (), short_text: str = "", **changes) -> LineItem:
@@ -83,3 +86,68 @@ def test_identical_items_are_checked_once_and_an_unanswered_item_keeps_its_price
     lv = an_lv(item("a", "reference", prices=(5.0,)))
     assess(lv, lambda questions: [None])
     assert (lv.items[0].risk.score, lv.items[0].risk.description) == (75, None)
+
+
+def test_confidence_is_100_minus_the_score_with_a_price_and_0_without():
+    lv = an_lv(item("a", "similar", quantity=10, prices=(10.0,)),  # value 100, risk 25
+               item("b", "reference", quantity=30, prices=(10.0,)),  # value 300, no price
+               item("c", "none"))                                    # typical value 200, no price
+
+    assess(lv, None)
+
+    assert [i.risk.confidence for i in lv.items] == [75, 0, 0]
+    assert lv.risk_summary.confidence == 12  # 100 x 75 / (100 + 300 + 200) = 12.5, and Python rounds half to even
+
+
+def test_a_comment_with_a_price_gives_confidence_100_and_keeps_the_checked_description():
+    lv = an_lv(item("a", "similar", quantity=10, prices=(10.0,)), item("b", "none", quantity=4))
+    assess(lv, says("gaps", missing=("size",)))
+    assert (lv.items[1].risk.confidence, lv.risk_summary.confidence) == (0, 32)  # a: 100 - (0.6 x 25 + 0.4 x 50) = 65
+
+    changed = comment(lv, "b", text="asked the supplier", price=50.0)  # no model is asked again
+
+    assert changed is lv.items[1] and changed.comments[0].text == "asked the supplier"
+    risk = changed.risk
+    assert (risk.confidence, risk.score, risk.price_risk, risk.value, risk.value_basis) == (100, 0, 0, 200.0, "price")
+    assert "entered by the estimator" in risk.price_reason
+    assert (risk.description, risk.missing) == ("gaps", ["size"])  # still there to show
+    assert lv.items[0].risk.confidence == 65 and lv.risk_summary.confidence == 88  # (100 x 65 + 200 x 100) / 300
+
+
+def test_a_doubt_lowers_a_found_price_a_note_changes_nothing_and_a_later_price_wins():
+    lv = an_lv(item("a", "copied", prices=(10.0,)), item("b", "none"))
+    assess(lv, None)
+
+    comment(lv, "a", text="call them on Monday")
+    assert lv.items[0].risk.confidence == 95
+    comment(lv, "a", text="this material got more expensive", doubt=True)
+    comment(lv, "a", text="just a note")  # the doubt before it still counts
+    assert (lv.items[0].risk.price_risk, lv.items[0].risk.confidence) == (75, 25)
+    assert "doubts" in lv.items[0].risk.price_reason
+    comment(lv, "b", text="looks odd", doubt=True)
+    assert lv.items[1].risk.confidence == 0  # nothing to doubt: there is no price
+    comment(lv, "a", price=12.0)
+    assert lv.items[0].risk.confidence == 100
+
+    with pytest.raises(ValueError, match="no item"):
+        comment(lv, "zzz", price=1.0)
+    with pytest.raises(ValueError):
+        comment(lv, "a", price=-5.0)
+    assert len(lv.items[0].comments) == 4  # the refused price was not saved
+
+
+def test_the_comment_command_rewrites_the_result_file(tmp_path, capsys):
+    lv = an_lv(item("P9/01.1", "similar", prices=(10.0,)), item("P9/01.2", "none", quantity=3))
+    assess(lv, None)
+    save(lv, tmp_path / "out")
+
+    main(["comment", "P9", "01.2", "--price", "20", "--text", "from the supplier"], data=tmp_path)
+
+    again = load(tmp_path / "out" / "P9.json")
+    assert again.items[1].comments[0].price == 20.0 and again.items[1].risk.confidence == 100
+    assert again.risk_summary.confidence == 96  # (10 x 75 + 60 x 100) / 70
+    assert "confidence" in capsys.readouterr().out
+    with pytest.raises(SystemExit, match="no item"):
+        main(["comment", "P9", "99", "--price", "20"], data=tmp_path)
+    with pytest.raises(SystemExit, match="P8"):
+        main(["comment", "P8", "01.2", "--price", "20"], data=tmp_path)

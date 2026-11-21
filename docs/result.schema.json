@@ -1,5 +1,39 @@
 {
  "$defs": {
+  "Comment": {
+   "description": "What the estimator said about one line item. The latest comment with a price or a doubt decides.",
+   "properties": {
+    "text": {
+     "default": "",
+     "title": "Text",
+     "type": "string"
+    },
+    "price": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Price"
+    },
+    "effect": {
+     "default": "note",
+     "enum": [
+      "note",
+      "doubt"
+     ],
+     "title": "Effect",
+     "type": "string"
+    }
+   },
+   "title": "Comment",
+   "type": "object"
+  },
   "ItemPlan": {
    "description": "Plan check: what the construction plan says about one line item (SPEC.md, plan check).",
    "properties": {
@@ -223,6 +257,14 @@
       }
      ],
      "default": null
+    },
+    "comments": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/Comment"
+     },
+     "title": "Comments",
+     "type": "array"
     },
     "plan": {
      "anyOf": [
@@ -664,6 +706,11 @@
      "title": "Score",
      "type": "integer"
     },
+    "confidence": {
+     "default": 0,
+     "title": "Confidence",
+     "type": "integer"
+    },
     "price_risk": {
      "title": "Price Risk",
      "type": "integer"
@@ -757,6 +804,18 @@
       }
      ],
      "title": "Score"
+    },
+    "confidence": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Confidence"
     },
     "value": {
      "title": "Value",

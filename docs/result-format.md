@@ -40,6 +40,7 @@ Regenerate both schemas after a change to `lv/model.py` or the judge's answer sh
 | `item_type`, `trade`, `item_type_reason` | string | step 2: the item's type, its trade, one sentence why |
 | `prediction` | object | step 3: what the price lookup found (below) |
 | `risk` | object | step 4: the item's risk score and its two parts (below) |
+| `comments` | array of `{text, price, effect}` | the estimator's comments, oldest first, written by `lv comment` (below); empty until then |
 | `plan` | object or null | plan check, only when a plan was given: what the plan says about this item (below) |
 
 ### `prediction`
@@ -169,21 +170,23 @@ Scores run from 0 (safe) to 100. They are places on a scale, not probabilities.
 
 | Field | Type | Meaning |
 |---|---|---|
-| `score` | integer | **the item's risk**: 0.6 × `price_risk` + 0.4 × `description_risk`; the price risk alone when the description was not checked |
-| `price_risk` | integer | from the step 3 method: copied 5, similar 25 (40 when its past prices lie more than 10% apart), adjusted 45, reference 75, none 100 |
+| `score` | integer | **the item's risk**: 0.6 × `price_risk` + 0.4 × `description_risk`; the price risk alone when the description was not checked or the estimator entered the price |
+| `confidence` | integer | **the item's confidence**: 100 − `score` when the item has a price (found by step 3 or entered by the estimator), else 0 |
+| `price_risk` | integer | from the step 3 method: copied 5, similar 25 (40 when its past prices lie more than 10% apart), adjusted 45, reference 75, none 100. A comment with a price makes it 0; a doubt on a found price makes it 75 |
 | `price_reason` | string | one fixed sentence saying why |
 | `description` | `"complete"`, `"gaps"`, `"vague"` or null | does the text state what an estimator needs to price the item? null: not checked |
 | `description_risk` | integer or null | complete 10, gaps 50, vague 90 |
 | `missing` | array of strings | what the text does not state, at most 3 short phrases |
 | `description_reason` | string | one sentence from the model |
 | `value` | number or null | roughly what the item is worth. **A weight, never a price to show** |
-| `value_basis` | `"price"`, `"reference"`, `"assumed"` | found price × quantity; middle price of the related items × quantity; or the value of a typical item |
+| `value_basis` | `"price"`, `"reference"`, `"assumed"` | found or entered price × quantity; middle price of the related items × quantity; or the value of a typical item |
 
 Example, P5 "Transporter", 5 h:
 
 ```json
 {
   "score": 65,
+  "confidence": 0,
   "price_risk": 75,
   "price_reason": "Only related past items were found, none the same. No price.",
   "description": "gaps",
@@ -201,11 +204,33 @@ Example, P5 "Transporter", 5 h:
 ### `risk_summary` (step 4)
 
 ```json
-{"score": 51, "value": 167595.45, "basis": {"price": 5, "reference": 33, "assumed": 12}}
+{"score": 51, "confidence": 5, "value": 167595.45, "basis": {"price": 5, "reference": 33, "assumed": 12}}
 ```
 
-`score` is the items' scores weighted by `value`, over the normal items. `basis` counts those items per value basis:
+`score` is the items' scores weighted by `value`, over the normal items. `confidence` is the items' confidence
+weighted the same way: here 5, because only 5 of 50 items have a price. `basis` counts those items per value basis:
 here 12 of 50 values are assumed, so show `basis` next to the score.
+
+### Comments: the estimator's input (`lv comment`)
+
+The estimator can comment on one item. The command saves the comment in the result file and recalculates every
+item's risk and confidence and the LV's `risk_summary`. No AI is asked and no API key is needed.
+
+```powershell
+.venv\Scripts\python.exe -m lv comment P5 02.0005 --price 12 --text "Angebot Erdbauer"   # own unit price
+.venv\Scripts\python.exe -m lv comment P5 02.0001 --doubt --text "Asphaltschneiden ist teurer geworden"
+.venv\Scripts\python.exe -m lv comment P5 02.0014 --text "Rückfrage beim Planer"         # a note only
+```
+
+| Comment | Effect on the item |
+|---|---|
+| with `price` | counts as priced: `price_risk` 0, `confidence` 100, `value` = price × quantity. The description no longer counts |
+| `effect: "doubt"` | a found price drops to `price_risk` 75 (P5 `02.0001`: confidence 81 → 51). An item without a price stays at 0 |
+| `effect: "note"` | nothing changes |
+
+The latest comment with a price or a doubt decides; notes after it change nothing. On P5, a price of €12 per m3 for
+the biggest open item (`02.0005`, 270 m3) lifts the LV's confidence from 5 to 9. The comment's `price` is the
+estimator's own number, so show it as such; the tool still never writes `unit_price`.
 
 ## `<project>_judge.json`
 
