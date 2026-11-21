@@ -118,6 +118,15 @@ def test_get_position_shows_the_unit_of_each_past_price(data):
     assert found["prediction"]["sources"][0]["unit"] == "St" and found["prediction"]["judged"][0]["unit"] == "m2"
 
 
+def test_the_brief_asks_both_questions_in_one_tab_and_saves_the_answers_in_one_field(data):
+    answers = iter(["A small valve job.", "Yes, if it fits your size range."])
+    found = assistant.brief(data, "H1", create=lambda **request: _reply({"type": "text", "text": next(answers)}))
+    saved = load(data / "out" / "H1.json").brief
+    assert saved == found and (saved.about, saved.go_no_go) == ("A small valve job.", "Yes, if it fits your size range.")
+    tab = assistant.get_tab(data, saved.tab)  # the estimator can go on in this tab
+    assert [m.text for m in tab.shown if m.role == "user"] == list(assistant.BRIEF.values())
+
+
 def test_a_dead_build_does_not_block_and_the_library_must_be_indexed_too(data):
     marker = data / "index" / "P1.building"
     marker.write_text("12345")

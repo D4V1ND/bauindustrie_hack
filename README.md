@@ -272,6 +272,14 @@ The model is `claude-opus-5-5` at effort `medium` (`ASSISTANT_MODEL` in `lv/ai.p
 server-side refusal fallback. It needs `ANTHROPIC_API_KEY` in `.env`. The address of the API is read only from
 `.env` (`ANTHROPIC_BASE_URL`), never from the shell.
 
+### The brief in the result
+
+At the end of every `lv price` run (not `--copy-only`), after the index, the assistant is asked "What is this project
+about?" and "Does it make sense to tender it?" in a new tab "Project brief". Both answers are saved in
+`<project>.json` as `brief`: `about`, `go_no_go` and `tab` (the tab to go on in). It adds about 40 s and 10 to 20
+cents to a run; without a key, or when Claude fails, it is skipped and the run still succeeds.
+`python -m lv brief P5` asks the two questions for an existing result.
+
 ### Endpoints
 
 | Method | Path | What it does |

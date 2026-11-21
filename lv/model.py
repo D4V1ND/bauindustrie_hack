@@ -154,6 +154,13 @@ class LineItem(BaseModel):
     plan: ItemPlan | None = None  # plan check, only when a plan was given
 
 
+class Brief(BaseModel):
+    """The assistant's answers to two fixed questions, asked at the end of a run (lv/assistant.py, BRIEF)."""
+    about: str  # "What is this project about?"
+    go_no_go: str  # "Does it make sense to tender it?"
+    tab: str  # the chat tab they were asked in: the estimator can go on from there
+
+
 class LV(BaseModel):
     project: str
     name: str
@@ -164,6 +171,7 @@ class LV(BaseModel):
     summary: Summary | None = None  # step 3: items and sums per method, and the project total
     risk_summary: RiskSummary | None = None  # step 4: the LV's risk score and what it rests on
     plan: PlanSummary | None = None  # plan check: the plan, its findings and files; only when a plan was given
+    brief: Brief | None = None  # the assistant's answers to two fixed questions; None: not asked (copy-only, no key)
 
     @computed_field
     @property

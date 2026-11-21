@@ -16,7 +16,7 @@ from typing import Any, Literal
 from pydantic import BaseModel
 
 from lv import ai, index
-from lv.model import LV, load, save
+from lv.model import LV, Brief, load, save
 from lv.risk import assess, comment
 
 PROMPT = (Path(__file__).resolve().parent / "assistant_prompt.md").read_text(encoding="utf-8")
@@ -579,3 +579,29 @@ def ask(data: Path, tab: Tab, text: str, ready: Readiness, running: Callable[[st
     save_tab(data, tab)
     return Reply(state=state, text=answer, actions=session.actions,
                  positions=list(dict.fromkeys(session.positions)), tab=info())
+
+
+# --- the brief at the end of a run --------------------------------------------------------------------------------
+
+BRIEF = {"about": "What is this project about?", "go_no_go": "Does it make sense to tender it?"}
+
+
+def brief(data: Path, project: str, create: Callable[..., Any] | None = None) -> Brief | None:
+    """Asks the BRIEF questions one after the other in a new tab of the tender (the estimator can go on from there)
+    and saves both answers as `brief` in data/out/<project>.json. None: an answer did not come; nothing is saved.
+    The tender and the library must be indexed."""
+    create = create or ai.anthropic_client().beta.messages.create  # first: without a key, no empty tab is left
+    tab = new_tab(data, project, "Project brief")
+    ready = Readiness(state="ready", message="", library=[])
+    answers = {}
+    for field, question in BRIEF.items():
+        reply = ask(data, tab, question, ready, running=lambda _: True, create=create)  # "running": no writes
+        if reply.state != "answered":
+            return None
+        answers[field] = reply.text
+    with saving:
+        lv = load(data / "out" / f"{project}.json")
+        lv.brief = Brief(**answers, tab=tab.id)
+        save(lv, data / "out")
+    index.refresh(lv, data, "tender")  # the result file is newer now; the cards stay the same
+    return lv.brief

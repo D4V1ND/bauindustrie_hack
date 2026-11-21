@@ -1,5 +1,29 @@
 {
  "$defs": {
+  "Brief": {
+   "description": "The assistant's answers to two fixed questions, asked at the end of a run (lv/assistant.py, BRIEF).",
+   "properties": {
+    "about": {
+     "title": "About",
+     "type": "string"
+    },
+    "go_no_go": {
+     "title": "Go No Go",
+     "type": "string"
+    },
+    "tab": {
+     "title": "Tab",
+     "type": "string"
+    }
+   },
+   "required": [
+    "about",
+    "go_no_go",
+    "tab"
+   ],
+   "title": "Brief",
+   "type": "object"
+  },
   "Comment": {
    "description": "What the estimator said about one line item. The latest comment with a price or a doubt decides.",
    "properties": {
@@ -29,6 +53,20 @@
      ],
      "title": "Effect",
      "type": "string"
+    },
+    "author": {
+     "default": "estimator",
+     "enum": [
+      "estimator",
+      "assistant"
+     ],
+     "title": "Author",
+     "type": "string"
+    },
+    "edited": {
+     "default": false,
+     "title": "Edited",
+     "type": "boolean"
     }
    },
    "title": "Comment",
@@ -971,6 +1009,17 @@
    "anyOf": [
     {
      "$ref": "#/$defs/PlanSummary"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null
+  },
+  "brief": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Brief"
     },
     {
      "type": "null"
