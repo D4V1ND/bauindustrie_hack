@@ -2,6 +2,7 @@
                  python -m lv comment <ID> <item number> [--price N] [--text "..."] [--doubt]"""
 import argparse
 import json
+import os
 import re
 import time
 from pathlib import Path
@@ -14,7 +15,7 @@ from lv.model import LV, load, save
 from lv.predict import NO_ANSWER, JudgeAnswer, predict
 from lv.risk import Checks, assess, comment
 
-DATA = Path(__file__).resolve().parent.parent / "data"
+DATA = Path(os.environ.get("LV_DATA") or Path(__file__).resolve().parent.parent / "data")  # LV_DATA: set by the API
 FOLDERS = {"ingest": "library", "price": "out"}
 
 
