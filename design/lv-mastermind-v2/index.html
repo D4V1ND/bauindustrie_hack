@@ -1057,10 +1057,9 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 
 .gwl button{position:relative}
 .gwl button:hover{background:transparent}
-.gwl button::before{content:"";position:absolute;left:-16px;top:-1px;bottom:-1px;width:2px;background:var(--ink);transform:scaleY(0);transition:transform .22s var(--ease)}
-.gwl button:hover::before{transform:none}
-.gwk{transition:color .15s;text-decoration:underline;text-decoration-color:transparent;text-underline-offset:3px;transition:text-decoration-color .2s}
-.gwl button:hover .gwk{text-decoration-color:var(--ink-3)}
+.gwl button{margin:0 -8px;width:calc(100% + 16px);padding:10px 8px}
+.gwl button:hover{background:var(--paper-2)}
+.rsk.na b{color:var(--ink-3)}
 
 
 /* ---- [04] scope: wichtige vs. gesamtes LV ---- */
@@ -1168,7 +1167,9 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 @keyframes planin{from{opacity:0;transform:translateX(-16px)}}
 .verdict2.warn{color:var(--warn)}
 @media (max-width:640px){.up-grid,.up-f{grid-template-columns:1fr}.pmenu{width:min(340px,calc(100vw - 32px))}}
-.cmts .panel{padding:12px 0 6px}
+.cmts .comm-h{height:39px;padding-right:16px}
+.cmts .panel{padding:12px 0 14px}
+.cmts .pempty{font-size:13px;color:var(--ink-3);margin-bottom:10px}
 .cml{list-style:none;margin:0 0 10px;padding:0}
 .cml li{padding:9px 0;border-bottom:1px solid var(--line);font-size:13px;line-height:1.5}
 .cml li p{margin:0;white-space:pre-wrap}.cml li small{color:var(--ink-3);font-size:11px}
@@ -2007,7 +2008,7 @@ function vDrawer(d) {
   {
     var gsum = sameAll.reduce(function (a, r) { return a + r.gp; }, p.gp);
     gwPanel = 
-      (same.length ? '<ol class="gwl">' + same.map(function (r) { var ok2 = !!S.confirmed[r.oz]; return '<li data-k="g' + r.oz + '"><button data-act="open" data-oz="' + r.oz + '"><span class="rsk ' + ck(r.conf) + '"><b>' + r.conf + '<small>%</small></b><i class="rbar"><i style="width:' + r.conf + '%"></i></i></span><span class="gwm"><span class="mono">' + r.oz + '</span><span class="gwk">' + esc(r.kurz) + '</span></span><span class="gwr"><b>' + (r.np ? 'Kein Preis' : eur(r.gp)) + '</b>' + (r.np ? '<span class="mtag offen"><i></i>Preis fehlt</span>' : ok2 ? '<span class="mtag ok"><i></i>bestätigt</span>' : '<span class="mtag ' + r.mode + '"><i></i>' + r.conf + ' %</span>') + '</span>' + IC.arrow + '</button></li>'; }).join('') + '</ol>' +
+      (same.length ? '<ol class="gwl">' + same.map(function (r) { var ok2 = !!S.confirmed[r.oz]; return '<li data-k="g' + r.oz + '"><button data-act="open" data-oz="' + r.oz + '"><span class="rsk ' + (r.np ? 'na' : ck(r.conf)) + '"><b>' + (r.np ? '–' : r.conf + '<small>%</small>') + '</b><i class="rbar"><i style="width:' + r.conf + '%"></i></i></span><span class="gwm"><span class="mono">' + r.oz + '</span><span class="gwk">' + esc(r.kurz) + '</span></span><span class="gwr">' + (r.np ? '' : '<b>' + eur(r.gp) + '</b>') + (r.np ? '<span class="mtag offen"><i></i>Preis fehlt</span>' : ok2 ? '<span class="mtag ok"><i></i>bestätigt</span>' : '<span class="mtag ' + r.mode + '"><i></i>' + r.conf + ' %</span>') + '</span>' + IC.arrow + '</button></li>'; }).join('') + '</ol>' +
         '<button class="lnk gwall" data-act="gewerkAll" data-v="' + esc(p.gewerk) + '">' + (sameAll.length > same.length ? 'Alle ' + (sameAll.length + 1) + ' im LV anzeigen' : 'Alle im LV filtern') + '</button>'
       : '<p class="pempty gw-e">Einzige Position in diesem Gewerk.</p>');
     var gmeta = (sameAll.length + 1) + ' Pos.' + (gsum > 0 ? ' · ' + eur(gsum) : '');
@@ -2070,11 +2071,11 @@ function vDrawer(d) {
         '</div></div><button class="whytg" data-act="whyToggle" aria-expanded="' + !!S.whyOpen + '">' + (S.whyOpen ? 'Weniger anzeigen' : 'Berechnung &amp; Quellen anzeigen') + IC.chev + '</button></div></section>') +
       '<div class="lower"><div class="lowin">' + (function () {
         var L = cmtList(p);
-        return '<section class="comm cmts" aria-label="Kommentare"><div class="comm-h"><span class="mono">Kommentare</span><span class="mono">' + L.length + '</span></div><div class="panel">' +
+        return '<section class="comm cmts" aria-label="Kommentare"><div class="comm-h"><span class="gw-t"><span class="mono">Kommentare</span></span><span class="mono gw-m">' + (L.length ? L.length + (L.length === 1 ? ' Kommentar' : ' Kommentare') : 'keine') + '</span></div><div class="panel">' +
           (L.length ? '<ol class="cml">' + L.map(function (c, i) { return '<li data-k="cm' + i + '">' + (c.tag ? '<span class="cmt-tag mono">' + esc(c.tag) + '</span>' : '') + '<p>' + esc(c.t || '–') + '</p>' + (c.time ? '<small>' + esc(c.time) + '</small>' : '') + '</li>'; }).join('') + '</ol>'
             : '<p class="pempty">Noch keine Kommentare zu dieser Position.</p>') +
           '<div class="composer"><label><span class="sr">Kommentar</span><input data-in="cmt" data-enter="sendCmt" value="' + esc(S.cmt) + '" placeholder="Kommentar zu ' + esc(p.oz) + ' schreiben…"></label><button data-act="sendCmt" aria-label="Kommentar speichern">' + IC.arrow + '</button></div>' +
-          (P.live ? '<p class="mono faint cmt-note">Wird im Backend gespeichert</p>' : '') + '</div></section>';
+          '</div></section>';
       })() + gwPanel + '</div></div>' +
       '<div class="aiwrap"><div class="aiin"><section class="aichat" role="region" aria-label="Chat mit dem Agenten zu ' + p.oz + '">' +
       '<div class="cp-h"><span class="agent-ic">' + IC.star + '</span><span><b>Agent</b><small>' + p.oz + ' · ' + esc(p.kurz) + '</small></span><span class="cp-live"><i></i>online</span><button class="ic" data-act="aiClose" aria-label="Chat schließen">' + IC.x + '</button></div>' +
