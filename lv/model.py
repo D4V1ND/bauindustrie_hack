@@ -18,6 +18,7 @@ class LineItem(BaseModel):
     total_price: float | None = None
     kind: Literal["normal", "optional"] = "normal"
     read_by: Literal["gaeb", "ai"] = "gaeb"
+    group: str = ""  # step 1: the same label for every exact match, inside one LV and across the price library
 
 
 class LV(BaseModel):

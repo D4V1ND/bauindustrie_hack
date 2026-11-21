@@ -3,6 +3,7 @@ import argparse
 from pathlib import Path
 
 from lv.extract import read
+from lv.match import group_label
 from lv.model import save
 
 DATA = Path(__file__).resolve().parent.parent / "data"
@@ -25,6 +26,8 @@ def main(argv: list[str] | None = None, data: Path = DATA) -> None:
         raise SystemExit(str(error))
     if args.command == "ingest" and not lv.priced:
         raise SystemExit(f"{args.file.name} has no prices, so it cannot go into the price library.")
+    for item in lv.items:
+        item.group = group_label(item)
     path = save(lv, data / FOLDERS[args.command])
     print(f"{len(lv.items)} line items -> {path}")
 

@@ -167,14 +167,14 @@ def read_gaeb90(path: Path, project: str) -> LV:
         raise ValueError(f"Found no line items in {path.name}. A file with prices only cannot be read on its own.")
     for item in items:
         item.short_text = _flow(item.short_text)
-        item.long_text = _flow(_ADDITION.sub(r"\1 \2", _flow(item.long_text)))
+        item.long_text = _flow(_ADDITION.sub(r"\1 \2 \3", _flow(item.long_text)))
     return LV(project=project, name=name, date=day, source_file=path.name, items=items)
 
 
-# A text addition by the client or the bidder: "[TA11 caption [ text ] tail]". Caption and text stay, the markup
-# goes. The tail goes too, because the file repeats it right after the closing bracket. A markup bracket stands
-# alone; a bracket inside the text ("[ORT_030]") touches its word.
-_ADDITION = re.compile(r"\[T[AB]\d\d (.*?)\[ (.*?)(?<= )\][^\[\]]*\]")
+# A text addition by the client or the bidder: "[TA11 caption [ text ] tail]". The words stay, the markup goes,
+# which gives the same text as the XML reader. A markup bracket stands alone; a bracket inside the text
+# ("[ORT_030]") touches its word.
+_ADDITION = re.compile(r"\[T[AB]\d\d (.*?)\[ (.*?)(?<= )\]([^\[\]]*)\]")
 
 
 def _decimal(field: str, decimals: int) -> float | None:

@@ -56,7 +56,7 @@ Test command for every task: `.venv\Scripts\python.exe -m pytest`
 
 ## Phase 2: link identical items (step 1)
 
-- [ ] **Task 4: Group label** (small)
+- [x] **Task 4: Group label** (small)
   - Does: gives every line item a `group` label from its cleaned short text, long text and unit, in both commands.
   - Acceptance:
     - P2: at least 27 groups with more than one item, covering at least 55 items. P4: at least 7 groups, 15 items.

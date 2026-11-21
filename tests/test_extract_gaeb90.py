@@ -127,8 +127,8 @@ def test_text_additions_are_read_without_their_markup(priced):
 
     assert by_oz["01.01.0007"].long_text == ("Bauwasseranschluss am Hydranten vorhalten, Positionsmenge = Produkt aus "
                                              "1 Stück(Vorhaltemenge) mal 28 Wochen (Vorhaltedauer).")
-    assert "des AN, Anlage (Bezeichnung/Ort) .......................... vom Bieter einzutragen, Abfall" \
-        in by_oz["03.01.0001"].long_text
+    assert ("des AN, Anlage (Bezeichnung/Ort) .......................... vom Bieter einzutragen vom Bieter einzutragen,"
+            " Abfall") in by_oz["03.01.0001"].long_text  # the tail is written twice, in the XML file too
     assert by_oz["01.01.0003"].long_text.endswith("[ORT_00030] für Herstellung des Rohranschlusses sind einzukalkulieren. .")
     assert not any(re.search(r"\[T[AB]\d|(^| )[\[\]]( |$)", item.long_text) for item in priced["P2"].items)
 
