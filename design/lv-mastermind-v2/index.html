@@ -853,7 +853,6 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .lower{grid-template-rows:1fr}
 .aiwrap{grid-template-rows:0fr;opacity:0}
 .lowin,.aiin{overflow:hidden;min-height:0}
-.dw.ai-open .lower{grid-template-rows:0fr;opacity:0}
 .dw.ai-open .aiwrap{grid-template-rows:1fr;opacity:1}
 .lowin{padding-bottom:24px}
 .comm,.gwsec{margin:12px 22px 0;border:1px solid var(--line);background:var(--card);padding:0 16px}
@@ -864,6 +863,52 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .aichat{margin:12px 22px 24px;border:1px solid var(--ink);background:var(--card);box-shadow:5px 5px 0 var(--signal);display:flex;flex-direction:column;min-height:300px}
 .aichat .cp-h .ic{width:28px;height:28px}
 .dw.ai-open .askin{border-color:var(--ink)}
+
+/* ---- chat priority: stack everything ---- */
+.E{}
+.price,.gwsec,.comm{position:relative;transition:max-height .55s var(--ease),margin .55s var(--ease),padding .55s var(--ease),box-shadow .4s,border-color .4s}
+.price{max-height:900px}.gwsec{max-height:700px}.comm{max-height:1400px}
+.mini{all:unset;box-sizing:border-box;position:absolute;inset:0 0 auto 0;height:40px;display:flex;align-items:center;gap:10px;padding:0 14px;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .25s;white-space:nowrap;overflow:hidden}
+.mini .mono{color:var(--ink-3);font-size:.58rem}
+.mini b{font-weight:500;font-size:13px}
+.mini .muted{font-size:12px;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+.mini .conf-v b{font-size:14px}
+.price>:not(.mini),.gwsec>:not(.mini),.comm>:not(.mini){transition:opacity .3s .15s}
+.dw.ai-open .dw-body{overflow:hidden;display:flex;flex-direction:column}
+.dw.ai-open .dw-body>.dw-swap{flex:1;min-height:0;display:flex;flex-direction:column;padding:0 0 12px}
+.dw.ai-open .lower,.dw.ai-open .lowin{display:contents}
+.dw.ai-open .price,.dw.ai-open .gwsec,.dw.ai-open .comm{flex:none;max-height:40px;overflow:hidden;padding-top:0;padding-bottom:0;box-shadow:0 -6px 14px -10px rgba(0,0,0,.4)}
+.dw.ai-open .price{margin:12px 40px 0;z-index:1}
+.dw.ai-open .gwsec{margin:-8px 31px 0;z-index:2}
+.dw.ai-open .comm:not(.gwsec){margin:-8px 22px 0;z-index:3}
+.dw.ai-open .price>:not(.mini),.dw.ai-open .gwsec>:not(.mini),.dw.ai-open .comm>:not(.mini){opacity:0;transition:opacity .15s}
+.dw.ai-open .mini{opacity:1;pointer-events:auto;transition:opacity .3s .2s}
+.dw.ai-open .mini:hover{background:var(--paper-2)}
+.dw.ai-open .aiwrap{flex:1;min-height:0}
+.dw.ai-open .aiin{display:flex}
+.dw.ai-open .aichat{flex:1;min-height:0;margin:12px 22px 0;animation:chatup .5s var(--ease)}
+@keyframes chatup{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+.aichat .cp-log{min-height:0}
+/* header compresses */
+.dw-title,.dmeta,.rl{transition:font-size .45s var(--ease),margin .45s var(--ease),max-height .45s var(--ease),opacity .3s,padding .45s var(--ease)}
+.dmeta,.rl{max-height:120px}
+.dw.ai-open .dw-title{font-size:16px;margin:10px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dw.ai-open .dmeta,.dw.ai-open .rl{max-height:0;opacity:0;margin-top:0;padding-top:0;padding-bottom:0;border-width:0;overflow:hidden}
+.dw.ai-open .dw-top{padding-bottom:10px}
+/* confirm bar compresses */
+.confirm,.okline{transition:transform .16s var(--ease),box-shadow .25s,height .45s var(--ease),min-height .45s var(--ease),padding .45s var(--ease)}
+.confirm .cl small,.confirm .ca small,.cbadge{transition:opacity .25s,max-height .4s var(--ease),width .4s var(--ease),height .4s var(--ease)}
+.confirm .cl small,.confirm .ca small{max-height:20px}
+.dw-cta{transition:padding .45s var(--ease)}
+.dw.ai-open .dw-cta{padding:6px 18px}
+.dw.ai-open .dw-cta .hint{display:none}
+.dw.ai-open .confirm{height:38px}
+.dw.ai-open .confirm .cl small,.dw.ai-open .confirm .ca small{opacity:0;max-height:0}
+.dw.ai-open .confirm .cl,.dw.ai-open .confirm .ca{gap:0}
+.dw.ai-open .confirm .cbadge{width:26px;height:26px}
+.dw.ai-open .confirm .ca b{font-size:14px}
+.dw.ai-open .okline{min-height:38px;padding:6px 14px}
+.price>.mini,.gwsec>.mini{height:32px}
 </style>
 </head>
 <body>
@@ -1358,7 +1403,7 @@ function vDrawer(d) {
       (same.length ? '<ol class="gwl">' + same.map(function (r) { var ok2 = !!S.confirmed[r.oz]; return '<li data-k="g' + r.oz + '"><button data-act="open" data-oz="' + r.oz + '"><span class="rsk ' + rk(r.risk) + '"><b>' + r.risk + '</b><i class="rbar"><i style="width:' + r.risk + '%"></i></i></span><span class="gwm"><span class="mono">' + r.oz + '</span><span class="gwk">' + esc(r.kurz) + '</span></span><span class="gwr"><b>' + eur(r.gp) + '</b>' + (ok2 ? '<span class="mtag ok"><i></i>bestätigt</span>' : '<span class="mtag ' + r.mode + '"><i></i>' + r.conf + ' %</span>') + '</span>' + IC.arrow + '</button></li>'; }).join('') + '</ol>' +
         '<button class="lnk gwall" data-act="gewerk" data-v="' + esc(p.gewerk) + '">Alle im LV filtern</button>'
       : '<p class="pempty">Keine weiteren Positionen in diesem Gewerk.</p>');
-    gwPanel = '<section class="comm gwsec" aria-label="Gewerk"><div class="comm-h"><span class="mono">Gewerk · <b>' + esc(p.gewerk) + '</b></span><span class="mono">' + (same.length + 1) + ' Pos. · Σ ' + eur(gsum) + '</span></div><div class="panel">' + gwPanel + '</div></section>';
+    gwPanel = '<section class="comm gwsec" aria-label="Gewerk"><button class="mini" data-act="aiClose" tabindex="-1"><span class="mono">Gewerk</span><b>' + esc(p.gewerk) + '</b><span class="muted">' + (same.length + 1) + ' Pos. · Σ ' + eur(gsum) + '</span></button><div class="comm-h"><span class="mono">Gewerk · <b>' + esc(p.gewerk) + '</b></span><span class="mono">' + (same.length + 1) + ' Pos. · Σ ' + eur(gsum) + '</span></div><div class="panel">' + gwPanel + '</div></section>';
   }
   if (dt === 'team') {
     panel = (cm.length ? '<ol class="feed">' + cm.map(function (c, i) { var m = T[c.by]; return '<li data-k="c' + i + '"><span class="av" style="background:' + m.color + '">' + m.ini + '</span><div class="fb"><div class="fh"><b>' + m.name + '</b><span>' + esc(c.time) + '</span></div><p>' + esc(c.t) + '</p></div></li>'; }).join('') + '</ol>' : '<p class="pempty">Noch nichts besprochen. Erwähne Kolleg:innen mit @.</p>') +
@@ -1393,7 +1438,7 @@ function vDrawer(d) {
         '<div><dt>Menge</dt><dd>' + qty(p.menge) + ' ' + p.einheit + '</dd></div></dl>' +
       (p.risk >= 40 ? '<div class="rl ' + k + '">' + IC.warn + '<span>' + esc(p.why) + '</span></div>' : '') + '</div></header>' +
     '<div class="dw-body"><div class="dw-swap ' + (S.leaving ? 'leaving' : S.swapDir) + '" data-k="b' + p.oz + '">' +
-      '<section class="price' + (ok ? ' is-ok' : '') + (S.editEp ? ' is-edit' : '') + '" aria-label="Preis"><div class="ptop"><div class="pmain">' +
+      '<section class="price' + (ok ? ' is-ok' : '') + (S.editEp ? ' is-edit' : '') + '" aria-label="Preis"><button class="mini" data-act="aiClose" tabindex="-1"><span class="mono">' + (p.manual ? 'Eigener Preis' : 'KI-Preis') + '</span><b>' + eur(p.ep) + '</b><span class="muted">je ' + p.einheit + ' · GP ' + eur(p.gp) + '</span><span class="conf-v ' + confLvl(p.conf) + '"><b>' + p.conf + ' %</b></span></button><div class="ptop"><div class="pmain">' +
         '<div class="mono lab">' + (p.manual ? 'Eigener Preis · ' + pct(md) + ' zum KI-Vorschlag' : 'KI-Preisvorschlag') + '</div>' +
         '<div class="prow">' + (S.editEp
           ? '<label class="epedit"><span class="sr">Einheitspreis in Euro</span><input id="epin" inputmode="decimal" autocomplete="off" data-in="epDraft" data-enter="saveEp" value="' + esc(S.epDraft) + '"><span class="cur">€</span></label>'
@@ -1409,7 +1454,7 @@ function vDrawer(d) {
           '<div class="whymore" aria-hidden="' + !S.whyOpen + '"><div class="whyin"><div class="calc2">' + C.steps.map(function (s, j) { return '<div class="cs' + (j === C.steps.length - 1 ? ' last' : '') + '"><span>' + esc(s[0]) + '</span><span>' + esc(s[1]) + '</span></div>'; }).join('') + '</div>' +
           ((R.similar || []).length ? '<div class="refs"><span class="mono">Quellen</span>' + R.similar.map(function (x) { var e = D.extra[x[0]]; return e ? '<button class="ref" data-act="preview" data-key="' + x[0] + '">' + esc(e.proj) + '<small>' + esc(x[1]) + '</small></button>' : ''; }).join('') + '</div>' : '') +
         '</div></div><button class="whytg" data-act="whyToggle" aria-expanded="' + !!S.whyOpen + '">' + (S.whyOpen ? 'Weniger anzeigen' : 'Berechnung &amp; Quellen anzeigen') + IC.chev + '</button></div></section>' +
-      '<div class="lower"><div class="lowin">' + gwPanel + '<section class="comm" aria-label="Kommunikation"><div class="comm-h"><span class="mono">Kommunikation</span>' +
+      '<div class="lower"><div class="lowin">' + gwPanel + '<section class="comm" aria-label="Kommunikation"><button class="mini" data-act="aiClose" tabindex="-1"><span class="mono">Kommunikation</span><b>Team ' + cm.length + '</b><span class="muted">Extern ' + (thread.length + notes.length) + '</span></button><div class="comm-h"><span class="mono">Kommunikation</span>' +
         '<div class="ctabs" role="tablist">' + tabs.map(function (t) { var on = dt === t[0]; return '<button role="tab" class="ctab' + (on ? ' on' : '') + '" aria-selected="' + on + '" data-act="dtab" data-v="' + t[0] + '">' + t[1] + (t[2] ? '<span class="dn">' + t[2] + '</span>' : '') + '</button>'; }).join('') + '</div></div>' +
         '<div class="panel" data-k="p' + dt + '">' + panel + '</div></section></div></div>' +
       '<div class="aiwrap"><div class="aiin"><section class="aichat" role="region" aria-label="Chat mit dem Agenten zu ' + p.oz + '">' +
@@ -1590,18 +1635,20 @@ function saveEp() {
   S.flashEp = 0;
   toast('EP ' + p.oz + ': ' + eur(v) + ' · GP ' + eur(v * p.menge));
 }
-var aiT = null;
+var aiT = null, aiScroll = 0;
+function aiShut() { set({ aiOpen: false }); var bd = document.querySelector('.dw-body'); if (bd) setTimeout(function () { bd.scrollTo({ top: aiScroll, behavior: 'smooth' }); }, 420); }
 function aiOpenNow() {
   clearTimeout(aiT); if (S.aiOpen) return;
+  var bd = document.querySelector('.dw-body'); aiScroll = bd ? bd.scrollTop : 0;
   set({ aiOpen: true });
-  var bd = document.querySelector('.dw-body'); if (bd) setTimeout(function () { bd.scrollTo({ top: bd.scrollHeight, behavior: 'smooth' }); }, 60);
+  bd = document.querySelector('.dw-body'); if (bd) bd.scrollTop = 0;
 }
 function aiMaybeClose() {
   clearTimeout(aiT);
   aiT = setTimeout(function () {
     var inAsk = document.querySelector('.ask:hover, .aichat:hover'), f = document.activeElement;
     if (inAsk || (f && f.closest && f.closest('.ask, .aichat')) || S.thinking) return;
-    set({ aiOpen: false });
+    aiShut();
   }, 700);
 }
 document.addEventListener('mouseover', function (e) { if (e.target.closest && e.target.closest('.ask, .aichat')) { if (e.target.closest('.ask')) aiOpenNow(); else clearTimeout(aiT); } });
@@ -1750,7 +1797,7 @@ var A = {
     if (a.cta === 'Sequenz vorbereiten') { st.compose = 'seq'; st.dtab = 'ext'; }
     set(st); toast(a.done);
   },
-  aiClose: function () { clearTimeout(aiT); var a = document.activeElement; if (a && a.blur) a.blur(); set({ aiOpen: false }); },
+  aiClose: function () { clearTimeout(aiT); var a = document.activeElement; if (a && a.blur) a.blur(); if (S.aiOpen) aiShut(); },
   whyToggle: function () { set({ whyOpen: !S.whyOpen }); },
   dtab: function (ds) { set({ dtab: ds.v }); },
   resetEp: function () { var p = cur(), e = Object.assign({}, S.eps), g = Object.assign({}, S.sugg), c = Object.assign({}, S.confirmed); delete e[p.oz]; delete g[p.oz]; delete c[p.oz]; set({ eps: e, sugg: g, confirmed: c, editEp: false, flashEp: 1 }); S.flashEp = 0; toast('KI-Vorschlag für ' + p.oz + ' wiederhergestellt'); },
