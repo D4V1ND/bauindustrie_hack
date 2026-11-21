@@ -189,6 +189,9 @@ def _from_verdicts(candidates: list[Described], answer: Verdicts | None) -> Pred
     prediction = _decide(judged, price, answer.reason, source)
     used = {s.id for s in prediction.sources}  # what the price rests on comes first, then the nearest misses
     prediction.judged = [source(j) for j in sorted(judged, key=lambda j: j.cand not in used)[:MAX_SHOWN]]
+    if prediction.method == "none" and prediction.judged:  # no price, only a span: the nearest past items, which differ
+        prices = [s.unit_price for s in prediction.judged]
+        prediction.min, prediction.max, prediction.count = min(prices), max(prices), len(prices)
     return prediction
 
 
@@ -218,8 +221,8 @@ def _decide(judged: list[Judged], price: dict[str, float], reason: str, source: 
                 result=result, reason=reason)
 
     references = [j for j in judged if j.verdict in ("size_only", "type_only")][:MAX_SHOWN]
-    if references:
-        return Prediction(method="reference", sources=[source(j) for j in references], reason=reason)
+    if references:  # the same kind of thing, another size or type: their middle price is the suggestion
+        return _priced("reference", [source(j) for j in references], reason)
     return Prediction(method="none", reason=reason)
 
 
@@ -230,7 +233,7 @@ def _priced(method: str, sources: list[Source], reason: str) -> Prediction:
 
 
 def summarise(items: list[LineItem]) -> Summary:
-    """Items per method, and median x quantity added up over the normal items. Methods without a price add nothing."""
+    """Items per method, and median x quantity added up over the normal items. "none" has no price and adds nothing."""
     methods = {method: MethodSum(items=0, total=0.0) for method in METHODS}
     for item in items:
         entry = methods[item.prediction.method]

@@ -19,7 +19,7 @@ SPREAD, SPREAD_RISK = 0.10, 40  # "similar", but the past prices behind it lie m
 DESCRIPTION_RISK = {"complete": 10, "gaps": 50, "vague": 90}
 PRICE_SHARE = 0.6  # of an item's score; the description has the rest
 BATCH = 25  # items per description call
-PRICED = ("copied", "similar", "adjusted")
+PRICED = ("copied", "similar", "adjusted", "reference")
 DOUBT_RISK = 75  # a found price the estimator doubts: worth no more than related items
 
 
@@ -125,20 +125,20 @@ def _price_risk(item: LineItem) -> tuple[int, str]:
         "similar": "The price comes from a past item the judge called the same."
         if prediction and prediction.count == 1 else "The price comes from past items the judge called the same.",
         "adjusted": "The price is calculated between a smaller and a larger size.",
-        "reference": "Only related past items were found, none the same. No price.",
-        "none": "No comparable past item was found. No price."}[method]
+        "reference": "Only related past items were found, none the same: the price is their middle price.",
+        "none": "No comparable past item was found. No price."
+        + (f" The nearest past items differ; their prices span {prediction.min:.2f} to {prediction.max:.2f}."
+           if prediction and prediction.min is not None else "")}[method]
 
 
 def _value(item: LineItem) -> tuple[float | None, str]:
-    """Roughly what the item is worth, for weighting only: the found price, else the middle price of the related
-    past items, each times the quantity. `None` with "assumed" when there is neither."""
+    """Roughly what the item is worth, for weighting only: the entered or found price times the quantity. `None`
+    with "assumed" when there is none (a span of differing items is no value)."""
     prediction, quantity = item.prediction, item.quantity or 0.0
     if quantity and _entered(item) is not None:
         return round(_entered(item) * quantity, 2), "price"
     if quantity and prediction and prediction.method in PRICED and prediction.median is not None:
         return round(prediction.median * quantity, 2), "price"
-    if quantity and prediction and prediction.method == "reference" and prediction.sources:
-        return round(statistics.median(source.unit_price for source in prediction.sources) * quantity, 2), "reference"
     return None, "assumed"
 
 

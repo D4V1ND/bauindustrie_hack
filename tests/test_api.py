@@ -55,6 +55,19 @@ def test_bad_uploads_and_unknown_projects_are_refused_before_anything_runs(clien
     assert client.post("/projects/H9/items/01.0010/comments", json={}).status_code == 422
 
 
+def test_with_a_passcode_set_every_call_needs_it(client, monkeypatch):
+    monkeypatch.setattr(api, "PASSCODE", "s3cret")
+    site = {"Origin": "https://frontend.example"}
+    denied = client.get("/projects", headers=site)
+    assert denied.status_code == 401 and denied.headers["access-control-allow-origin"] == "*"  # the page can read it
+    assert client.get("/projects", headers={"X-Passcode": "wrong"}).status_code == 401
+    assert client.get("/projects", headers={"X-Passcode": "s3cret"}).json() == []
+    assert client.get("/projects?passcode=s3cret").status_code == 200  # for an <img> of the plan
+    assert client.options("/projects", headers={**site, "Access-Control-Request-Method": "GET",
+                                                "Access-Control-Request-Headers": "x-passcode"}).status_code == 200
+    assert client.get("/assistant").status_code == 200 and client.get("/openapi.json").status_code == 200
+
+
 def test_the_judge_log_and_the_plan_files_are_served_by_name_only(client, tmp_path):
     lv = LV(project="H1", name="", date=None, source_file="H1.x83",
             items=[LineItem(id="H1/01.0010", oz="01.0010", section=[], short_text="Baustelle", long_text="",

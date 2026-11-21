@@ -26,9 +26,9 @@ The pipeline runs in steps after an upload ("extraction"):
    - `copied`: an identical past item, its price taken unchanged;
    - `similar`: past items a judge model called the same thing, with min, max, median and mean;
    - `adjusted`: calculated by a named rule, e.g. between a smaller and a larger size;
-   - `reference`: related past items shown as evidence, but no price, because something that changes the price
-     differs;
-   - `none`: nothing comparable found.
+   - `reference`: related past items (another size or type); their median is a suggested price, less sure than
+     `similar`, because something that changes the price differs;
+   - `none`: nothing comparable found, no price; `min`-`max` is only the span of the 3 nearest items, which differ.
    The tool never writes into the unit price. The found price is a prediction; the estimator sets the price.
 4. **Risk**: how unsure each price is (from the method and the spread of past prices) and whether the item text is
    complete enough to price ("Rolex oder Micky-Maus-Uhr": "1 m³ Beton" without a strength class). Confidence runs

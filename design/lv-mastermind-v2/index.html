@@ -1356,8 +1356,16 @@ var API = (function () {
   if (window.LV_API) return String(window.LV_API).replace(/\/+$/, '');
   return (location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) ? 'http://localhost:8000' : '/api';
 })();
-function api(path, opt) {
-  return fetch(API + path, opt).then(function (r) {
+// The server may ask for the team's passcode (LV_PASSCODE): asked once, kept in this browser.
+function pass() { return store('lvm-passcode') || ''; }
+function api(path, opt, again) {
+  opt = opt || {};
+  var o = Object.assign({}, opt, { headers: Object.assign({}, opt.headers, pass() ? { 'X-Passcode': pass() } : {}) });
+  return fetch(API + path, o).then(function (r) {
+    if (r.status === 401 && !again) {
+      var p = window.prompt('Passcode für das Backend:');
+      if (p && p.trim()) { store('lvm-passcode', p.trim()); return api(path, opt, true); }
+    }
     return r.json().catch(function () { return {}; }).then(function (j) {
       if (!r.ok) throw new Error(typeof j.detail === 'string' ? j.detail : j.detail ? JSON.stringify(j.detail) : 'HTTP ' + r.status);
       return j;
@@ -1365,8 +1373,8 @@ function api(path, opt) {
   });
 }
 function store(k, v) { try { if (v === undefined) return JSON.parse(localStorage.getItem(k) || 'null'); localStorage.setItem(k, JSON.stringify(v)); } catch (e) { return null; } }
-var MODE = { copied: 'übernommen', similar: 'adaptiert', adjusted: 'adaptiert', reference: 'offen', none: 'offen' };
-var WHY = { copied: 'Textgleich in Alt-LV', similar: 'Gleichwertige Position in Alt-LV', adjusted: 'Interpoliert aus Alt-LV', reference: 'Nur verwandte Positionen, kein Preis', none: 'Keine Referenz in den Alt-LVs' };
+var MODE = { copied: 'übernommen', similar: 'adaptiert', adjusted: 'adaptiert', reference: 'adaptiert', none: 'offen' };
+var WHY = { copied: 'Textgleich in Alt-LV', similar: 'Gleichwertige Position in Alt-LV', adjusted: 'Interpoliert aus Alt-LV', reference: 'Verwandte Positionen in Alt-LV (Median)', none: 'Keine Referenz in den Alt-LVs' };
 var VERD = { exact: 'textgleich', same: 'gleichwertig', size_only: 'andere Größe', type_only: 'gleiche Art', different: 'anders' };
 function gwName(it) {
   if (it.trade && it.trade !== 'Sonstiges') return it.trade;
@@ -1380,6 +1388,7 @@ function ownPrice(it) {
 function toPos(it) {
   var pr = it.prediction || {}, rk = it.risk || {}, m = pr.method || 'none', own = ownPrice(it), med = pr.median || 0, conf = rk.confidence || 0;
   var why = own != null ? 'Eigener Preis' : (WHY[m] || m);
+  if (own == null && m === 'none' && pr.min != null) why += ' · Spanne ' + eur(pr.min) + ' – ' + eur(pr.max);  // no price, only the span of differing items
   if (own == null && (it.comments || []).some(function (c) { return c.effect === 'doubt'; })) why = 'Preis angezweifelt · ' + why;
   if (rk.missing && rk.missing.length) why += ' · fehlt: ' + rk.missing[0];
   if (it.plan && it.plan.status === 'differs') why = 'Plan ' + qty(it.plan.quantity || 0) + ' ' + (it.plan.unit || '') + ', LV ' + qty(it.quantity || 0) + ' · ' + why;
@@ -1402,6 +1411,8 @@ function toRich(it, extra) {
   if (pr.method === 'adjusted') R.steps = [['Regel', pr.rule || '–'], ['Rechnung', pr.calculation || '–'], ['EP', eur(pr.result || pr.median || 0)]];
   else if (pr.median) R.steps = srcs.slice(0, 4).map(function (s) { return ['EP ' + s.id, eur(s.unit_price)]; })
     .concat(pr.count > 1 ? [['Spanne (' + pr.count + ' Preise)', eur(pr.min) + ' – ' + eur(pr.max)]] : []).concat([['EP (Median)', eur(pr.median)]]);
+  else if (pr.min != null) R.steps = jd.slice(0, 3).map(function (s) { return ['EP ' + s.id + ' (anders)', eur(s.unit_price)]; })
+    .concat([['Spanne · kein Preis', eur(pr.min) + ' – ' + eur(pr.max)]]);
   else R.steps = [['Preis', 'keiner gefunden']];
   R.steps.push(['Preisrisiko · Beschreibung', (rk.price_risk != null ? rk.price_risk : '–') + ' · ' + (rk.description || 'nicht geprüft')]);
   var seen = {}; R.similar = [];
@@ -1734,7 +1745,7 @@ function vPlan(d, full) {
     '<div class="plan-empty">' + IC.layers + '<p>Lade beim nächsten Upload einen Bauplan (PNG oder JPG) als Kontext hoch. Dann prüft das Backend die Mengen gegen den Plan und die Positionen erscheinen hier.</p><button class="btn btn-sm btn-quiet" data-act="newProj">' + IC.plus + 'Neues Projekt mit Plan</button></div></aside>';
   var img = P.live && /\.(png|jpe?g)$/i.test(P.plan.file);
   var o = '<svg class="plan-svg" viewBox="0 0 1000 ' + PLAN_VH + '" role="img" aria-label="' + (P.live ? 'Bauplan ' + esc(P.plan.file) : 'Grundriss Erdgeschoss') + ' mit Positionen">';
-  if (P.live) o += img ? '<image href="' + esc(API + '/projects/' + encodeURIComponent(P.id) + '/files/' + encodeURIComponent(P.plan.file)) + '" x="0" y="0" width="1000" height="' + PLAN_VH + '" preserveAspectRatio="none"/>'
+  if (P.live) o += img ? '<image href="' + esc(API + '/projects/' + encodeURIComponent(P.id) + '/files/' + encodeURIComponent(P.plan.file) + (pass() ? '?passcode=' + encodeURIComponent(pass()) : '')) + '" x="0" y="0" width="1000" height="' + PLAN_VH + '" preserveAspectRatio="none"/>'
     : '<rect class="slab" x="0" y="0" width="1000" height="' + PLAN_VH + '"/><text class="rl2" x="500" y="' + (PLAN_VH / 2) + '">PLAN ALS PDF · FÜR DIE ANSICHT PNG ODER JPG HOCHLADEN</text>';
   if (!P.live) {
   o += '<defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="8" class="hl"/></pattern></defs>';
