@@ -1,0 +1,593 @@
+{
+ "$defs": {
+  "ItemType": {
+   "description": "Step 2: one item type of an LV's own list, with the one trade it belongs to.",
+   "properties": {
+    "name": {
+     "title": "Name",
+     "type": "string"
+    },
+    "trade": {
+     "title": "Trade",
+     "type": "string"
+    },
+    "description": {
+     "default": "",
+     "title": "Description",
+     "type": "string"
+    }
+   },
+   "required": [
+    "name",
+    "trade"
+   ],
+   "title": "ItemType",
+   "type": "object"
+  },
+  "LineItem": {
+   "properties": {
+    "id": {
+     "title": "Id",
+     "type": "string"
+    },
+    "oz": {
+     "title": "Oz",
+     "type": "string"
+    },
+    "section": {
+     "items": {
+      "type": "string"
+     },
+     "title": "Section",
+     "type": "array"
+    },
+    "short_text": {
+     "title": "Short Text",
+     "type": "string"
+    },
+    "long_text": {
+     "title": "Long Text",
+     "type": "string"
+    },
+    "quantity": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "title": "Quantity"
+    },
+    "unit": {
+     "title": "Unit",
+     "type": "string"
+    },
+    "unit_price": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Unit Price"
+    },
+    "total_price": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Total Price"
+    },
+    "kind": {
+     "default": "normal",
+     "enum": [
+      "normal",
+      "optional"
+     ],
+     "title": "Kind",
+     "type": "string"
+    },
+    "read_by": {
+     "default": "gaeb",
+     "enum": [
+      "gaeb",
+      "pdf",
+      "ai"
+     ],
+     "title": "Read By",
+     "type": "string"
+    },
+    "group": {
+     "default": "",
+     "title": "Group",
+     "type": "string"
+    },
+    "item_type": {
+     "default": "",
+     "title": "Item Type",
+     "type": "string"
+    },
+    "trade": {
+     "default": "",
+     "title": "Trade",
+     "type": "string"
+    },
+    "item_type_reason": {
+     "default": "",
+     "title": "Item Type Reason",
+     "type": "string"
+    },
+    "prediction": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Prediction"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "risk": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Risk"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    }
+   },
+   "required": [
+    "id",
+    "oz",
+    "section",
+    "short_text",
+    "long_text",
+    "quantity",
+    "unit"
+   ],
+   "title": "LineItem",
+   "type": "object"
+  },
+  "MethodSum": {
+   "properties": {
+    "items": {
+     "title": "Items",
+     "type": "integer"
+    },
+    "total": {
+     "title": "Total",
+     "type": "number"
+    }
+   },
+   "required": [
+    "items",
+    "total"
+   ],
+   "title": "MethodSum",
+   "type": "object"
+  },
+  "Prediction": {
+   "description": "Step 3: what the lookup in the price library found for one line item (SPEC.md, step 3).",
+   "properties": {
+    "method": {
+     "enum": [
+      "copied",
+      "similar",
+      "adjusted",
+      "reference",
+      "none"
+     ],
+     "title": "Method",
+     "type": "string"
+    },
+    "min": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Min"
+    },
+    "max": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Max"
+    },
+    "median": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Median"
+    },
+    "mean": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Mean"
+    },
+    "count": {
+     "default": 0,
+     "title": "Count",
+     "type": "integer"
+    },
+    "sources": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/Source"
+     },
+     "title": "Sources",
+     "type": "array"
+    },
+    "rule": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Rule"
+    },
+    "calculation": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Calculation"
+    },
+    "result": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Result"
+    },
+    "reason": {
+     "default": "",
+     "title": "Reason",
+     "type": "string"
+    },
+    "judged": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/Source"
+     },
+     "title": "Judged",
+     "type": "array"
+    },
+    "judged_item": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Judged Item"
+    }
+   },
+   "required": [
+    "method"
+   ],
+   "title": "Prediction",
+   "type": "object"
+  },
+  "Risk": {
+   "description": "Step 4: how unsure the tool is about one line item (SPEC.md, step 4). Scores run from 0 (safe) to 100 and\nare places on a scale, not probabilities.",
+   "properties": {
+    "score": {
+     "title": "Score",
+     "type": "integer"
+    },
+    "price_risk": {
+     "title": "Price Risk",
+     "type": "integer"
+    },
+    "price_reason": {
+     "title": "Price Reason",
+     "type": "string"
+    },
+    "description": {
+     "anyOf": [
+      {
+       "enum": [
+        "complete",
+        "gaps",
+        "vague"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Description"
+    },
+    "description_risk": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Description Risk"
+    },
+    "missing": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Missing",
+     "type": "array"
+    },
+    "description_reason": {
+     "default": "",
+     "title": "Description Reason",
+     "type": "string"
+    },
+    "value": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Value"
+    },
+    "value_basis": {
+     "enum": [
+      "price",
+      "reference",
+      "assumed"
+     ],
+     "title": "Value Basis",
+     "type": "string"
+    }
+   },
+   "required": [
+    "score",
+    "price_risk",
+    "price_reason",
+    "value_basis"
+   ],
+   "title": "Risk",
+   "type": "object"
+  },
+  "RiskSummary": {
+   "properties": {
+    "score": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "title": "Score"
+    },
+    "value": {
+     "title": "Value",
+     "type": "number"
+    },
+    "basis": {
+     "additionalProperties": {
+      "type": "integer"
+     },
+     "title": "Basis",
+     "type": "object"
+    }
+   },
+   "required": [
+    "score",
+    "value",
+    "basis"
+   ],
+   "title": "RiskSummary",
+   "type": "object"
+  },
+  "Source": {
+   "description": "One past line item behind a prediction, or shown next to it as a reference.",
+   "properties": {
+    "id": {
+     "title": "Id",
+     "type": "string"
+    },
+    "short_text": {
+     "default": "",
+     "title": "Short Text",
+     "type": "string"
+    },
+    "unit_price": {
+     "title": "Unit Price",
+     "type": "number"
+    },
+    "verdict": {
+     "enum": [
+      "exact",
+      "same",
+      "size_only",
+      "type_only",
+      "different"
+     ],
+     "title": "Verdict",
+     "type": "string"
+    },
+    "difference": {
+     "default": "",
+     "title": "Difference",
+     "type": "string"
+    },
+    "why": {
+     "default": "",
+     "title": "Why",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "unit_price",
+    "verdict"
+   ],
+   "title": "Source",
+   "type": "object"
+  },
+  "Summary": {
+   "properties": {
+    "methods": {
+     "additionalProperties": {
+      "$ref": "#/$defs/MethodSum"
+     },
+     "title": "Methods",
+     "type": "object"
+    },
+    "total": {
+     "title": "Total",
+     "type": "number"
+    }
+   },
+   "required": [
+    "methods",
+    "total"
+   ],
+   "title": "Summary",
+   "type": "object"
+  }
+ },
+ "properties": {
+  "project": {
+   "title": "Project",
+   "type": "string"
+  },
+  "name": {
+   "title": "Name",
+   "type": "string"
+  },
+  "date": {
+   "anyOf": [
+    {
+     "format": "date",
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "title": "Date"
+  },
+  "source_file": {
+   "title": "Source File",
+   "type": "string"
+  },
+  "items": {
+   "items": {
+    "$ref": "#/$defs/LineItem"
+   },
+   "title": "Items",
+   "type": "array"
+  },
+  "item_types": {
+   "default": [],
+   "items": {
+    "$ref": "#/$defs/ItemType"
+   },
+   "title": "Item Types",
+   "type": "array"
+  },
+  "summary": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Summary"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null
+  },
+  "risk_summary": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/RiskSummary"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null
+  },
+  "priced": {
+   "readOnly": true,
+   "title": "Priced",
+   "type": "boolean"
+  }
+ },
+ "required": [
+  "project",
+  "name",
+  "date",
+  "source_file",
+  "items",
+  "priced"
+ ],
+ "title": "LV",
+ "type": "object"
+}

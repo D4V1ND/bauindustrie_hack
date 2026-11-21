@@ -1,0 +1,161 @@
+{
+ "title": "JudgeLog",
+ "description": "data/out/<project>_judge.json: one entry per judge call, in call order.",
+ "type": "array",
+ "items": {
+  "type": "object",
+  "required": [
+   "call",
+   "items",
+   "question",
+   "thinking",
+   "answer"
+  ],
+  "properties": {
+   "call": {
+    "type": "integer",
+    "description": "1, 2, 3 ... in the order the calls were made"
+   },
+   "items": {
+    "type": "array",
+    "items": {
+     "type": "string"
+    },
+    "description": "ids of the new LV's items this call asked about"
+   },
+   "question": {
+    "type": "string",
+    "description": "exactly what the judge read (texts only, never a price)"
+   },
+   "thinking": {
+    "type": "string",
+    "description": "the judge's summarised thinking; empty when the model did not think"
+   },
+   "answer": {
+    "anyOf": [
+     {
+      "$defs": {
+       "Judged": {
+        "description": "The judge's verdict on one candidate. Field names are the ones the judging rules name.",
+        "properties": {
+         "cand": {
+          "title": "Cand",
+          "type": "string"
+         },
+         "verdict": {
+          "enum": [
+           "same",
+           "size_only",
+           "type_only",
+           "different"
+          ],
+          "title": "Verdict",
+          "type": "string"
+         },
+         "dimension": {
+          "anyOf": [
+           {
+            "type": "string"
+           },
+           {
+            "type": "null"
+           }
+          ],
+          "title": "Dimension"
+         },
+         "cand_size": {
+          "anyOf": [
+           {
+            "type": "number"
+           },
+           {
+            "type": "null"
+           }
+          ],
+          "title": "Cand Size"
+         },
+         "target_size": {
+          "anyOf": [
+           {
+            "type": "number"
+           },
+           {
+            "type": "null"
+           }
+          ],
+          "title": "Target Size"
+         },
+         "difference": {
+          "title": "Difference",
+          "type": "string"
+         },
+         "why": {
+          "default": "",
+          "title": "Why",
+          "type": "string"
+         }
+        },
+        "required": [
+         "cand",
+         "verdict",
+         "dimension",
+         "cand_size",
+         "target_size",
+         "difference"
+        ],
+        "title": "Judged",
+        "type": "object"
+       },
+       "Verdicts": {
+        "description": "The judge's answer for one new item.",
+        "properties": {
+         "id": {
+          "title": "Id",
+          "type": "string"
+         },
+         "judged": {
+          "items": {
+           "$ref": "#/$defs/Judged"
+          },
+          "title": "Judged",
+          "type": "array"
+         },
+         "reason": {
+          "title": "Reason",
+          "type": "string"
+         }
+        },
+        "required": [
+         "id",
+         "judged",
+         "reason"
+        ],
+        "title": "Verdicts",
+        "type": "object"
+       }
+      },
+      "description": "What one judge call returns: one set of verdicts per item it was asked about.",
+      "properties": {
+       "items": {
+        "items": {
+         "$ref": "#/$defs/Verdicts"
+        },
+        "title": "Items",
+        "type": "array"
+       }
+      },
+      "required": [
+       "items"
+      ],
+      "title": "JudgeAnswer",
+      "type": "object"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "description": "the judge's answer; null when the call failed"
+   }
+  }
+ }
+}

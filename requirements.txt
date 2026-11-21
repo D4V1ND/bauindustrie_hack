@@ -1,0 +1,6 @@
+pydantic>=2.7
+pytest>=8
+langchain-anthropic>=1.0
+python-dotenv>=1.0
+pypdf>=4.0
+voyageai>=0.3.7

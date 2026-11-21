@@ -1,0 +1,443 @@
+<title>LV Result File</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Unbounded:wght@700;900&display=swap">
+<style>
+/* Layout: the paper world of the LV Pipeline page. Torn-paper labels lead left-aligned chapters; each chapter shows the whole file as a sheet whose left edge is coloured by the step that wrote each line. Deliberately single-theme. */
+:root{
+  --paper:#ebe6dc; --paper-hi:#f7f3eb; --ink:#2d3144; --muted:#5d6176;
+  --slate:#555b7e; --slate-dk:#454a69;
+  --rose:#ecd5cf; --brick:#d49a8e; --clay:#b35e5a;
+  --mint:#c4e3cf; --teal:#5a958d; --teal-dk:#36605d;
+  --crystal:#b4c9e8; --brass:#dcaa3c;
+  --s0:#8fb0dd; --s1:#d49a8e; --s2:#dcaa3c; --s3:#5a958d; --s4:#b35e5a; /* one colour per step: read, label, sort, price, risk */
+  --display:"Unbounded","Arial Black",system-ui,sans-serif;
+  --body:"Montserrat","Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"Cascadia Mono","SF Mono",Menlo,Consolas,monospace;
+  --ease:cubic-bezier(.2,.75,.15,1);
+  --rule:rgb(45 49 68 / .18);
+  color-scheme:light;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 16.5px/1.65 var(--body);-webkit-font-smoothing:antialiased;overflow-x:clip}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:60;opacity:.55;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .17 0 0 0 0 .18 0 0 0 0 .26 0 0 0 1.5 -.68'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+::selection{background:var(--brass);color:var(--ink)}
+:focus-visible{outline:2px solid var(--brass);outline-offset:3px}
+p{text-wrap:pretty}
+code{font:500 .9em var(--mono);overflow-wrap:anywhere}
+.wrap{max-width:1040px;margin-inline:auto;
+  padding-left:max(clamp(16px,4vw,40px),env(safe-area-inset-left,0px));
+  padding-right:max(clamp(16px,4vw,40px),env(safe-area-inset-right,0px))}
+
+.art{fill:none;stroke:var(--ink);stroke-linecap:round;stroke-linejoin:round;font-size:2px;stroke-width:1em}
+.pa{fill:var(--paper-hi)} .ro{fill:var(--rose)} .mi{fill:var(--mint)} .br{fill:var(--brass)} .ink{fill:var(--ink)}
+.ns{stroke:none} .th{stroke-width:.6em}
+
+/* hero */
+.hero{padding-block:clamp(28px,5vw,60px) 0;text-align:center}
+.title{margin:0;font:900 clamp(32px,7.6vw,84px)/.94 var(--display);color:var(--slate);letter-spacing:.005em;text-transform:uppercase;text-wrap:balance}
+.eyebrow{margin:16px 0 0;font:600 12px/1.5 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.dlg{background:var(--paper-hi);border:1.5px solid var(--ink);box-shadow:4px 4px 0 rgb(45 49 68 / .14);padding:18px 22px;text-align:left;margin:0}
+.dlg p{margin:0}
+.dlg p+p{margin-top:.7em}
+.hero .dlg{max-width:700px;margin:22px auto 0}
+
+/* the growing file: four small sheets */
+.grow{list-style:none;margin:34px auto 0;padding:0;max-width:980px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(10px,2.4vw,26px);text-align:left}
+.mini{display:grid;gap:10px;min-width:0}
+.page{background:var(--paper-hi);border:1.5px solid var(--ink);box-shadow:4px 4px 0 rgb(45 49 68 / .14);padding:12px 12px 14px;display:grid;gap:6px}
+.band{height:10px;border:1.5px solid var(--ink)}
+.band.tall{height:30px} .band.mid{height:18px}
+.band.b0{background:var(--s0)} .band.b1{background:var(--s1)} .band.b2{background:var(--s2)} .band.b3{background:var(--s3)} .band.b4{background:var(--s4)}
+.band.off{background:none;border-style:dashed;border-color:rgb(45 49 68 / .45)}
+.mini b{display:block;font:700 13px/1.25 var(--display);color:var(--slate);text-transform:uppercase}
+.mini span{display:block;font-size:13.5px;line-height:1.4;color:var(--muted)}
+@media (max-width:760px){.grow{grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}}
+
+/* chapters */
+.ch{padding-block:clamp(56px,7.5vw,88px) 0}
+.label-row{filter:drop-shadow(3px 4px 0 rgb(45 49 68 / .12))}
+.label{width:fit-content;max-width:calc(100% + 50vw - 50%);margin-left:calc(50% - 50vw);background:var(--paper-hi);
+  padding-block:18px 20px;padding-right:56px;padding-left:calc(50vw - 50%);
+  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 9%,calc(100% - 6px) 19%,calc(100% - 1px) 31%,calc(100% - 9px) 42%,calc(100% - 3px) 55%,100% 66%,calc(100% - 7px) 77%,calc(100% - 2px) 88%,calc(100% - 8px) 100%,0 100%)}
+.part{display:block;margin:0 0 10px;font:600 11.5px/1 var(--body);letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.label h2{margin:0;font:900 clamp(26px,5vw,54px)/.98 var(--display);color:var(--slate);text-transform:uppercase;text-wrap:balance}
+.head{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:clamp(14px,3vw,40px);margin:26px 0 24px}
+.lead{margin:0;max-width:46ch;font:500 clamp(18px,2.3vw,23px)/1.45 var(--body)}
+.medal{width:100px;height:100px;border-radius:50%;display:grid;place-items:center;border:1.5px solid var(--ink);box-shadow:inset 0 0 0 5px var(--paper-hi),inset 0 0 0 6.5px var(--ink)}
+.medal svg{width:58px;height:58px;font-size:2.2px}
+.medal.c0{background:var(--s0)} .medal.c2{background:var(--s2)} .medal.c3{background:var(--mint)} .medal.c4{background:var(--rose)} .medal.c5{background:var(--crystal)} .medal.c6{background:var(--s4)}
+.kind{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;margin:0 0 22px;font-size:15px}
+h3{margin:44px 0 14px;font:700 clamp(17px,2vw,20px)/1.25 var(--display);color:var(--slate);text-transform:uppercase;text-wrap:balance}
+.prose{max-width:66ch;margin:0 0 1em}
+
+.who{display:inline-block;padding:1px 8px;border:1.5px solid var(--ink);font:700 10.5px/1.7 var(--body);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;vertical-align:1px;background:var(--paper-hi)}
+.who.code{background:var(--mint)} .who.ai{background:var(--brass)}
+.who.s0c{background:var(--s0)} .who.s1c{background:var(--s1)} .who.s2c{background:var(--s2)} .who.s3c{background:var(--s3);color:var(--paper-hi)}
+
+/* ledger table */
+.ledger{position:relative;background:var(--paper-hi);border:1.5px solid var(--ink);padding:10px}
+.ledger::before{content:"";position:absolute;inset:5px;border:1px solid var(--ink);pointer-events:none}
+.ledger table{width:100%;border-collapse:collapse;position:relative}
+.ledger th,.ledger td{text-align:left;vertical-align:top;padding:14px 18px;border-top:1px solid var(--rule)}
+.ledger thead th{border-top:0;padding-block:14px 12px;font:600 11px/1.35 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.ledger tbody th{width:27%;font:600 14.5px/1.5 var(--body);color:var(--slate)}
+.ledger tbody th code{font-weight:600}
+.ledger td{font-size:15.5px;min-width:0}
+.ledger td:nth-child(2){width:22%;color:var(--muted);font-size:14.5px}
+.ledger tr>td:last-child{width:auto;color:var(--ink);font-size:15.5px}
+.quote{margin-top:10px;padding:10px 12px;background:var(--paper);border-left:3px solid var(--slate);font:400 12.5px/1.55 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere;max-height:17em;overflow:auto}
+.dlg.note{margin-top:26px;max-width:780px}
+.dlg.note ul{margin:0;padding-left:1.15em}
+.dlg.note li{margin:.35em 0}
+.tag{display:block;margin-bottom:6px;font:600 11.5px/1.3 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--slate)}
+.fn{margin:14px 0 0;max-width:68ch;font:500 italic 14px/1.5 var(--body);color:var(--muted)}
+
+/* the file sheet */
+.sheet{margin:26px 0 0;background:var(--paper-hi);border:1.5px solid var(--ink);box-shadow:4px 4px 0 rgb(45 49 68 / .14);min-width:0}
+.sheet figcaption{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:14px 20px;border-bottom:1px solid var(--rule)}
+.sheet figcaption b{font:700 14.5px/1.3 var(--display);color:var(--slate)}
+.sheet figcaption small{flex-basis:100%;font-size:13.5px;color:var(--muted)}
+.copy{margin-left:auto;font:700 11px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--ink);background:var(--paper);border:1.5px solid var(--ink);padding:8px 12px;cursor:pointer;box-shadow:2px 2px 0 rgb(45 49 68 / .18)}
+.copy:hover{background:var(--brass)}
+.copy:active{transform:translate(1px,1px);box-shadow:1px 1px 0 rgb(45 49 68 / .18)}
+.sheet pre{margin:0;padding:14px 0;overflow-x:auto;font:400 13px/1.62 var(--mono);color:var(--ink);tab-size:2}
+.sheet pre code{display:inline-block;min-width:100%;font:inherit;overflow-wrap:normal}
+.ln{display:block;white-space:pre;padding:0 20px 0 14px;border-left:6px solid transparent}
+.ln.s0{border-left-color:var(--s0)} .ln.s1{border-left-color:var(--s1)} .ln.s2{border-left-color:var(--s2)} .ln.s3{border-left-color:var(--s3)} .ln.s4{border-left-color:var(--s4)}
+.ln.new.s0{background:color-mix(in srgb,var(--s0) 24%,var(--paper-hi))}
+.ln.new.s1{background:color-mix(in srgb,var(--s1) 34%,var(--paper-hi))}
+.ln.new.s2{background:color-mix(in srgb,var(--s2) 28%,var(--paper-hi))}
+.ln.new.s3{background:color-mix(in srgb,var(--s3) 20%,var(--paper-hi))}
+.ln.new.s4{background:color-mix(in srgb,var(--s4) 18%,var(--paper-hi))}
+.ln.old .tx{color:var(--muted)}
+.ln.empty{border-left-style:dashed}
+.ln.empty .tx{color:rgb(45 49 68 / .5)}
+.k{font-weight:600;color:var(--slate)}
+.ln.old .k,.ln.empty .k{font-weight:500;color:inherit}
+.nt{margin-left:3ch;font:500 italic 12.5px/1 var(--body);color:var(--teal-dk);user-select:none;-webkit-user-select:none}
+.nt::before{content:"← "}
+.ln.empty .nt{color:var(--muted)}
+.plain pre{padding:14px 20px;white-space:pre;overflow-x:auto}
+.legend{list-style:none;display:flex;flex-wrap:wrap;gap:8px 20px;margin:16px 0 0;padding:0;font-size:14.5px}
+.legend.c{justify-content:center}
+.sw{display:inline-block;width:22px;height:12px;border:1.5px solid var(--ink);vertical-align:-1px;margin-right:6px}
+.sw.dash{background:none;border-style:dashed}
+
+/* hanging plaque */
+.hang{position:relative;width:fit-content;max-width:100%;margin:46px 0 0;padding-top:34px;transform-origin:50% 0}
+.hang::before{content:"";position:absolute;top:0;left:50%;width:1.5px;height:36px;background:var(--ink)}
+.hang::after{content:"";position:absolute;top:-5px;left:calc(50% - 4.25px);width:7px;height:7px;border-radius:50%;border:1.5px solid var(--ink);background:var(--paper-hi)}
+.plaque{position:relative;margin:0;max-width:32ch;padding:22px 32px;background:var(--slate);color:var(--paper-hi);font:700 clamp(16px,2.1vw,21px)/1.35 var(--display);text-wrap:balance;
+  -webkit-mask:radial-gradient(circle 12px at 0 0,#0000 98%,#000) top left/51% 51% no-repeat,radial-gradient(circle 12px at 100% 0,#0000 98%,#000) top right/51% 51% no-repeat,radial-gradient(circle 12px at 0 100%,#0000 98%,#000) bottom left/51% 51% no-repeat,radial-gradient(circle 12px at 100% 100%,#0000 98%,#000) bottom right/51% 51% no-repeat;
+          mask:radial-gradient(circle 12px at 0 0,#0000 98%,#000) top left/51% 51% no-repeat,radial-gradient(circle 12px at 100% 0,#0000 98%,#000) top right/51% 51% no-repeat,radial-gradient(circle 12px at 0 100%,#0000 98%,#000) bottom left/51% 51% no-repeat,radial-gradient(circle 12px at 100% 100%,#0000 98%,#000) bottom right/51% 51% no-repeat}
+.plaque::before{content:"";position:absolute;inset:6px;border:1px solid rgb(247 243 235 / .55);pointer-events:none}
+
+/* ending */
+.end{margin-top:clamp(72px,9vw,110px);background:var(--slate-dk);color:var(--paper-hi);padding-block:clamp(64px,10vw,120px) 44px}
+.disc{position:relative;isolation:isolate;width:min(600px,100%);aspect-ratio:1;max-width:100%;margin-inline:auto;display:grid;align-content:center;justify-items:center;text-align:center;padding:13%;color:var(--ink)}
+.disc::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:50%;background:var(--paper-hi);box-shadow:-3px 4px 0 rgb(0 0 0 / .2)}
+.disc svg{width:84px;height:auto;margin-bottom:10px;font-size:2.4px}
+.disc .part{margin-bottom:14px}
+.bl{margin:0;max-width:36ch;font:500 clamp(16px,2vw,19px)/1.55 var(--body)}
+.sources{max-width:780px;margin:72px auto 0}
+.sources h2{margin:0 0 14px;font:700 15px/1.3 var(--display);letter-spacing:.04em;text-transform:uppercase;color:var(--paper-hi)}
+.sources ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:0 32px}
+.sources li{min-width:0;padding:13px 0;border-top:1px solid rgb(247 243 235 / .22);overflow-wrap:anywhere}
+.sources small{display:block;font-size:12.5px;color:rgb(247 243 235 / .62)}
+.fine{margin:52px 0 0;text-align:center;font-size:13px;color:rgb(247 243 235 / .7)}
+
+@media (max-width:720px){
+  .ledger thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+  .ledger table,.ledger tbody,.ledger tr,.ledger th,.ledger td{display:block;width:auto}
+  .ledger tbody th,.ledger td:nth-child(2){width:auto}
+  .ledger tr{padding:16px 12px;border-top:1px solid var(--rule)}
+  .ledger tbody tr:first-child{border-top:0}
+  .ledger th,.ledger td{border:0;padding:0}
+  .ledger td{margin-top:10px}
+  .ledger td::before{content:attr(data-l);display:block;margin-bottom:2px;font:600 10.5px/1.4 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+}
+@media (max-width:600px){
+  .disc{aspect-ratio:auto;padding:56px 24px 44px}
+  .disc::before{border-radius:999px 999px 26px 26px / 190px 190px 26px 26px}
+  .copy{margin-left:0}
+}
+@media (max-width:520px){.head{grid-template-columns:minmax(0,1fr);row-gap:14px}.medal{width:84px;height:84px}.medal svg{width:48px;height:48px}}
+
+/* motion: the four sheets rise once on load; labels slide in */
+@media (prefers-reduced-motion:no-preference){
+  .mini{animation:rise .9s var(--ease) both;animation-delay:calc(.15s + var(--i) * 140ms)}
+  @keyframes rise{from{opacity:0;transform:translateY(12px)}}
+  .label{transition:transform .9s var(--ease)}
+  .js .label-row:not(.in) .label{transform:translateX(-44px)}
+  .hang{animation:pend 7s ease-in-out infinite}
+  @keyframes pend{0%,100%{transform:rotate(-.9deg)}50%{transform:rotate(.9deg)}}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<svg class="art" width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-page" viewBox="0 0 80 80">
+    <path class="ro" d="M24 16h26l12 12v40H24z" transform="rotate(7 43 42)"/>
+    <path class="pa" d="M18 12h28l12 12v44H18z"/>
+    <path class="th" d="M46 12v12h12"/>
+    <path class="th" d="M26 34h8M38 34h14M26 44h8M38 44h14M26 54h8M38 54h10"/>
+  </symbol>
+  <symbol id="i-sort" viewBox="0 0 80 80">
+    <path class="pa" d="M12 20h56l-6 14H18z"/>
+    <path class="mi" d="M12 38h56l-6 14H18z"/>
+    <path class="br" d="M12 56h56l-6 14H18z"/>
+    <path class="th" d="M30 27h20M30 45h20M30 63h20"/>
+    <path d="M40 6v8M36 11l4 4 4-4"/>
+  </symbol>
+  <symbol id="i-tag" viewBox="0 0 80 80">
+    <path class="br" d="M14 40l26-26h26v26L40 66z"/>
+    <circle class="pa" cx="55" cy="25" r="5"/>
+    <path class="th" d="M30 44l10 10M36 38l10 10"/>
+    <path d="M58 22c8-10 14-8 16-2"/>
+  </symbol>
+  <symbol id="i-talk" viewBox="0 0 80 80">
+    <path class="pa" d="M12 16h56v36H40L26 66V52H12z"/>
+    <path class="th" d="M22 28h36M22 38h24"/>
+    <circle class="br" cx="58" cy="38" r="4"/>
+  </symbol>
+  <symbol id="i-scale" viewBox="0 0 80 80">
+    <path d="M40 14v50M24 64h32"/>
+    <path d="M14 24h52"/>
+    <path class="pa" d="M6 44l8-20l8 20z"/>
+    <path class="br" d="M58 50l8-26l8 26z"/>
+    <circle class="ink ns" cx="40" cy="14" r="3"/>
+  </symbol>
+  <symbol id="i-screen" viewBox="0 0 80 80">
+    <rect class="pa" x="10" y="14" width="60" height="42"/>
+    <rect class="mi" x="18" y="22" width="20" height="26"/>
+    <path class="th" d="M44 26h18M44 35h18M44 44h10"/>
+    <path d="M30 66h20M40 56v10"/>
+  </symbol>
+</svg>
+
+<header class="hero wrap">
+  <h1 class="title">LV Result File</h1>
+  <p class="eyebrow">For the frontend team · what each step adds, and how the file looks after it</p>
+  <div class="dlg">
+    <p><strong>One file per new LV, one list inside it.</strong> <code>lv price</code> writes <code>data/out/&lt;project&gt;.json</code>. Its <code>items</code> list has one entry per line item, and every step adds its fields to that same entry. Nothing has to be joined afterwards.</p>
+    <p>Every value on this page is real: item <code>P5/02.0001</code>, "<span lang="de">Asphalt schneiden, bis 15 cm</span>", followed through all five steps.</p>
+  </div>
+  <ol class="grow" aria-label="The file after each step">
+    <li class="mini" style="--i:0"><div class="page" aria-hidden="true"><div class="band tall b0"></div><div class="band off"></div><div class="band mid off"></div><div class="band tall off"></div><div class="band mid off"></div></div><div><b>Step 0 · Read</b><span>The LV's own data: texts, quantity, unit.</span></div></li>
+    <li class="mini" style="--i:1"><div class="page" aria-hidden="true"><div class="band tall b0"></div><div class="band b1"></div><div class="band mid off"></div><div class="band tall off"></div><div class="band mid off"></div></div><div><b>Step 1 · Label</b><span>One field: <code>group</code>.</span></div></li>
+    <li class="mini" style="--i:2"><div class="page" aria-hidden="true"><div class="band tall b0"></div><div class="band b1"></div><div class="band mid b2"></div><div class="band tall off"></div><div class="band mid off"></div></div><div><b>Step 2 · Sort</b><span>Item type, trade and the reason.</span></div></li>
+    <li class="mini" style="--i:3"><div class="page" aria-hidden="true"><div class="band tall b0"></div><div class="band b1"></div><div class="band mid b2"></div><div class="band tall b3"></div><div class="band mid off"></div></div><div><b>Step 3 · Price</b><span>The <code>prediction</code> and the <code>summary</code>.</span></div></li>
+    <li class="mini" style="--i:4"><div class="page" aria-hidden="true"><div class="band tall b0"></div><div class="band b1"></div><div class="band mid b2"></div><div class="band tall b3"></div><div class="band mid b4"></div></div><div><b>Step 4 · Risk</b><span>The <code>risk</code> and the <code>risk_summary</code>.</span></div></li>
+  </ol>
+  <ul class="legend c">
+    <li><span class="sw" style="background:var(--s0)"></span>written by step 0</li>
+    <li><span class="sw" style="background:var(--s1)"></span>step 1</li>
+    <li><span class="sw" style="background:var(--s2)"></span>step 2</li>
+    <li><span class="sw" style="background:var(--s3)"></span>step 3</li>
+    <li><span class="sw" style="background:var(--s4)"></span>step 4</li>
+    <li><span class="sw dash"></span>still empty</li>
+  </ul>
+</header>
+
+<main>
+  <section class="ch wrap" aria-labelledby="c1">
+    <div class="label-row"><div class="label"><span class="part">Part 1 · Steps 0 and 1</span><h2 id="c1">Read and label</h2></div></div>
+    <div class="head"><p class="lead">Before step 2 the file holds the LV as it was read, plus one label per item. The fields of later steps are already there, empty.</p><div class="medal c0" aria-hidden="true"><svg class="art" viewBox="0 0 80 80"><use href="#i-page"/></svg></div></div>
+    <p class="kind"><span class="who code">Code</span> Both steps are deterministic. No AI is involved.</p>
+    <h3>What gets added</h3>
+    <div class="ledger "><table><thead><tr><th scope="col">Field</th><th scope="col">Type</th><th scope="col">Meaning</th></tr></thead><tbody><tr><th scope="row"><code>project</code></th><td data-l="Type">string</td><td data-l="Meaning">Short project ID the person chose, here <code>"P5"</code>.</td></tr><tr><th scope="row"><code>name</code>, <code>date</code>, <code>source_file</code></th><td data-l="Type">string, date or null, string</td><td data-l="Meaning">From the LV file's header. Texts can hold anonymiser tokens such as <code>[PROJEKT_004]</code>.</td></tr><tr><th scope="row"><code>priced</code></th><td data-l="Type">boolean</td><td data-l="Meaning">Whether the file itself came with prices. <code>false</code> for a new LV.</td></tr><tr><th scope="row"><code>items[]</code></th><td data-l="Type">array</td><td data-l="Meaning">One entry per line item, in LV order. Every field below sits on each entry.</td></tr><tr><th scope="row"><code>id</code></th><td data-l="Type">string</td><td data-l="Meaning">Project + <code>/</code> + item number. Unique across all projects, so use it as the key.</td></tr><tr><th scope="row"><code>oz</code></th><td data-l="Type">string</td><td data-l="Meaning">The item number (<span lang="de">Ordnungszahl</span>) as printed in the LV.</td></tr><tr><th scope="row"><code>section</code></th><td data-l="Type">array of strings</td><td data-l="Meaning">Section titles, outermost first.</td></tr><tr><th scope="row"><code>short_text</code>, <code>long_text</code></th><td data-l="Type">string</td><td data-l="Meaning">The item's two texts as written in the LV.</td></tr><tr><th scope="row"><code>quantity</code>, <code>unit</code></th><td data-l="Type">number or null, string</td><td data-l="Meaning">Units have one spelling: <code>St</code>, <code>m</code>, <code>m2</code>, <code>m3</code>, <code>h</code>, <code>psch</code>.</td></tr><tr><th scope="row"><code>unit_price</code>, <code>total_price</code></th><td data-l="Type">null</td><td data-l="Meaning">Empty in a new LV. The tool never fills them, so never show them as the predicted price.</td></tr><tr><th scope="row"><code>kind</code></th><td data-l="Type"><code>"normal"</code> or <code>"optional"</code></td><td data-l="Meaning">Optional items (<span lang="de">Bedarfspositionen</span>) are listed but not added to totals.</td></tr><tr><th scope="row"><code>read_by</code></th><td data-l="Type"><code>"gaeb"</code> or <code>"pdf"</code></td><td data-l="Meaning">Where the texts were read from.</td></tr><tr><th scope="row"><code>group</code> <span class="who s1c">Step 1</span></th><td data-l="Type">string</td><td data-l="Meaning">A 12-character label. Items with the same label are word for word the same item. P5 has no repeats; P4 has 7 sets covering 16 items.</td></tr></tbody></table></div>
+    <figure class="sheet">
+      <figcaption><b>The whole file after step 1</b><button class="copy" type="button" data-copy="f1">Copy JSON</button><small>Tinted lines are new. Dashed lines exist already and are filled by a later step.</small></figcaption>
+      <pre id="f1" tabindex="0"><code><span class="ln s0 new"><span class="tx">{</span></span><span class="ln s0 new"><span class="tx">  <b class="k">&quot;project&quot;</b>: &quot;P5&quot;,</span></span><span class="ln s0 new"><span class="tx">  <b class="k">&quot;name&quot;</b>: &quot;[PROJEKT_004]&quot;,</span></span><span class="ln s0 new"><span class="tx">  <b class="k">&quot;date&quot;</b>: &quot;2025-05-16&quot;,</span></span><span class="ln s0 new"><span class="tx">  <b class="k">&quot;source_file&quot;</b>: &quot;GAEB-[PROJEKT_004].X83&quot;,</span></span><span class="ln s0 new"><span class="tx">  <b class="k">&quot;items&quot;</b>: [</span></span><span class="ln s0 new"><span class="tx">    {</span><span class="nt">1 of P5&#x27;s 50 items shown</span></span><span class="ln s0 new"><span class="tx">      <b class="k">&quot;id&quot;</b>: &quot;P5/02.0001&quot;,</span><span class="nt">project + / + item number; use it as the key</span></span><span class="ln s0 new"><span class="tx">      <b class="k">&quot;oz&quot;</b>: &quot;02.0001&quot;,</span></span><span class="ln s0 new"><span class="tx">      <b class="k">&quot;section&quot;</b>: [</span></span><span class="ln s0 new"><span class="tx">        &quot;02 Tiefbauarbeiten&quot;</span></span><span class="ln s0 new"><span class="tx">      ],</span></span><span class="ln s0 new"><span class="tx">      <b class="k">&quot;short_text&quot;</b>: &quot;Asphalt schneiden, bis 15 cm&quot;,</span></span><span class="ln s0 new"><span class="tx">      <b class="k">&quot;long_text&quot;</b>: &quot;Asphalt schneiden, mit Fugenschneidgerät, senkrechter Schnitt, Restdicke trennen nach [PERSON_125] des AN. 01) Asphaltstärke bis 15 cm&quot;,</span></span><span class="ln s0 new"><span class="tx">      <b class="k">&quot;quantity&quot;</b>: 70.0,</span></span><span class="ln s0 new"><span class="tx">      <b class="k">&quot;unit&quot;</b>: &quot;m&quot;,</span></span><span class="ln s0 new"><span class="tx">      <b class="k">&quot;unit_price&quot;</b>: null,</span><span class="nt">empty in a new LV; the tool never fills it</span></span><span class="ln s0 new"><span class="tx">      <b class="k">&quot;total_price&quot;</b>: null,</span></span><span class="ln s0 new"><span class="tx">      <b class="k">&quot;kind&quot;</b>: &quot;normal&quot;,</span><span class="nt">normal or optional</span></span><span class="ln s0 new"><span class="tx">      <b class="k">&quot;read_by&quot;</b>: &quot;gaeb&quot;,</span></span><span class="ln s1 new"><span class="tx">      <b class="k">&quot;group&quot;</b>: &quot;11e730283708&quot;,</span><span class="nt">step 1: same label = word for word the same item</span></span><span class="ln s2 empty"><span class="tx">      <b class="k">&quot;item_type&quot;</b>: &quot;&quot;,</span><span class="nt">still empty · step 2 fills it</span></span><span class="ln s2 empty"><span class="tx">      <b class="k">&quot;trade&quot;</b>: &quot;&quot;,</span><span class="nt">still empty · step 2 fills it</span></span><span class="ln s2 empty"><span class="tx">      <b class="k">&quot;item_type_reason&quot;</b>: &quot;&quot;,</span><span class="nt">still empty · step 2 fills it</span></span><span class="ln s3 empty"><span class="tx">      <b class="k">&quot;prediction&quot;</b>: null,</span><span class="nt">still empty · step 3 fills it</span></span><span class="ln s4 empty"><span class="tx">      <b class="k">&quot;risk&quot;</b>: null</span><span class="nt">still empty · step 4 fills it</span></span><span class="ln s0 new"><span class="tx">    }</span></span><span class="ln s0 new"><span class="tx">  ],</span></span><span class="ln s2 empty"><span class="tx">  <b class="k">&quot;item_types&quot;</b>: [],</span><span class="nt">still empty · step 2 fills it</span></span><span class="ln s3 empty"><span class="tx">  <b class="k">&quot;summary&quot;</b>: null,</span><span class="nt">still empty · step 3 fills it</span></span><span class="ln s4 empty"><span class="tx">  <b class="k">&quot;risk_summary&quot;</b>: null,</span><span class="nt">still empty · step 4 fills it</span></span><span class="ln s0 new"><span class="tx">  <b class="k">&quot;priced&quot;</b>: false</span></span><span class="ln s0 new"><span class="tx">}</span></span></code></pre>
+    </figure>
+    <p class="fn">The empty values have fixed shapes: <code>""</code> for the three step 2 texts, <code>[]</code> for <code>item_types</code>, <code>null</code> for <code>prediction</code> and <code>summary</code>. A file from <code>lv price --copy-only</code> stays without item types.</p>
+  </section>
+
+  <section class="ch wrap" aria-labelledby="c2">
+    <div class="label-row"><div class="label"><span class="part">Part 2 · Step 2</span><h2 id="c2">Sort into types</h2></div></div>
+    <div class="head"><p class="lead">The LV gets its own list of item types, and every item gets one of them with its trade and a reason.</p><div class="medal c2" aria-hidden="true"><svg class="art" viewBox="0 0 80 80"><use href="#i-sort"/></svg></div></div>
+    <p class="kind"><span class="who ai">AI</span><span class="who code">Code</span> Claude proposes the list and assigns the items. Code checks every answer.</p>
+    <h3>What gets added</h3>
+    <div class="ledger "><table><thead><tr><th scope="col">Field</th><th scope="col">Type</th><th scope="col">Meaning</th></tr></thead><tbody><tr><th scope="row"><code>item_types[]</code></th><td data-l="Type">array of <code>{name, trade, description}</code></td><td data-l="Meaning">The LV's own list of item types, proposed once per LV. P5 has 20, P4 has 72. The list can differ from run to run.</td></tr><tr><th scope="row"><code>item_type</code></th><td data-l="Type">string</td><td data-l="Meaning">One name from <code>item_types</code>, or <code>"Sonstiges"</code> (other) if none fits.</td></tr><tr><th scope="row"><code>trade</code></th><td data-l="Type">string</td><td data-l="Meaning">The trade of that type, from a fixed list of 17 stand-in names.</td></tr><tr><th scope="row"><code>item_type_reason</code></th><td data-l="Type">string</td><td data-l="Meaning">One English sentence on why the item got this type.</td></tr></tbody></table></div>
+    <figure class="sheet">
+      <figcaption><b>The whole file after step 2</b><button class="copy" type="button" data-copy="f2">Copy JSON</button><small>Three fields on the item and the list at the bottom are new. Everything from steps 0 and 1 is unchanged.</small></figcaption>
+      <pre id="f2" tabindex="0"><code><span class="ln s0 old"><span class="tx">{</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;project&quot;</b>: &quot;P5&quot;,</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;name&quot;</b>: &quot;[PROJEKT_004]&quot;,</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;date&quot;</b>: &quot;2025-05-16&quot;,</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;source_file&quot;</b>: &quot;GAEB-[PROJEKT_004].X83&quot;,</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;items&quot;</b>: [</span></span><span class="ln s0 old"><span class="tx">    {</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;id&quot;</b>: &quot;P5/02.0001&quot;,</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;oz&quot;</b>: &quot;02.0001&quot;,</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;section&quot;</b>: [</span></span><span class="ln s0 old"><span class="tx">        &quot;02 Tiefbauarbeiten&quot;</span></span><span class="ln s0 old"><span class="tx">      ],</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;short_text&quot;</b>: &quot;Asphalt schneiden, bis 15 cm&quot;,</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;long_text&quot;</b>: &quot;Asphalt schneiden, mit Fugenschneidgerät, senkrechter Schnitt, Restdicke trennen nach [PERSON_125] des AN. 01) Asphaltstärke bis 15 cm&quot;,</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;quantity&quot;</b>: 70.0,</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;unit&quot;</b>: &quot;m&quot;,</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;unit_price&quot;</b>: null,</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;total_price&quot;</b>: null,</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;kind&quot;</b>: &quot;normal&quot;,</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;read_by&quot;</b>: &quot;gaeb&quot;,</span></span><span class="ln s1 old"><span class="tx">      <b class="k">&quot;group&quot;</b>: &quot;11e730283708&quot;,</span></span><span class="ln s2 new"><span class="tx">      <b class="k">&quot;item_type&quot;</b>: &quot;Asphaltaufbruch&quot;,</span><span class="nt">one name from item_types, or Sonstiges</span></span><span class="ln s2 new"><span class="tx">      <b class="k">&quot;trade&quot;</b>: &quot;Demontage und Rückbau&quot;,</span></span><span class="ln s2 new"><span class="tx">      <b class="k">&quot;item_type_reason&quot;</b>: &quot;Cutting asphalt with a joint cutter, vertical cut, up to 15 cm thick.&quot;,</span><span class="nt">text to show, nothing more</span></span><span class="ln s3 empty"><span class="tx">      <b class="k">&quot;prediction&quot;</b>: null,</span><span class="nt">still empty · step 3 fills it</span></span><span class="ln s4 empty"><span class="tx">      <b class="k">&quot;risk&quot;</b>: null</span><span class="nt">still empty · step 4 fills it</span></span><span class="ln s0 old"><span class="tx">    }</span></span><span class="ln s0 old"><span class="tx">  ],</span></span><span class="ln s2 new"><span class="tx">  <b class="k">&quot;item_types&quot;</b>: [</span><span class="nt">2 of P5&#x27;s 20 types shown</span></span><span class="ln s2 new"><span class="tx">    {</span></span><span class="ln s2 new"><span class="tx">      <b class="k">&quot;name&quot;</b>: &quot;Asphaltaufbruch&quot;,</span></span><span class="ln s2 new"><span class="tx">      <b class="k">&quot;trade&quot;</b>: &quot;Demontage und Rückbau&quot;,</span></span><span class="ln s2 new"><span class="tx">      <b class="k">&quot;description&quot;</b>: &quot;Cutting, breaking up and milling of existing asphalt surfaces.&quot;</span></span><span class="ln s2 new"><span class="tx">    },</span></span><span class="ln s2 new"><span class="tx">    {</span></span><span class="ln s2 new"><span class="tx">      <b class="k">&quot;name&quot;</b>: &quot;Baustelleneinrichtung&quot;,</span></span><span class="ln s2 new"><span class="tx">      <b class="k">&quot;trade&quot;</b>: &quot;Baustelleneinrichtung&quot;,</span></span><span class="ln s2 new"><span class="tx">      <b class="k">&quot;description&quot;</b>: &quot;Site setup and clearance, mobilisation of equipment and site facilities.&quot;</span></span><span class="ln s2 new"><span class="tx">    }</span></span><span class="ln s2 new"><span class="tx">  ],</span></span><span class="ln s3 empty"><span class="tx">  <b class="k">&quot;summary&quot;</b>: null,</span><span class="nt">still empty · step 3 fills it</span></span><span class="ln s4 empty"><span class="tx">  <b class="k">&quot;risk_summary&quot;</b>: null,</span><span class="nt">still empty · step 4 fills it</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;priced&quot;</b>: false</span></span><span class="ln s0 old"><span class="tx">}</span></span></code></pre>
+    </figure>
+    <div class="dlg note">
+      <span class="tag">For an overview screen</span>
+      <ul>
+        <li>The tree "trade, then item type, then quantities" is not stored. Group <code>items</code> by <code>trade</code> and <code>item_type</code>.</li>
+        <li>Add up <code>quantity</code> per <code>unit</code>, never across units, and only for items whose <code>kind</code> is <code>"normal"</code>.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="ch wrap" aria-labelledby="c3">
+    <div class="label-row"><div class="label"><span class="part">Part 3 · Step 3</span><h2 id="c3">Look up a price</h2></div></div>
+    <div class="head"><p class="lead">Every item gets a <code>prediction</code>, and the LV gets a <code>summary</code>. Here: €17.90 per metre, × 70 m = €1,253.00.</p><div class="medal c3" aria-hidden="true"><svg class="art" viewBox="0 0 80 80"><use href="#i-tag"/></svg></div></div>
+    <p class="kind"><span class="who code">Code</span><span class="who ai">AI</span> Code searches and calculates. Claude only judges whether two texts describe the same thing, and never sees a price.</p>
+    <h3>What gets added</h3>
+    <div class="ledger "><table><thead><tr><th scope="col">Field</th><th scope="col">Type</th><th scope="col">Meaning</th></tr></thead><tbody><tr><th scope="row"><code>prediction.method</code></th><td data-l="Type">one of five</td><td data-l="Meaning">How the result came about. The next table says what to show for each.</td></tr><tr><th scope="row"><code>median</code></th><td data-l="Type">number or null</td><td data-l="Meaning"><strong>The price to show</strong>, per unit. Set only for copied, similar and adjusted.</td></tr><tr><th scope="row"><code>min</code>, <code>max</code>, <code>mean</code>, <code>count</code></th><td data-l="Type">number or null; integer</td><td data-l="Meaning">Range, average and number of the past prices behind the price. <code>count</code> is 0 for reference and none.</td></tr><tr><th scope="row"><code>sources[]</code></th><td data-l="Type">array of sources</td><td data-l="Meaning">The past items the price rests on. For reference: the related items shown in place of a price.</td></tr><tr><th scope="row"><code>judged[]</code></th><td data-l="Type">array of sources</td><td data-l="Meaning">The 3 best candidates, best first, each with a <code>why</code>. The judge reads 5; the file keeps 3. Empty when the judge was not asked.</td></tr><tr><th scope="row"><code>reason</code></th><td data-l="Type">string</td><td data-l="Meaning">One sentence from the judge, or a fixed sentence when code decided alone.</td></tr><tr><th scope="row"><code>rule</code>, <code>calculation</code>, <code>result</code></th><td data-l="Type">string, string, number; else null</td><td data-l="Meaning">Only for adjusted, e.g. <code>"linear interpolation by DN"</code>, <code>"80 + (125 - 100) / (150 - 100) x (120 - 80)"</code>, <code>100.0</code>.</td></tr><tr><th scope="row"><code>judged_item</code></th><td data-l="Type">string or null</td><td data-l="Meaning">Set when this item is identical to another item of the LV: the <code>id</code> of the item that was actually judged.</td></tr><tr><th scope="row"><code>summary</code></th><td data-l="Type">object</td><td data-l="Meaning">Per method the number of items and their money, and the LV's <code>total</code>: median × quantity over normal items with a price.</td></tr></tbody></table></div>
+    <h3>What each method means for the screen</h3>
+    <div class="ledger "><table><thead><tr><th scope="col">Method</th><th scope="col">When</th><th scope="col">Show</th></tr></thead><tbody><tr><th scope="row"><code>copied</code></th><td data-l="When">A past item is word for word identical.</td><td data-l="Show"><code>median</code> as the price, marked exact.</td></tr><tr><th scope="row"><code>similar</code></th><td data-l="When">The judge called at least one past item the same thing.</td><td data-l="Show"><code>median</code> as the price, with every source.</td></tr><tr><th scope="row"><code>adjusted</code></th><td data-l="When">The same thing exists in a smaller and a larger size. Code interpolates.</td><td data-l="Show"><code>median</code>, both sources and <code>calculation</code>.</td></tr><tr><th scope="row"><code>reference</code></th><td data-l="When">Only related past items were found.</td><td data-l="Show">No price. <code>sources</code> as "related, not the same".</td></tr><tr><th scope="row"><code>none</code></th><td data-l="When">Nothing usable.</td><td data-l="Show">No price.</td></tr></tbody></table></div>
+    <h3>One source, in <code>sources</code> and in <code>judged</code></h3>
+    <div class="ledger "><table><thead><tr><th scope="col">Field</th><th scope="col">Type</th><th scope="col">Meaning</th></tr></thead><tbody><tr><th scope="row"><code>id</code></th><td data-l="Type">string</td><td data-l="Meaning">The past item, e.g. <code>"P2/05.01.0003"</code>. The part before <code>/</code> is the past project.</td></tr><tr><th scope="row"><code>short_text</code></th><td data-l="Type">string</td><td data-l="Meaning">Its short text, so no library file is needed to show it.</td></tr><tr><th scope="row"><code>unit_price</code></th><td data-l="Type">number</td><td data-l="Meaning">Its price in that past project.</td></tr><tr><th scope="row"><code>verdict</code></th><td data-l="Type">one of five</td><td data-l="Meaning"><code>exact</code>: copied without a judge. <code>same</code>: the same thing. <code>size_only</code>: the same thing in another size. <code>type_only</code>: the same kind, other material or scope. <code>different</code>: another product or work.</td></tr><tr><th scope="row"><code>difference</code></th><td data-l="Type">string</td><td data-l="Meaning">A few words from the judge on what differs. Empty when nothing does.</td></tr><tr><th scope="row"><code>why</code></th><td data-l="Type">string</td><td data-l="Meaning">One sentence from the judge. For <code>same</code>: why this is the match. For every other verdict: why it is not.</td></tr></tbody></table></div>
+    <figure class="sheet">
+      <figcaption><b>The whole file after step 3</b><button class="copy" type="button" data-copy="f3">Copy JSON</button><small>The prediction and the summary are new. Step 4's two fields are still empty.</small></figcaption>
+      <pre id="f3" tabindex="0"><code><span class="ln s0 old"><span class="tx">{</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;project&quot;</b>: &quot;P5&quot;,</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;name&quot;</b>: &quot;[PROJEKT_004]&quot;,</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;date&quot;</b>: &quot;2025-05-16&quot;,</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;source_file&quot;</b>: &quot;GAEB-[PROJEKT_004].X83&quot;,</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;items&quot;</b>: [</span></span><span class="ln s0 old"><span class="tx">    {</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;id&quot;</b>: &quot;P5/02.0001&quot;,</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;oz&quot;</b>: &quot;02.0001&quot;,</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;section&quot;</b>: [</span></span><span class="ln s0 old"><span class="tx">        &quot;02 Tiefbauarbeiten&quot;</span></span><span class="ln s0 old"><span class="tx">      ],</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;short_text&quot;</b>: &quot;Asphalt schneiden, bis 15 cm&quot;,</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;long_text&quot;</b>: &quot;Asphalt schneiden, mit Fugenschneidgerät, senkrechter Schnitt, Restdicke trennen nach [PERSON_125] des AN. 01) Asphaltstärke bis 15 cm&quot;,</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;quantity&quot;</b>: 70.0,</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;unit&quot;</b>: &quot;m&quot;,</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;unit_price&quot;</b>: null,</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;total_price&quot;</b>: null,</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;kind&quot;</b>: &quot;normal&quot;,</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;read_by&quot;</b>: &quot;gaeb&quot;,</span></span><span class="ln s1 old"><span class="tx">      <b class="k">&quot;group&quot;</b>: &quot;11e730283708&quot;,</span></span><span class="ln s2 old"><span class="tx">      <b class="k">&quot;item_type&quot;</b>: &quot;Asphaltaufbruch&quot;,</span></span><span class="ln s2 old"><span class="tx">      <b class="k">&quot;trade&quot;</b>: &quot;Demontage und Rückbau&quot;,</span></span><span class="ln s2 old"><span class="tx">      <b class="k">&quot;item_type_reason&quot;</b>: &quot;Cutting asphalt with a joint cutter, vertical cut, up to 15 cm thick.&quot;,</span></span><span class="ln s3 new"><span class="tx">      <b class="k">&quot;prediction&quot;</b>: {</span></span><span class="ln s3 new"><span class="tx">        <b class="k">&quot;method&quot;</b>: &quot;similar&quot;,</span><span class="nt">copied · similar · adjusted · reference · none</span></span><span class="ln s3 new"><span class="tx">        <b class="k">&quot;min&quot;</b>: 17.9,</span></span><span class="ln s3 new"><span class="tx">        <b class="k">&quot;max&quot;</b>: 17.9,</span></span><span class="ln s3 new"><span class="tx">        <b class="k">&quot;median&quot;</b>: 17.9,</span><span class="nt">the price to show</span></span><span class="ln s3 new"><span class="tx">        <b class="k">&quot;mean&quot;</b>: 17.9,</span></span><span class="ln s3 new"><span class="tx">        <b class="k">&quot;count&quot;</b>: 1,</span><span class="nt">number of past prices behind it</span></span><span class="ln s3 new"><span class="tx">        <b class="k">&quot;sources&quot;</b>: [</span><span class="nt">what the price rests on</span></span><span class="ln s3 new"><span class="tx">          {</span></span><span class="ln s3 new"><span class="tx">            <b class="k">&quot;id&quot;</b>: &quot;P2/05.01.0003&quot;,</span></span><span class="ln s3 new"><span class="tx">            <b class="k">&quot;short_text&quot;</b>: &quot;Asphaltbelag schneiden bis 15 cm&quot;,</span></span><span class="ln s3 new"><span class="tx">            <b class="k">&quot;unit_price&quot;</b>: 17.9,</span></span><span class="ln s3 new"><span class="tx">            <b class="k">&quot;verdict&quot;</b>: &quot;same&quot;,</span></span><span class="ln s3 new"><span class="tx">            <b class="k">&quot;difference&quot;</b>: &quot;&quot;,</span></span><span class="ln s3 new"><span class="tx">            <b class="k">&quot;why&quot;</b>: &quot;Same work: cutting asphalt with a cutter, same thickness limit of 15 cm.&quot;</span></span><span class="ln s3 new"><span class="tx">          }</span></span><span class="ln s3 new"><span class="tx">        ],</span></span><span class="ln s3 new"><span class="tx">        <b class="k">&quot;rule&quot;</b>: null,</span><span class="nt">rule, calculation, result: only for adjusted</span></span><span class="ln s3 new"><span class="tx">        <b class="k">&quot;calculation&quot;</b>: null,</span></span><span class="ln s3 new"><span class="tx">        <b class="k">&quot;result&quot;</b>: null,</span></span><span class="ln s3 new"><span class="tx">        <b class="k">&quot;reason&quot;</b>: &quot;Only P2/05.01.0003 matches fully; P3/2.3.10 differs only in thickness; the others are different work.&quot;,</span><span class="nt">the judge&#x27;s sentence</span></span><span class="ln s3 new"><span class="tx">        <b class="k">&quot;judged&quot;</b>: [</span><span class="nt">the 3 best candidates, best first</span></span><span class="ln s3 new"><span class="tx">          {</span></span><span class="ln s3 new"><span class="tx">            <b class="k">&quot;id&quot;</b>: &quot;P2/05.01.0003&quot;,</span></span><span class="ln s3 new"><span class="tx">            <b class="k">&quot;short_text&quot;</b>: &quot;Asphaltbelag schneiden bis 15 cm&quot;,</span></span><span class="ln s3 new"><span class="tx">            <b class="k">&quot;unit_price&quot;</b>: 17.9,</span></span><span class="ln s3 new"><span class="tx">            <b class="k">&quot;verdict&quot;</b>: &quot;same&quot;,</span></span><span class="ln s3 new"><span class="tx">            <b class="k">&quot;difference&quot;</b>: &quot;&quot;,</span></span><span class="ln s3 new"><span class="tx">            <b class="k">&quot;why&quot;</b>: &quot;Same work: cutting asphalt with a cutter, same thickness limit of 15 cm.&quot;</span><span class="nt">the match: why this one</span></span><span class="ln s3 new"><span class="tx">          },</span></span><span class="ln s3 new"><span class="tx">          {</span></span><span class="ln s3 new"><span class="tx">            <b class="k">&quot;id&quot;</b>: &quot;P3/2.3.10&quot;,</span></span><span class="ln s3 new"><span class="tx">            <b class="k">&quot;short_text&quot;</b>: &quot;Strassendecke schneiden&quot;,</span></span><span class="ln s3 new"><span class="tx">            <b class="k">&quot;unit_price&quot;</b>: 6.8,</span></span><span class="ln s3 new"><span class="tx">            <b class="k">&quot;verdict&quot;</b>: &quot;size_only&quot;,</span></span><span class="ln s3 new"><span class="tx">            <b class="k">&quot;difference&quot;</b>: &quot;bis 20 cm vs bis 15 cm&quot;,</span></span><span class="ln s3 new"><span class="tx">            <b class="k">&quot;why&quot;</b>: &quot;Same vertical cutting of bituminous layer, but thickness class is 20 cm instead of 15 cm.&quot;</span><span class="nt">a miss: why not this one</span></span><span class="ln s3 new"><span class="tx">          },</span></span><span class="ln s3 new"><span class="tx">          {</span></span><span class="ln s3 new"><span class="tx">            <b class="k">&quot;id&quot;</b>: &quot;P3/2.3.100&quot;,</span></span><span class="ln s3 new"><span class="tx">            <b class="k">&quot;short_text&quot;</b>: &quot;Anschluss als Fuge mit Fugenmasse herstellen&quot;,</span></span><span class="ln s3 new"><span class="tx">            <b class="k">&quot;unit_price&quot;</b>: 9.5,</span></span><span class="ln s3 new"><span class="tx">            <b class="k">&quot;verdict&quot;</b>: &quot;different&quot;,</span></span><span class="ln s3 new"><span class="tx">            <b class="k">&quot;difference&quot;</b>: &quot;sealing a joint with joint compound, not cutting&quot;,</span></span><span class="ln s3 new"><span class="tx">            <b class="k">&quot;why&quot;</b>: &quot;Making a joint with sealant is a different work from cutting asphalt.&quot;</span></span><span class="ln s3 new"><span class="tx">          }</span></span><span class="ln s3 new"><span class="tx">        ],</span></span><span class="ln s3 new"><span class="tx">        <b class="k">&quot;judged_item&quot;</b>: null</span><span class="nt">set when an identical item was judged instead</span></span><span class="ln s3 new"><span class="tx">      },</span></span><span class="ln s4 empty"><span class="tx">      <b class="k">&quot;risk&quot;</b>: null</span><span class="nt">still empty · step 4 fills it</span></span><span class="ln s0 old"><span class="tx">    }</span></span><span class="ln s0 old"><span class="tx">  ],</span></span><span class="ln s2 old"><span class="tx">  <b class="k">&quot;item_types&quot;</b>: [</span></span><span class="ln s2 old"><span class="tx">    {</span></span><span class="ln s2 old"><span class="tx">      <b class="k">&quot;name&quot;</b>: &quot;Asphaltaufbruch&quot;,</span></span><span class="ln s2 old"><span class="tx">      <b class="k">&quot;trade&quot;</b>: &quot;Demontage und Rückbau&quot;,</span></span><span class="ln s2 old"><span class="tx">      <b class="k">&quot;description&quot;</b>: &quot;Cutting, breaking up and milling of existing asphalt surfaces.&quot;</span></span><span class="ln s2 old"><span class="tx">    },</span></span><span class="ln s2 old"><span class="tx">    {</span></span><span class="ln s2 old"><span class="tx">      <b class="k">&quot;name&quot;</b>: &quot;Baustelleneinrichtung&quot;,</span></span><span class="ln s2 old"><span class="tx">      <b class="k">&quot;trade&quot;</b>: &quot;Baustelleneinrichtung&quot;,</span></span><span class="ln s2 old"><span class="tx">      <b class="k">&quot;description&quot;</b>: &quot;Site setup and clearance, mobilisation of equipment and site facilities.&quot;</span></span><span class="ln s2 old"><span class="tx">    }</span></span><span class="ln s2 old"><span class="tx">  ],</span></span><span class="ln s3 new"><span class="tx">  <b class="k">&quot;summary&quot;</b>: {</span></span><span class="ln s3 new"><span class="tx">    <b class="k">&quot;methods&quot;</b>: {</span></span><span class="ln s3 new"><span class="tx">      <b class="k">&quot;copied&quot;</b>: { &quot;items&quot;: 0, &quot;total&quot;: 0.0 },</span></span><span class="ln s3 new"><span class="tx">      <b class="k">&quot;similar&quot;</b>: { &quot;items&quot;: 5, &quot;total&quot;: 10952.0 },</span></span><span class="ln s3 new"><span class="tx">      <b class="k">&quot;adjusted&quot;</b>: { &quot;items&quot;: 0, &quot;total&quot;: 0.0 },</span></span><span class="ln s3 new"><span class="tx">      <b class="k">&quot;reference&quot;</b>: { &quot;items&quot;: 33, &quot;total&quot;: 0.0 },</span></span><span class="ln s3 new"><span class="tx">      <b class="k">&quot;none&quot;</b>: { &quot;items&quot;: 12, &quot;total&quot;: 0.0 }</span></span><span class="ln s3 new"><span class="tx">    },</span></span><span class="ln s3 new"><span class="tx">    <b class="k">&quot;total&quot;</b>: 10952.0</span><span class="nt">median × quantity over normal items with a price</span></span><span class="ln s3 new"><span class="tx">  },</span></span><span class="ln s4 empty"><span class="tx">  <b class="k">&quot;risk_summary&quot;</b>: null,</span><span class="nt">still empty · step 4 fills it</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;priced&quot;</b>: false</span></span><span class="ln s0 old"><span class="tx">}</span></span></code></pre>
+    </figure>
+    <p class="fn">The item's own <code>unit_price</code> is still <code>null</code>. The looked-up price lives in <code>prediction.median</code> and nowhere else.</p>
+  </section>
+
+  <section class="ch wrap" aria-labelledby="c6">
+    <div class="label-row"><div class="label"><span class="part">Part 4 · Step 4</span><h2 id="c6">Score the risk</h2></div></div>
+    <div class="head"><p class="lead">Every item gets a <code>risk</code> from 0 to 100, and the LV gets a <code>risk_summary</code>. Here: 19 for the item, 51 for all of P5.</p><div class="medal c6" aria-hidden="true"><svg class="art" viewBox="0 0 80 80"><use href="#i-scale"/></svg></div></div>
+    <p class="kind"><span class="who code">Code</span><span class="who ai">AI</span> Code scores the price risk and does the weighting. Claude reads each text and says whether it is complete enough to price.</p>
+    <h3>What gets added</h3>
+    <div class="ledger "><table><thead><tr><th scope="col">Field</th><th scope="col">Type</th><th scope="col">Meaning</th></tr></thead><tbody><tr><th scope="row"><code>risk.score</code></th><td data-l="Type">integer, 0 to 100</td><td data-l="Meaning"><strong>The item's risk.</strong> 0.6 × <code>price_risk</code> + 0.4 × <code>description_risk</code>. A place on a scale, not a probability.</td></tr><tr><th scope="row"><code>price_risk</code>, <code>price_reason</code></th><td data-l="Type">integer, string</td><td data-l="Meaning">How unsure the price is, from the step 3 method, with one fixed sentence saying why.</td></tr><tr><th scope="row"><code>description</code></th><td data-l="Type"><code>"complete"</code>, <code>"gaps"</code>, <code>"vague"</code> or null</td><td data-l="Meaning">Does the text state what an estimator needs to price the item? <code>null</code> when it was not checked; the score is then the price risk alone.</td></tr><tr><th scope="row"><code>description_risk</code>, <code>description_reason</code></th><td data-l="Type">integer or null, string</td><td data-l="Meaning">The verdict as a number, and one sentence from the model.</td></tr><tr><th scope="row"><code>missing[]</code></th><td data-l="Type">array of strings</td><td data-l="Meaning">What the text does not state, at most 3 short phrases. Empty for <code>complete</code>.</td></tr><tr><th scope="row"><code>value</code></th><td data-l="Type">number or null</td><td data-l="Meaning">Roughly what the item is worth. It weights the LV's score. <strong>Never show it as a price.</strong></td></tr><tr><th scope="row"><code>value_basis</code></th><td data-l="Type">one of three</td><td data-l="Meaning"><code>price</code>: found price × quantity. <code>reference</code>: middle price of the related items × quantity. <code>assumed</code>: the value of a typical item.</td></tr><tr><th scope="row"><code>risk_summary</code></th><td data-l="Type">object</td><td data-l="Meaning"><code>score</code>: the items' scores weighted by value, over the normal items. <code>value</code>: the sum of those values. <code>basis</code>: how many items per value basis.</td></tr></tbody></table></div>
+    <h3>The scale</h3>
+    <div class="ledger nums"><table><thead><tr><th scope="col">Part</th><th scope="col">Value</th><th scope="col">Risk</th></tr></thead><tbody><tr><th scope="row">Price risk</th><td data-l="Value"><code>copied</code></td><td data-l="Risk">5</td></tr><tr><th scope="row"></th><td data-l="Value"><code>similar</code></td><td data-l="Risk">25, or 40 when its past prices lie more than 10% apart</td></tr><tr><th scope="row"></th><td data-l="Value"><code>adjusted</code></td><td data-l="Risk">45</td></tr><tr><th scope="row"></th><td data-l="Value"><code>reference</code></td><td data-l="Risk">75</td></tr><tr><th scope="row"></th><td data-l="Value"><code>none</code></td><td data-l="Risk">100</td></tr><tr><th scope="row">Description risk</th><td data-l="Value"><code>complete</code></td><td data-l="Risk">10</td></tr><tr><th scope="row"></th><td data-l="Value"><code>gaps</code></td><td data-l="Risk">50</td></tr><tr><th scope="row"></th><td data-l="Value"><code>vague</code></td><td data-l="Risk">90</td></tr></tbody></table></div>
+    <p class="fn">These are starting values, to be tuned with the estimator. A score says where an item sits on this scale. It is not the chance that a price is wrong.</p>
+    <figure class="sheet">
+      <figcaption><b>The whole file after step 4</b><button class="copy" type="button" data-copy="f4">Copy JSON</button><small>This is the finished file. The colour on the left edge says which step wrote each line.</small></figcaption>
+      <pre id="f4" tabindex="0"><code><span class="ln s0 old"><span class="tx">{</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;project&quot;</b>: &quot;P5&quot;,</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;name&quot;</b>: &quot;[PROJEKT_004]&quot;,</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;date&quot;</b>: &quot;2025-05-16&quot;,</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;source_file&quot;</b>: &quot;GAEB-[PROJEKT_004].X83&quot;,</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;items&quot;</b>: [</span></span><span class="ln s0 old"><span class="tx">    {</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;id&quot;</b>: &quot;P5/02.0001&quot;,</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;oz&quot;</b>: &quot;02.0001&quot;,</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;section&quot;</b>: [</span></span><span class="ln s0 old"><span class="tx">        &quot;02 Tiefbauarbeiten&quot;</span></span><span class="ln s0 old"><span class="tx">      ],</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;short_text&quot;</b>: &quot;Asphalt schneiden, bis 15 cm&quot;,</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;long_text&quot;</b>: &quot;Asphalt schneiden, mit Fugenschneidgerät, senkrechter Schnitt, Restdicke trennen nach [PERSON_125] des AN. 01) Asphaltstärke bis 15 cm&quot;,</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;quantity&quot;</b>: 70.0,</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;unit&quot;</b>: &quot;m&quot;,</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;unit_price&quot;</b>: null,</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;total_price&quot;</b>: null,</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;kind&quot;</b>: &quot;normal&quot;,</span></span><span class="ln s0 old"><span class="tx">      <b class="k">&quot;read_by&quot;</b>: &quot;gaeb&quot;,</span></span><span class="ln s1 old"><span class="tx">      <b class="k">&quot;group&quot;</b>: &quot;11e730283708&quot;,</span></span><span class="ln s2 old"><span class="tx">      <b class="k">&quot;item_type&quot;</b>: &quot;Asphaltaufbruch&quot;,</span></span><span class="ln s2 old"><span class="tx">      <b class="k">&quot;trade&quot;</b>: &quot;Demontage und Rückbau&quot;,</span></span><span class="ln s2 old"><span class="tx">      <b class="k">&quot;item_type_reason&quot;</b>: &quot;Cutting asphalt with a joint cutter, vertical cut, up to 15 cm thick.&quot;,</span></span><span class="ln s3 old"><span class="tx">      <b class="k">&quot;prediction&quot;</b>: {</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;method&quot;</b>: &quot;similar&quot;,</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;min&quot;</b>: 17.9,</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;max&quot;</b>: 17.9,</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;median&quot;</b>: 17.9,</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;mean&quot;</b>: 17.9,</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;count&quot;</b>: 1,</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;sources&quot;</b>: [</span></span><span class="ln s3 old"><span class="tx">          {</span></span><span class="ln s3 old"><span class="tx">            <b class="k">&quot;id&quot;</b>: &quot;P2/05.01.0003&quot;,</span></span><span class="ln s3 old"><span class="tx">            <b class="k">&quot;short_text&quot;</b>: &quot;Asphaltbelag schneiden bis 15 cm&quot;,</span></span><span class="ln s3 old"><span class="tx">            <b class="k">&quot;unit_price&quot;</b>: 17.9,</span></span><span class="ln s3 old"><span class="tx">            <b class="k">&quot;verdict&quot;</b>: &quot;same&quot;,</span></span><span class="ln s3 old"><span class="tx">            <b class="k">&quot;difference&quot;</b>: &quot;&quot;,</span></span><span class="ln s3 old"><span class="tx">            <b class="k">&quot;why&quot;</b>: &quot;Same work: cutting asphalt with a cutter, same thickness limit of 15 cm.&quot;</span></span><span class="ln s3 old"><span class="tx">          }</span></span><span class="ln s3 old"><span class="tx">        ],</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;rule&quot;</b>: null,</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;calculation&quot;</b>: null,</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;result&quot;</b>: null,</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;reason&quot;</b>: &quot;Only P2/05.01.0003 matches fully; P3/2.3.10 differs only in thickness; the others are different work.&quot;,</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;judged&quot;</b>: [</span></span><span class="ln s3 old"><span class="tx">          {</span></span><span class="ln s3 old"><span class="tx">            <b class="k">&quot;id&quot;</b>: &quot;P2/05.01.0003&quot;,</span></span><span class="ln s3 old"><span class="tx">            <b class="k">&quot;short_text&quot;</b>: &quot;Asphaltbelag schneiden bis 15 cm&quot;,</span></span><span class="ln s3 old"><span class="tx">            <b class="k">&quot;unit_price&quot;</b>: 17.9,</span></span><span class="ln s3 old"><span class="tx">            <b class="k">&quot;verdict&quot;</b>: &quot;same&quot;,</span></span><span class="ln s3 old"><span class="tx">            <b class="k">&quot;difference&quot;</b>: &quot;&quot;,</span></span><span class="ln s3 old"><span class="tx">            <b class="k">&quot;why&quot;</b>: &quot;Same work: cutting asphalt with a cutter, same thickness limit of 15 cm.&quot;</span></span><span class="ln s3 old"><span class="tx">          },</span></span><span class="ln s3 old"><span class="tx">          {</span></span><span class="ln s3 old"><span class="tx">            <b class="k">&quot;id&quot;</b>: &quot;P3/2.3.10&quot;,</span></span><span class="ln s3 old"><span class="tx">            <b class="k">&quot;short_text&quot;</b>: &quot;Strassendecke schneiden&quot;,</span></span><span class="ln s3 old"><span class="tx">            <b class="k">&quot;unit_price&quot;</b>: 6.8,</span></span><span class="ln s3 old"><span class="tx">            <b class="k">&quot;verdict&quot;</b>: &quot;size_only&quot;,</span></span><span class="ln s3 old"><span class="tx">            <b class="k">&quot;difference&quot;</b>: &quot;bis 20 cm vs bis 15 cm&quot;,</span></span><span class="ln s3 old"><span class="tx">            <b class="k">&quot;why&quot;</b>: &quot;Same vertical cutting of bituminous layer, but thickness class is 20 cm instead of 15 cm.&quot;</span></span><span class="ln s3 old"><span class="tx">          },</span></span><span class="ln s3 old"><span class="tx">          {</span></span><span class="ln s3 old"><span class="tx">            <b class="k">&quot;id&quot;</b>: &quot;P3/2.3.100&quot;,</span></span><span class="ln s3 old"><span class="tx">            <b class="k">&quot;short_text&quot;</b>: &quot;Anschluss als Fuge mit Fugenmasse herstellen&quot;,</span></span><span class="ln s3 old"><span class="tx">            <b class="k">&quot;unit_price&quot;</b>: 9.5,</span></span><span class="ln s3 old"><span class="tx">            <b class="k">&quot;verdict&quot;</b>: &quot;different&quot;,</span></span><span class="ln s3 old"><span class="tx">            <b class="k">&quot;difference&quot;</b>: &quot;sealing a joint with joint compound, not cutting&quot;,</span></span><span class="ln s3 old"><span class="tx">            <b class="k">&quot;why&quot;</b>: &quot;Making a joint with sealant is a different work from cutting asphalt.&quot;</span></span><span class="ln s3 old"><span class="tx">          }</span></span><span class="ln s3 old"><span class="tx">        ],</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;judged_item&quot;</b>: null</span></span><span class="ln s3 old"><span class="tx">      },</span></span><span class="ln s4 new"><span class="tx">      <b class="k">&quot;risk&quot;</b>: {</span></span><span class="ln s4 new"><span class="tx">        <b class="k">&quot;score&quot;</b>: 19,</span><span class="nt">the item&#x27;s risk, 0 to 100</span></span><span class="ln s4 new"><span class="tx">        <b class="k">&quot;price_risk&quot;</b>: 25,</span><span class="nt">from the step 3 method</span></span><span class="ln s4 new"><span class="tx">        <b class="k">&quot;price_reason&quot;</b>: &quot;The price comes from a past item the judge called the same.&quot;,</span></span><span class="ln s4 new"><span class="tx">        <b class="k">&quot;description&quot;</b>: &quot;complete&quot;,</span><span class="nt">complete · gaps · vague</span></span><span class="ln s4 new"><span class="tx">        <b class="k">&quot;description_risk&quot;</b>: 10,</span></span><span class="ln s4 new"><span class="tx">        <b class="k">&quot;missing&quot;</b>: [],</span><span class="nt">what the text does not state, at most 3</span></span><span class="ln s4 new"><span class="tx">        <b class="k">&quot;description_reason&quot;</b>: &quot;Asphalt cutting with joint cutter, vertical cut, thickness up to 15 cm, priced per metre.&quot;,</span></span><span class="ln s4 new"><span class="tx">        <b class="k">&quot;value&quot;</b>: 1253.0,</span><span class="nt">a weight, never a price to show</span></span><span class="ln s4 new"><span class="tx">        <b class="k">&quot;value_basis&quot;</b>: &quot;price&quot;</span><span class="nt">price · reference · assumed</span></span><span class="ln s4 new"><span class="tx">      }</span></span><span class="ln s0 old"><span class="tx">    }</span></span><span class="ln s0 old"><span class="tx">  ],</span></span><span class="ln s2 old"><span class="tx">  <b class="k">&quot;item_types&quot;</b>: [</span></span><span class="ln s2 old"><span class="tx">    {</span></span><span class="ln s2 old"><span class="tx">      <b class="k">&quot;name&quot;</b>: &quot;Asphaltaufbruch&quot;,</span></span><span class="ln s2 old"><span class="tx">      <b class="k">&quot;trade&quot;</b>: &quot;Demontage und Rückbau&quot;,</span></span><span class="ln s2 old"><span class="tx">      <b class="k">&quot;description&quot;</b>: &quot;Cutting, breaking up and milling of existing asphalt surfaces.&quot;</span></span><span class="ln s2 old"><span class="tx">    },</span></span><span class="ln s2 old"><span class="tx">    {</span></span><span class="ln s2 old"><span class="tx">      <b class="k">&quot;name&quot;</b>: &quot;Baustelleneinrichtung&quot;,</span></span><span class="ln s2 old"><span class="tx">      <b class="k">&quot;trade&quot;</b>: &quot;Baustelleneinrichtung&quot;,</span></span><span class="ln s2 old"><span class="tx">      <b class="k">&quot;description&quot;</b>: &quot;Site setup and clearance, mobilisation of equipment and site facilities.&quot;</span></span><span class="ln s2 old"><span class="tx">    }</span></span><span class="ln s2 old"><span class="tx">  ],</span></span><span class="ln s3 old"><span class="tx">  <b class="k">&quot;summary&quot;</b>: {</span></span><span class="ln s3 old"><span class="tx">    <b class="k">&quot;methods&quot;</b>: {</span></span><span class="ln s3 old"><span class="tx">      <b class="k">&quot;copied&quot;</b>: { &quot;items&quot;: 0, &quot;total&quot;: 0.0 },</span></span><span class="ln s3 old"><span class="tx">      <b class="k">&quot;similar&quot;</b>: { &quot;items&quot;: 5, &quot;total&quot;: 10952.0 },</span></span><span class="ln s3 old"><span class="tx">      <b class="k">&quot;adjusted&quot;</b>: { &quot;items&quot;: 0, &quot;total&quot;: 0.0 },</span></span><span class="ln s3 old"><span class="tx">      <b class="k">&quot;reference&quot;</b>: { &quot;items&quot;: 33, &quot;total&quot;: 0.0 },</span></span><span class="ln s3 old"><span class="tx">      <b class="k">&quot;none&quot;</b>: { &quot;items&quot;: 12, &quot;total&quot;: 0.0 }</span></span><span class="ln s3 old"><span class="tx">    },</span></span><span class="ln s3 old"><span class="tx">    <b class="k">&quot;total&quot;</b>: 10952.0</span></span><span class="ln s3 old"><span class="tx">  },</span></span><span class="ln s4 new"><span class="tx">  <b class="k">&quot;risk_summary&quot;</b>: {</span></span><span class="ln s4 new"><span class="tx">    <b class="k">&quot;score&quot;</b>: 51,</span><span class="nt">the items&#x27; scores, weighted by value</span></span><span class="ln s4 new"><span class="tx">    <b class="k">&quot;value&quot;</b>: 167595.45,</span></span><span class="ln s4 new"><span class="tx">    <b class="k">&quot;basis&quot;</b>: {</span><span class="nt">how many values rest on what</span></span><span class="ln s4 new"><span class="tx">      <b class="k">&quot;price&quot;</b>: 5,</span></span><span class="ln s4 new"><span class="tx">      <b class="k">&quot;reference&quot;</b>: 33,</span></span><span class="ln s4 new"><span class="tx">      <b class="k">&quot;assumed&quot;</b>: 12</span></span><span class="ln s4 new"><span class="tx">    }</span></span><span class="ln s4 new"><span class="tx">  },</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;priced&quot;</b>: false</span></span><span class="ln s0 old"><span class="tx">}</span></span></code></pre>
+    </figure>
+    <div class="hang"><p class="plaque">One list. Every step adds to the same entry.</p></div>
+  </section>
+
+  <section class="ch wrap" aria-labelledby="c4">
+    <div class="label-row"><div class="label"><span class="part">Part 5 · The second file</span><h2 id="c4">The judge log</h2></div></div>
+    <div class="head"><p class="lead">Next to the result file sits <code>&lt;project&gt;_judge.json</code>: one entry per judge call, for a "why?" view.</p><div class="medal c4" aria-hidden="true"><svg class="art" viewBox="0 0 80 80"><use href="#i-talk"/></svg></div></div>
+    <p class="prose">To find an item's call, look for its <code>id</code> in the entry's <code>items</code>. For an item that copied the verdict of an identical item, look for its <code>prediction.judged_item</code>. An item can appear in two calls when it was asked again on its own; the later call is the one that counted.</p>
+    <div class="ledger "><table><thead><tr><th scope="col">Field</th><th scope="col">Type</th><th scope="col">Example from call 4</th></tr></thead><tbody><tr><th scope="row"><code>call</code></th><td data-l="Type">integer</td><td data-l="Example from call 4"><code>4</code>. Calls are numbered in the order they were made.</td></tr><tr><th scope="row"><code>items[]</code></th><td data-l="Type">array of ids</td><td data-l="Example from call 4"><code>P5/02.0001</code> <code>P5/02.0002</code> <code>P5/02.0023</code>. One call judges up to 15 items of one item type.</td></tr><tr><th scope="row"><code>question</code></th><td data-l="Type">string</td><td data-l="Example from call 4">Exactly what the judge read: texts only, never a price.<div class="quote">HINT: the 3 new items below were sorted under &quot;Asphaltaufbruch&quot; (trade: Demontage und Rückbau) by an earlier step. Decide by the texts only.
+
+### P5/02.0001 | unit m | qty 70
+NEW: Asphalt schneiden, bis 15 cm — Asphalt schneiden, mit Fugenschneidgerät, senkrechter Schnitt, Restdicke trennen nach [PERSON_125] des AN. 01) Asphaltstärke bis 15 cm
+- P2/05.01.0003: Asphaltbelag schneiden bis 15 cm — Vorhandenen Asphaltbelag mit Schneidegerät vollkommen und glattkantig durchtrennen. Mengenermittlung nach Aufmaß. Dicke des Belages: bis 15 cm
+- P3/2.3.10: Strassendecke schneiden — Bituminösen Oberbau senkrecht schneiden, bis 20 cm stark Anfallende Stoffe sind auf Kosten des AN zu beseitigen. Bei einer Stärke größer 20 cm erfolgt die Vergütung pro weitere Schnitttiefe mit 1/20 des Einheitspreises. 
+- P3/2.3.100: Anschluss als Fuge mit Fugenmasse herstellen — Längs- und Querfuge; in der Asphaltdeckschicht ausbilden. Fugenspalttiefe: 40 mm Fugenspaltbreite: 15 mm Mit heiß verarbeitbarer Fugenmasse [PERSON_129] N 2
+- P3/2.3.90: Naht in Asphaltschicht herstellen — Naht in Asphaltdeckschicht herstellen Längsnaht, Nähte im Aufweitungsbereich und Quernaht am Ausbauanfang und Ausbauende. Herstellen der Nahtflanke durch Kantenandrückrolle. Heiß aufzubringendes Polymermodifiiertes Bitum
+- P2/03.01.0002: Rückbau Bordstein Beton zur Wiederverwendung TB10/25 24kN/m3 Geräteein — Rückbau des Bordsteins aus Beton zur späteren Wiederverwendung, im Rahmen einer Teilabbruchmaßnahme, Form TB 10/25, ausgebauten Bordstein säubern und seitlich auf Paletten zum späteren Wiedereinbau lagern. Fundament aus
+
+… 2 more items …</div></td></tr><tr><th scope="row"><code>thinking</code></th><td data-l="Type">string</td><td data-l="Example from call 4">The judge's summarised thinking. Can be empty: the model decides whether to think.<div class="quote">I&#x27;m comparing the candidate matches for the asphalt-cutting item, which is 15 cm in size. The P2 entry for asphalt covering up to 15 cm looks identical, while the P3 entry is for bituminous road surfaces up to 20 cm, so its size doesn&#x27;t match. …</div></td></tr><tr><th scope="row"><code>answer</code></th><td data-l="Type">object or null</td><td data-l="Example from call 4">The judge's answer, one entry per item. <code>null</code> when the call failed.</td></tr></tbody></table></div>
+    <figure class="sheet plain">
+      <figcaption><b>The <code>answer</code> of that call, cut to our item</b><small>The log keeps all 5 candidates the judge read. Code turns them into <code>prediction</code>: the one <code>same</code> verdict becomes the source of the price, and the best 3 go into <code>judged</code>.</small></figcaption>
+      <pre tabindex="0">{
+  &quot;items&quot;: [
+    {
+      &quot;id&quot;: &quot;P5/02.0001&quot;,
+      &quot;judged&quot;: [
+        {
+          &quot;cand&quot;: &quot;P2/05.01.0003&quot;,
+          &quot;verdict&quot;: &quot;same&quot;,
+          &quot;dimension&quot;: null,
+          &quot;cand_size&quot;: null,
+          &quot;target_size&quot;: null,
+          &quot;difference&quot;: &quot;&quot;,
+          &quot;why&quot;: &quot;Same work: cutting asphalt with a cutter, same thickness limit of 15 cm.&quot;
+        },
+        {
+          &quot;cand&quot;: &quot;P3/2.3.10&quot;,
+          &quot;verdict&quot;: &quot;size_only&quot;,
+          &quot;dimension&quot;: &quot;Schnitttiefe/Dicke cm&quot;,
+          &quot;cand_size&quot;: 20.0,
+          &quot;target_size&quot;: 15.0,
+          &quot;difference&quot;: &quot;bis 20 cm vs bis 15 cm&quot;,
+          &quot;why&quot;: &quot;Same vertical cutting of bituminous layer, but thickness class is 20 cm instead of 15 cm.&quot;
+        },
+        {
+          &quot;cand&quot;: &quot;P3/2.3.100&quot;,
+          &quot;verdict&quot;: &quot;different&quot;,
+          &quot;dimension&quot;: null,
+          &quot;cand_size&quot;: null,
+          &quot;target_size&quot;: null,
+          &quot;difference&quot;: &quot;sealing a joint with joint compound, not cutting&quot;,
+          &quot;why&quot;: &quot;Making a joint with sealant is a different work from cutting asphalt.&quot;
+        },
+        {
+          &quot;cand&quot;: &quot;P3/2.3.90&quot;,
+          &quot;verdict&quot;: &quot;different&quot;,
+          &quot;dimension&quot;: null,
+          &quot;cand_size&quot;: null,
+          &quot;target_size&quot;: null,
+          &quot;difference&quot;: &quot;forming a seam with bitumen, not cutting&quot;,
+          &quot;why&quot;: &quot;Forming an asphalt seam is paving work, not cutting.&quot;
+        },
+        {
+          &quot;cand&quot;: &quot;P2/03.01.0002&quot;,
+          &quot;verdict&quot;: &quot;different&quot;,
+          &quot;dimension&quot;: null,
+          &quot;cand_size&quot;: null,
+          &quot;target_size&quot;: null,
+          &quot;difference&quot;: &quot;curb removal, not asphalt cutting&quot;,
+          &quot;why&quot;: &quot;Dismantling concrete curbs is a different work from cutting asphalt.&quot;
+        }
+      ],
+      &quot;reason&quot;: &quot;Only P2/05.01.0003 matches fully; P3/2.3.10 differs only in thickness; the others are different work.&quot;
+    },
+    &quot;… 2 more items …&quot;
+  ]
+}</pre>
+    </figure>
+  </section>
+
+  <section class="ch wrap" aria-labelledby="c5">
+    <div class="label-row"><div class="label"><span class="part">Part 6</span><h2 id="c5">Rules for the screen</h2></div></div>
+    <div class="head"><p class="lead">Eight rules that keep the screen honest about what the tool found.</p><div class="medal c5" aria-hidden="true"><svg class="art" viewBox="0 0 80 80"><use href="#i-screen"/></svg></div></div>
+    <div class="ledger "><table><thead><tr><th scope="col">Rule</th><th scope="col">What it means</th></tr></thead><tbody><tr><th scope="row">The price is <code>prediction.median</code></th><td data-l="What it means">Only when <code>method</code> is copied, similar or adjusted. Show <code>min</code> to <code>max</code> and <code>count</code> next to it when <code>count</code> is above 1.</td></tr><tr><th scope="row">Every price shows its source</th><td data-l="What it means">For each entry in <code>sources</code>: <code>id</code>, <code>short_text</code>, <code>unit_price</code>. Tracing a price back is a hard requirement of the estimators.</td></tr><tr><th scope="row">No price for reference and none</th><td data-l="What it means">Never fill one in from <code>judged</code> or <code>sources</code>.</td></tr><tr><th scope="row"><code>judged</code> is ordered best first</th><td data-l="What it means">At most 3 entries. If the first one's verdict is <code>same</code>, it is the match and its <code>why</code> says why. Every other entry's <code>why</code> says why it is not the match.</td></tr><tr><th scope="row">Totals come from <code>summary</code></th><td data-l="What it means">Optional items and items without a price are already left out there.</td></tr><tr><th scope="row">A risk score comes with its reasons</th><td data-l="What it means">Show <code>price_reason</code>, <code>description_reason</code> and <code>missing</code> next to <code>risk.score</code>. Sorting by <code>score × value</code> puts the items that matter most first.</td></tr><tr><th scope="row"><code>risk.value</code> is not a price</th><td data-l="What it means">It is a weight. Show <code>risk_summary.basis</code> next to the LV's score, so a reader sees how many values are assumed.</td></tr><tr><th scope="row">Past prices can be near zero</th><td data-l="What it means">One candidate in the example costs 0.50 per metre. Some bids hold symbolic prices, and no rule handles them yet.</td></tr></tbody></table></div>
+    <div class="dlg note">
+      <span class="tag">Not in the file yet</span>
+      <ul>
+        <li><strong>The estimator's own decision.</strong> There is no field for an accepted or changed price. A field next to <code>prediction</code>, such as <code>final_price</code>, would have to be agreed.</li>
+        <li><strong>Money per trade or item type.</strong> <code>summary</code> splits by method only. Add up <code>median × quantity</code> per trade if a screen needs it.</li>
+        <li><strong>P4 is one run behind.</strong> <code>data/out/P4.json</code> still lacks <code>risk</code>, <code>judged</code>, <code>why</code> and the sources' <code>short_text</code>, and has no judge log, until its next run.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer class="end">
+  <div class="wrap">
+    <div class="disc">
+      <svg class="art" viewBox="0 0 80 80" aria-hidden="true"><use href="#i-page"/></svg>
+      <p class="part">Bottom line</p>
+      <p class="bl"><strong>Build against <code>data/out/P5.json</code>.</strong> Read <code>items</code>, show <code>prediction.median</code> with its sources when the method has a price, and open the judge log for the "why?".</p>
+    </div>
+    <div class="sources">
+      <h2>Where this comes from</h2>
+      <ul>
+        <li><code>data/out/P5.json</code><small>The result file every example is taken from: 50 items, 20 item types</small></li>
+        <li><code>data/out/P5_judge.json</code><small>The judge log, one entry per call</small></li>
+        <li><code>docs/result.schema.json</code>, <code>docs/judge-log.schema.json</code><small>JSON Schemas generated from the code</small></li>
+        <li><code>docs/result-format.md</code><small>The same format as a text reference</small></li>
+        <li><code>lv/model.py</code><small>The shapes in code: LV, LineItem, Prediction, Source</small></li>
+      </ul>
+    </div>
+    <p class="fine">State of 21 November 2026 · judge at effort xhigh · working notes for the team</p>
+  </div>
+</footer>
+
+<script>
+(() => {
+  for (const btn of document.querySelectorAll('[data-copy]')) {
+    btn.addEventListener('click', async () => {
+      const pre = document.getElementById(btn.dataset.copy);
+      const text = [...pre.querySelectorAll('.tx')].map(e => e.textContent).join('\n');
+      try { await navigator.clipboard.writeText(text); btn.textContent = 'Copied'; }
+      catch { const r = document.createRange(); r.selectNodeContents(pre); const s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = 'Selected: press Ctrl+C'; }
+      setTimeout(() => { btn.textContent = 'Copy JSON'; }, 2000);
+    });
+  }
+  // Torn-paper labels slide in when they come into view; they are fully visible without script.
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
+    document.documentElement.classList.add('js');
+    const ro = new IntersectionObserver(es => {
+      for (const e of es) if (e.isIntersecting) { e.target.classList.add('in'); ro.unobserve(e.target); }
+    }, { threshold: .08 });
+    document.querySelectorAll('.label-row').forEach(el => ro.observe(el));
+  }
+})();
+</script>
