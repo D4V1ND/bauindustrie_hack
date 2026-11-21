@@ -1,10 +1,10 @@
-# Implementation plan: LV estimating backend, steps 0–2
+# Implementation plan: LV estimating backend, steps 0–3
 
-Covers extraction (step 0), exact match (step 1) and trades and item types (step 2) from [SPEC.md](../SPEC.md).
-The tasks with acceptance criteria are in [todo.md](todo.md).
+Covers extraction (step 0), exact match (step 1), trades and item types (step 2) and the price lookup with evidence
+(step 3) from [SPEC.md](../SPEC.md). The tasks with acceptance criteria are in [todo.md](todo.md).
 
-**Not in this plan:** step 3 (price prediction). Its matching rule is being tightened and re-measured in a separate
-session. The step 3 plan is written only after that rule is approved.
+**Order changed:** step 3 (tasks 8–11) is built before step 2 (tasks 6 and 7), because it does not need trades or
+item types. Its plan is the section "Step 3" at the end of this file.
 
 ## What exists after this plan
 
@@ -72,11 +72,51 @@ Text is in a DOS code page (umlauts read correctly as code page 850).
 - **After task 4:** group counts match the numbers measured in the spec.
 - **After task 7:** `lv price` runs on P4 and P5 end to end. You read the printed overview before anything is committed.
 
-## Deferred to the step 3 plan
+## Step 3: price lookup with evidence (tasks 8–11)
 
-- Price prediction, the accuracy check command (`lv check`) and the project total.
-- Reading P3 (prices from the `.D84`, texts from a PDF). P3 is only used as a price source, and which PDF holds the
-  full texts was found in the other session.
+What exists after these tasks:
+
+```
+.venv\Scripts\python.exe -m lv price "<new LV>" --project P4              ->  data/out/P4.json, with predictions
+.venv\Scripts\python.exe -m lv price "<new LV>" --project P4 --copy-only  ->  the same, exact matches only, no AI
+```
+
+### Decisions
+
+- **A lookup, not an estimate.** Measured on this dataset: a loose "similar" rule priced 17–30% of items and was
+  typically 80–120% off. The strict rule prices about 1% and stays within 25%. Low coverage is accepted.
+- **Code decides, the AI only compares texts.** The judge gives one verdict per candidate and never sees a price.
+  Which method an item gets, every statistic and the interpolation are code.
+- **The judge is a function that is handed in.** `predict` takes the judge as an argument, so the tests hand in a
+  fake with fixed verdicts and need no network and no key.
+- **One judge call per item**, sent in parallel with `.batch()`. One item's failed call does not lose the others.
+- **Surcharge status and the text a repeat item refers to are worked out on the fly** and not saved in the line
+  item table, so the table does not change beyond `group`, `prediction` and `summary`.
+- **`--copy-only`** makes the first check runnable on its own, without a key.
+
+### Dependency order
+
+```
+3 GAEB 90 reader ─┐
+4 group label ────┼─ 8 shapes + copied prices + total ─┐
+                  └─ 9 candidate search ───────────────┼─ 10 judge + verdicts to prediction ── 11 lv price with the judge
+5 AI setup ────────────────────────────────────────────┘
+```
+
+### Risks
+
+| Risk | Impact | Mitigation |
+|---|---|---|
+| The same item is worded differently in a `.D86` and an `.X83` (anonymiser, short text cut at 70 characters) | Fewer copied prices than expected, more judge calls | Measured in task 8 and reported; the label is not loosened without your decision (open question 6 in the spec) |
+| The judge names two sizes that do not belong together | A wrong interpolated price | Interpolation only when both candidates name the same dimension and the same target size |
+| The judge answers for an id that was not offered, or not at all | A price without a real source | Unknown ids are ignored; no answer gives `none` |
+| No API key | Tasks 10 and 11 cannot be checked with a real call | Everything is tested with a fake judge; the one real run is left to you |
+
+## Still deferred
+
+- The accuracy check command (`lv check`).
+- Reading P3 (prices from the `.D84` work; texts from a PDF do not exist yet). P3 is only used as a price source,
+  and which PDF holds the full texts was found in the other session.
 
 ## Open questions
 

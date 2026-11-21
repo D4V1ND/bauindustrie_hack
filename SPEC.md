@@ -1,6 +1,6 @@
 # Spec: LV estimating backend, steps 0–3
 
-Status: draft, waiting for confirmation. Terms in **bold** are defined in [CONTEXT.md](CONTEXT.md).
+Status: steps 0 and 1 are built, step 3 is being built, step 2 is not built. Terms in **bold** are defined in [CONTEXT.md](CONTEXT.md).
 
 ## Objective
 
@@ -10,7 +10,8 @@ prices. Today they summarise and price it by hand. This backend does the first p
 1. reads LV files into one common table (step 0),
 2. links identical line items (step 1),
 3. sorts the new LV's items into **trades** and **item types** for an overview (step 2),
-4. proposes a price for each item from the company's own **past projects**, with the source of every number (step 3).
+4. looks up a price for each item in the company's own **past projects**, with the source of every number, and
+   proposes one only when the match is strict (step 3).
 
 The estimator stays in charge: the tool proposes, the person decides. Every price must be traceable to a real line
 item in the **price library**. No internet prices, no prices invented by an AI model.
@@ -37,7 +38,7 @@ Steps 2 and 3 do not depend on each other. Step 2 runs on the new LV only; past 
 
 | Role | Projects |
 |---|---|
-| Price library | P1, P2, P3 |
+| Price library | P1, P2 (P3 once its PDF texts are read) |
 | New LV | P4 |
 | Accuracy check | hide one past project's prices, predict them from the other two, compare |
 
@@ -109,41 +110,96 @@ not for prices. Quantities add up per unit and are never added across units.
 
 Each item gains `item_type` and `trade`.
 
-## Step 3: price prediction
+## Step 3: price lookup with evidence
+
+A lookup, not an estimate. An item gets a price only when the price library holds the same item, or the same item
+in a smaller and a larger size. Otherwise it gets the nearest past items as **references**, without a price, or
+nothing. Low coverage is accepted; a wrong price is not.
+
+Why this strict: in tests on this dataset, exact matches across projects were close to 0%. A loose "similar" rule
+priced 17–30% of items and was typically 80–120% off. The strict rule below priced about 1% of 720 hidden items,
+with no price off by more than 25%.
+
+`lv price <new LV> --project <ID>` reads the new LV, gives each item its `group` label, loads every file in
+`data/library/` and adds one `prediction` per item. Only library items with a unit price above zero are used.
 
 For each item of the new LV, in this order:
 
-| Order | Check | `method` |
-|---|---|---|
-| 1 | An item with the same `group` label exists in the price library | `copied` |
-| 2 | Search: library items with the same unit, ranked by text similarity (short + long text joined), top 5. An AI model judges each: comparable or not, and what differs. | |
-| 2a | Comparable items exist in a smaller and a larger size, and size is the only difference | `adjusted` |
-| 2b | Other comparable items | `similar` |
-| 3 | Nothing comparable | `none` |
+| Order | Check | Who | `method` |
+|---|---|---|---|
+| 1 | A library item has the same `group` label | code | `copied` |
+| 2 | Search for **candidates**, then the **judge** gives each candidate a **verdict** | code, then AI | |
+| 2a | At least one candidate is `same` | code | `similar` |
+| 2b | One `size_only` candidate is smaller and one is larger, in the same dimension | code | `adjusted` |
+| 2c | Only `type_only` candidates, or `size_only` candidates on one side | code | `reference` |
+| 3 | No candidate, or all candidates `different` | code | `none` |
 
-The AI never searches the whole library and never outputs a price. It only judges the short list. For `adjusted`,
-the AI names the two source items and the three sizes; code does the arithmetic (linear interpolation).
+### Search (code, standard library)
+
+- Only library items with the same unit and the same surcharge status: a **surcharge item** ("Zulage", "Zuschlag",
+  "Mehrpreis", "Aufpreis", "Mehrkosten") only meets other surcharge items.
+- A **repeat item** ("wie vor, jedoch …", "wie Pos. …") is compared together with the text of the item it refers
+  to: the last item before it in the same LV that is fully described. It also takes over that item's surcharge status.
+- Ranking: similarity of the words and numbers in short text + long text (rare words weigh more). The 5 best with a
+  score of at least 0.10 are the candidates.
+
+### Judge (AI, `claude-sonnet-5-5`)
+
+One call per item that has candidates. The judge reads the new item's text and the candidates' texts. It never
+sees a price, a quantity-times-price or a total, and it never states one. Its rules are the estimator's own
+(`JUDGE_RULES` in `lv/ai.py`): compare kind, material, scope, size, class and, for hourly rates, the kind of worker
+or machine. It answers in a fixed shape:
+
+| Field | Meaning |
+|---|---|
+| `judged[]` | one entry per candidate: `cand` (library item id), `verdict`, `difference` (a few words) |
+| `verdict` | `same`, `size_only`, `type_only` or `different`; in doubt the stricter one |
+| `dimension`, `cand_size`, `target_size` | only for `size_only`: what differs (e.g. `DN`) and both sizes as numbers |
+| `reason` | one sentence for the item |
+
+Verdicts for ids that were not offered are ignored. If the judge gives no answer for an item, the item gets `none`.
+
+### From verdicts to the prediction (code)
+
+- `similar`: the prices of all `same` candidates. A `size_only` candidate whose two sizes are equal counts as `same`.
+- `adjusted`: the nearest smaller and the nearest larger `size_only` candidate, linear interpolation:
+  `smaller price + (target size − smaller size) ÷ (larger size − smaller size) × (larger price − smaller price)`,
+  rounded to the cent. Both candidates must name the same dimension and the same target size.
+- `reference`: every `size_only` and `type_only` candidate is listed with its unit price. No price is proposed.
 
 Each item gains a `prediction`:
 
 | Field | Meaning |
 |---|---|
-| `method` | `copied`, `adjusted`, `similar` or `none` |
-| `min`, `max` | range of the comparable past prices |
-| `median` | the value used for totals |
-| `mean` | average of the same prices |
-| `count` | number of past prices behind it |
-| `sources` | list of `{id, unit_price, difference}`: every past item used, in full |
-| `rule`, `calculation`, `result` | only for `adjusted`, e.g. `80 + (125 − 100) ÷ (150 − 100) × (120 − 80) = 100` |
-| `reason` | one sentence from the AI judge; saved, so later explanations match what was done |
+| `method` | `copied`, `similar`, `adjusted`, `reference` or `none` |
+| `min`, `max` | range of the past prices behind the prediction; empty for `reference` and `none` |
+| `median` | the value used for totals. For `adjusted` it is the calculated result |
+| `mean` | average of the same prices. For `adjusted` it is the calculated result |
+| `count` | number of past prices behind the prediction; 0 for `reference` and `none` |
+| `sources` | list of `{id, unit_price, verdict, difference}`: every past item used or shown. `verdict` is `exact` for `copied` |
+| `rule`, `calculation`, `result` | only for `adjusted`, e.g. `linear interpolation by DN`, `80 + (125 - 100) / (150 - 100) x (120 - 80)`, `100.0` |
+| `reason` | the judge's sentence, or a fixed sentence when code decided alone |
 
-The output file also holds the project total (sum of `median × quantity` over normal items), split by method, and
-the number of items with method `none`.
+The result file `data/out/<project>.json` also holds a `summary`: per method the number of items and the sum of
+`median × quantity`, and the project `total`. Sums count only **normal items** whose method is `copied`, `similar`
+or `adjusted`. `lv price` prints the same numbers.
+
+`lv price … --copy-only` stops after check 1: no search, no AI call, no API key needed. Without that option a
+missing API key stops the command with a message that says what to do, and only if at least one item has candidates.
 
 ### What step 3 hands to step 4
 
 Step 3 records facts and contains no thresholds. Step 4 will read `method`, `min`/`max`, `mean` vs `median`,
-`count`, `sources[].difference` and `read_by` to decide what to flag.
+`count`, `sources[].verdict`, `sources[].difference` and `read_by` to decide what to flag.
+
+### Known limits
+
+- **Exact matches across file formats.** The dataset's anonymiser hid different words in each file, and GAEB 90
+  files cut the short text at 70 characters. So the same item often has a different `group` label in a `.D86` and
+  in an `.X83` file (P2 against itself: 160 of 248 items get the same label). Such items go to the judge instead.
+- **P3 is not in the price library.** Its prices are read (`.D84`), but its texts sit in PDFs. Not built yet.
+- **`lv check`** (hide one past project, predict it from the others, compare) is not built yet.
+- A repeat item in P2's `.X83` names its reference in a separate field, not in its text. That field is not read.
 
 ## Tech stack
 
@@ -151,8 +207,9 @@ Step 3 records facts and contains no thresholds. Step 4 will read `method`, `min
 - GAEB reading and text search: standard library only.
 - AI: Claude API through `langchain-anthropic`, used thinly: chat model, structured output, `.batch()` with a
   concurrency limit. No agents, chains, vector stores or LangGraph.
-  - `claude-haiku-5-5` for the per-item calls (assign item types, judge candidates).
-  - `claude-opus-5-5` for the two one-off calls (propose the item type list, read PDF texts).
+  - `claude-sonnet-5-5` for the step 3 judge: the variant that was measured.
+  - Step 2 (not built yet): `claude-haiku-5-5` to assign item types, `claude-opus-5-5` for the two one-off calls
+    (propose the item type list, read PDF texts).
   - Model names live in one settings place. No `temperature` parameter; structured output through the native
     JSON-schema method, not forced tool calls. Check both against the current `langchain-anthropic` docs when building.
 - `pydantic` for the data shapes, `python-dotenv` for the API key, `pytest` for tests.
@@ -163,7 +220,9 @@ Step 3 records facts and contains no thresholds. Step 4 will read `method`, `min
 .venv\Scripts\python.exe -m pip install -r requirements.txt
 .venv\Scripts\python.exe -m lv ingest "<priced LV file>" --project P2     # flow A
 .venv\Scripts\python.exe -m lv price "<new LV file>" --project P4         # flow B
-.venv\Scripts\python.exe -m lv check --hide P2                            # accuracy check
+.venv\Scripts\python.exe -m lv price "<new LV file>" --project P4 --copy-only   # exact matches only, no AI
+.venv\Scripts\python.exe -m lv.ai                                         # one real AI call, to check the key
+.venv\Scripts\python.exe -m lv check --hide P2                            # accuracy check (not built yet)
 .venv\Scripts\python.exe -m pytest
 ```
 
@@ -174,10 +233,10 @@ lv/
   __main__.py     command line: ingest, price, check
   model.py        line item, prediction and file shapes
   extract.py      step 0: one reader per format
-  match.py        step 1 group label; step 3 text search
-  categorise.py   step 2
-  predict.py      step 3: judging, interpolation, statistics, totals
-  ai.py           model setup and prompts
+  match.py        step 1 group label; step 3 candidate search
+  categorise.py   step 2 (not built yet)
+  predict.py      step 3: judge input, verdicts to prediction, interpolation, statistics, totals
+  ai.py           model setup, API key and prompts
 tests/            one small test file per module
 data/raw/         the dataset, unchanged
 data/library/     price library: one JSON per past project
@@ -200,7 +259,8 @@ def group_label(item: LineItem) -> str:
 ## Testing strategy
 
 `pytest`, tests in `tests/`, run against the real files in `data/raw/`. One small test per piece of real logic; no
-mocks of the dataset. AI calls are not part of the automated tests; they are checked by `lv check` and by reading
+mocks of the dataset. The tests need no network and no API key: in step 3 the judge is replaced by a fake that
+returns fixed verdicts. Real AI calls are checked by hand (`python -m lv.ai`, then `lv price` on P5) and by reading
 the output.
 
 ## Boundaries
@@ -231,9 +291,10 @@ Step 2
 Step 3
 - Every prediction with a method other than `none` has at least one source, and every source `id` exists in the library.
 - For every `adjusted` prediction, recomputing `calculation` gives `result`.
-- `lv check --hide P2` prints, per method, how many items got a prediction and how far the median is from the real
-  unit price. No target value is set yet: P4 against P2 alone gave a usable match for 24% of items in a first test.
-- `lv price` for P4 writes `data/out/P4.json` with a project total and the count of unpriced items.
+- No price is written into `unit_price`, and no price appears in what the judge is sent.
+- With only P2 in the library, `lv price --copy-only` on P2's own `.X83` copies a price for every item whose label
+  matches, and every copied price equals the unit price in the `.D86`.
+- `lv price` for P4 writes `data/out/P4.json` with the number of items per method and the project total.
 
 ## Out of scope
 
@@ -247,3 +308,6 @@ day); item types for past projects; search by meaning; a database or web server.
 3. **Trade list.** The test used 17 stand-in trade names. Is there an official list to use?
 4. **GAEB 90 layout.** The record layout of `.D84`/`.D86` must be confirmed on the real files while building the reader.
 5. **Cloud AI.** Is sending the (anonymised) item texts to the Claude API acceptable to the organisers?
+6. **How strict is an exact match across file formats?** Today the label ignores letter case, spacing, line-break
+   hyphens and the anonymiser's spelling of a hidden word. It does not ignore a short text cut at 70 characters or a
+   word hidden in one file and readable in the other. Loosening it would copy more prices and could copy a wrong one.

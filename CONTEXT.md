@@ -62,8 +62,12 @@ All line items of all past projects' priced LVs taken together, each still knowi
 _Avoid_: Database, price database, price list, catalogue
 
 **Price prediction**:
-What the tool proposes for a new line item's empty unit price: the comparable past prices, their range, median and mean, and how they were found. The estimator sets the final price.
+What the tool records for a new line item's empty unit price: how it looked the item up, the past line items it found, and, only when the match is strict, their prices with range, median and mean. The estimator sets the final price.
 _Avoid_: Estimate, suggested price, quote
+
+**Reference**:
+A past line item shown next to a new line item as evidence, without a price being proposed from it, because it differs in something that changes the price.
+_Avoid_: Weak match, low-confidence price
 
 **Copied price**:
 A price prediction taken unchanged from an exact match in the price library.
@@ -84,8 +88,16 @@ _Avoid_: Sub-category, product, style, kind
 
 ### Matching
 
+**Surcharge item** (*Zulage*):
+A line item that is an add-on price on top of another line item (e.g. "Zulage für Flansch"). It is only compared with other surcharge items.
+_Avoid_: Extra, add-on
+
+**Repeat item** (*"wie vor, jedoch …"*):
+A line item whose text only says how it differs from an earlier line item. It is read together with the text of the item it refers to.
+_Avoid_: Reference item (a **reference** is something else)
+
 **Exact match**:
-Two line items whose short text, long text and unit are identical, ignoring letter case, spacing and line-break hyphens.
+Two line items whose short text, long text and unit are identical, ignoring letter case, spacing, line-break hyphens and the spelling of an anonymised word.
 _Avoid_: Duplicate, 1:1 match, identical item
 
 **Group**:
@@ -93,9 +105,16 @@ All line items that are exact matches of each other; their quantities may be add
 _Avoid_: Cluster, bundle, category, sub-sub-category
 
 **Candidate**:
-A line item from a priced LV that has the same unit as a new line item and a similar text, offered as a possible price source.
+A line item from the price library that has the same unit and the same surcharge status as a new line item and a similar text, offered to the judge as a possible price source.
 _Avoid_: Hit, result, neighbour
 
+**Judge**:
+The AI model that compares the text of a new line item with the texts of its candidates. It never sees or states a price.
+_Avoid_: Matcher, classifier
+
+**Verdict**:
+The judge's answer for one candidate: `same` (everything that changes the price matches), `size_only` (exactly one numeric size differs), `type_only` (same kind of thing, but material, scope or more than one attribute differs) or `different`.
+
 **Similar match**:
-A candidate judged to be the same kind of work as the new line item but differing in a named aspect such as size, material or scope.
+A candidate with the verdict `same`: the same item in kind, material, scope, size and class, though its text is not identical. Its price may be used.
 _Avoid_: Fuzzy match, near match
