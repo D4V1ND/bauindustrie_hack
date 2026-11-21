@@ -39,6 +39,13 @@ class Summary(BaseModel):
     total: float
 
 
+class ItemType(BaseModel):
+    """Step 2: one item type of an LV's own list, with the one trade it belongs to."""
+    name: str
+    trade: str
+    description: str = ""
+
+
 class LineItem(BaseModel):
     id: str  # project + "/" + oz, unique across all projects
     oz: str
@@ -52,6 +59,8 @@ class LineItem(BaseModel):
     kind: Literal["normal", "optional"] = "normal"
     read_by: Literal["gaeb", "ai"] = "gaeb"
     group: str = ""  # step 1: the same label for every exact match, inside one LV and across the price library
+    item_type: str = ""  # step 2: one type from the LV's list, or "Sonstiges"
+    trade: str = ""  # step 2: the trade of that item type
     prediction: Prediction | None = None  # step 3; never written into unit_price
 
 
@@ -61,6 +70,7 @@ class LV(BaseModel):
     date: date | None
     source_file: str
     items: list[LineItem]
+    item_types: list[ItemType] = []  # step 2: the LV's own list of item types
     summary: Summary | None = None  # step 3: items and sums per method, and the project total
 
     @computed_field

@@ -87,7 +87,11 @@ Test command for every task: `.venv\Scripts\python.exe -m pytest`
   - Depends on: 1.
   - Files: `lv/ai.py`, `tests/test_ai.py`, `requirements.txt`.
 
-- [ ] **Task 6: Propose the item type list** (small)
+- [x] **Task 6: Propose the item type list** (small)
+  - Real run on P5 (`claude-opus-5-5`, one call, 14 s): 20 types in 11 trades, close to the list of the first test.
+  - Changed: the cap is never below 20. With "one type per four items" alone, P5 (50 items) got 13 types and no
+    type for its 7 hourly-rate items. P1 still gets at most 40.
+  - The model also reads the first 200 characters of each long text, as in the first test, not only short texts.
   - Does: one call per new LV that returns the list of item types, each with exactly one trade from the fixed list.
   - Acceptance:
     - The list respects the cap: about one type per four items, at most 100. P1 gives 40 types or fewer.
