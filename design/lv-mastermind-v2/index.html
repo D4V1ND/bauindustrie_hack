@@ -822,11 +822,12 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .drv-ol .drv-t>span:first-child::before{content:counter(drv) ".";display:inline-block;min-width:22px;font:12px var(--mono);color:var(--ink-3)}
 .drv-ol .drv-t b{font-weight:500;white-space:nowrap;flex:none}
 .np.sgp{color:var(--warn)}
-.sgbox{display:flex;flex-direction:column;gap:6px;width:100%;padding:12px 14px;border:1px dashed var(--warn);background:var(--warn-bg)}
-.sg-ep{font:300 30px/1 var(--sans);letter-spacing:-.03em;color:var(--ink)}
-.sg-ep small{font-size:12px;color:var(--ink-3);letter-spacing:0}
-.sg-r{font-size:12px;color:var(--ink-2)}
-.sg-b{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.sgbox{display:flex;flex-direction:column;gap:8px;width:100%;padding:2px 0 2px 14px;border-left:2px solid var(--warn)}
+.sg-ep{font:300 32px/1 var(--sans);letter-spacing:-.03em;color:var(--ink)}
+.sg-ep small{font-size:12px;color:var(--ink-3);letter-spacing:0;margin-left:4px}
+.sg-r{font:.62rem/1.4 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.sg-b{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.sg-b .btn{flex:1 1 0;justify-content:center;white-space:nowrap}.sg-b .btn svg{width:13px;height:13px}
 .bulksafe{align-self:center;white-space:nowrap}
 .agentnote{display:flex;gap:14px;align-items:flex-start;margin:0 0 16px;padding:14px 16px;border:1px solid var(--ink);background:var(--card)}
 .an-i{flex:none;display:grid;place-items:center;width:32px;height:32px;background:var(--signal-bg);color:var(--signal)}
@@ -1963,11 +1964,11 @@ function vDrawer(d) {
       (p.conf < 75 ? '<div class="rl ' + k + '">' + IC.warn + '<span>' + esc(p.why) + '</span></div>' : '') + '</div></header>' +
     '<div class="dw-body"><div class="dw-swap ' + (S.leaving ? 'leaving' : S.swapDir) + '" data-k="b' + p.oz + '">' +
       '<section class="price' + (ok ? ' is-ok' : '') + (S.editEp ? ' is-edit' : '') + '" aria-label="Preis"><button class="mini" data-act="aiClose" tabindex="-1"><span class="mono">' + (p.np ? 'Preis' : p.manual ? 'Eigener Preis' : 'KI-Preis') + '</span><b>' + (p.np ? 'fehlt' : eur(p.ep)) + '</b><span class="muted">' + (p.np ? (p.sg ? 'Vorschlag ≈ ' + eur(p.sg.ep) + ' · bitte prüfen' : 'Keine KI-Schätzung') : 'je ' + p.einheit + ' · GP ' + eur(p.gp)) + '</span><span class="conf-v ' + confLvl(p.conf) + '"><b>' + p.conf + ' %</b></span></button><div class="ptop"><div class="pmain">' +
-        '<div class="mono lab">' + (p.np ? (p.sg ? 'Vorschlag · niedrige Konfidenz, bitte prüfen' : 'Kein Preisvorschlag möglich') : p.manual ? (noAi ? 'Eigener Preis · ohne KI-Vorschlag' : 'Eigener Preis · ' + pct(md) + ' zum KI-Vorschlag') : 'KI-Preisvorschlag') + '</div>' +
+        '<div class="mono lab">' + (p.np ? (p.sg ? 'Vorschlag · bitte prüfen' : 'Kein Preisvorschlag möglich') : p.manual ? (noAi ? 'Eigener Preis · ohne KI-Vorschlag' : 'Eigener Preis · ' + pct(md) + ' zum KI-Vorschlag') : 'KI-Preisvorschlag') + '</div>' +
         '<div class="prow">' + (S.editEp
           ? '<label class="epedit"><span class="sr">Einheitspreis in Euro</span><input id="epin" inputmode="decimal" autocomplete="off" data-in="epDraft" data-enter="saveEp" value="' + esc(S.epDraft) + '"><span class="cur">€</span></label>'
           : p.np && p.sg ? '<div class="sgbox" data-k="sg' + p.oz + '"><span class="sg-ep">≈ ' + eur(p.sg.ep) + '<small> je ' + esc(p.einheit) + '</small></span><span class="sg-r">' + (p.sg.hi > p.sg.lo ? 'Spanne ' + eur(p.sg.lo) + ' – ' + eur(p.sg.hi) + ' · ' : '') + 'aus ' + p.sg.n + ' verwandten Position' + (p.sg.n > 1 ? 'en' : '') + '</span>' +
-              '<span class="sg-b"><button class="btn btn-sm btn-primary" data-act="takeSugg">Vorschlag übernehmen</button><button class="btn btn-sm btn-quiet" data-act="startEdit">Eigenen Preis eingeben</button></span></div>'
+              '<span class="sg-b"><button class="btn btn-sm btn-primary" data-act="takeSugg">' + IC.tick + 'Übernehmen</button><button class="btn btn-sm btn-quiet" data-act="startEdit">' + IC.pen + 'Eigener Preis</button></span></div>'
           : p.np ? '<button class="ep epnp" data-k="epnp" data-act="startEdit" aria-label="Preis eingeben">Preis eingeben<span class="pen">' + IC.pen + '</span></button>'
           : '<button class="ep' + (S.flashEp ? ' flash' : '') + '" data-k="ep' + p.ep + '" data-act="startEdit" title="Preis bearbeiten" aria-label="Einheitspreis ' + eur(p.ep) + ', bearbeiten">' + eur(p.ep) + '<span class="pen">' + IC.pen + '</span></button>') +
           (p.np && !S.editEp ? '' : '<span class="muted">je ' + p.einheit + '</span>') + '</div>' +
