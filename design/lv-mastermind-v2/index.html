@@ -1653,10 +1653,8 @@ function priceRange(rows) {
   return { lo: lo, hi: hi, sgN: sgN, openN: openN };
 }
 function moneyRange(a, b) {
-  if (Math.round(a) === Math.round(b)) return b >= 1e6 ? ['€' + fmt(b / 1e6, 2), 'million'] : b >= 1e5 ? ['€' + fmt(b / 1e3, 0), 'thousand'] : ['€' + fmt(Math.round(b)), ''];
-  if (b >= 1e6) return ['€' + fmt(a / 1e6, 2) + ' – ' + fmt(b / 1e6, 2), 'million'];
-  if (b >= 1e5) return ['€' + fmt(a / 1e3, 0) + ' – ' + fmt(b / 1e3, 0), 'thousand'];
-  return ['€' + fmt(Math.round(a)) + ' – ' + fmt(Math.round(b)), ''];
+  var k = function (v) { return b >= 1e6 ? fmt(v / 1e6, 2) + 'M' : b >= 1e5 ? fmt(v / 1e3, 0) + 'k' : fmt(Math.round(v)); };
+  return [Math.round(a) === Math.round(b) ? '€' + k(b) : '€' + k(a) + ' – ' + k(b), ''];
 }
 function vCost() {
   var d0 = derive(), all = P.live ? d0.full : d0.all, w = 0, c = 0;
@@ -1675,7 +1673,7 @@ function vCost() {
     ['lo', cnt.open, 'No price yet, please check', R.sgN ? 'Only a suggestion from related items' : 'No matching item in past BoQs']];
   return '<section class="card cost rise' + (S.analyzing ? ' scan' : '') + '" style="flex:1 1 100%;--d:200ms" aria-label="Cost estimate">' +
     '<div class="card-h"><span class="mono"><b>01</b> Cost estimate</span><span class="mono">' + (P.live ? esc(P.lib) : '3 past BoQs · 9,120 priced items') + '</span></div>' +
-    '<div class="cost-main"><div class="est"><span class="big rng">' + rg[0] + ' <small>' + rg[1] + '</small></span></div>' +
+    '<div class="cost-main"><div class="est"><span class="big rng">' + rg[0] + (rg[1] ? ' <small>' + rg[1] + '</small>' : '') + '</span></div>' +
     '<div class="estconf"><div class="conf-h"><span class="conf-l">Confidence<small>How certain the prices are, weighted by value</small></span><span class="conf-v ' + confLvl(conf) + '" data-k="cv' + conf + '"><b>' + conf + '%</b>' + confWord(conf) + '</span></div>' +
       cmeter(conf, 50) + '<div class="conf-s"><span>0</span><span>50</span><span>100</span></div></div></div>' +
     '<div class="srcs" role="list" aria-label="Where the prices come from">' + boxes.map(function (b) {
