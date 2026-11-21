@@ -338,12 +338,7 @@ class Session:
             "plan_findings": len(lv.plan.findings) if lv.plan else None}
 
     def list_projects(self) -> dict:
-        def name(path: Path) -> str:
-            found = index.indexes(self.data, [path.stem])
-            return found[0].name if found else load(path).name
-        return {"open_tender": self.tab.project,
-                "library": [{"project": p.stem, "name": name(p)}
-                            for p in sorted((self.data / "library").glob("*.json"))]}
+        return {"open_tender": self.tab.project, "library": library_info(self.data)}
 
     def list_bidder_questions(self) -> dict:
         return {"questions": [q.model_dump() for q in bidder_questions(self.data, self._own())]}
@@ -496,10 +491,21 @@ class Reply(BaseModel):
     tab: TabInfo
 
 
+def library_info(data: Path) -> list[dict]:
+    """The past projects of the price library: ID, name and the date of their LV (how old their prices are)."""
+    found = []
+    for path in sorted((data / "library").glob("*.json")):
+        lv = load(path)  # ponytail: reads each library file per message; cache by mtime if the library grows large
+        found.append({"project": path.stem, "name": lv.name, "date": str(lv.date) if lv.date else None})
+    return found
+
+
 def _context(data: Path, tab: Tab) -> str:
     facts = [f for f in memory(data) if f.project in (None, tab.project)][-MAX_MEMORY:]
     lines = [f"Today: {datetime.now().date().isoformat()}.",
-             f"Open tender in this tab: {tab.project or 'none (only the price library)'}."]
+             f"Open tender in this tab: {tab.project or 'none (only the price library)'}.",
+             "Price library: " + "; ".join(f"{p['project']} {p['name']} (LV date {p['date'] or 'unknown'})"
+                                          for p in library_info(data)) + "."]
     lines.append("Memory:" if facts else "Memory: nothing stored yet.")
     lines += [f"- [{f.id}] {f.text}" + (f" (only {f.project})" if f.project else "") for f in facts]
     return "\n".join(lines)

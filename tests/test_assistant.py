@@ -2,6 +2,7 @@
 import json
 import os
 import time
+from datetime import date
 from types import SimpleNamespace
 
 import pytest
@@ -19,7 +20,7 @@ def _item(project, oz, short, unit="St", price=None, long="", section=("06 Armat
 @pytest.fixture
 def data(tmp_path, monkeypatch):
     monkeypatch.setattr(index, "CACHE", index.Cache(tmp_path / "embeddings" / "cache.json"))
-    library = LV(project="P1", name="Pumpwerk", date=None, source_file="p1.d86", items=[
+    library = LV(project="P1", name="Pumpwerk", date=date(2024, 2, 27), source_file="p1.d86", items=[
         _item("P1", "06.01.4", "Absperrschieber DN 200, PN 10", price=774.53),
         _item("P1", "06.01.6", "Absperrschieber handbetätigt versetzen, DN 200", price=250.70,
               section=("06 Armaturen", "06.01 Absperrarmaturen handbetätigt")),
@@ -100,6 +101,8 @@ def test_bidder_questions_and_memory_are_saved_and_writes_wait_for_the_run(data)
     assert assistant.bidder_questions(data, "H1")[0].status == "ready"
     fact = session.remember("Wir bieten nur bis 5 Mio.", False)["saved"]
     assert "5 Mio." in assistant._context(data, tab) and session.forget(fact["id"])
+    assert "P1 Pumpwerk (LV date 2024-02-27)" in assistant._context(data, tab)  # how old the library's prices are
+    assert session.list_projects()["library"] == [{"project": "P1", "name": "Pumpwerk", "date": "2024-02-27"}]
     busy = assistant.Session(data, tab, running=lambda p: True)
     with pytest.raises(assistant.ToolError, match="running"):
         busy.save_comment("01.0010", "x", None, False)
