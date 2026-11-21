@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 import pytest
@@ -5,6 +6,7 @@ import pytest
 from lv import ai
 from lv.__main__ import main
 from lv.ai import JUDGE_RULES
+from lv.categorise import Assigned, Assignments, Proposal, ProposedType
 from lv.extract import read
 from lv.model import LV, LineItem, load
 from lv.predict import Judged, Verdicts, predict
@@ -317,24 +319,39 @@ def test_p2_priced_from_itself_copies_only_correct_prices():
 
 # --- the command -------------------------------------------------------------------------------------------------
 
-def test_price_command_stops_without_a_key_only_when_the_judge_is_needed(tmp_path):
-    main(["price", str(RAW / P5_NEW), "--project", "P5"], data=tmp_path)  # empty library: nothing to judge
-    assert load(tmp_path / "out" / "P5.json").summary.methods["none"].items == 50
-
+def test_price_command_stops_without_a_key_unless_it_only_copies(tmp_path):
     main(["ingest", str(RAW / P2_PRICED), "--project", "P2"], data=tmp_path)
-    (tmp_path / "out" / "P5.json").unlink()
     with pytest.raises(SystemExit, match="ANTHROPIC_API_KEY="):
         main(["price", str(RAW / P5_NEW), "--project", "P5"], data=tmp_path)
     assert not (tmp_path / "out" / "P5.json").exists()
 
     main(["price", str(RAW / P5_NEW), "--project", "P5", "--copy-only"], data=tmp_path)
-    assert (tmp_path / "out" / "P5.json").exists()
+    assert load(tmp_path / "out" / "P5.json").summary.methods["none"].items == 50
+
+
+def test_the_judge_needs_no_key_when_nothing_has_candidates(tmp_path, monkeypatch):
+    monkeypatch.setattr(ai, "ask", fake_step_2)  # step 2 answered by a fake; the price library is empty
+
+    main(["price", str(RAW / P5_NEW), "--project", "P5"], data=tmp_path)
+
+    assert load(tmp_path / "out" / "P5.json").summary.methods["none"].items == 50
+
+
+def fake_step_2(model, system, questions, shape):
+    """Stands in for the two step 2 calls: one item type, and every item gets it."""
+    if shape is Proposal:
+        return [Proposal(item_types=[ProposedType(name="Bauleistung", trade="Erdarbeiten", description="everything")])]
+    assert shape is Assignments, "no key is set up, so the real judge must not be reached"
+    return [Assignments(items=[Assigned(id=id, item_type="Bauleistung") for id in re.findall(r"^### (\S+) \|", q, flags=re.M)])
+            for q in questions]
 
 
 def test_price_command_asks_the_judge_and_writes_what_code_made_of_the_verdicts(tmp_path, capsys, monkeypatch):
     asked = []
 
     def fake_ask(model, system, questions, shape):
+        if shape is not Verdicts:
+            return fake_step_2(model, system, questions, shape)
         asked.append((model, system, shape))
         answers = []
         for block in questions:  # the first candidate of every item is "the same", the others are "different"

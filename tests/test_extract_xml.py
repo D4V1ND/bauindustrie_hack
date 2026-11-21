@@ -93,7 +93,7 @@ def test_unknown_file_type_is_refused():
 
 
 def test_price_command_writes_the_result_file(tmp_path):
-    main(["price", str(RAW / FILES["P5"]), "--project", "P5"], data=tmp_path)
+    main(["price", str(RAW / FILES["P5"]), "--project", "P5", "--copy-only"], data=tmp_path)
 
     assert len(load(tmp_path / "out" / "P5.json").items) == 50
 

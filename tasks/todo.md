@@ -101,7 +101,11 @@ Test command for every task: `.venv\Scripts\python.exe -m pytest`
   - Depends on: 2, 5.
   - Files: `lv/categorise.py`, `lv/ai.py`, `tests/test_categorise.py`.
 
-- [ ] **Task 7: Assign item types and print the overview** (medium)
+- [x] **Task 7: Assign item types and print the overview** (medium)
+  - Real run on P5 (45 s for steps 2 and 3 together): 50 items -> 20 item types -> 11 trades, 0 items forced to
+    `Sonstiges`. Step 3 on the same run: 2 `similar`, 13 `reference`, 35 `none` (library: P1 and P2).
+  - Items go to `claude-haiku-5-5` 25 per call. The overview counts normal items only; optional items are named
+    in one line below it. With `--copy-only` step 2 is skipped as well.
   - Does: assigns every item of the new LV one type from the list, in batches, writes `item_type` and `trade` into the
     result file, and makes `lv price` print the overview: trade → item type → quantities per unit.
   - Acceptance:
