@@ -1539,9 +1539,8 @@ function isDark() {
 // ================= views =================
 function vHeader() {
   return '<header class="top"><div class="top-in">' +
-    '<div class="brand"><button class="brand-b" data-act="home" aria-label="Startseite"><span class="mark" aria-hidden="true"></span><b>LV Mastermind</b></button><span class="crumb">/ <span class="pmw"><button class="crumb-b" data-act="projects" aria-expanded="' + !!S.projOpen + '">Projekte' + IC.chev + '</button>' + vProjMenu() + '</span> /</span>' + (S.home ? '<span>Neues LV</span>' : '<span>' + esc(P.short) + '</span>' + (P.live ? '<span class="livebadge mono">Live</span>' : '<span class="livebadge demo mono">Demo</span>')) + '</div>' +
+    '<div class="brand"><button class="brand-b" data-act="home" aria-label="Startseite"><span class="mark" aria-hidden="true"></span><b>LV Mastermind</b></button><span class="crumb">/ <span class="pmw"><button class="crumb-b" data-act="projects" aria-expanded="' + !!S.projOpen + '">Projekte' + IC.chev + '</button>' + vProjMenu() + '</span> /</span>' + (S.home ? '<span>Neues LV</span>' : '<span>' + esc(P.short) + '</span>') + '</div>' +
     '<div class="top-r">' +
-      (S.home ? '' : '<label class="search">' + IC.search + '<span class="sr">Positionen durchsuchen</span><input id="q-top" type="search" data-in="q" value="' + esc(S.q) + '" placeholder="Position, OZ oder Gewerk…"><span class="kbd">/</span></label>') +
       '<button class="theme-btn" data-act="theme" aria-label="Farbschema wechseln"><span class="theme-icon"></span>' + (isDark() ? 'Hell' : 'Dunkel') + '</button>' +
       (S.home ? '' : '<button class="btn btn-primary" data-act="newProj">' + IC.plus + 'Neues Projekt</button>') +
     '</div></div></header>';
@@ -1556,11 +1555,7 @@ function vHero(d) {
     '<div class="hero-actions">' +
       '<button class="btn btn-quiet btn-rep" data-act="report" data-v="1">' + IC.doc + 'Konfidenzbericht</button>' +
       '<button class="btn btn-primary btn-export" data-act="export">' + IC.down + 'Export GAEB X84<span class="xsep"></span><span class="xamt">' + eur(Math.round(d.tot)) + '</span>' + IC.arrow + '</button>' +
-    '</div></div>' +
-    '<nav class="tabs" aria-label="Projektbereiche">' +
-      '<button class="tab' + (S.tab === 'home' ? ' on' : '') + '" data-act="tab" data-v="home" aria-current="' + (S.tab === 'home') + '">' + IC.home + 'Home</button>' +
-      '<button class="tab' + (S.tab === 'kontext' ? ' on' : '') + '" data-act="tab" data-v="kontext" aria-current="' + (S.tab === 'kontext') + '">' + IC.doc + 'Kontext</button>' +
-      '<span class="tab-ind" aria-hidden="true"></span></nav>';
+    '</div></div>';
 }
 
 function vMenu(id, cur, up) {
@@ -1623,7 +1618,6 @@ function vSummary(d) {
     '<div class="sum-drv"><div class="mono faint" style="margin-bottom:8px">Top-Kostentreiber</div>' +
       drivers.map(function (r, i) { return '<button class="drv" data-act="open" data-oz="' + r.oz + '"><span class="drv-t"><span>' + esc(r.kurz) + '</span><b style="font-weight:500">' + eur(r.gp) + '</b></span><span class="drv-bar"><i style="width:' + Math.round(r.gp / drivers[0].gp * 100) + '%;--i:' + i + '"></i></span></button>'; }).join('') +
     '</div></div>' +
-    '<div class="stats">' + stats.map(function (c) { return '<span class="stat ' + c[0] + '"><b>' + c[1] + '</b> ' + c[2] + '</span>'; }).join('') + '</div>' +
   '</section>';
 }
 
@@ -1700,8 +1694,7 @@ function vPlan(d, full) {
   o += '</svg>';
   var hi = (P.live ? d.full : d.all).filter(function (r) { return PLAN[r.oz] && shown[r.oz]; }).length;
   return '<aside class="plan' + (full ? ' plan-full' : '') + '" aria-label="Bauplan' + (full ? ' Vollbild' : '') + '">' +
-    '<div class="plan-h"><div><span class="mono">Bauplan</span><b>' + (P.live ? esc(P.plan.file) : 'A-102 · Grundriss') + '</b></div>' +
-      '<div class="plan-ctl"><div class="seg" role="group" aria-label="Geschoss">' + FLOORS.map(function (g) { return '<button class="' + (fl === g ? 'on' : '') + '" data-act="floor" data-v="' + g + '" aria-pressed="' + (fl === g) + '">' + g + '</button>'; }).join('') + '</div>' +
+    '<div class="plan-h"><div class="plan-ctl" style="margin-left:auto">' +
       (full ? '<button class="ic pfs-b" data-act="planFull" data-v="0" aria-label="Vollbild schließen" title="Schließen (Esc)">' + IC.x + '</button>' : '<button class="ic pfs-b" data-act="planFull" data-v="1" aria-label="Bauplan im Vollbild" title="Vollbild">' + IC.expand + '</button>') + '</div></div>' +
     '<div class="plan-c">' + o + '<div class="plan-tip" aria-hidden="true"></div></div>' +
     '<div class="plan-f"><span class="mono plan-xy">' + hi + ' Positionen verortet' + (P.live ? '' : ' · M 1:100') + '</span><span class="plan-lg"><span class="lgt">Konfidenz</span><i class="hi"></i>&lt; 50<i class="mid"></i>&lt; 75<i class="lo"></i>≥ 75<i class="ok"></i>bestätigt</span></div>' +
@@ -1734,7 +1727,7 @@ function vTable(d) {
   var okN = d.all.filter(function (r) { return S.confirmed[r.oz]; }).length;
   return '<section aria-label="Leistungsverzeichnis" class="rise" style="--d:380ms">' +
     '<div class="lv-head"><div><div class="mono faint"><span style="color:var(--ink)">[03]</span> Leistungsverzeichnis</div><div class="lv-title">' + (isAll ? fmt(d.rows.length) + ' Positionen <small>· gesamtes LV</small>' : d.rows.length + ' wichtige Positionen <small>· von ' + fmt(d.full.length) + '</small>') + '</div>' +
-      '<div class="seg lv-scope" role="group" aria-label="Umfang"><button class="' + (isAll ? '' : 'on') + '" data-act="scope" data-v="key" aria-pressed="' + !isAll + '">Wichtige · ' + d.all.length + '</button><button class="' + (isAll ? 'on' : '') + '" data-act="scope" data-v="all" aria-pressed="' + isAll + '">Gesamtes LV · ' + fmt(d.full.length) + '</button></div></div>' +
+      '</div>' +
       '<div class="lv-stats"><div class="lv-stat"><span class="mono">Bestätigt</span><b>' + okN + '<small> / ' + d.all.length + '</small></b><i class="lv-meter"><i style="width:' + (okN / d.all.length * 100) + '%"></i></i></div>' +
         '<div class="lv-stat"><span class="mono">Summe angezeigt</span><b>' + eur(sum) + '</b><i class="lv-meter"><i style="width:' + Math.min(100, sum / d.tot * 100) + '%;background:var(--ink)"></i></i></div></div></div>' +
     '<div class="lv-split">' + vPlan(d) + '<div class="lv-main"><div class="lv-bar"><div class="filters" role="group" aria-label="Filter">' + filters.map(function (x) {
@@ -1742,7 +1735,7 @@ function vTable(d) {
       return '<button class="pill' + (on ? ' on' : '') + '" aria-pressed="' + on + '" data-act="filter" data-v="' + x[0] + '">' + x[1] + '<span class="cnt">' + d.base.filter(d.fdef[x[0]]).length + '</span></button>';
     }).join('') +
       (S.gewerk ? '<span class="ftag" data-k="fg">Gewerk: ' + esc(S.gewerk) + '<button data-act="gewerk" data-v="" aria-label="Gewerk-Filter entfernen">×</button></span>' : '') +
-    '</div><div class="tools"><label class="search">' + IC.search + '<span class="sr">Positionen filtern</span><input type="search" data-in="q" value="' + esc(S.q) + '" placeholder="OZ, Text oder Gewerk…"></label>' +
+    '</div><div class="tools"><label class="search">' + IC.search + '<span class="sr">Positionen filtern</span><input id="q-lv" type="search" data-in="q" value="' + esc(S.q) + '" placeholder="OZ, Text oder Gewerk…"></label>' +
         '<span class="vsep" aria-hidden="true"></span>' +
         '<div class="seg" role="group" aria-label="Darstellung"><button class="' + (S.density === 'compact' ? 'on' : '') + '" data-act="density" data-v="compact" aria-pressed="' + (S.density === 'compact') + '">Kompakt</button><button class="' + (S.density === 'details' ? 'on' : '') + '" data-act="density" data-v="details" aria-pressed="' + (S.density === 'details') + '">Langtext</button></div>' +
         '<button class="btn btn-quiet' + (S.group ? ' on' : '') + '" data-act="group" aria-pressed="' + S.group + '">' + IC.layers + 'Nach Gewerk</button>' +
@@ -1816,18 +1809,6 @@ function vDock(d) {
     '<button class="btn go" data-act="bulkOk">' + IC.tick + 'Preise bestätigen</button>' +
     '<button class="btn" data-act="bulkBundle"' + (pr.length < 2 ? ' disabled title="Mindestens 2 Positionen auswählen"' : '') + '>' + IC.layers + 'Bündeln</button>' +
     '<button class="btn" data-act="clearPicked" aria-label="Auswahl aufheben" style="width:34px;padding:0;justify-content:center">' + IC.x + '</button></div>';
-}
-
-function vKontext() {
-  var ctx = P.live ? liveCtx() : [
-    { tag: '[K1] Dokumente', title: 'Ausschreibungsunterlagen', sub: 'Vom Bauherrn, analysiert am 21.11.2026', items: [['LV_Kita_Sonnenhof.X83', '1.284 Pos.', 'var(--signal)'], ['Grundrisse EG–2. OG (A-101–A-103)', 'PDF · 3 Blätter', 'var(--signal)'], ['Schnitte & Ansichten', 'PDF · 6 Blätter', 'var(--signal)'], ['Statik Positionsplan (S-01–S-05)', 'PDF · 5 Blätter', 'var(--signal)']] },
-    { tag: '[K2] Preisbasis', title: 'Eigene Alt-LVs mit Preisen', sub: 'Nur eigene Daten, keine Internetpreise', items: [['Grundschule Trudering 2024', '2.910 Pos.', 'var(--ok)'], ['Turnhalle Pasing 2025', '1.650 Pos.', 'var(--ok)'], ['Kita Freiham 2023', '1.120 Pos.', 'var(--ok)'], ['Baupreisindex Q3/2026', '+4,2 % ggü. 2024', 'var(--warn)']] },
-    { tag: '[K3] Regeln', title: 'Kalkulationslogik', sub: 'Festgelegt, für jeden Vorschlag nachvollziehbar', items: [['Preis übernehmen bei Abweichung', '≤ ±10 %', 'var(--ink)'], ['Gleiche Texte bündeln', 'automatisch', 'var(--ink)'], ['Materialfaktor Edelstahl', '× 3,0 ggü. Stahl', 'var(--ink)'], ['Örtlicher Preis', 'Beton, Erdbau', 'var(--ink)']] }
-  ];
-  return '<div class="ctx">' + ctx.map(function (g, i) {
-    return '<section class="card rise" style="--d:' + (i * 70) + 'ms"><div class="mono faint">' + g.tag + '</div><h2>' + g.title + '</h2><p class="muted" style="margin:0 0 12px;font-size:13px">' + g.sub + '</p>' +
-      g.items.map(function (x) { return '<div class="ctx-row"><span><i style="background:' + x[2] + '"></i><span>' + esc(x[0]) + '</span></span><span class="muted" style="text-align:right">' + esc(x[1]) + '</span></div>'; }).join('') + '</section>';
-  }).join('') + '</div>';
 }
 
 function liveCtx() {
@@ -2031,7 +2012,7 @@ function view() {
   if (S.home) return vHeader() + '<main>' + vStart() + '</main>' + vUpload() + vToast();
   var d = derive();
   return vHeader() + '<main>' + vHero(d) +
-    (S.tab === 'home' ? '<div class="grid2">' + vCost() + '</div><div class="grid2 row2">' + vSummary(d) + '</div>' + vTable(d) : vKontext()) +
+    '<div class="grid2">' + vCost() + '</div><div class="grid2 row2">' + vSummary(d) + '</div>' + vTable(d) +
     '</main>' + vDock(d) + vReport(d) + (S.planFull ? '<div class="planfs" data-k="planfs"><div class="planfs-bg" data-act="planFull" data-v="0"></div>' + vPlan(d, true) + '</div>' : '') + vDrawer(d) + vPreview(d) + vFx() + vUpload() + vToast();
 }
 
@@ -2635,7 +2616,7 @@ document.addEventListener('keydown', function (e) {
     return;
   }
   if (inField) return;
-  if (e.key === '/') { e.preventDefault(); var q = document.getElementById('q-top'); if (q) q.focus(); return; }
+  if (e.key === '/') { e.preventDefault(); var q = document.getElementById('q-lv'); if (q) q.focus(); return; }
   if (S.sel && !S.fx && !S.preview && (e.key === 'ArrowDown' || e.key === 'j')) { e.preventDefault(); A.nav({ v: 1 }); }
   if (S.sel && !S.fx && !S.preview && (e.key === 'ArrowUp' || e.key === 'k')) { e.preventDefault(); A.nav({ v: -1 }); }
 });
