@@ -1,8 +1,17 @@
-<<<<<<< HEAD
 # Secrets - never commit
 .env
 *.env
 !.env.example
+
+# Python
+.venv/
+__pycache__/
+.pytest_cache/
+
+# LV pipeline: price library, results and saved vectors (company data)
+data/library/
+data/out/
+data/embeddings/
 
 # Local plan files for VLM tests
 vlm/plans/*
@@ -11,14 +20,3 @@ vlm/plans/*
 # VLM local env and outputs
 vlm/.venv/
 vlm/out/
-.venv/
-__pycache__/
-=======
-.env
-.venv/
-__pycache__/
-.pytest_cache/
-data/library/
-data/out/
-data/embeddings/
->>>>>>> origin/main
