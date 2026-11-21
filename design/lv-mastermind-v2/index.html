@@ -825,6 +825,15 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .gwsec .comm-h{height:39px}
 .gwsec .comm-h b{color:var(--ink);font-weight:400}
 .gwsec .panel{padding:8px 0 4px}
+
+.whymore{display:grid;grid-template-rows:0fr;transition:grid-template-rows .4s var(--ease)}
+.whyin{overflow:hidden;min-height:0}
+.why2.open .whymore{grid-template-rows:1fr}
+.whytg{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:6px;margin-top:10px;font:.62rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);padding:4px 0;border-bottom:1px solid var(--line-2);transition:color .15s,border-color .15s}
+.whytg:hover{color:var(--ink);border-color:var(--ink)}
+.whytg:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+.whytg svg{width:12px;height:12px;transition:transform .3s var(--ease)}
+.why2.open .whytg svg{transform:rotate(180deg)}
 </style>
 </head>
 <body>
@@ -1366,10 +1375,10 @@ function vDrawer(d) {
             (p.manual ? ' · <button class="lnk" data-act="resetEp">KI-Vorschlag ' + eur(p.aiEp) + ' wiederherstellen</button>' : '') + '</div>') +
         (ok ? '<div class="stamp' + (fresh ? ' fx' : '') + '" data-k="st"><span class="sq">' + IC.tickRaw + '</span><span><b>Bestätigt</b><small>' + (p.manual ? 'Eigener Preis' : 'KI-Preis') + ' · T. Berger</small></span></div>' : '') + '</div>' +
         '<div class="pconf"><span class="mono">Konfidenz</span><span class="conf-v ' + confLvl(p.conf) + '"><b>' + p.conf + ' %</b>' + confWord(p.conf) + '</span>' + cmeter(p.conf, 10) + '</div></div>' +
-        '<div class="why2"><div class="mono lab">Begründung</div><p>' + esc(C.cands[0].why) + '</p>' +
-          '<div class="calc2">' + C.steps.map(function (s, j) { return '<div class="cs' + (j === C.steps.length - 1 ? ' last' : '') + '"><span>' + esc(s[0]) + '</span><span>' + esc(s[1]) + '</span></div>'; }).join('') + '</div>' +
+        '<div class="why2' + (S.whyOpen ? ' open' : '') + '"><div class="mono lab">Begründung</div><p>' + esc(C.cands[0].why) + '</p>' +
+          '<div class="whymore" aria-hidden="' + !S.whyOpen + '"><div class="whyin"><div class="calc2">' + C.steps.map(function (s, j) { return '<div class="cs' + (j === C.steps.length - 1 ? ' last' : '') + '"><span>' + esc(s[0]) + '</span><span>' + esc(s[1]) + '</span></div>'; }).join('') + '</div>' +
           ((R.similar || []).length ? '<div class="refs"><span class="mono">Quellen</span>' + R.similar.map(function (x) { var e = D.extra[x[0]]; return e ? '<button class="ref" data-act="preview" data-key="' + x[0] + '">' + esc(e.proj) + '<small>' + esc(x[1]) + '</small></button>' : ''; }).join('') + '</div>' : '') +
-        '</div></section>' +
+        '</div></div><button class="whytg" data-act="whyToggle" aria-expanded="' + !!S.whyOpen + '">' + (S.whyOpen ? 'Weniger anzeigen' : 'Berechnung &amp; Quellen anzeigen') + IC.chev + '</button></div></section>' +
       gwPanel + '<section class="comm" aria-label="Kommunikation"><div class="comm-h"><span class="mono">Kommunikation</span>' +
         '<div class="ctabs" role="tablist">' + tabs.map(function (t) { var on = dt === t[0]; return '<button role="tab" class="ctab' + (on ? ' on' : '') + '" aria-selected="' + on + '" data-act="dtab" data-v="' + t[0] + '">' + t[1] + (t[2] ? '<span class="dn">' + t[2] + '</span>' : '') + '</button>'; }).join('') + '</div></div>' +
         '<div class="panel" data-k="p' + dt + '">' + panel + '</div></section>' +
@@ -1683,6 +1692,7 @@ var A = {
     if (a.cta === 'Sequenz vorbereiten') { st.compose = 'seq'; st.dtab = 'ext'; }
     set(st); toast(a.done);
   },
+  whyToggle: function () { set({ whyOpen: !S.whyOpen }); },
   dtab: function (ds) { set({ dtab: ds.v }); },
   resetEp: function () { var p = cur(), e = Object.assign({}, S.eps), g = Object.assign({}, S.sugg), c = Object.assign({}, S.confirmed); delete e[p.oz]; delete g[p.oz]; delete c[p.oz]; set({ eps: e, sugg: g, confirmed: c, editEp: false, flashEp: 1 }); S.flashEp = 0; toast('KI-Vorschlag für ' + p.oz + ' wiederhergestellt'); },
   sendCmt: addComment,
