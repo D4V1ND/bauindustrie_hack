@@ -1699,10 +1699,9 @@ function vCost() {
     ['hi', cnt.similar, 'Ähnliche Position aus altem LV', 'Gleichwertige Leistung, Preis übernommen'],
     ['mid', cnt.adjusted, 'Angepasst (Größe/Material)', 'Aus ähnlichen Positionen umgerechnet'],
     ['lo', cnt.open, 'Noch kein Preis, bitte prüfen', R.sgN ? 'Nur ein Vorschlag aus verwandten Positionen' : 'Keine passende Position in den alten LVs']];
-  var note = 'netto · Spanne aus den Preisen der alten LVs' + (R.sgN ? ' · inkl. ' + (R.sgN === 1 ? 'Vorschlag für 1 Position' : 'Vorschlägen für ' + R.sgN + ' Positionen') + ' ohne Preis' : '') + (R.openN ? ' · <b class="npn">' + R.openN + (R.openN === 1 ? ' Position' : ' Positionen') + ' ohne Vorschlag</b> nicht enthalten' : '');
   return '<section class="card cost rise' + (S.analyzing ? ' scan' : '') + '" style="flex:1 1 100%;--d:200ms" aria-label="Kostenschätzung">' +
     '<div class="card-h"><span class="mono"><b>01</b> Kostenschätzung</span><span class="mono">' + (P.live ? esc(P.lib) : '3 Alt-LVs · 9.120 bepreiste Positionen') + '</span></div>' +
-    '<div class="cost-main"><div class="est"><span class="mono faint">Gesamtpreis von – bis</span><span class="big rng">' + rg[0] + ' <small>' + rg[1] + '</small></span><span class="muted">' + note + '</span></div>' +
+    '<div class="cost-main"><div class="est"><span class="big rng">' + rg[0] + ' <small>' + rg[1] + '</small></span></div>' +
     '<div class="estconf"><div class="conf-h"><span class="conf-l">Konfidenz<small>Wie sicher die Preise sind, gewichtet nach Volumen</small></span><span class="conf-v ' + confLvl(conf) + '" data-k="cv' + conf + '"><b>' + conf + ' %</b>' + confWord(conf) + '</span></div>' +
       cmeter(conf, 50) + '<div class="conf-s"><span>0</span><span>50</span><span>100</span></div></div></div>' +
     '<div class="srcs" role="list" aria-label="Woher die Preise kommen">' + boxes.map(function (b) {
