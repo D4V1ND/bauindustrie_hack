@@ -23,6 +23,7 @@ Regenerate both schemas after a change to `lv/model.py` or the judge's answer sh
 | `summary` | object | step 3: items and money per method, and the project total (see below) |
 | `risk_summary` | object | step 4: the LV's risk score and what it rests on (see below) |
 | `plan` | object or null | plan check, only when a plan was given: the plan, all findings, the files behind them (see below) |
+| `brief` | object or null | the assistant's answers at the end of the run: `about` ("What is this project about?"), `go_no_go` ("Does it make sense to tender it?"), both Markdown, and `tab`, the chat tab to go on in. Null for a copy-only run or without an API key |
 | `priced` | boolean | whether the file itself had prices; `false` for a new LV |
 
 ### A line item (`items[]`)

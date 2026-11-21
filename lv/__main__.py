@@ -1,6 +1,7 @@
 """Command line: python -m lv ingest|price <LV file> --project <ID> [--plan <plan>]
                  python -m lv comment <ID> <item number> [--price N] [--text "..."] [--doubt]
-                 python -m lv index [<ID> ...]"""
+                 python -m lv index [<ID> ...]
+                 python -m lv brief <ID>"""
 import argparse
 import json
 import os
@@ -8,7 +9,7 @@ import re
 import time
 from pathlib import Path
 
-from lv import ai, index, plan
+from lv import ai, assistant, index, plan
 from lv.categorise import Assignments, Proposal, assign, overview, propose
 from lv.extract import add_texts, read
 from lv.match import group_label
@@ -48,7 +49,18 @@ def main(argv: list[str] | None = None, data: Path = DATA) -> None:
     again = commands.add_parser("index", help="build the assistant's search index again (all projects, or the "
                                               "ones named); embeds only texts not embedded before")
     again.add_argument("projects", nargs="*", help="project IDs, e.g. P1 H1; none: every project")
+    asked = commands.add_parser("brief", help="ask the assistant what a result's project is about and whether to bid, "
+                                              "and save both answers as `brief` in it (lv price does this at its end)")
+    asked.add_argument("project", help="short project ID of a result file, e.g. P5")
     args = parser.parse_args(argv)
+    if args.command == "brief":
+        path = data / "out" / f"{args.project}.json"
+        if not path.exists():
+            raise SystemExit(f"No result file for {args.project}: {path} is missing. Run 'lv price' first.")
+        if index.state(data, args.project, "tender") != "ready":
+            _index(load(path), data, "tender")
+        _brief(args.project, data)
+        return
     if args.command == "index":
         found = [(path, "library") for path in sorted((data / "library").glob("*.json"))] + \
                 [(path, "tender") for path in sorted((data / "out").glob("*.json")) if "_" not in path.stem]
@@ -152,6 +164,25 @@ def main(argv: list[str] | None = None, data: Path = DATA) -> None:
               f"{len(lv.plan.findings)} findings")
     # last step of every run: the assistant answers from this index, and waits while the run is going
     _index(lv, data, "library" if args.command == "ingest" else "tender", meaning=not getattr(args, "copy_only", False))
+    if args.command == "price" and not args.copy_only:  # copy-only promises no AI
+        _brief(lv.project, data)
+
+
+def _brief(project: str, data: Path) -> None:
+    """Asks the assistant the two brief questions (BRIEF in lv/assistant.py) and saves its answers as `brief` in the
+    result file. A failure does not fail the run: the result is saved either way."""
+    for path in sorted((data / "library").glob("*.json")):  # the answers search the library too
+        if index.state(data, path.stem, "library") != "ready":
+            _index(load(path), data, "library")
+    print(f"assistant brief: asking {ai.ASSISTANT_MODEL} {len(assistant.BRIEF)} questions ...", flush=True)
+    start = time.monotonic()
+    try:
+        found = assistant.brief(data, project)
+    except Exception as error:  # e.g. no ANTHROPIC_API_KEY or the Claude API is down: say so, keep the result
+        print(f"assistant brief: skipped ({type(error).__name__}: {error})", flush=True)
+        return
+    print(f"assistant brief: {'saved as `brief` in ' + project + '.json' if found else 'no answer, nothing saved'} "
+          f"({time.monotonic() - start:.0f} s)", flush=True)
 
 
 def _index(lv: LV, data: Path, source: str, meaning: bool = True) -> None:

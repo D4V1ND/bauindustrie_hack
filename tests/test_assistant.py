@@ -1,12 +1,15 @@
 """The assistant's index, tools, tabs and waiting rule, without Claude or Voyage: the model is a scripted fake."""
 import json
+import os
+import time
+from datetime import date
 from types import SimpleNamespace
 
 import pytest
 from fastapi.testclient import TestClient
 
 from lv import api, assistant, index
-from lv.model import LV, Comment, LineItem, save
+from lv.model import LV, Comment, LineItem, Prediction, Source, load, save
 
 
 def _item(project, oz, short, unit="St", price=None, long="", section=("06 Armaturen",), comments=()):
@@ -17,7 +20,7 @@ def _item(project, oz, short, unit="St", price=None, long="", section=("06 Armat
 @pytest.fixture
 def data(tmp_path, monkeypatch):
     monkeypatch.setattr(index, "CACHE", index.Cache(tmp_path / "embeddings" / "cache.json"))
-    library = LV(project="P1", name="Pumpwerk", date=None, source_file="p1.d86", items=[
+    library = LV(project="P1", name="Pumpwerk", date=date(2024, 2, 27), source_file="p1.d86", items=[
         _item("P1", "06.01.4", "Absperrschieber DN 200, PN 10", price=774.53),
         _item("P1", "06.01.6", "Absperrschieber handbetätigt versetzen, DN 200", price=250.70,
               section=("06 Armaturen", "06.01 Absperrarmaturen handbetätigt")),
@@ -80,7 +83,7 @@ def test_the_assistant_searches_then_comments_only_on_its_own_tender(data):
     reply = assistant.ask(data, tab, "Was kostet ein Schieber DN 200? Schreib es an 01.0010.", ready,
                           running=lambda p: False, create=create)
     assert reply.state == "answered" and reply.text.startswith("774,53")
-    assert reply.actions == ["Kommentar an 01.0010 gespeichert"] and "P1/06.01.4" in reply.positions
+    assert reply.actions == ["Comment saved on 01.0010"] and "P1/06.01.4" in reply.positions
     results = sent[2][-1]["content"]
     assert results[0].get("is_error") is None and results[1]["is_error"]  # the library cannot be changed
     saved = json.loads((data / "out" / "H1.json").read_text())["items"][0]["comments"][0]
@@ -98,9 +101,43 @@ def test_bidder_questions_and_memory_are_saved_and_writes_wait_for_the_run(data)
     assert assistant.bidder_questions(data, "H1")[0].status == "ready"
     fact = session.remember("Wir bieten nur bis 5 Mio.", False)["saved"]
     assert "5 Mio." in assistant._context(data, tab) and session.forget(fact["id"])
+    assert "P1 Pumpwerk (LV date 2024-02-27)" in assistant._context(data, tab)  # how old the library's prices are
+    assert session.list_projects()["library"] == [{"project": "P1", "name": "Pumpwerk", "date": "2024-02-27"}]
     busy = assistant.Session(data, tab, running=lambda p: True)
     with pytest.raises(assistant.ToolError, match="running"):
         busy.save_comment("01.0010", "x", None, False)
+
+
+def test_get_position_shows_the_unit_of_each_past_price(data):
+    lv = load(data / "out" / "H1.json")
+    lv.items[0].prediction = Prediction(
+        method="similar", median=774.53, sources=[Source(id="P1/06.01.4", unit_price=774.53, verdict="same")],
+        judged=[Source(id="P1/02.01.1", unit_price=48.60, verdict="different")])
+    save(lv, data / "out")
+    found = assistant.Session(data, assistant.new_tab(data, "H1"), running=lambda p: False).get_position("H1", "01.0010")
+    assert found["prediction"]["sources"][0]["unit"] == "St" and found["prediction"]["judged"][0]["unit"] == "m2"
+
+
+def test_the_brief_asks_both_questions_in_one_tab_and_saves_the_answers_in_one_field(data):
+    answers = iter(["A small valve job.", "Yes, if it fits your size range."])
+    found = assistant.brief(data, "H1", create=lambda **request: _reply({"type": "text", "text": next(answers)}))
+    saved = load(data / "out" / "H1.json").brief
+    assert saved == found and (saved.about, saved.go_no_go) == ("A small valve job.", "Yes, if it fits your size range.")
+    tab = assistant.get_tab(data, saved.tab)  # the estimator can go on in this tab
+    assert [m.text for m in tab.shown if m.role == "user"] == list(assistant.BRIEF.values())
+
+
+def test_a_dead_build_does_not_block_and_the_library_must_be_indexed_too(data):
+    marker = data / "index" / "P1.building"
+    marker.write_text("12345")
+    assert index.state(data, "P1", "library") == "indexing"  # a build that touches its marker is running
+    old = time.time() - index.STALE - 1
+    os.utime(marker, (old, old))
+    assert index.state(data, "P1", "library") == "ready"  # untouched for 2 minutes: its build died
+    (data / "index" / "P1.json").unlink()
+    started = []
+    ready = assistant.readiness(data, "H1", lambda p: None, lambda p, source: started.append((p, source)))
+    assert ready.state == "indexing" and "P1" in ready.message and started == [("P1", "library")]
 
 
 @pytest.fixture
@@ -121,7 +158,7 @@ def test_tabs_and_the_waiting_answer_while_the_extraction_runs(client, data):
     api.runs["H1"] = SimpleNamespace(poll=lambda: None)  # a run of H1 is going
     assert client.get("/assistant/status?project=H1").json()["state"] == "extracting"
     reply = client.post(f"/assistant/tabs/{tab['id']}/messages", json={"text": "Was kostet 01.0010?"}).json()
-    assert reply["state"] == "waiting" and "warte" in reply["text"]
+    assert reply["state"] == "waiting" and "wait" in reply["text"]
     assert client.get(f"/assistant/tabs/{tab['id']}").json()["shown"] == []  # nothing saved, ask again later
 
     api.runs["H1"] = SimpleNamespace(poll=lambda: 0)  # done
