@@ -1,0 +1,327 @@
+<title>LV Price Span</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Unbounded:wght@700;900&display=swap">
+<style>
+/* Layout: the paper world of the LV Pipeline page. Torn-paper labels lead left-aligned chapters; each chapter shows the whole file as a sheet whose left edge is coloured by the step that wrote each line. Deliberately single-theme. */
+:root{
+  --paper:#ebe6dc; --paper-hi:#f7f3eb; --ink:#2d3144; --muted:#5d6176;
+  --slate:#555b7e; --slate-dk:#454a69;
+  --rose:#ecd5cf; --brick:#d49a8e; --clay:#b35e5a;
+  --mint:#c4e3cf; --teal:#5a958d; --teal-dk:#36605d;
+  --crystal:#b4c9e8; --brass:#dcaa3c;
+  --s0:#8fb0dd; --s1:#d49a8e; --s2:#dcaa3c; --s3:#5a958d; --s4:#b35e5a; /* one colour per step: read, label, sort, price, risk */
+  --display:"Unbounded","Arial Black",system-ui,sans-serif;
+  --body:"Montserrat","Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"Cascadia Mono","SF Mono",Menlo,Consolas,monospace;
+  --ease:cubic-bezier(.2,.75,.15,1);
+  --rule:rgb(45 49 68 / .18);
+  color-scheme:light;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 16.5px/1.65 var(--body);-webkit-font-smoothing:antialiased;overflow-x:clip}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:60;opacity:.55;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .17 0 0 0 0 .18 0 0 0 0 .26 0 0 0 1.5 -.68'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+::selection{background:var(--brass);color:var(--ink)}
+:focus-visible{outline:2px solid var(--brass);outline-offset:3px}
+p{text-wrap:pretty}
+code{font:500 .9em var(--mono);overflow-wrap:anywhere}
+.wrap{max-width:1040px;margin-inline:auto;
+  padding-left:max(clamp(16px,4vw,40px),env(safe-area-inset-left,0px));
+  padding-right:max(clamp(16px,4vw,40px),env(safe-area-inset-right,0px))}
+
+.art{fill:none;stroke:var(--ink);stroke-linecap:round;stroke-linejoin:round;font-size:2px;stroke-width:1em}
+.pa{fill:var(--paper-hi)} .ro{fill:var(--rose)} .mi{fill:var(--mint)} .br{fill:var(--brass)} .ink{fill:var(--ink)}
+.ns{stroke:none} .th{stroke-width:.6em}
+
+/* hero */
+.hero{padding-block:clamp(28px,5vw,60px) 0;text-align:center}
+.title{margin:0;font:900 clamp(32px,7.6vw,84px)/.94 var(--display);color:var(--slate);letter-spacing:.005em;text-transform:uppercase;text-wrap:balance}
+.eyebrow{margin:16px 0 0;font:600 12px/1.5 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.dlg{background:var(--paper-hi);border:1.5px solid var(--ink);box-shadow:4px 4px 0 rgb(45 49 68 / .14);padding:18px 22px;text-align:left;margin:0}
+.dlg p{margin:0}
+.dlg p+p{margin-top:.7em}
+.hero .dlg{max-width:700px;margin:22px auto 0}
+
+/* the growing file: four small sheets */
+.grow{list-style:none;margin:34px auto 0;padding:0;max-width:980px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(10px,2.4vw,26px);text-align:left}
+.mini{display:grid;gap:10px;min-width:0}
+.page{background:var(--paper-hi);border:1.5px solid var(--ink);box-shadow:4px 4px 0 rgb(45 49 68 / .14);padding:12px 12px 14px;display:grid;gap:6px}
+.band{height:10px;border:1.5px solid var(--ink)}
+.band.tall{height:30px} .band.mid{height:18px}
+.band.b0{background:var(--s0)} .band.b1{background:var(--s1)} .band.b2{background:var(--s2)} .band.b3{background:var(--s3)} .band.b4{background:var(--s4)}
+.band.off{background:none;border-style:dashed;border-color:rgb(45 49 68 / .45)}
+.mini b{display:block;font:700 13px/1.25 var(--display);color:var(--slate);text-transform:uppercase}
+.mini span{display:block;font-size:13.5px;line-height:1.4;color:var(--muted)}
+@media (max-width:760px){.grow{grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}}
+
+/* chapters */
+.ch{padding-block:clamp(56px,7.5vw,88px) 0}
+.label-row{filter:drop-shadow(3px 4px 0 rgb(45 49 68 / .12))}
+.label{width:fit-content;max-width:calc(100% + 50vw - 50%);margin-left:calc(50% - 50vw);background:var(--paper-hi);
+  padding-block:18px 20px;padding-right:56px;padding-left:calc(50vw - 50%);
+  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 9%,calc(100% - 6px) 19%,calc(100% - 1px) 31%,calc(100% - 9px) 42%,calc(100% - 3px) 55%,100% 66%,calc(100% - 7px) 77%,calc(100% - 2px) 88%,calc(100% - 8px) 100%,0 100%)}
+.part{display:block;margin:0 0 10px;font:600 11.5px/1 var(--body);letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.label h2{margin:0;font:900 clamp(26px,5vw,54px)/.98 var(--display);color:var(--slate);text-transform:uppercase;text-wrap:balance}
+.head{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:clamp(14px,3vw,40px);margin:26px 0 24px}
+.lead{margin:0;max-width:46ch;font:500 clamp(18px,2.3vw,23px)/1.45 var(--body)}
+.medal{width:100px;height:100px;border-radius:50%;display:grid;place-items:center;border:1.5px solid var(--ink);box-shadow:inset 0 0 0 5px var(--paper-hi),inset 0 0 0 6.5px var(--ink)}
+.medal svg{width:58px;height:58px;font-size:2.2px}
+.medal.c0{background:var(--s0)} .medal.c2{background:var(--s2)} .medal.c3{background:var(--mint)} .medal.c4{background:var(--rose)} .medal.c5{background:var(--crystal)} .medal.c6{background:var(--s4)}
+.kind{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;margin:0 0 22px;font-size:15px}
+h3{margin:44px 0 14px;font:700 clamp(17px,2vw,20px)/1.25 var(--display);color:var(--slate);text-transform:uppercase;text-wrap:balance}
+.prose{max-width:66ch;margin:0 0 1em}
+
+.who{display:inline-block;padding:1px 8px;border:1.5px solid var(--ink);font:700 10.5px/1.7 var(--body);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;vertical-align:1px;background:var(--paper-hi)}
+.who.code{background:var(--mint)} .who.ai{background:var(--brass)}
+.who.s0c{background:var(--s0)} .who.s1c{background:var(--s1)} .who.s2c{background:var(--s2)} .who.s3c{background:var(--s3);color:var(--paper-hi)}
+
+/* ledger table */
+.ledger{position:relative;background:var(--paper-hi);border:1.5px solid var(--ink);padding:10px}
+.ledger::before{content:"";position:absolute;inset:5px;border:1px solid var(--ink);pointer-events:none}
+.ledger table{width:100%;border-collapse:collapse;position:relative}
+.ledger th,.ledger td{text-align:left;vertical-align:top;padding:14px 18px;border-top:1px solid var(--rule)}
+.ledger thead th{border-top:0;padding-block:14px 12px;font:600 11px/1.35 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.ledger tbody th{width:27%;font:600 14.5px/1.5 var(--body);color:var(--slate)}
+.ledger tbody th code{font-weight:600}
+.ledger td{font-size:15.5px;min-width:0}
+.ledger td:nth-child(2){width:22%;color:var(--muted);font-size:14.5px}
+.ledger tr>td:last-child{width:auto;color:var(--ink);font-size:15.5px}
+.quote{margin-top:10px;padding:10px 12px;background:var(--paper);border-left:3px solid var(--slate);font:400 12.5px/1.55 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere;max-height:17em;overflow:auto}
+.dlg.note{margin-top:26px;max-width:780px}
+.dlg.note ul{margin:0;padding-left:1.15em}
+.dlg.note li{margin:.35em 0}
+.tag{display:block;margin-bottom:6px;font:600 11.5px/1.3 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--slate)}
+.fn{margin:14px 0 0;max-width:68ch;font:500 italic 14px/1.5 var(--body);color:var(--muted)}
+
+/* the file sheet */
+.sheet{margin:26px 0 0;background:var(--paper-hi);border:1.5px solid var(--ink);box-shadow:4px 4px 0 rgb(45 49 68 / .14);min-width:0}
+.sheet figcaption{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:14px 20px;border-bottom:1px solid var(--rule)}
+.sheet figcaption b{font:700 14.5px/1.3 var(--display);color:var(--slate)}
+.sheet figcaption small{flex-basis:100%;font-size:13.5px;color:var(--muted)}
+.copy{margin-left:auto;font:700 11px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--ink);background:var(--paper);border:1.5px solid var(--ink);padding:8px 12px;cursor:pointer;box-shadow:2px 2px 0 rgb(45 49 68 / .18)}
+.copy:hover{background:var(--brass)}
+.copy:active{transform:translate(1px,1px);box-shadow:1px 1px 0 rgb(45 49 68 / .18)}
+.sheet pre{margin:0;padding:14px 0;overflow-x:auto;font:400 13px/1.62 var(--mono);color:var(--ink);tab-size:2}
+.sheet pre code{display:inline-block;min-width:100%;font:inherit;overflow-wrap:normal}
+.ln{display:block;white-space:pre;padding:0 20px 0 14px;border-left:6px solid transparent}
+.ln.s0{border-left-color:var(--s0)} .ln.s1{border-left-color:var(--s1)} .ln.s2{border-left-color:var(--s2)} .ln.s3{border-left-color:var(--s3)} .ln.s4{border-left-color:var(--s4)}
+.ln.new.s0{background:color-mix(in srgb,var(--s0) 24%,var(--paper-hi))}
+.ln.new.s1{background:color-mix(in srgb,var(--s1) 34%,var(--paper-hi))}
+.ln.new.s2{background:color-mix(in srgb,var(--s2) 28%,var(--paper-hi))}
+.ln.new.s3{background:color-mix(in srgb,var(--s3) 20%,var(--paper-hi))}
+.ln.new.s4{background:color-mix(in srgb,var(--s4) 18%,var(--paper-hi))}
+.ln.old .tx{color:var(--muted)}
+.ln.empty{border-left-style:dashed}
+.ln.empty .tx{color:rgb(45 49 68 / .5)}
+.k{font-weight:600;color:var(--slate)}
+.ln.old .k,.ln.empty .k{font-weight:500;color:inherit}
+.nt{margin-left:3ch;font:500 italic 12.5px/1 var(--body);color:var(--teal-dk);user-select:none;-webkit-user-select:none}
+.nt::before{content:"← "}
+.ln.empty .nt{color:var(--muted)}
+.plain pre{padding:14px 20px;white-space:pre;overflow-x:auto}
+.legend{list-style:none;display:flex;flex-wrap:wrap;gap:8px 20px;margin:16px 0 0;padding:0;font-size:14.5px}
+.legend.c{justify-content:center}
+.sw{display:inline-block;width:22px;height:12px;border:1.5px solid var(--ink);vertical-align:-1px;margin-right:6px}
+.sw.dash{background:none;border-style:dashed}
+
+/* hanging plaque */
+.hang{position:relative;width:fit-content;max-width:100%;margin:46px 0 0;padding-top:34px;transform-origin:50% 0}
+.hang::before{content:"";position:absolute;top:0;left:50%;width:1.5px;height:36px;background:var(--ink)}
+.hang::after{content:"";position:absolute;top:-5px;left:calc(50% - 4.25px);width:7px;height:7px;border-radius:50%;border:1.5px solid var(--ink);background:var(--paper-hi)}
+.plaque{position:relative;margin:0;max-width:32ch;padding:22px 32px;background:var(--slate);color:var(--paper-hi);font:700 clamp(16px,2.1vw,21px)/1.35 var(--display);text-wrap:balance;
+  -webkit-mask:radial-gradient(circle 12px at 0 0,#0000 98%,#000) top left/51% 51% no-repeat,radial-gradient(circle 12px at 100% 0,#0000 98%,#000) top right/51% 51% no-repeat,radial-gradient(circle 12px at 0 100%,#0000 98%,#000) bottom left/51% 51% no-repeat,radial-gradient(circle 12px at 100% 100%,#0000 98%,#000) bottom right/51% 51% no-repeat;
+          mask:radial-gradient(circle 12px at 0 0,#0000 98%,#000) top left/51% 51% no-repeat,radial-gradient(circle 12px at 100% 0,#0000 98%,#000) top right/51% 51% no-repeat,radial-gradient(circle 12px at 0 100%,#0000 98%,#000) bottom left/51% 51% no-repeat,radial-gradient(circle 12px at 100% 100%,#0000 98%,#000) bottom right/51% 51% no-repeat}
+.plaque::before{content:"";position:absolute;inset:6px;border:1px solid rgb(247 243 235 / .55);pointer-events:none}
+
+/* ending */
+.end{margin-top:clamp(72px,9vw,110px);background:var(--slate-dk);color:var(--paper-hi);padding-block:clamp(64px,10vw,120px) 44px}
+.disc{position:relative;isolation:isolate;width:min(600px,100%);aspect-ratio:1;max-width:100%;margin-inline:auto;display:grid;align-content:center;justify-items:center;text-align:center;padding:13%;color:var(--ink)}
+.disc::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:50%;background:var(--paper-hi);box-shadow:-3px 4px 0 rgb(0 0 0 / .2)}
+.disc svg{width:84px;height:auto;margin-bottom:10px;font-size:2.4px}
+.disc .part{margin-bottom:14px}
+.bl{margin:0;max-width:36ch;font:500 clamp(16px,2vw,19px)/1.55 var(--body)}
+.sources{max-width:780px;margin:72px auto 0}
+.sources h2{margin:0 0 14px;font:700 15px/1.3 var(--display);letter-spacing:.04em;text-transform:uppercase;color:var(--paper-hi)}
+.sources ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:0 32px}
+.sources li{min-width:0;padding:13px 0;border-top:1px solid rgb(247 243 235 / .22);overflow-wrap:anywhere}
+.sources small{display:block;font-size:12.5px;color:rgb(247 243 235 / .62)}
+.fine{margin:52px 0 0;text-align:center;font-size:13px;color:rgb(247 243 235 / .7)}
+
+@media (max-width:720px){
+  .ledger thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+  .ledger table,.ledger tbody,.ledger tr,.ledger th,.ledger td{display:block;width:auto}
+  .ledger tbody th,.ledger td:nth-child(2){width:auto}
+  .ledger tr{padding:16px 12px;border-top:1px solid var(--rule)}
+  .ledger tbody tr:first-child{border-top:0}
+  .ledger th,.ledger td{border:0;padding:0}
+  .ledger td{margin-top:10px}
+  .ledger td::before{content:attr(data-l);display:block;margin-bottom:2px;font:600 10.5px/1.4 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+}
+@media (max-width:600px){
+  .disc{aspect-ratio:auto;padding:56px 24px 44px}
+  .disc::before{border-radius:999px 999px 26px 26px / 190px 190px 26px 26px}
+  .copy{margin-left:0}
+}
+@media (max-width:520px){.head{grid-template-columns:minmax(0,1fr);row-gap:14px}.medal{width:84px;height:84px}.medal svg{width:48px;height:48px}}
+
+/* motion: the four sheets rise once on load; labels slide in */
+@media (prefers-reduced-motion:no-preference){
+  .mini{animation:rise .9s var(--ease) both;animation-delay:calc(.15s + var(--i) * 140ms)}
+  @keyframes rise{from{opacity:0;transform:translateY(12px)}}
+  .label{transition:transform .9s var(--ease)}
+  .js .label-row:not(.in) .label{transform:translateX(-44px)}
+  .hang{animation:pend 7s ease-in-out infinite}
+  @keyframes pend{0%,100%{transform:rotate(-.9deg)}50%{transform:rotate(.9deg)}}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<style>
+.ln.mk-list{border-left-color:var(--brass);background:color-mix(in srgb,var(--brass) 26%,var(--paper-hi))}
+.ln.mk-span{border-left-color:var(--clay);background:color-mix(in srgb,var(--clay) 22%,var(--paper-hi))}
+.ln.mk-price{border-left-color:var(--teal);background:color-mix(in srgb,var(--teal) 24%,var(--paper-hi))}
+.ln.mk-null{border-left-color:var(--clay);border-left-style:dashed}
+.ln.mk-null .tx{color:var(--clay)}
+.sw.list{background:var(--brass)} .sw.span{background:color-mix(in srgb,var(--clay) 60%,var(--paper-hi))}
+.sw.price{background:var(--teal)} .sw.null{background:none;border-style:dashed;border-color:var(--clay)}
+.sw.old{background:var(--paper-hi)}
+</style>
+
+<svg class="art" width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-page" viewBox="0 0 80 80">
+    <path class="ro" d="M24 16h26l12 12v40H24z" transform="rotate(7 43 42)"/>
+    <path class="pa" d="M18 12h28l12 12v44H18z"/>
+    <path class="th" d="M46 12v12h12"/>
+    <path class="th" d="M26 34h8M38 34h14M26 44h8M38 44h14M26 54h8M38 54h10"/>
+  </symbol>
+  <symbol id="i-sort" viewBox="0 0 80 80">
+    <path class="pa" d="M12 20h56l-6 14H18z"/>
+    <path class="mi" d="M12 38h56l-6 14H18z"/>
+    <path class="br" d="M12 56h56l-6 14H18z"/>
+    <path class="th" d="M30 27h20M30 45h20M30 63h20"/>
+    <path d="M40 6v8M36 11l4 4 4-4"/>
+  </symbol>
+  <symbol id="i-tag" viewBox="0 0 80 80">
+    <path class="br" d="M14 40l26-26h26v26L40 66z"/>
+    <circle class="pa" cx="55" cy="25" r="5"/>
+    <path class="th" d="M30 44l10 10M36 38l10 10"/>
+    <path d="M58 22c8-10 14-8 16-2"/>
+  </symbol>
+  <symbol id="i-talk" viewBox="0 0 80 80">
+    <path class="pa" d="M12 16h56v36H40L26 66V52H12z"/>
+    <path class="th" d="M22 28h36M22 38h24"/>
+    <circle class="br" cx="58" cy="38" r="4"/>
+  </symbol>
+  <symbol id="i-scale" viewBox="0 0 80 80">
+    <path d="M40 14v50M24 64h32"/>
+    <path d="M14 24h52"/>
+    <path class="pa" d="M6 44l8-20l8 20z"/>
+    <path class="br" d="M58 50l8-26l8 26z"/>
+    <circle class="ink ns" cx="40" cy="14" r="3"/>
+  </symbol>
+  <symbol id="i-screen" viewBox="0 0 80 80">
+    <rect class="pa" x="10" y="14" width="60" height="42"/>
+    <rect class="mi" x="18" y="22" width="20" height="26"/>
+    <path class="th" d="M44 26h18M44 35h18M44 44h10"/>
+    <path d="M30 66h20M40 56v10"/>
+  </symbol>
+</svg>
+
+<header class="hero wrap">
+  <h1 class="title">LV Price Span</h1>
+  <p class="eyebrow">For the frontend team · what step 3 writes now for reference and none</p>
+  <div class="dlg">
+    <p><strong>Two methods changed.</strong> A <code>reference</code> item now gets a suggested price (Vorschlagspreis): the middle price of the related past items, in <code>median</code>, counted in the total. A <code>none</code> item still gets no price and confidence 0, but <code>min</code> and <code>max</code> now hold a span: the lowest and highest price of the 3 nearest past items in <code>judged</code>.</p>
+    <p>Every value on this page is real: P5, re-scored from its saved run with the new rules, without asking any AI model again.</p>
+  </div>
+  <ul class="legend c">
+    <li><span class="sw list"></span>the list the numbers come from</li>
+    <li><span class="sw span"></span>the prices that make min and max</li>
+    <li><span class="sw price"></span>the suggested price and what it changes</li>
+    <li><span class="sw null"></span>no price</li>
+    <li><span class="sw old"></span>unchanged</li>
+  </ul>
+</header>
+
+<main>
+  <section class="ch wrap" aria-labelledby="c1">
+    <div class="label-row"><div class="label"><span class="part">Part 1 · none</span><h2 id="c1">No price, only a span</h2></div></div>
+    <div class="head"><p class="lead">“Wasserhaltung Bach bis 150 l/s”: the judge found nothing the same. The 3 nearest past items span €350 to €2,150, so the screen shows that span and no price.</p><div class="medal c4" aria-hidden="true"><svg class="art" viewBox="0 0 80 80"><use href="#i-scale"/></svg></div></div>
+    <p class="kind"><span class="who ai">AI</span><span class="who code">Code</span> The judge gives each candidate a verdict. Code takes the 3 it keeps in <code>judged</code> and writes their lowest and highest price.</p>
+    <h3>What a none item holds</h3>
+    <div class="ledger"><table><thead><tr><th scope="col">Field</th><th scope="col">Type</th><th scope="col">Meaning</th></tr></thead><tbody><tr><th scope="row"><code>judged[]</code></th><td data-l="Type">array of 3 sources</td><td data-l="Meaning">The 3 nearest past items, best first, each with the judge's <code>why</code>. For none, every verdict is <code>different</code>.</td></tr><tr><th scope="row"><code>min</code>, <code>max</code></th><td data-l="Type">number or null</td><td data-l="Meaning"><strong>The span:</strong> the lowest and the highest <code>unit_price</code> in <code>judged</code>. Null when <code>judged</code> is empty.</td></tr><tr><th scope="row"><code>count</code></th><td data-l="Type">integer</td><td data-l="Meaning">How many prices make the span, here 3.</td></tr><tr><th scope="row"><code>median</code>, <code>mean</code></th><td data-l="Type">null</td><td data-l="Meaning">No price. The item adds nothing to <code>summary.total</code>.</td></tr><tr><th scope="row"><code>risk.confidence</code></th><td data-l="Type">0</td><td data-l="Meaning">Every item without a price has confidence 0.</td></tr><tr><th scope="row"><code>risk.price_reason</code></th><td data-l="Type">string</td><td data-l="Meaning">Says the span in words, e.g. “… their prices span 350.00 to 2150.00.”</td></tr></tbody></table></div>
+    <figure class="sheet"><figcaption><b>One “none” item: P5/02.0016</b><button class="copy" type="button" data-copy="f1">Copy JSON</button><small>Yellow: the list the span comes from. Red: the prices that make the span, and min and max. Dashed red: no price. Grey lines are unchanged.</small></figcaption><pre id="f1" tabindex="0"><code><span class="ln s0 old"><span class="tx">{</span><span class="nt">1 of P5&#x27;s 50 items, as saved under items[]</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;id&quot;</b>: &quot;P5/02.0016&quot;,</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;oz&quot;</b>: &quot;02.0016&quot;,</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;section&quot;</b>: [</span></span><span class="ln s0 old"><span class="tx">    &quot;02 Tiefbauarbeiten&quot;</span></span><span class="ln s0 old"><span class="tx">  ],</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;short_text&quot;</b>: &quot;Wasserhaltung Bach bis 150 l/s&quot;,</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;long_text&quot;</b>: &quot;Wasserhaltung Bach, nach [PERSON_125] AN durchführen, Wasserhaltung durch [PERSON_139] oder Umleitung mittels Ableitungskanal, Länge Ableitungskanal bis 10 m. Ableitungskanal erstellen, vorhalten und abbauen, sämtliches Material bleibt im Eigentum des AN. Förder- bzw. Umleitungsmenge bis 150 l/s.&quot;,</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;quantity&quot;</b>: 1.0,</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;unit&quot;</b>: &quot;psch&quot;,</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;unit_price&quot;</b>: null,</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;total_price&quot;</b>: null,</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;kind&quot;</b>: &quot;normal&quot;,</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;read_by&quot;</b>: &quot;gaeb&quot;,</span></span><span class="ln s1 old"><span class="tx">  <b class="k">&quot;group&quot;</b>: &quot;e3b5d57e6fe0&quot;,</span></span><span class="ln s2 old"><span class="tx">  <b class="k">&quot;item_type&quot;</b>: &quot;Wasserhaltung&quot;,</span></span><span class="ln s2 old"><span class="tx">  <b class="k">&quot;trade&quot;</b>: &quot;Wasserhaltung&quot;,</span></span><span class="ln s2 old"><span class="tx">  <b class="k">&quot;item_type_reason&quot;</b>: &quot;Stream water diversion via a discharge channel for flow up to 150 l/s.&quot;,</span></span><span class="ln s3 old"><span class="tx">  <b class="k">&quot;prediction&quot;</b>: {</span></span><span class="ln s3 old"><span class="tx">    <b class="k">&quot;method&quot;</b>: &quot;none&quot;,</span><span class="nt">the judge called all 5 candidates different</span></span><span class="ln s3 mk-span"><span class="tx">    <b class="k">&quot;min&quot;</b>: 350.0,</span><span class="nt">the lowest unit_price in judged</span></span><span class="ln s3 mk-span"><span class="tx">    <b class="k">&quot;max&quot;</b>: 2150.0,</span><span class="nt">the highest unit_price in judged</span></span><span class="ln s3 mk-null"><span class="tx">    <b class="k">&quot;median&quot;</b>: null,</span><span class="nt">no price: not counted in any total</span></span><span class="ln s3 mk-null"><span class="tx">    <b class="k">&quot;mean&quot;</b>: null,</span></span><span class="ln s3 old"><span class="tx">    <b class="k">&quot;count&quot;</b>: 3,</span><span class="nt">3 prices behind the span</span></span><span class="ln s3 old"><span class="tx">    <b class="k">&quot;sources&quot;</b>: [],</span><span class="nt">empty: nothing the same was found</span></span><span class="ln s3 old"><span class="tx">    <b class="k">&quot;rule&quot;</b>: null,</span></span><span class="ln s3 old"><span class="tx">    <b class="k">&quot;calculation&quot;</b>: null,</span></span><span class="ln s3 old"><span class="tx">    <b class="k">&quot;result&quot;</b>: null,</span></span><span class="ln s3 old"><span class="tx">    <b class="k">&quot;reason&quot;</b>: &quot;None of the candidates is a stream water management item; all are different kinds of work.&quot;,</span></span><span class="ln s3 mk-list"><span class="tx">    <b class="k">&quot;judged&quot;</b>: [</span><span class="nt">the 3 nearest past items, best first, each with its why</span></span><span class="ln s3 mk-list"><span class="tx">      {</span></span><span class="ln s3 mk-list"><span class="tx">        <b class="k">&quot;id&quot;</b>: &quot;P3/1.1.80&quot;,</span></span><span class="ln s3 mk-list"><span class="tx">        <b class="k">&quot;short_text&quot;</b>: &quot;Verkehrssicherung Umleitung&quot;,</span></span><span class="ln s3 mk-span"><span class="tx">        <b class="k">&quot;unit_price&quot;</b>: 1200.0,</span></span><span class="ln s3 mk-list"><span class="tx">        <b class="k">&quot;verdict&quot;</b>: &quot;different&quot;,</span></span><span class="ln s3 mk-list"><span class="tx">        <b class="k">&quot;difference&quot;</b>: &quot;traffic safety/diversion vs stream water diversion&quot;,</span></span><span class="ln s3 mk-list"><span class="tx">        <b class="k">&quot;why&quot;</b>: &quot;Traffic management is a different kind of work than water diversion for a stream.&quot;</span></span><span class="ln s3 mk-list"><span class="tx">      },</span></span><span class="ln s3 mk-list"><span class="tx">      {</span></span><span class="ln s3 mk-list"><span class="tx">        <b class="k">&quot;id&quot;</b>: &quot;P2/08.02.0004&quot;,</span></span><span class="ln s3 mk-list"><span class="tx">        <b class="k">&quot;short_text&quot;</b>: &quot;Entleerung + Außerbetriebnahme + Wiederinbetriebnahme&quot;,</span></span><span class="ln s3 mk-span"><span class="tx">        <b class="k">&quot;unit_price&quot;</b>: 350.0,</span><span class="nt">→ min</span></span><span class="ln s3 mk-list"><span class="tx">        <b class="k">&quot;verdict&quot;</b>: &quot;different&quot;,</span></span><span class="ln s3 mk-list"><span class="tx">        <b class="k">&quot;difference&quot;</b>: &quot;pipe decommissioning and draining vs stream water management&quot;,</span></span><span class="ln s3 mk-list"><span class="tx">        <b class="k">&quot;why&quot;</b>: &quot;Taking a water pipe out of service and draining it is not a stream water diversion.&quot;</span></span><span class="ln s3 mk-list"><span class="tx">      },</span></span><span class="ln s3 mk-list"><span class="tx">      {</span></span><span class="ln s3 mk-list"><span class="tx">        <b class="k">&quot;id&quot;</b>: &quot;P1/02.02.3&quot;,</span></span><span class="ln s3 mk-list"><span class="tx">        <b class="k">&quot;short_text&quot;</b>: &quot;Entwässerungscontainer und Beprobung nach DepV&quot;,</span></span><span class="ln s3 mk-span"><span class="tx">        <b class="k">&quot;unit_price&quot;</b>: 2150.0,</span><span class="nt">→ max</span></span><span class="ln s3 mk-list"><span class="tx">        <b class="k">&quot;verdict&quot;</b>: &quot;different&quot;,</span></span><span class="ln s3 mk-list"><span class="tx">        <b class="k">&quot;difference&quot;</b>: &quot;disposal containers and analysis vs water management&quot;,</span></span><span class="ln s3 mk-list"><span class="tx">        <b class="k">&quot;why&quot;</b>: &quot;Waste containers and sample analysis are unrelated to stream water diversion.&quot;</span></span><span class="ln s3 mk-list"><span class="tx">      }</span></span><span class="ln s3 mk-list"><span class="tx">    ],</span></span><span class="ln s3 old"><span class="tx">    <b class="k">&quot;judged_item&quot;</b>: null,</span></span><span class="ln s3 old"><span class="tx">    <b class="k">&quot;judge_call&quot;</b>: 10</span></span><span class="ln s3 old"><span class="tx">  },</span></span><span class="ln s4 old"><span class="tx">  <b class="k">&quot;risk&quot;</b>: {</span></span><span class="ln s4 old"><span class="tx">    <b class="k">&quot;score&quot;</b>: 80,</span></span><span class="ln s4 mk-null"><span class="tx">    <b class="k">&quot;confidence&quot;</b>: 0,</span><span class="nt">0: an item without a price</span></span><span class="ln s4 old"><span class="tx">    <b class="k">&quot;price_risk&quot;</b>: 100,</span></span><span class="ln s4 mk-span"><span class="tx">    <b class="k">&quot;price_reason&quot;</b>: &quot;No comparable past item was found. No price. The nearest past items differ; their prices span 350.00 to 2150.00.&quot;,</span><span class="nt">the span in words, for the screen</span></span><span class="ln s4 old"><span class="tx">    <b class="k">&quot;description&quot;</b>: &quot;gaps&quot;,</span></span><span class="ln s4 old"><span class="tx">    <b class="k">&quot;description_risk&quot;</b>: 50,</span></span><span class="ln s4 old"><span class="tx">    <b class="k">&quot;missing&quot;</b>: [</span></span><span class="ln s4 old"><span class="tx">      &quot;duration of water retention&quot;,</span></span><span class="ln s4 old"><span class="tx">      &quot;diversion channel cross-section&quot;</span></span><span class="ln s4 old"><span class="tx">    ],</span></span><span class="ln s4 old"><span class="tx">    <b class="k">&quot;description_reason&quot;</b>: &quot;Flow rate and channel length are given, but holding duration and channel size must be assumed.&quot;,</span></span><span class="ln s4 old"><span class="tx">    <b class="k">&quot;value&quot;</b>: 1194.0,</span></span><span class="ln s4 old"><span class="tx">    <b class="k">&quot;value_basis&quot;</b>: &quot;assumed&quot;</span><span class="nt">no price, so it weighs as a typical item</span></span><span class="ln s4 old"><span class="tx">  },</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;comments&quot;</b>: [],</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;plan&quot;</b>: null</span></span><span class="ln s0 old"><span class="tx">}</span></span></code></pre></figure>
+    <p class="fn">The span stays empty when the judge was not asked (<code>--copy-only</code>), when no past item has the same unit, or when the judge gave no answer: then <code>judged</code> is empty and <code>min</code> and <code>max</code> are null.</p>
+    <div class="dlg note">
+      <span class="tag">Read the span with care</span>
+      <ul>
+        <li>The 3 items are the nearest by text and meaning, but the judge called each one a different thing. Their prices are a hint, not an estimate.</li>
+        <li>In H1 (a building priced from civil-engineering projects) the span of “Betonstahl B500B”, per tonne, is €0.95 to €182: from a binder and asphalt mixes. Show the 3 items next to the span so the estimator sees where it comes from.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="ch wrap" aria-labelledby="c2">
+    <div class="label-row"><div class="label"><span class="part">Part 2 · reference</span><h2 id="c2">A suggested price</h2></div></div>
+    <div class="head"><p class="lead">“Verkehrsregelung und -sicherung”: two related past items cost €1,200 and €3,800. Their middle, €2,500, is the suggested price.</p><div class="medal c3" aria-hidden="true"><svg class="art" viewBox="0 0 80 80"><use href="#i-tag"/></svg></div></div>
+    <p class="kind"><span class="who ai">AI</span><span class="who code">Code</span> The judge calls the past items <code>size_only</code> or <code>type_only</code>. Code takes the median of their prices, as for <code>similar</code>.</p>
+    <h3>What a reference item holds now</h3>
+    <div class="ledger"><table><thead><tr><th scope="col">Field</th><th scope="col">Type</th><th scope="col">Meaning</th></tr></thead><tbody><tr><th scope="row"><code>median</code></th><td data-l="Type">number</td><td data-l="Meaning"><strong>The suggested price</strong>, per unit: the middle price of <code>sources</code>. Counted in <code>summary.total</code>.</td></tr><tr><th scope="row"><code>min</code>, <code>max</code>, <code>mean</code>, <code>count</code></th><td data-l="Type">number; integer</td><td data-l="Meaning">Range, average and number of the related prices.</td></tr><tr><th scope="row"><code>sources[]</code></th><td data-l="Type">array of sources</td><td data-l="Meaning">The related past items, at most 3: the same kind, another size or type.</td></tr><tr><th scope="row"><code>risk.confidence</code></th><td data-l="Type">integer</td><td data-l="Meaning">100 − score, now that the item has a price. Price risk stays 75, the highest of all priced methods, so confidence stays low: 35 here.</td></tr></tbody></table></div>
+    <figure class="sheet"><figcaption><b>One “reference” item: P5/01.0002</b><button class="copy" type="button" data-copy="f2">Copy JSON</button><small>Yellow: the related past items. Red: their prices, min and max. Green: the suggested price and what it changes.</small></figcaption><pre id="f2" tabindex="0"><code><span class="ln s0 old"><span class="tx">{</span><span class="nt">1 of P5&#x27;s 50 items, as saved under items[]</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;id&quot;</b>: &quot;P5/01.0002&quot;,</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;oz&quot;</b>: &quot;01.0002&quot;,</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;section&quot;</b>: [</span></span><span class="ln s0 old"><span class="tx">    &quot;01 Baustelleneinrichtung und -räumung&quot;</span></span><span class="ln s0 old"><span class="tx">  ],</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;short_text&quot;</b>: &quot;Verkehrsregelung und -sicherung&quot;,</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;long_text&quot;</b>: &quot;Verkehrszeichen und Beschilderungen nach den Vorgaben der verkehrsrechtlichen Anordnung liefern, aufstellen, vorhalten und abbauen, verkehrsrechtliche Genehmigung beantragen, Baustelle den Vorschriften entsprechend fortwährend sichern. Gefahrenquellen nachts, nach sicherheitstechnischen Vorgaben, beleuchten. Abrechnung einmalig für die Dauer der gesamten Bauzeit.&quot;,</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;quantity&quot;</b>: 1.0,</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;unit&quot;</b>: &quot;psch&quot;,</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;unit_price&quot;</b>: null,</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;total_price&quot;</b>: null,</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;kind&quot;</b>: &quot;normal&quot;,</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;read_by&quot;</b>: &quot;gaeb&quot;,</span></span><span class="ln s1 old"><span class="tx">  <b class="k">&quot;group&quot;</b>: &quot;b21ac1a19110&quot;,</span></span><span class="ln s2 old"><span class="tx">  <b class="k">&quot;item_type&quot;</b>: &quot;Verkehrssicherung&quot;,</span></span><span class="ln s2 old"><span class="tx">  <b class="k">&quot;trade&quot;</b>: &quot;Verkehrssicherung&quot;,</span></span><span class="ln s2 old"><span class="tx">  <b class="k">&quot;item_type_reason&quot;</b>: &quot;Traffic signs and signage per traffic order, with securing of the construction site.&quot;,</span></span><span class="ln s3 old"><span class="tx">  <b class="k">&quot;prediction&quot;</b>: {</span></span><span class="ln s3 old"><span class="tx">    <b class="k">&quot;method&quot;</b>: &quot;reference&quot;,</span><span class="nt">related past items, none the same</span></span><span class="ln s3 mk-span"><span class="tx">    <b class="k">&quot;min&quot;</b>: 1200.0,</span><span class="nt">the lowest related price</span></span><span class="ln s3 mk-span"><span class="tx">    <b class="k">&quot;max&quot;</b>: 3800.0,</span><span class="nt">the highest related price</span></span><span class="ln s3 mk-price"><span class="tx">    <b class="k">&quot;median&quot;</b>: 2500.0,</span><span class="nt">the suggested price (Vorschlagspreis), counted in the total</span></span><span class="ln s3 mk-price"><span class="tx">    <b class="k">&quot;mean&quot;</b>: 2500.0,</span></span><span class="ln s3 old"><span class="tx">    <b class="k">&quot;count&quot;</b>: 2,</span><span class="nt">number of related prices behind it</span></span><span class="ln s3 mk-list"><span class="tx">    <b class="k">&quot;sources&quot;</b>: [</span><span class="nt">same kind of thing, another size or type</span></span><span class="ln s3 mk-list"><span class="tx">      {</span></span><span class="ln s3 mk-list"><span class="tx">        <b class="k">&quot;id&quot;</b>: &quot;P3/1.1.70&quot;,</span></span><span class="ln s3 mk-list"><span class="tx">        <b class="k">&quot;short_text&quot;</b>: &quot;Verkehrssicherung Arbeitsstelle&quot;,</span></span><span class="ln s3 mk-span"><span class="tx">        <b class="k">&quot;unit_price&quot;</b>: 3800.0,</span><span class="nt">→ max</span></span><span class="ln s3 mk-list"><span class="tx">        <b class="k">&quot;verdict&quot;</b>: &quot;type_only&quot;,</span></span><span class="ln s3 mk-list"><span class="tx">        <b class="k">&quot;difference&quot;</b>: &quot;permit application excluded (paid separately) vs included in new item&quot;,</span></span><span class="ln s3 mk-list"><span class="tx">        <b class="k">&quot;why&quot;</b>: &quot;Same kind of traffic safety, but the scope differs: the candidate excludes the traffic order, the new item includes it.&quot;</span></span><span class="ln s3 mk-list"><span class="tx">      },</span></span><span class="ln s3 mk-list"><span class="tx">      {</span></span><span class="ln s3 mk-list"><span class="tx">        <b class="k">&quot;id&quot;</b>: &quot;P3/1.1.80&quot;,</span></span><span class="ln s3 mk-list"><span class="tx">        <b class="k">&quot;short_text&quot;</b>: &quot;Verkehrssicherung Umleitung&quot;,</span></span><span class="ln s3 mk-span"><span class="tx">        <b class="k">&quot;unit_price&quot;</b>: 1200.0,</span><span class="nt">→ min</span></span><span class="ln s3 mk-list"><span class="tx">        <b class="k">&quot;verdict&quot;</b>: &quot;type_only&quot;,</span></span><span class="ln s3 mk-list"><span class="tx">        <b class="k">&quot;difference&quot;</b>: &quot;detour safety with signal system and guide elements vs signs and permit&quot;,</span></span><span class="ln s3 mk-list"><span class="tx">        <b class="k">&quot;why&quot;</b>: &quot;Traffic safety, but a detour setup with signals and guide elements differs in scope from signage plus permit.&quot;</span></span><span class="ln s3 mk-list"><span class="tx">      }</span></span><span class="ln s3 mk-list"><span class="tx">    ],</span></span><span class="ln s3 old"><span class="tx">    <b class="k">&quot;rule&quot;</b>: null,</span></span><span class="ln s3 old"><span class="tx">    <b class="k">&quot;calculation&quot;</b>: null,</span></span><span class="ln s3 old"><span class="tx">    <b class="k">&quot;result&quot;</b>: null,</span></span><span class="ln s3 old"><span class="tx">    <b class="k">&quot;reason&quot;</b>: &quot;No candidate matches fully; P3/1.1.70 and P3/1.1.80 are related traffic safety items with different scope, the others are different work.&quot;,</span></span><span class="ln s3 old"><span class="tx">    <b class="k">&quot;judged&quot;</b>: [</span><span class="nt">the same items as the judge saw them</span></span><span class="ln s3 old"><span class="tx">      {</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;id&quot;</b>: &quot;P3/1.1.70&quot;,</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;short_text&quot;</b>: &quot;Verkehrssicherung Arbeitsstelle&quot;,</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;unit_price&quot;</b>: 3800.0,</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;verdict&quot;</b>: &quot;type_only&quot;,</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;difference&quot;</b>: &quot;permit application excluded (paid separately) vs included in new item&quot;,</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;why&quot;</b>: &quot;Same kind of traffic safety, but the scope differs: the candidate excludes the traffic order, the new item includes it.&quot;</span></span><span class="ln s3 old"><span class="tx">      },</span></span><span class="ln s3 old"><span class="tx">      {</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;id&quot;</b>: &quot;P3/1.1.80&quot;,</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;short_text&quot;</b>: &quot;Verkehrssicherung Umleitung&quot;,</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;unit_price&quot;</b>: 1200.0,</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;verdict&quot;</b>: &quot;type_only&quot;,</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;difference&quot;</b>: &quot;detour safety with signal system and guide elements vs signs and permit&quot;,</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;why&quot;</b>: &quot;Traffic safety, but a detour setup with signals and guide elements differs in scope from signage plus permit.&quot;</span></span><span class="ln s3 old"><span class="tx">      },</span></span><span class="ln s3 old"><span class="tx">      {</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;id&quot;</b>: &quot;P1/01.01.1&quot;,</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;short_text&quot;</b>: &quot;Baustelleneinrichtung und -räumung&quot;,</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;unit_price&quot;</b>: 5700.0,</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;verdict&quot;</b>: &quot;different&quot;,</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;difference&quot;</b>: &quot;site setup and clearance, not traffic safety&quot;,</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;why&quot;</b>: &quot;Site setup and clearance is a different work item from traffic signs and traffic control.&quot;</span></span><span class="ln s3 old"><span class="tx">      }</span></span><span class="ln s3 old"><span class="tx">    ],</span></span><span class="ln s3 old"><span class="tx">    <b class="k">&quot;judged_item&quot;</b>: null,</span></span><span class="ln s3 old"><span class="tx">    <b class="k">&quot;judge_call&quot;</b>: 2</span></span><span class="ln s3 old"><span class="tx">  },</span></span><span class="ln s4 old"><span class="tx">  <b class="k">&quot;risk&quot;</b>: {</span></span><span class="ln s4 old"><span class="tx">    <b class="k">&quot;score&quot;</b>: 65,</span></span><span class="ln s4 mk-price"><span class="tx">    <b class="k">&quot;confidence&quot;</b>: 35,</span><span class="nt">100 − score: it has a price now</span></span><span class="ln s4 old"><span class="tx">    <b class="k">&quot;price_risk&quot;</b>: 75,</span></span><span class="ln s4 mk-price"><span class="tx">    <b class="k">&quot;price_reason&quot;</b>: &quot;Only related past items were found, none the same: the price is their middle price.&quot;,</span></span><span class="ln s4 old"><span class="tx">    <b class="k">&quot;description&quot;</b>: &quot;gaps&quot;,</span></span><span class="ln s4 old"><span class="tx">    <b class="k">&quot;description_risk&quot;</b>: 50,</span></span><span class="ln s4 old"><span class="tx">    <b class="k">&quot;missing&quot;</b>: [</span></span><span class="ln s4 old"><span class="tx">      &quot;construction duration&quot;,</span></span><span class="ln s4 old"><span class="tx">      &quot;content of traffic order (signs, lighting)&quot;</span></span><span class="ln s4 old"><span class="tx">    ],</span></span><span class="ln s4 old"><span class="tx">    <b class="k">&quot;description_reason&quot;</b>: &quot;Services are listed, but signage scope and duration depend on a traffic order and the construction period, which are not given.&quot;,</span></span><span class="ln s4 mk-price"><span class="tx">    <b class="k">&quot;value&quot;</b>: 2500.0,</span><span class="nt">suggested price × quantity</span></span><span class="ln s4 mk-price"><span class="tx">    <b class="k">&quot;value_basis&quot;</b>: &quot;price&quot;</span><span class="nt">was &quot;reference&quot; before</span></span><span class="ln s4 old"><span class="tx">  },</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;comments&quot;</b>: [],</span></span><span class="ln s0 old"><span class="tx">  <b class="k">&quot;plan&quot;</b>: null</span></span><span class="ln s0 old"><span class="tx">}</span></span></code></pre></figure>
+  </section>
+
+  <section class="ch wrap" aria-labelledby="c3">
+    <div class="label-row"><div class="label"><span class="part">Part 3 · The whole LV</span><h2 id="c3">What it does to P5</h2></div></div>
+    <div class="head"><p class="lead">33 of P5's 50 items are reference items. With a suggested price each, the project total rises from €10,952 to €153,267.46.</p><div class="medal c5" aria-hidden="true"><svg class="art" viewBox="0 0 80 80"><use href="#i-sort"/></svg></div></div>
+    <p class="kind"><span class="who code">Code</span> Totals and confidence are arithmetic on the saved items. No AI is involved.</p>
+    <h3>Before and after</h3>
+    <div class="ledger"><table><thead><tr><th scope="col">Method</th><th scope="col">Items</th><th scope="col">Total before</th><th scope="col">Total after</th></tr></thead><tbody><tr><th scope="row"><code>copied</code></th><td data-l="Items">0</td><td data-l="Total before">€0</td><td data-l="Total after">€0</td></tr><tr><th scope="row"><code>similar</code></th><td data-l="Items">5</td><td data-l="Total before">€10,952</td><td data-l="Total after">€10,952</td></tr><tr><th scope="row"><code>adjusted</code></th><td data-l="Items">0</td><td data-l="Total before">€0</td><td data-l="Total after">€0</td></tr><tr><th scope="row"><code>reference</code></th><td data-l="Items">33</td><td data-l="Total before">€0</td><td data-l="Total after">€142,315.46</td></tr><tr><th scope="row"><code>none</code></th><td data-l="Items">12</td><td data-l="Total before">€0</td><td data-l="Total after">€0</td></tr><tr><th scope="row"><strong>Project total</strong></th><td data-l="Items">50</td><td data-l="Total before"><strong>€10,952</strong></td><td data-l="Total after"><strong>€153,267.46</strong></td></tr><tr><th scope="row"><strong>Confidence of the LV</strong></th><td data-l="Items"></td><td data-l="Total before">5 of 100</td><td data-l="Total after"><strong>47 of 100</strong></td></tr></tbody></table></div>
+    <figure class="sheet"><figcaption><b>P5’s summary and risk summary, after</b><button class="copy" type="button" data-copy="f3">Copy JSON</button><small>Green: what the reference items add. The none items still add nothing.</small></figcaption><pre id="f3" tabindex="0"><code><span class="ln s0 old"><span class="tx">{</span></span><span class="ln s3 old"><span class="tx">  <b class="k">&quot;summary&quot;</b>: {</span></span><span class="ln s3 old"><span class="tx">    <b class="k">&quot;methods&quot;</b>: {</span></span><span class="ln s3 old"><span class="tx">      <b class="k">&quot;copied&quot;</b>: {</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;items&quot;</b>: 0,</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;total&quot;</b>: 0.0</span></span><span class="ln s3 old"><span class="tx">      },</span></span><span class="ln s3 old"><span class="tx">      <b class="k">&quot;similar&quot;</b>: {</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;items&quot;</b>: 5,</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;total&quot;</b>: 10952.0</span></span><span class="ln s3 old"><span class="tx">      },</span></span><span class="ln s3 old"><span class="tx">      <b class="k">&quot;adjusted&quot;</b>: {</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;items&quot;</b>: 0,</span></span><span class="ln s3 old"><span class="tx">        <b class="k">&quot;total&quot;</b>: 0.0</span></span><span class="ln s3 old"><span class="tx">      },</span></span><span class="ln s3 mk-price"><span class="tx">      <b class="k">&quot;reference&quot;</b>: {</span><span class="nt">33 items, each its suggested price × quantity</span></span><span class="ln s3 mk-price"><span class="tx">        <b class="k">&quot;items&quot;</b>: 33,</span></span><span class="ln s3 mk-price"><span class="tx">        <b class="k">&quot;total&quot;</b>: 142315.46</span></span><span class="ln s3 mk-price"><span class="tx">      },</span></span><span class="ln s3 mk-null"><span class="tx">      <b class="k">&quot;none&quot;</b>: {</span><span class="nt">no price, so 0 in the total</span></span><span class="ln s3 mk-null"><span class="tx">        <b class="k">&quot;items&quot;</b>: 12,</span></span><span class="ln s3 mk-null"><span class="tx">        <b class="k">&quot;total&quot;</b>: 0.0</span></span><span class="ln s3 mk-null"><span class="tx">      }</span></span><span class="ln s3 old"><span class="tx">    },</span></span><span class="ln s3 mk-price"><span class="tx">    <b class="k">&quot;total&quot;</b>: 153267.46</span><span class="nt">was €10,952</span></span><span class="ln s3 old"><span class="tx">  },</span></span><span class="ln s4 old"><span class="tx">  <b class="k">&quot;risk_summary&quot;</b>: {</span></span><span class="ln s4 old"><span class="tx">    <b class="k">&quot;score&quot;</b>: 51,</span></span><span class="ln s4 mk-price"><span class="tx">    <b class="k">&quot;confidence&quot;</b>: 47,</span><span class="nt">was 5</span></span><span class="ln s4 old"><span class="tx">    <b class="k">&quot;value&quot;</b>: 167595.46,</span></span><span class="ln s4 mk-price"><span class="tx">    <b class="k">&quot;basis&quot;</b>: {</span><span class="nt">was {&quot;price&quot;: 5, &quot;reference&quot;: 33, &quot;assumed&quot;: 12}</span></span><span class="ln s4 mk-price"><span class="tx">      <b class="k">&quot;price&quot;</b>: 38,</span></span><span class="ln s4 mk-price"><span class="tx">      <b class="k">&quot;reference&quot;</b>: 0,</span></span><span class="ln s4 mk-price"><span class="tx">      <b class="k">&quot;assumed&quot;</b>: 12</span></span><span class="ln s4 mk-price"><span class="tx">    }</span></span><span class="ln s4 old"><span class="tx">  }</span></span><span class="ln s0 old"><span class="tx">}</span></span></code></pre></figure>
+    <h3>What each method means for the screen</h3>
+    <div class="ledger"><table><thead><tr><th scope="col">Method</th><th scope="col">When</th><th scope="col">Show</th></tr></thead><tbody><tr><th scope="row"><code>copied</code></th><td data-l="When">A past item is word for word identical.</td><td data-l="Show"><code>median</code> as the price, marked exact.</td></tr><tr><th scope="row"><code>similar</code></th><td data-l="When">The judge called at least one past item the same thing.</td><td data-l="Show"><code>median</code> as the price, with every source.</td></tr><tr><th scope="row"><code>adjusted</code></th><td data-l="When">The same thing exists in a smaller and a larger size. Code interpolates.</td><td data-l="Show"><code>median</code>, both sources and <code>calculation</code>.</td></tr><tr><th scope="row"><code>reference</code> <span class="who s3c">changed</span></th><td data-l="When">Only related past items: the same kind, another size or type.</td><td data-l="Show"><code>median</code> as the suggested price, the <code>sources</code> as “related, not the same”, and <code>min</code>–<code>max</code> as their range.</td></tr><tr><th scope="row"><code>none</code> <span class="who s1c">changed</span></th><td data-l="When">The judge called every candidate different.</td><td data-l="Show"><strong>No price.</strong> Show <code>min</code>–<code>max</code> as a span with the 3 items of <code>judged</code>, and confidence 0. Never add it to a total.</td></tr></tbody></table></div>
+    <div class="hang"><p class="plaque">Every method but none now has a price. None shows a span, never a price.</p></div>
+  </section>
+</main>
+
+<footer class="end">
+  <div class="wrap">
+    <div class="disc">
+      <svg class="art" viewBox="0 0 80 80" aria-hidden="true"><use href="#i-page"/></svg>
+      <p class="part">Bottom line</p>
+      <p class="bl"><strong>Show <code>median</code> whenever it is set.</strong> When it is null and <code>min</code> is set, show <code>min</code>–<code>max</code> as a span with the 3 items of <code>judged</code>, and keep it out of every total.</p>
+    </div>
+    <div class="sources">
+      <h2>Where this comes from</h2>
+      <ul>
+        <li><code>data/out/P5.json</code><small>The run of P5 the values come from, re-scored with the new rules</small></li>
+        <li><code>lv/predict.py</code><small><code>_decide</code>: reference gets a median. <code>_from_verdicts</code>: none gets the span of <code>judged</code></small></li>
+        <li><code>lv/risk.py</code><small>Reference counts as priced; the price reason names the span</small></li>
+        <li><code>docs/result-format.md</code><small>The same format as a text reference</small></li>
+      </ul>
+    </div>
+    <p class="fine">State of 21 November 2026 · working notes for the team</p>
+  </div>
+</footer>
+
+<script>
+(() => {
+  for (const btn of document.querySelectorAll('[data-copy]')) {
+    btn.addEventListener('click', async () => {
+      const pre = document.getElementById(btn.dataset.copy);
+      const text = [...pre.querySelectorAll('.tx')].map(e => e.textContent).join('\n');
+      try { await navigator.clipboard.writeText(text); btn.textContent = 'Copied'; }
+      catch { const r = document.createRange(); r.selectNodeContents(pre); const s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = 'Selected: press Ctrl+C'; }
+      setTimeout(() => { btn.textContent = 'Copy JSON'; }, 2000);
+    });
+  }
+  // Torn-paper labels slide in when they come into view; they are fully visible without script.
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
+    document.documentElement.classList.add('js');
+    const ro = new IntersectionObserver(es => {
+      for (const e of es) if (e.isIntersecting) { e.target.classList.add('in'); ro.unobserve(e.target); }
+    }, { threshold: .08 });
+    document.querySelectorAll('.label-row').forEach(el => ro.observe(el));
+  }
+})();
+</script>

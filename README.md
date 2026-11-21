@@ -52,6 +52,11 @@ flowchart LR
   - `ANTHROPIC_API_KEY`: steps 2–4;
   - `VOYAGE_API_KEY`: optional, search by meaning;
   - `OPENAI_API_KEY` and `OPENAI_MODEL`: only for the plan check.
+- **Passcode:** on the server, set the environment variable `LV_PASSCODE`. Every call then needs it as the header
+  `X-Passcode: <passcode>`; without it the answer is `401`. Where a header cannot be sent (an `<img>` or SVG
+  `<image>` of the plan), add `?passcode=<passcode>` to the address. Not set (on your own computer), the API is open.
+  The dashboard and the chat panel ask for it once and keep it in the browser. `/docs`, `/openapi.json` and the chat
+  panel page `/assistant` hold no data and stay open.
 - **Price library:** the past LVs must already be in `data/library/` (`python -m lv ingest …`). Adding to the library
   has no endpoint.
 
@@ -102,7 +107,8 @@ a plan.
 was asked for this item.
 
 **5. Draw the plan check** (only when `lv.plan` is not `null`):
-- Load the image from `GET /projects/H1/files/{lv.plan.file}`.
+- Load the image from `GET /projects/H1/files/{lv.plan.file}` (on the server: add `?passcode=…`, since an image
+  cannot send a header).
 - Every marker in `item.plan.markers` and `lv.plan.findings[].markers` has `x` and `y` from 0 to 1, measured from
   the top left. Pixel position = `x × width`, `y × height` of the shown image.
 - A plan uploaded as PDF stays a PDF: upload PNG or JPG when the frontend should draw on it.
@@ -195,6 +201,7 @@ Every error answer is JSON with a `detail` field, e.g. `{"detail": "No project H
 
 | Code | When |
 |---|---|
+| `401` | `LV_PASSCODE` is set on the server and the passcode is missing or wrong: ask for it, then call again |
 | `404` | unknown project, item, judge call or file; a project without a result yet |
 | `409` | the project is running: a second upload, or a comment during the run |
 | `422` | a bad project ID, a wrong file type, a plan together with `copy_only`, a comment with no text, price or doubt, a price of 0 or less. For a malformed request, `detail` is a list of what is wrong |
@@ -209,8 +216,9 @@ of steps 0–4 is already saved, so `has_result` is `true`.
 - **A re-run replaces the result.** Until it finishes, `GET /projects/{project}` returns the previous result.
 - **Runs are tracked in the server's memory.** Restart the server only when no run is going. After a restart, a
   project with a result file shows `done`.
-- **No login, and every origin may call the API (CORS).** Fine for the hackathon. Before it runs anywhere public,
-  add a login and allow only the frontend's address.
+- **One shared passcode, no personal logins,** and every origin may call the API (CORS). Fine for the hackathon:
+  without the passcode nobody can read results (they hold the company's past prices) or start paid runs. Beyond the
+  hackathon, add a login per person.
 ## Assistant
 
 A chat assistant for the right-hand panel. It answers questions about the open tender and the past projects from

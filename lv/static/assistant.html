@@ -81,8 +81,16 @@ const API = location.origin;
 const $ = id => document.getElementById(id);
 let project = null, tabs = [], current = null, ready = false, busy = false, poll = null;
 
-async function call(path, options = {}) {
-  const response = await fetch(API + path, { headers: { "Content-Type": "application/json" }, ...options });
+// The server may ask for the team's passcode (LV_PASSCODE): asked once, kept in this browser.
+function passcode() { try { return localStorage.getItem("lv-passcode") || ""; } catch { return ""; } }
+
+async function call(path, options = {}, again = false) {
+  const headers = { "Content-Type": "application/json", ...(passcode() ? { "X-Passcode": passcode() } : {}) };
+  const response = await fetch(API + path, { headers, ...options });
+  if (response.status === 401 && !again) {
+    const given = (prompt("Passcode für das Backend:") || "").trim();
+    if (given) { try { localStorage.setItem("lv-passcode", given); } catch {} return call(path, options, true); }
+  }
   if (response.status === 204) return null;
   const body = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(body.detail || response.statusText);
