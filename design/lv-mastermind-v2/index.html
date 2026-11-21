@@ -1004,78 +1004,21 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .gwk{transition:color .15s;text-decoration:underline;text-decoration-color:transparent;text-underline-offset:3px;transition:text-decoration-color .2s}
 .gwl button:hover .gwk{text-decoration-color:var(--ink-3)}
 
-/* ---- [05] LV-Editor ---- */
-.ed{margin-top:28px;border:1px solid var(--line);background:color-mix(in srgb,var(--card) 82%,transparent)}
-.ed-h{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 24px;transition:background .15s}
-.ed-h:hover{background:color-mix(in srgb,var(--paper-2) 50%,transparent)}
-.ed-h:focus-visible{outline:2px solid var(--signal);outline-offset:-2px}
-.ed-t{display:flex;flex-direction:column;gap:6px}
-.ed-t b{font-size:22px;font-weight:300;letter-spacing:-.03em}
-.ed-t small{color:var(--ink-3);font-size:12.5px}
-.ed-s{display:flex;align-items:center;gap:18px}
-.ed-o{display:inline-flex;align-items:center;gap:10px;height:34px;padding:0 12px 0 14px;border:1px solid var(--ink);font:.66rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;transition:background .15s,color .15s}
-.ed-h:hover .ed-o{background:var(--ink);color:var(--paper)}
-.ed-chev{display:flex;transition:transform .35s var(--spring)}
-.ed.is-open .ed-chev{transform:rotate(180deg)}
-.ed.is-open .ed-o{background:var(--ink);color:var(--paper)}
-.ed-body{border-top:1px solid var(--line);animation:edin .45s var(--ease)}
-@keyframes edin{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
-.ed-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:0 24px;border-bottom:1px solid var(--line)}
-.ed-tabs{display:flex;gap:4px}
-.ed-tabs button{all:unset;cursor:pointer;height:46px;padding:0 10px;display:inline-flex;align-items:center;gap:7px;font:.64rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);box-shadow:inset 0 -2px 0 transparent;transition:color .15s,box-shadow .2s}
-.ed-tabs button:hover{color:var(--ink)}
-.ed-tabs button.on{color:var(--ink);box-shadow:inset 0 -2px 0 var(--ink)}
-.ed-tabs button span{opacity:.55}.ed-tabs button.on span{opacity:1;color:var(--signal)}
-.ed-tabs button:focus-visible{outline:2px solid var(--signal);outline-offset:-2px}
-.ed-tools{display:flex;align-items:center;gap:8px;padding:8px 0}
-.ed-tools .search{width:260px}
-.ed-sel{position:relative;display:inline-flex;align-items:center}
-.ed-sel select{appearance:none;height:34px;padding:0 30px 0 10px;border:1px solid var(--line-2);background:transparent;font:13px var(--sans);color:var(--ink);cursor:pointer}
-.ed-sel select:focus{outline:0;border-color:var(--ink)}
-.ed-sel svg{position:absolute;right:9px;width:13px;height:13px;pointer-events:none;color:var(--ink-3)}
-.ed-th,.ed-r{display:grid;grid-template-columns:96px minmax(0,1fr) 150px 150px 120px 70px;gap:14px;align-items:center;padding:0 24px}
-.ed-th{height:36px;color:var(--ink-3);font-size:.58rem;border-bottom:1px solid var(--ink)}
-.ed-th .r{text-align:right}
-.ed-list{max-height:640px;overflow:auto;overscroll-behavior:contain}
-.ed-g{position:sticky;top:0;z-index:1;display:flex;align-items:center;gap:12px;height:38px;padding:0 24px;background:var(--paper-2);border-bottom:1px solid var(--line)}
-.ed-g .mono{font-size:.62rem}
-.ed-g b{font-weight:500;font-size:13px}
-.ed-g .ed-gs{font-variant-numeric:tabular-nums}
-.ed-r{position:relative;min-height:44px;border-bottom:1px solid var(--line);transition:background .15s}
-.ed-r:hover{background:color-mix(in srgb,var(--paper-2) 45%,transparent)}
-.ed-r.ch::before{content:"";position:absolute;left:0;top:-1px;bottom:-1px;width:2px;background:var(--signal)}
-.ed-oz{font-size:.66rem;color:var(--ink-3)}
-.ed-k{font-size:13px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ed-ki{all:unset;cursor:pointer;margin-left:6px;padding:2px 5px;font:.54rem/1 var(--mono);letter-spacing:.06em;border:1px solid var(--line-2);color:var(--ink-3);vertical-align:2px}
-.ed-ki:hover{border-color:var(--ink);color:var(--ink)}
-.ed-c{display:flex;align-items:center;justify-content:flex-end;gap:6px}
-.ed-in{width:100%;min-width:0;height:30px;padding:0 8px;border:1px solid transparent;background:transparent;text-align:right;font:13px var(--sans);font-variant-numeric:tabular-nums;color:var(--ink);transition:border-color .15s,background .15s,box-shadow .15s}
-.ed-r:hover .ed-in{border-color:var(--line-2)}
-.ed-in:focus{outline:0;border-color:var(--ink);background:var(--card);box-shadow:3px 3px 0 var(--signal)}
-.ed-r.ch .ed-in{color:var(--signal)}
-.ed-u{flex:none;width:26px;font:.6rem var(--mono);color:var(--ink-3)}
-.ed-gp{text-align:right;font-size:13px;font-weight:500;font-variant-numeric:tabular-nums}
-.ed-a{display:flex;align-items:center;justify-content:flex-end;gap:4px}
-.ed-x{width:26px;height:26px;font-size:14px;color:var(--ink-3)}
-.ed-x:hover{color:var(--signal)}
-.ed-cb{all:unset;cursor:pointer;height:26px;min-width:26px;padding:0 4px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:3px;color:var(--ink-3);border:1px solid transparent;transition:color .15s,border-color .15s}
-.ed-cb svg{width:14px;height:14px}
-.ed-cb b{font:500 .6rem/1 var(--mono)}
-.ed-cb.has{color:var(--ink)}
-.ed-cb:hover,.ed-cb.on{border-color:var(--ink);color:var(--ink)}
-.ed-cb:focus-visible{outline:2px solid var(--signal)}
-.ed-r.open{background:color-mix(in srgb,var(--paper-2) 45%,transparent);border-bottom-color:transparent}
-.ed-cm{padding:6px 24px 14px 134px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--paper-2) 45%,transparent);animation:edin .3s var(--ease)}
-.ed-msg{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;font-size:13px;line-height:1.45;max-width:640px}
-.ed-msg>i{flex:none;width:22px;height:22px;display:grid;place-items:center;font:500 .55rem/1 var(--mono);font-style:normal;color:#fff}
-.ed-msg>span{display:flex;flex-direction:column;gap:2px}
-.ed-msg .mono{font-size:.56rem}
-.ed-cf{display:flex;gap:8px;max-width:640px}
-.ed-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 24px;border-top:1px solid var(--ink)}
-.ed-foot .mono{color:var(--ink-3);font-size:.6rem}
-.ed-foot .ft-r{display:flex;align-items:baseline;gap:12px}
-.ed-foot .ft-r b{font-size:18px;font-weight:400;letter-spacing:-.02em}
-.ed-mg{font-size:13px;font-variant-numeric:tabular-nums;color:var(--ink-2);padding-right:9px}
+
+/* ---- [04] scope: wichtige vs. gesamtes LV ---- */
+.lv-scope{margin-top:12px}
+.lv-scope button{padding:0 12px}
+.lv-more{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:52px;padding:0 16px;border-bottom:1px solid var(--line);font-size:12.5px;color:var(--ink-3);transition:background .15s,color .15s}
+.lv-more b{display:inline-flex;align-items:center;gap:8px;font:.64rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
+.lv-more b svg{width:13px;height:13px;transition:transform .2s var(--ease)}
+.lv-more:hover{background:color-mix(in srgb,var(--paper-2) 50%,transparent);color:var(--ink)}
+.lv-more:hover b svg{transform:translateX(3px)}
+.lv-more:focus-visible{outline:2px solid var(--signal);outline-offset:-2px}
+.lv-r.gen .rsk{opacity:.55}
+.auto1{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;font:.58rem/1 var(--mono);letter-spacing:.04em;color:var(--ink-3);border:1px dashed var(--line-2)}
+.okline.auto{background:transparent;color:var(--ink-2);border:1px dashed var(--line-2);min-height:52px}
+.okline.auto svg.i{color:var(--ink-3)}
+.okline.auto .lnk{color:var(--ink)}
 </style>
 </head>
 <body>
@@ -1239,7 +1182,7 @@ var S = { tab: 'home', filter: 'all', sel: null, q: '', sort: { k: 'risk', d: -1
   picked: {}, owners: {}, confirmed: {}, bundled: {}, collapsed: {}, toast: null, dtab: '', sugg: {}, editEp: false, epDraft: '', eps: {},
   accepted: {}, justOk: {}, comments: {}, cmt: '', notes: {}, noteDraft: '', compose: null, seqs: {}, chats: {}, draft: '', thinking: false,
   preview: null, fx: null, holding: false, analyzing: false, analyzed: 'heute, 08:47 · vor 12 Min.', flashEp: 0, focusEp: false,
-  lvOpen: false, lvq: '', lvGw: '', lvF: 'all', lvLimit: 60, lvEp: {}, mg: {}, lvCo: null, lvCd: '' };
+  scope: 'key', lvLimit: 60, mg: {} };
 
 // ================= helpers =================
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -1294,8 +1237,13 @@ function derive() {
   var maxGp = Math.max.apply(null, all.map(function (r) { return r.gp; }));
   var driver = {}, acc = 0;
   all.slice().sort(function (a, b) { return b.gp - a.gp; }).forEach(function (r) { if (acc < 0.8 * tot) { driver[r.oz] = true; acc += r.gp; } });
+  var full = all.concat(LVX.map(function (p, i) {
+    var ep = S.eps[p.oz] !== undefined ? S.eps[p.oz] : p.ep, mg = S.mg[p.oz] !== undefined ? S.mg[p.oz] : p.menge;
+    return { oz: p.oz, kurz: p.kurz, lang: p.kurz + '. Text unverändert aus dem Alt-LV übernommen.', menge: mg, einheit: p.einheit, gewerk: p.gewerk, ep: ep, aiEp: p.ep, manual: S.eps[p.oz] !== undefined, gp: mg * ep,
+      risk: 2 + (i * 7) % 11, mode: 'übernommen', conf: 88 + (i * 5) % 12, why: '1:1 aus Alt-LV', owner: '', gen: true };
+  }));
   var q = S.q.trim().toLowerCase();
-  var base = all.filter(function (r) {
+  var base = (S.scope === 'all' ? full : all).filter(function (r) {
     if (S.gewerk && r.gewerk !== S.gewerk) return false;
     if (S.owner && ownerOf(r) !== S.owner) return false;
     if (q && (r.oz + ' ' + r.kurz + ' ' + r.lang + ' ' + r.gewerk).toLowerCase().indexOf(q) < 0) return false;
@@ -1312,7 +1260,7 @@ function derive() {
   var rows = base.filter(fdef[f]);
   var k = S.sort.k, d = S.sort.d;
   rows.sort(function (a, b) { var x = a[k], y = b[k]; return (typeof x === 'string' ? x.localeCompare(y, 'de') : x - y) * d; });
-  return { all: all, tot: tot, maxGp: maxGp, driver: driver, base: base, fdef: fdef, f: f, rows: rows };
+  return { all: all, full: full, tot: tot, maxGp: maxGp, driver: driver, base: base, fdef: fdef, f: f, rows: rows };
 }
 function lookup(key, d) {
   var p = d.all.find(function (x) { return x.oz === key; });
@@ -1453,19 +1401,19 @@ function vSummary(d) {
 
 function vRow(r, d) {
   var ow = ownerOf(r), m = ow ? T[ow] : null, ok = !!S.confirmed[r.oz], pk = !!S.picked[r.oz], fresh = S.justOk[r.oz] !== undefined, n = cmtN(r.oz), k = rk(r.risk);
-  var chip = ok ? '<span class="mtag ok"><i></i>' + (r.manual ? 'manuell' : 'bestätigt') + '</span>' : '<span class="mtag ' + r.mode + '"><i></i>' + r.mode + ' · ' + r.conf + ' %</span>';
-  return '<div class="lv-grid lv-r' + (pk ? ' picked' : '') + (r.oz === S.sel ? ' sel' : '') + (ok ? ' is-ok' : '') + (fresh ? ' fx-ok' : '') + '" style="--i:' + (fresh ? S.justOk[r.oz] : 0) + '" role="row" data-k="r' + r.oz + '" data-act="open" data-oz="' + r.oz + '">' +
-    '<span role="cell" class="c2"><input type="checkbox" class="cb"' + (pk ? ' checked' : '') + ' data-act="pick" data-oz="' + r.oz + '" aria-label="Position ' + r.oz + ' auswählen"></span>' +
+  var chip = r.gen ? '<span class="mtag ' + (r.manual ? 'adaptiert' : '') + '"><i></i>' + (r.manual ? 'manuell' : '1:1 · ' + r.conf + ' %') + '</span>' : ok ? '<span class="mtag ok"><i></i>' + (r.manual ? 'manuell' : 'bestätigt') + '</span>' : '<span class="mtag ' + r.mode + '"><i></i>' + r.mode + ' · ' + r.conf + ' %</span>';
+  return '<div class="lv-grid lv-r' + (pk ? ' picked' : '') + (r.oz === S.sel ? ' sel' : '') + (r.gen ? ' gen' : '') + (ok ? ' is-ok' : '') + (fresh ? ' fx-ok' : '') + '" style="--i:' + (fresh ? S.justOk[r.oz] : 0) + '" role="row" data-k="r' + r.oz + '" data-act="open" data-oz="' + r.oz + '">' +
+    '<span role="cell" class="c2">' + (r.gen ? '' : '<input type="checkbox" class="cb"' + (pk ? ' checked' : '') + ' data-act="pick" data-oz="' + r.oz + '" aria-label="Position ' + r.oz + ' auswählen">') + '</span>' +
     '<span role="cell"><span class="rsk ' + k + '" title="Risiko ' + r.risk + ' von 100 · ' + esc(r.why) + '"><b>' + r.risk + '</b><i class="rbar"><i style="width:' + r.risk + '%"></i></i></span></span>' +
     '<span role="cell" style="min-width:0"><span class="ozl mono">' + r.oz + (PLAN[r.oz] ? '<span class="ploc" title="Im Bauplan verortet">' + IC.pin + PLAN[r.oz][2] + '</span>' : '') + '</span><button class="kurz" data-act="open" data-oz="' + r.oz + '">' + esc(r.kurz) + '</button>' +
       (S.density === 'details' ? '<span class="lang">' + esc(r.lang) + '</span>' : '') +
       '<span class="rmeta"><button class="gw" data-act="gewerk" data-v="' + esc(r.gewerk) + '" title="Nur ' + esc(r.gewerk) + ' anzeigen">' + esc(r.gewerk) + '</button>' +
-      '<span class="why ' + k + '">' + IC.warn + esc(r.why) + '</span>' +
+      (r.gen ? '<span class="why lo">' + esc(r.why) + '</span>' : '<span class="why ' + k + '">' + IC.warn + esc(r.why) + '</span>') +
       (S.bundled[r.oz] ? '<span class="chip bundle">Bündel · ' + esc(S.bundled[r.oz]) + '</span>' : '') +
       (n ? '<span class="why lo" title="Kommentare">' + IC.chat + n + '</span>' : '') + '</span></span>' +
     '<span role="cell" class="c2" style="display:flex;flex-direction:column;align-items:flex-end;gap:5px"><span style="font-size:13px;font-weight:500">' + eur(r.ep) + '</span><span class="qty">' + qty(r.menge) + ' ' + r.einheit + '</span>' + chip + '</span>' +
     '<span role="cell" class="num c2"><span style="font-size:14px;font-weight:500">' + eur(r.gp) + '</span><span class="gpbar" title="' + fmt(r.gp / d.tot * 100, 1) + ' % des Volumens"><i style="width:' + Math.max(4, Math.round(r.gp / d.maxGp * 100)) + '%;background:' + (d.driver[r.oz] ? 'var(--signal)' : 'var(--ink-3)') + '"></i></span></span>' +
-    '<span role="cell"><button class="okbtn' + (ok ? ' is-ok' : '') + (fresh && ok ? ' fx' : '') + '" data-act="toggleOk" data-oz="' + r.oz + '" aria-pressed="' + ok + '" aria-label="' + (ok ? 'Bestätigung zurücknehmen' : 'Preis bestätigen') + '" title="' + (ok ? 'Bestätigung zurücknehmen' : 'Preis bestätigen') + '">' + IC.tickRaw + (fresh && ok && S.justOk[r.oz] === 0 ? particles('conf', 10, 34) : '') + '</button></span>' +
+    '<span role="cell">' + (r.gen ? '<span class="auto1" title="1:1 übernommen, keine Bestätigung nötig">1:1</span>' : '<button class="okbtn' + (ok ? ' is-ok' : '') + (fresh && ok ? ' fx' : '') + '" data-act="toggleOk" data-oz="' + r.oz + '" aria-pressed="' + ok + '" aria-label="' + (ok ? 'Bestätigung zurücknehmen' : 'Preis bestätigen') + '" title="' + (ok ? 'Bestätigung zurücknehmen' : 'Preis bestätigen') + '">' + IC.tickRaw + (fresh && ok && S.justOk[r.oz] === 0 ? particles('conf', 10, 34) : '') + '</button>') + '</span>' +
   '</div>';
 }
 
@@ -1532,10 +1480,10 @@ function vTable(d) {
   };
   var filters = [['all', 'Alle'], ['risk', 'Hohes Risiko'], ['review', 'Zu prüfen'], ['cost', 'Kostentreiber 80 %'], ['bundle', 'Bündelbar']];
   var allPicked = d.rows.length > 0 && d.rows.every(function (r) { return S.picked[r.oz]; });
-  var body = '';
+  var body = '', isAll = S.scope === 'all', vis = isAll ? d.rows.slice(0, S.lvLimit) : d.rows, genN = d.full.length - d.all.length;
   if (S.group) {
     var order = [], groups = {};
-    d.rows.forEach(function (r) { if (!groups[r.gewerk]) { groups[r.gewerk] = []; order.push(r.gewerk); } groups[r.gewerk].push(r); });
+    vis.forEach(function (r) { if (!groups[r.gewerk]) { groups[r.gewerk] = []; order.push(r.gewerk); } groups[r.gewerk].push(r); });
     var gsum = function (g) { return groups[g].reduce(function (a, r) { return a + r.gp; }, 0); };
     order.sort(function (a, b) { return gsum(b) - gsum(a); });
     order.forEach(function (g) {
@@ -1543,11 +1491,14 @@ function vTable(d) {
       body += '<button class="grp" data-k="g' + esc(g) + '" data-act="collapse" data-v="' + esc(g) + '" aria-expanded="' + !closed + '"><span style="display:flex;transform:' + (closed ? 'rotate(-90deg)' : 'none') + ';transition:transform .3s var(--spring)">' + IC.chev + '</span><b style="font-weight:500">' + esc(g) + '</b><span class="mono faint">' + groups[g].length + ' Pos.</span><span style="flex:1"></span><span class="mono faint">' + fmt(sub / d.tot * 100, 1) + ' % des Volumens</span><b style="font-weight:500;min-width:110px;text-align:right">' + eur(sub) + '</b></button>';
       if (!closed) groups[g].forEach(function (r) { body += vRow(r, d); });
     });
-  } else d.rows.forEach(function (r) { body += vRow(r, d); });
+  } else vis.forEach(function (r) { body += vRow(r, d); });
+  if (body && isAll && d.rows.length > vis.length) body += '<button class="lv-more" data-k="more" data-act="more"><span>' + fmt(vis.length) + ' von ' + fmt(d.rows.length) + ' angezeigt</span><b>Weitere 60 laden' + IC.chev + '</b></button>';
+  if (body && !isAll) body += '<button class="lv-more" data-k="more" data-act="scope" data-v="all"><span>+ ' + fmt(genN) + ' weitere Positionen · 1:1 aus Alt-LV übernommen</span><b>Gesamtes LV anzeigen' + IC.arrow + '</b></button>';
   var sum = d.rows.reduce(function (a, r) { return a + r.gp; }, 0);
   var okN = d.all.filter(function (r) { return S.confirmed[r.oz]; }).length;
   return '<section aria-label="Leistungsverzeichnis" class="rise" style="--d:380ms">' +
-    '<div class="lv-head"><div><div class="mono faint"><span style="color:var(--ink)">[04]</span> Leistungsverzeichnis</div><div class="lv-title">' + d.rows.length + ' von 1.284 Positionen <small>· sortiert nach ' + sortDef[S.sort.k] + (S.sort.d < 0 ? ' ↓' : ' ↑') + '</small></div></div>' +
+    '<div class="lv-head"><div><div class="mono faint"><span style="color:var(--ink)">[04]</span> Leistungsverzeichnis</div><div class="lv-title">' + (isAll ? fmt(d.rows.length) + ' Positionen <small>· gesamtes LV</small>' : d.rows.length + ' wichtige Positionen <small>· von ' + fmt(d.full.length) + '</small>') + '</div>' +
+      '<div class="seg lv-scope" role="group" aria-label="Umfang"><button class="' + (isAll ? '' : 'on') + '" data-act="scope" data-v="key" aria-pressed="' + !isAll + '">Wichtige · ' + d.all.length + '</button><button class="' + (isAll ? 'on' : '') + '" data-act="scope" data-v="all" aria-pressed="' + isAll + '">Gesamtes LV · ' + fmt(d.full.length) + '</button></div></div>' +
       '<div class="lv-stats"><div class="lv-stat"><span class="mono">Bestätigt</span><b>' + okN + '<small> / ' + d.all.length + '</small></b><i class="lv-meter"><i style="width:' + (okN / d.all.length * 100) + '%"></i></i></div>' +
         '<div class="lv-stat"><span class="mono">Summe angezeigt</span><b>' + eur(sum) + '</b><i class="lv-meter"><i style="width:' + Math.min(100, sum / d.tot * 100) + '%;background:var(--ink)"></i></i></div></div></div>' +
     '<div class="lv-split">' + vPlan(d) + '<div class="lv-main"><div class="lv-bar"><div class="filters" role="group" aria-label="Filter">' + filters.map(function (x) {
@@ -1564,76 +1515,11 @@ function vTable(d) {
       '<div class="lv-grid th mono" role="row"><span role="columnheader"><input type="checkbox" class="cb' + (!allPicked && d.rows.some(function (r) { return S.picked[r.oz]; }) ? ' some' : '') + '"' + (allPicked ? ' checked' : '') + ' data-act="pickAll" aria-label="Alle angezeigten Positionen auswählen"></span>' +
         th('risk') + '<span role="columnheader" class="thl">' + th('oz').replace(/^<span[^>]*>|<\/span>$/g, '') + '<i>/</i>' + th('kurz').replace(/^<span[^>]*>|<\/span>$/g, '') + '</span>' + th('ep', 1) + th('gp', 1) + '<span role="columnheader" style="text-align:center">OK</span></div>' +
       body +
-      (body ? '' : '<div class="empty">Keine Position passt zu diesen Filtern. <button class="lnk" data-act="resetFilters">Filter zurücksetzen</button></div>') +
-      '<div class="foot"><span class="mono">' + d.rows.length + ' Positionen angezeigt · ' + okN + ' von ' + d.all.length + ' bestätigt</span><span class="ft-r"><span class="mono">Gesamt LV · KI-Kalkulation</span><b>' + eur(Math.round(d.tot)) + '</b></span></div>' +
+      (body ? '' : '<div class="empty">Keine Position passt zu diesen Filtern. ' + (isAll ? '' : '<button class="lnk" data-act="scope" data-v="all">Im gesamten LV suchen</button> · ') + '<button class="lnk" data-act="resetFilters">Filter zurücksetzen</button></div>') +
+      '<div class="foot"><span class="mono">' + fmt(vis.length) + ' Positionen angezeigt · ' + okN + ' von ' + d.all.length + ' bestätigt</span><span class="ft-r"><span class="mono">Gesamt LV · KI-Kalkulation</span><b>' + eur(Math.round(d.tot)) + '</b></span></div>' +
     '</div></div></div></div></section>';
 }
 
-
-// ================= [05] LV-Editor =================
-function lvAll(d) {
-  var core = d.all.map(function (r) { var o = D.pos.find(function (p) { return p.oz === r.oz; }); return { oz: r.oz, kurz: r.kurz, einheit: r.einheit, ep: r.ep, menge: r.menge, gp: r.gp, gewerk: r.gewerk, core: true, risk: r.risk, ep0: o.ep, menge0: o.menge }; });
-  var gen = LVX.map(function (p) { var ep = S.lvEp[p.oz] !== undefined ? S.lvEp[p.oz] : p.ep, mg = S.mg[p.oz] !== undefined ? S.mg[p.oz] : p.menge; return { oz: p.oz, kurz: p.kurz, einheit: p.einheit, ep: ep, menge: mg, gp: ep * mg, gewerk: p.gewerk, ep0: p.ep, menge0: p.menge }; });
-  return core.concat(gen).sort(function (a, b) { return a.oz < b.oz ? -1 : a.oz > b.oz ? 1 : 0; });
-}
-function lvCmts(oz) { return ((D.rich[oz] || {}).comments || []).concat(S.comments[oz] || []); }
-function lvNum(v) { return fmt(v, v % 1 ? 2 : 0); }
-function vEditor(d) {
-  var all = lvAll(d), edited = all.filter(function (r) { return r.ep !== r.ep0 || r.menge !== r.menge0; });
-  var delta = edited.reduce(function (a, r) { return a + r.gp - r.ep0 * r.menge0; }, 0);
-  var head = '<button class="ed-h" data-act="lvToggle" aria-expanded="' + S.lvOpen + '" aria-controls="lved">' +
-    '<span class="ed-t"><span class="mono faint"><span style="color:var(--ink)">[05]</span> LV-Editor</span><b>Gesamtes LV bearbeiten</b><small>' + fmt(all.length) + ' Positionen · Preise und Kommentare direkt im LV ändern</small></span>' +
-    '<span class="ed-s">' + (edited.length ? '<span class="mtag adaptiert"><i></i>' + edited.length + ' geändert · ' + (delta >= 0 ? '+' : '−') + eur(Math.abs(Math.round(delta))) + '</span>' : '') +
-    '<span class="ed-o">' + (S.lvOpen ? 'Schließen' : 'Öffnen') + '<span class="ed-chev">' + IC.chev + '</span></span></span></button>';
-  if (!S.lvOpen) return '<section class="ed rise" style="--d:440ms" aria-label="LV-Editor" data-k="ed">' + head + '</section>';
-  var q = S.lvq.trim().toLowerCase(), gws = [];
-  all.forEach(function (r) { if (gws.indexOf(r.gewerk) < 0) gws.push(r.gewerk); });
-  var fd = { all: function () { return true; }, edited: function (r) { return r.ep !== r.ep0 || r.menge !== r.menge0; }, cmt: function (r) { return lvCmts(r.oz).length > 0; }, ki: function (r) { return !!r.core; } };
-  var base = all.filter(function (r) { return (!S.lvGw || r.gewerk === S.lvGw) && (!q || (r.oz + ' ' + r.kurz + ' ' + r.gewerk).toLowerCase().indexOf(q) >= 0); });
-  var rows = base.filter(fd[S.lvF] || fd.all), shown = rows.slice(0, S.lvLimit);
-  var gsum = {}; rows.forEach(function (r) { gsum[r.gewerk] = (gsum[r.gewerk] || [0, 0]); gsum[r.gewerk][0]++; gsum[r.gewerk][1] += r.gp; });
-  var body = '', lastG = null;
-  shown.forEach(function (r) {
-    if (r.gewerk !== lastG) { lastG = r.gewerk; body += '<div class="ed-g" data-k="eg' + esc(r.gewerk) + '"><span class="mono">' + r.oz.slice(0, 2) + '</span><b>' + esc(r.gewerk) + '</b><span class="mono faint">' + gsum[r.gewerk][0] + ' Pos.</span><span style="flex:1"></span><b class="ed-gs">' + eur(Math.round(gsum[r.gewerk][1])) + '</b></div>'; }
-    var ch = r.ep !== r.ep0 || r.menge !== r.menge0, cm = lvCmts(r.oz), open = S.lvCo === r.oz;
-    body += '<div class="ed-r' + (ch ? ' ch' : '') + (open ? ' open' : '') + '" data-k="e' + r.oz + '" role="row">' +
-      '<span class="mono ed-oz" role="cell">' + r.oz + '</span>' +
-      '<span class="ed-k" role="cell">' + esc(r.kurz) + (r.core ? ' <button class="ed-ki" data-act="open" data-oz="' + r.oz + '" title="KI-Analyse öffnen">KI · ' + r.risk + '</button>' : '') + '</span>' +
-      '<span role="cell" class="ed-c"><span class="ed-mg">' + lvNum(r.menge) + '</span><span class="ed-u">' + esc(r.einheit) + '</span></span>' +
-      '<span role="cell" class="ed-c"><input class="ed-in" data-lvf="ep" data-oz="' + r.oz + '" inputmode="decimal" value="' + fmt(r.ep, 2) + '" aria-label="Einheitspreis ' + r.oz + '"><span class="ed-u">€</span></span>' +
-      '<span role="cell" class="ed-gp">' + eur(Math.round(r.gp * 100) / 100) + '</span>' +
-      '<span role="cell" class="ed-a">' +
-        (ch ? '<button class="ic ed-x" data-act="lvReset" data-oz="' + r.oz + '" title="Änderung zurücksetzen" aria-label="Änderung an ' + r.oz + ' zurücksetzen">↺</button>' : '<i class="ed-x"></i>') +
-        '<button class="ed-cb' + (cm.length ? ' has' : '') + (open ? ' on' : '') + '" data-act="lvCmt" data-oz="' + r.oz + '" aria-expanded="' + open + '" aria-label="Kommentare zu ' + r.oz + '">' + IC.chat + (cm.length ? '<b>' + cm.length + '</b>' : '') + '</button></span>' +
-      '</div>';
-    if (open) body += '<div class="ed-cm" data-k="ec' + r.oz + '">' +
-      (cm.length ? cm.map(function (c) { var m = T[c.by] || { ini: c.by, color: 'var(--ink-3)' }; return '<div class="ed-msg"><i style="background:' + m.color + '">' + esc(m.ini) + '</i><span><span class="mono faint">' + esc(m.name || c.by) + ' · ' + esc(c.time || '') + '</span>' + esc(c.t) + '</span></div>'; }).join('') : '<p class="mono faint" style="margin:0 0 8px">Noch keine Kommentare zu dieser Position</p>') +
-      '<div class="ed-cf"><input class="fld" id="lvcd" data-in="lvCd" data-enter="lvSend" value="' + esc(S.lvCd) + '" placeholder="Kommentar zu ' + r.oz + ' schreiben…"><button class="btn btn-quiet" data-act="lvSend">Senden</button></div></div>';
-  });
-  var tabs = [['all', 'Alle'], ['edited', 'Geändert'], ['cmt', 'Kommentiert'], ['ki', 'KI-analysiert']];
-  var sum = rows.reduce(function (a, r) { return a + r.gp; }, 0);
-  return '<section class="ed is-open" aria-label="LV-Editor" data-k="ed">' + head +
-    '<div class="ed-body" id="lved">' +
-      '<div class="ed-bar"><div class="ed-tabs" role="group" aria-label="Status">' + tabs.map(function (t) { var on = (S.lvF || 'all') === t[0]; return '<button class="' + (on ? 'on' : '') + '" aria-pressed="' + on + '" data-act="lvF" data-v="' + t[0] + '">' + t[1] + '<span>' + fmt(base.filter(fd[t[0]]).length) + '</span></button>'; }).join('') + '</div>' +
-        '<div class="ed-tools"><label class="search">' + IC.search + '<span class="sr">Im LV suchen</span><input type="search" data-in="lvq" value="' + esc(S.lvq) + '" placeholder="OZ oder Text im gesamten LV…"></label>' +
-        '<label class="ed-sel"><span class="sr">Gewerk</span><select data-change="lvGw" data-val="' + esc(S.lvGw) + '"><option value="">Alle Gewerke</option>' + gws.map(function (g) { return '<option value="' + esc(g) + '"' + (S.lvGw === g ? ' selected' : '') + '>' + esc(g) + '</option>'; }).join('') + '</select>' + IC.chev + '</label>' +
-        (edited.length ? '<button class="btn btn-quiet" data-act="lvResetAll">Alle Änderungen verwerfen</button>' : '') + '</div></div>' +
-      '<div class="ed-th mono" role="row"><span>OZ</span><span>Kurztext</span><span class="r">Menge</span><span class="r">EP</span><span class="r">GP</span><span></span></div>' +
-      '<div class="ed-list" role="table" aria-label="Gesamtes Leistungsverzeichnis">' + (body || '<div class="empty">Keine Position passt. <button class="lnk" data-act="lvClear">Filter zurücksetzen</button></div>') + '</div>' +
-      '<div class="ed-foot"><span class="mono">' + fmt(shown.length) + ' von ' + fmt(rows.length) + ' angezeigt</span>' +
-        (rows.length > shown.length ? '<button class="btn btn-quiet" data-act="lvMore">Weitere 60 laden</button>' : '<span></span>') +
-        '<span class="ft-r"><span class="mono">Summe Auswahl</span><b>' + eur(Math.round(sum)) + '</b></span></div>' +
-    '</div></section>';
-}
-function lvParse(v) { v = String(v).trim().replace(/\s|€/g, ''); if (v.indexOf(',') >= 0) v = v.replace(/\./g, '').replace(',', '.'); return parseFloat(v); }
-function lvCommit(oz, f, raw) {
-  var v = lvParse(raw), isCore = D.pos.some(function (p) { return p.oz === oz; });
-  if (!(v >= 0)) { toast('Ungültiger Wert'); render(); return; }
-  v = Math.round(v * 100) / 100;
-  if (f === 'menge') { var m = Object.assign({}, S.mg); m[oz] = v; set({ mg: m }); }
-  else if (isCore) { var e = Object.assign({}, S.eps); e[oz] = v; set({ eps: e }); }
-  else { var x = Object.assign({}, S.lvEp); x[oz] = v; set({ lvEp: x }); }
-}
 function vDock(d) {
   var pr = d.all.filter(function (r) { return S.picked[r.oz]; });
   if (!pr.length) return '';
@@ -1680,14 +1566,14 @@ function candidates(p, R) {
 }
 
 function navInfo(d) {
-  var list = d.rows.some(function (r) { return r.oz === S.sel; }) ? d.rows : d.all;
+  var list = d.rows.some(function (r) { return r.oz === S.sel; }) ? d.rows : d.full;
   var idx = list.findIndex(function (r) { return r.oz === S.sel; });
   return { list: list, idx: idx };
 }
 
 function vDrawer(d) {
   if (!S.sel) return '';
-  var p = d.all.find(function (x) { return x.oz === S.sel; });
+  var p = d.full.find(function (x) { return x.oz === S.sel; });
   if (!p) return '';
   var R = D.rich[p.oz] || {}, k = rk(p.risk), nav = navInfo(d), ok = !!S.confirmed[p.oz], fresh = S.justOk[p.oz] !== undefined;
   var C = candidates(p, R);
@@ -1697,7 +1583,9 @@ function vDrawer(d) {
   var devWarn = S.editEp ? (dd !== null && Math.abs(dd) > 10) : Math.abs(md) > 10;
   var nextOpen = nav.list.slice(nav.idx + 1).find(function (r) { return !S.confirmed[r.oz]; });
 
-  var cta = ok
+  var cta = p.gen
+    ? '<div class="okline auto" data-k="okauto">' + IC.tick + (p.manual ? 'Eigener Preis gespeichert · zählt direkt ins Angebot' : '1:1 aus Alt-LV · keine Bestätigung nötig') + (p.manual ? '<button class="lnk" data-act="resetEp">Rückgängig</button>' : '') + '</div>'
+    : ok
     ? '<div class="okline' + (fresh ? ' fx' : '') + '" data-k="okl">' + IC.tick + (p.manual ? 'Eigener Preis bestätigt' : 'KI-Preis bestätigt') +
         (S.adv && S.adv.from === p.oz
           ? '<button class="adv" data-act="goNext">Weiter zu ' + S.adv.to + IC.arrow + '</button><button class="lnk" style="margin-left:14px" data-act="stay">Hier bleiben</button><i class="advbar" data-k="ab' + S.adv.to + '"></i>'
@@ -1714,18 +1602,19 @@ function vDrawer(d) {
   var notes = (ext ? ext.notes : []).concat(S.notes[p.oz] || []);
   var subName = p.oz.indexOf('04') === 0 ? 'Elektro Lindner GmbH' : 'Lieferant (Vorschlag)';
   var chat = S.chats[p.oz] || [];
-  var same = d.all.filter(function (r) { return r.gewerk === p.gewerk && r.oz !== p.oz; });
+  var sameAll = d.full.filter(function (r) { return r.gewerk === p.gewerk && r.oz !== p.oz; });
+  var same = sameAll.slice().sort(function (a, b) { return b.risk - a.risk; }).slice(0, 5);
   var tabs = [['team', 'Team', cm.length], ['ext', 'Extern', thread.length + notes.length]];
   var dt = S.dtab === 'ext' ? 'ext' : 'team';
   var panel = '';
   var gwPanel = '';
   {
-    var gsum = same.reduce(function (a, r) { return a + r.gp; }, p.gp);
+    var gsum = sameAll.reduce(function (a, r) { return a + r.gp; }, p.gp);
     gwPanel = 
       (same.length ? '<ol class="gwl">' + same.map(function (r) { var ok2 = !!S.confirmed[r.oz]; return '<li data-k="g' + r.oz + '"><button data-act="open" data-oz="' + r.oz + '"><span class="rsk ' + rk(r.risk) + '"><b>' + r.risk + '</b><i class="rbar"><i style="width:' + r.risk + '%"></i></i></span><span class="gwm"><span class="mono">' + r.oz + '</span><span class="gwk">' + esc(r.kurz) + '</span></span><span class="gwr"><b>' + eur(r.gp) + '</b>' + (ok2 ? '<span class="mtag ok"><i></i>bestätigt</span>' : '<span class="mtag ' + r.mode + '"><i></i>' + r.conf + ' %</span>') + '</span>' + IC.arrow + '</button></li>'; }).join('') + '</ol>' +
-        '<button class="lnk gwall" data-act="gewerk" data-v="' + esc(p.gewerk) + '">Alle im LV filtern</button>'
+        '<button class="lnk gwall" data-act="gewerkAll" data-v="' + esc(p.gewerk) + '">' + (sameAll.length > same.length ? 'Alle ' + (sameAll.length + 1) + ' im LV anzeigen' : 'Alle im LV filtern') + '</button>'
       : '<p class="pempty">Keine weiteren Positionen in diesem Gewerk.</p>');
-    gwPanel = '<section class="comm gwsec" aria-label="Gewerk"><button class="mini" data-act="aiClose" tabindex="-1"><span class="mono">Gewerk</span><b>' + esc(p.gewerk) + '</b><span class="muted">' + (same.length + 1) + ' Pos. · Σ ' + eur(gsum) + '</span></button><div class="comm-h"><span class="mono">Gewerk · <b>' + esc(p.gewerk) + '</b></span><span class="mono">' + (same.length + 1) + ' Pos. · Σ ' + eur(gsum) + '</span></div><div class="panel">' + gwPanel + '</div></section>';
+    gwPanel = '<section class="comm gwsec" aria-label="Gewerk"><button class="mini" data-act="aiClose" tabindex="-1"><span class="mono">Gewerk</span><b>' + esc(p.gewerk) + '</b><span class="muted">' + (sameAll.length + 1) + ' Pos. · Σ ' + eur(gsum) + '</span></button><div class="comm-h"><span class="mono">Gewerk · <b>' + esc(p.gewerk) + '</b></span><span class="mono">' + (sameAll.length + 1) + ' Pos. · Σ ' + eur(gsum) + '</span></div><div class="panel">' + gwPanel + '</div></section>';
   }
   if (dt === 'team') {
     panel = (cm.length ? '<ol class="feed">' + cm.map(function (c, i) { var m = T[c.by]; return '<li data-k="c' + i + '"><span class="av" style="background:' + m.color + '">' + m.ini + '</span><div class="fb"><div class="fh"><b>' + m.name + '</b><span>' + esc(c.time) + '</span></div><p>' + esc(c.t) + '</p></div></li>'; }).join('') + '</ol>' : '<p class="pempty">Noch nichts besprochen. Erwähne Kolleg:innen mit @.</p>') +
@@ -1788,7 +1677,7 @@ function vDrawer(d) {
         (S.thinking ? '<div class="cp-m agent" data-k="cth"><span class="agent-ic">' + IC.star + '</span><div class="bub thinking"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>' : '') +
       '</div></section></div></div>' +
     '</div></div>' +
-    '<div class="dw-cta" data-k="cta-bar">' + (devWarn && !ok ? '<p class="hint" data-k="hint">' + IC.warn + '<span>Mehr als 10 % neben der Empfehlung. Gedrückt halten und kurz im Team begründen.</span></p>' : '') + cta + '</div>' +
+    '<div class="dw-cta" data-k="cta-bar">' + (devWarn && !ok && !p.gen ? '<p class="hint" data-k="hint">' + IC.warn + '<span>Mehr als 10 % neben der Empfehlung. Gedrückt halten und kurz im Team begründen.</span></p>' : '') + cta + '</div>' +
     '<footer class="ask">' +
       '<div class="askin"><span style="color:var(--signal);display:flex">' + IC.star + '</span><label style="flex:1;display:flex"><span class="sr">Frage an den Agenten</span><input data-in="draft" data-enter="sendDraft" value="' + esc(S.draft) + '" placeholder="Agent fragen zu ' + p.oz + '…"></label><button class="send" data-act="sendDraft" aria-label="Senden">' + IC.arrow + '</button></div></footer>' +
   '</aside>';
@@ -1831,7 +1720,7 @@ function vToast() { return S.toast ? '<div class="toast" role="status" data-k="t
 function view() {
   var d = derive();
   return vHeader() + '<main>' + vHero(d) +
-    (S.tab === 'home' ? '<div class="grid2">' + vCost() + vBid() + '</div>' + vSummary(d) + vTable(d) + vEditor(d) : vKontext()) +
+    (S.tab === 'home' ? '<div class="grid2">' + vCost() + vBid() + '</div>' + vSummary(d) + vTable(d) : vKontext()) +
     '</main>' + vDock(d) + (S.planFull ? '<div class="planfs" data-k="planfs"><div class="planfs-bg" data-act="planFull" data-v="0"></div>' + vPlan(d, true) + '</div>' : '') + vDrawer(d) + vPreview(d) + vFx() + vToast();
 }
 
@@ -1916,7 +1805,7 @@ function reply(p, text) {
 }
 
 // ================= actions =================
-function cur() { return derive().all.find(function (x) { return x.oz === S.sel; }); }
+function cur() { return derive().full.find(function (x) { return x.oz === S.sel; }); }
 var advT = null;
 function cancelAdvance() { clearTimeout(advT); advT = null; S.adv = null; S.leaving = false; }
 function scheduleAdvance(from, to) { clearTimeout(advT); S.adv = { from: from, to: to }; advT = setTimeout(advanceNow, 2400); }
@@ -2068,6 +1957,9 @@ var A = {
   sort: function (ds) { var on = S.sort.k === ds.v; set({ sort: { k: ds.v, d: on ? -S.sort.d : ((ds.v === 'oz' || ds.v === 'kurz') ? 1 : -1) } }); },
   filter: function (ds) { set({ filter: ds.v }); },
   gewerk: function (ds) { set({ gewerk: ds.v }); },
+  gewerkAll: function (ds) { set({ gewerk: ds.v, scope: 'all', lvLimit: 60, sel: null }); var t = document.querySelector('.lv-head'); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); },
+  scope: function (ds) { set({ scope: ds.v, lvLimit: 60, filter: ds.v === 'all' ? S.filter : S.filter }); },
+  more: function () { set({ lvLimit: S.lvLimit + 60 }); },
   ownerFilter: function (ds) { set({ owner: ds.v }); },
   resetFilters: function () { set({ q: '', gewerk: '', owner: '', filter: 'all' }); },
   density: function (ds) { set({ density: ds.v }); },
@@ -2143,14 +2035,6 @@ var A = {
   aiClose: function () { clearTimeout(aiT); var a = document.activeElement; if (a && a.blur) a.blur(); if (S.aiOpen) aiShut(); },
   floor: function (ds) { set({ floor: ds.v }); },
   planFull: function (ds) { planHot(null); set({ planFull: ds.v === '1' }); },
-  lvToggle: function () { set({ lvOpen: !S.lvOpen, lvCo: null }); },
-  lvF: function (ds) { set({ lvF: ds.v, lvLimit: 60 }); },
-  lvMore: function () { set({ lvLimit: S.lvLimit + 60 }); },
-  lvClear: function () { set({ lvq: '', lvGw: '', lvF: 'all', lvLimit: 60 }); },
-  lvCmt: function (ds) { set({ lvCo: S.lvCo === ds.oz ? null : ds.oz, lvCd: '' }); var i = document.getElementById('lvcd'); if (i) i.focus(); },
-  lvSend: function () { var v = S.lvCd.trim(); if (!v || !S.lvCo) return; var c = Object.assign({}, S.comments); c[S.lvCo] = (c[S.lvCo] || []).concat([{ by: 'TB', time: 'gerade eben', t: v }]); set({ comments: c, lvCd: '' }); },
-  lvReset: function (ds) { var m = Object.assign({}, S.mg), e = Object.assign({}, S.eps), x = Object.assign({}, S.lvEp); delete m[ds.oz]; delete e[ds.oz]; delete x[ds.oz]; set({ mg: m, eps: e, lvEp: x }); },
-  lvResetAll: function () { var core = {}; D.pos.forEach(function (p) { core[p.oz] = 1; }); var e = {}; Object.keys(S.eps).forEach(function (k) { if (!core[k]) e[k] = S.eps[k]; }); set({ mg: {}, lvEp: {}, eps: e }); toast('Alle Änderungen im LV verworfen'); },
   whyToggle: function () { set({ whyOpen: !S.whyOpen }); },
   dtab: function (ds) { set({ dtab: ds.v }); },
   resetEp: function () { var p = cur(), e = Object.assign({}, S.eps), g = Object.assign({}, S.sugg), c = Object.assign({}, S.confirmed); delete e[p.oz]; delete g[p.oz]; delete c[p.oz]; set({ eps: e, sugg: g, confirmed: c, editEp: false, flashEp: 1 }); S.flashEp = 0; toast('KI-Vorschlag für ' + p.oz + ' wiederhergestellt'); },
@@ -2179,13 +2063,10 @@ document.addEventListener('input', function (e) {
   if (!k) return;
   S[k] = e.target.value;
   if (k === 'q' || k === 'epDraft') render();
-  if (k === 'lvq') { S.lvLimit = 60; render(); }
 });
 document.addEventListener('change', function (e) {
-  if (e.target.getAttribute && e.target.getAttribute('data-lvf')) { lvCommit(e.target.getAttribute('data-oz'), e.target.getAttribute('data-lvf'), e.target.value); return; }
   var k = e.target.getAttribute && e.target.getAttribute('data-change');
   if (!k) return;
-  if (k === 'lvGw') { set({ lvGw: e.target.value, lvLimit: 60 }); return; }
   var v = e.target.value;
   if (k === 'bulkAssign' && v && T[v]) {
     var pr = derive().all.filter(function (r) { return S.picked[r.oz]; }), o = Object.assign({}, S.owners);
@@ -2195,8 +2076,7 @@ document.addEventListener('change', function (e) {
 });
 document.addEventListener('keydown', function (e) {
   var tg = e.target.tagName, inField = tg === 'INPUT' || tg === 'TEXTAREA' || tg === 'SELECT';
-  if (e.key === 'Enter' && inField && e.target.getAttribute('data-enter')) { e.preventDefault(); var n = e.target.getAttribute('data-enter'); if (n === 'saveEp') saveEp(); else if (n === 'sendCmt') addComment(); else if (n === 'sendDraft') send(S.draft); else if (n === 'lvSend') A.lvSend(); return; }
-  if (e.key === 'Enter' && e.target.getAttribute && e.target.getAttribute('data-lvf')) { e.preventDefault(); e.target.blur(); return; }
+  if (e.key === 'Enter' && inField && e.target.getAttribute('data-enter')) { e.preventDefault(); var n = e.target.getAttribute('data-enter'); if (n === 'saveEp') saveEp(); else if (n === 'sendCmt') addComment(); else if (n === 'sendDraft') send(S.draft); return; }
   if ((e.key === 'Enter' || e.key === ' ') && e.target.hasAttribute && e.target.hasAttribute('data-hold')) { e.preventDefault(); confirmCurrent(); return; }
   if (S.menu && (e.key === 'ArrowDown' || e.key === 'ArrowUp') && e.target.classList && e.target.classList.contains('mi')) {
     e.preventDefault(); var sib = e.key === 'ArrowDown' ? e.target.nextElementSibling : e.target.previousElementSibling;
