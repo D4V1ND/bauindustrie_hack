@@ -24,7 +24,8 @@ ENV_FILE = Path(__file__).resolve().parent.parent / ".env"
 # Step 3 search by meaning (Voyage AI; Anthropic has no embedding model). The saved vectors are per model, so a
 # new model never meets old vectors.
 EMBED_MODEL = "voyage-4"
-EMBED_FILE = Path(__file__).resolve().parent.parent / "data" / "embeddings" / f"{EMBED_MODEL}.json"
+# LV_DATA (set by the API, on the server a persistent volume) keeps the vectors across redeploys
+EMBED_FILE = Path(os.environ.get("LV_DATA") or Path(__file__).resolve().parent.parent / "data") / "embeddings" / f"{EMBED_MODEL}.json"
 # ponytail: sized for Voyage's limit without a payment method (3 calls and 10,000 tokens a minute; a text here is at
 # most ~300 tokens). With a payment method the limit is far higher; raise the batch to 128 if embedding is too slow.
 EMBED_BATCH = 32  # texts per Voyage call
