@@ -2419,8 +2419,7 @@ function vProjMenu() {
   if (!S.projOpen) return '';
   var L = S.projList;
   return '<div class="pmenu" role="menu" data-k="pmenu"><div class="menu-h mono">Projekte · ' + esc(API) + '</div>' +
-    '<button class="pm-i' + (P.live ? '' : ' on') + '" data-act="loadProj" data-v="demo"><span><b>Kita Sonnenhof</b><small>Demo-Daten</small></span><span class="mono faint">Demo</span></button>' +
-    (L === null ? '<div class="pm-e mono faint">Lädt…</div>' : L === false ? '<div class="pm-e">Backend nicht erreichbar.</div>' : !L.length ? '<div class="pm-e">Noch keine Projekte. Lade ein LV hoch.</div>' :
+    (L === null ? '<div class="pm-e mono faint">Lädt…</div>' : L === false ? '<div class="pm-e">Backend nicht erreichbar.</div>' : !L.length ? '<div class="pm-e">Noch keine Projekte analysiert.</div>' :
       L.map(function (p) {
         return '<button class="pm-i' + (P.live && P.id === p.project ? ' on' : '') + '" data-act="loadProj" data-v="' + esc(p.project) + '"' + (p.items == null ? ' disabled' : '') + '><span><b>' + esc((store('lvm-meta-' + p.project) || {}).name || p.project) + '</b><small>' + esc(p.project) + (p.items != null ? ' · ' + fmt(p.items) + ' Pos.' : '') + (p.total != null ? ' · ' + eur(Math.round(p.total)) : '') + '</small></span>' +
           '<span class="mono ' + (p.status === 'failed' ? 'pm-bad' : 'faint') + '">' + (p.status === 'running' ? 'läuft…' : p.status === 'failed' ? 'Fehler' : p.confidence != null ? p.confidence + ' %' : '') + '</span></button>';
@@ -2455,7 +2454,7 @@ function vUpload() {
       upFile('plan', U.plan, '.png,.jpg,.jpeg,.pdf', ['Kontext: Bauplan (optional)', 'PNG oder JPG für Markierungen, PDF geht auch']) +
     '</div>' +
     '<div class="up-f"><label><span class="mono faint">Projekt-ID</span><input class="fld" data-in="upId" value="' + esc(S.upId) + '" placeholder="z. B. KITA-RIEM" maxlength="40"></label>' +
-      '<label><span class="mono faint">Name (optional)</span><input class="fld" data-in="upName" value="' + esc(S.upName) + '" placeholder="Neubau Kita Sonnenhof"></label></div>' +
+      '<label><span class="mono faint">Name (optional)</span><input class="fld" data-in="upName" value="' + esc(S.upName) + '" placeholder="z. B. Neubau Grundschule"></label></div>' +
     '<button class="up-chk' + (U.copy ? ' on' : '') + '" data-act="upCopy" aria-pressed="' + !!U.copy + '"><span class="cb2">' + (U.copy ? IC.tickRaw : '') + '</span><span><b>Schnelltest ohne KI</b><small>Nur textgleiche Positionen kopieren. Sekunden statt Minuten, keine Kosten, kein Bauplan.</small></span></button>' +
     (U.err ? '<div class="up-err">' + IC.warn + '<span>' + esc(U.err) + '</span></div>' : '') +
     '<div class="up-btns"><button class="btn btn-quiet" data-act="upClose">Abbrechen</button><button class="btn btn-primary" data-act="upGo"' + (U.lv ? '' : ' disabled') + '>Analyse starten' + IC.arrow + '</button></div></div></div>';
@@ -2513,17 +2512,16 @@ function takeFile(kind, f) {
 }
 
 // ================= start page: upload + demo samples =================
-// Unpriced LVs from the dataset in ./samples. "quick" = result of a copy-only run against the 720-item library.
+// Unpriced LVs from the Challenge A dataset in ./samples. Every click is a fresh run on the backend.
 var SAMPLES = [
-  { id: 'BSP-RINGSCHLUSS', file: 'ringschluss-brunnenwasser.x83', name: 'Ringschluss Brunnenwasser', n: 248, quick: '160 von 248 sofort bepreist', note: 'Alt-LV P2 ist dasselbe Projekt' },
-  { id: 'BSP-MASCHINENTECHNIK', file: 'maschinentechnik-anlagenbau.x83', name: 'Maschinentechnik Anlagenbau', n: 159, quick: '112 von 159 sofort bepreist', note: 'Alt-LV P1 ist dasselbe Projekt' },
-  { id: 'BSP-TIEFBAU', file: 'tiefbau-verlegung.x83', name: 'Tiefbau und Verlegung', n: 296, quick: '1 von 296 textgleich', note: 'Neues Projekt, zeigt die KI-Analyse' },
-  { id: 'BSP-KURZ', file: 'kurz-lv-50.x83', name: 'Kurzes LV', n: 50, quick: '0 von 50 textgleich', note: 'Klein genug für eine KI-Analyse live' }
+  { id: 'BSP-RINGSCHLUSS', file: 'ringschluss-brunnenwasser.x83', name: 'Ringschluss Brunnenwasser', n: 248, kind: 'Rohrleitungsbau' },
+  { id: 'BSP-MASCHINENTECHNIK', file: 'maschinentechnik-anlagenbau.x83', name: 'Maschinentechnik Anlagenbau', n: 159, kind: 'Anlagenbau' },
+  { id: 'BSP-TIEFBAU', file: 'tiefbau-verlegung.x83', name: 'Tiefbau und Verlegung', n: 296, kind: 'Tiefbau' },
+  { id: 'BSP-KURZ', file: 'kurz-lv-50.x83', name: 'Kurzes LV', n: 50, kind: 'Kurzes LV' }
 ];
 function freshUp() { var c = store('lvm-copy'); return { phase: 'form', lv: null, plan: null, copy: c === null ? true : !!c, err: '' }; }
-function projDone(id) { return (S.projList || []).some(function (p) { return p.project === id && p.status !== 'running' && p.items != null; }); }
 function vStart() {
-  var U = S.up || (S.up = freshUp()), L = S.projList, off = S.apiOk === false;
+  var U = S.up || (S.up = freshUp()), off = S.apiOk === false;
   var api0 = S.apiOk === true ? '<span class="st-ok"><i></i>Backend verbunden</span>' : off ? '<span class="st-bad"><i></i>Backend nicht erreichbar</span>' : '<span class="faint">Backend wird geprüft…</span>';
   var form = '<section class="card st-up" aria-label="LV hochladen"><div class="card-h"><span class="mono"><b>[01]</b> LV hochladen</span><span class="mono faint">GAEB .x83 · .d83 · .d84 · .d86</span></div>' +
     (off ? '<div class="up-err">' + IC.warn + '<span>Backend unter ' + esc(API) + ' nicht erreichbar. Lokal: <code>uvicorn lv.api:app</code> starten. Andere Adresse: Seite mit <code>?api=https://…</code> öffnen.</span></div>' : '') +
@@ -2532,29 +2530,19 @@ function vStart() {
       upFile('plan', U.plan, '.png,.jpg,.jpeg,.pdf', ['Kontext: Bauplan (optional)', 'PNG oder JPG für Markierungen, PDF geht auch']) +
     '</div>' +
     '<div class="up-f"><label><span class="mono faint">Projekt-ID</span><input class="fld" data-in="upId" value="' + esc(S.upId || '') + '" placeholder="z. B. KITA-RIEM" maxlength="40"></label>' +
-      '<label><span class="mono faint">Name (optional)</span><input class="fld" data-in="upName" value="' + esc(S.upName || '') + '" placeholder="Neubau Kita Sonnenhof"></label></div>' +
+      '<label><span class="mono faint">Name (optional)</span><input class="fld" data-in="upName" value="' + esc(S.upName || '') + '" placeholder="z. B. Neubau Grundschule"></label></div>' +
     '<button class="up-chk' + (U.copy ? ' on' : '') + '" data-act="upCopy" aria-pressed="' + !!U.copy + '"><span class="cb2">' + (U.copy ? IC.tickRaw : '') + '</span><span><b>Schnelltest ohne KI</b><small>Nur textgleiche Positionen aus den Alt-LVs übernehmen. Sekunden statt Minuten, keine Kosten, ohne Bauplan. Aus: volle KI-Analyse, braucht API-Schlüssel im Backend.</small></span></button>' +
     (U.err ? '<div class="up-err">' + IC.warn + '<span>' + esc(U.err) + '</span></div>' : '') +
     '<div class="up-btns"><button class="btn btn-primary" data-act="upGo"' + (U.lv && !off ? '' : ' disabled') + '>' + (U.copy ? 'Schnelltest starten' : 'Analyse starten') + IC.arrow + '</button></div></section>';
-  var samples = '<section class="card st-smp" aria-label="Beispiel-LVs"><div class="card-h"><span class="mono"><b>[02]</b> Beispiele für die Demo</span><span class="mono faint">Ein Klick lädt hoch und startet</span></div>' +
+  var samples = '<section class="card st-smp" aria-label="Beispiel-LVs"><div class="card-h"><span class="mono"><b>[02]</b> Beispiel-LVs aus dem Datensatz</span><span class="mono faint">Unbepreiste LVs der Challenge · Klick startet den Lauf</span></div>' +
     '<ol class="smp">' + SAMPLES.map(function (x, i) {
-      var ai = x.id + '-KI', hasQ = projDone(x.id), hasA = projDone(ai);
-      return '<li data-k="smp' + i + '"><div class="smp-t"><b>' + esc(x.name) + '</b><small class="mono">' + esc(x.file) + ' · ' + x.n + ' Pos.</small><span>Schnelltest: ' + esc(x.quick) + '. ' + esc(x.note) + '.</span>' +
-        (hasQ || hasA ? '<span class="smp-o">' + (hasQ ? '<button class="lnk" data-act="loadProj" data-v="' + x.id + '">Schnelltest öffnen</button>' : '') + (hasA ? '<button class="lnk" data-act="loadProj" data-v="' + ai + '">KI-Ergebnis öffnen</button>' : '') + '</span>' : '') + '</div>' +
+      return '<li data-k="smp' + i + '"><div class="smp-t"><b>' + esc(x.name) + '</b><small class="mono">' + esc(x.file) + ' · ' + x.n + ' Positionen · ohne Preise</small></div>' +
         '<div class="smp-b"><button class="btn btn-sm btn-quiet" data-act="sample" data-i="' + i + '" data-mode="copy"' + (off ? ' disabled' : '') + '>Schnelltest</button>' +
         '<button class="btn btn-sm btn-primary" data-act="sample" data-i="' + i + '" data-mode="ai"' + (off ? ' disabled' : '') + ' title="Volle Analyse mit KI, braucht API-Schlüssel im Backend">KI-Analyse</button></div></li>';
     }).join('') + '</ol></section>';
-  var list = L == null ? '<p class="pempty">Lädt…</p>' : L === false ? '<p class="pempty">Keine Verbindung zum Backend.</p>' : !L.length ? '<p class="pempty">Noch nichts analysiert. Lade oben ein LV hoch oder nimm ein Beispiel.</p>' :
-    '<div class="st-list">' + L.map(function (p) {
-      var nm = (store('lvm-meta-' + p.project) || {}).name || p.project, ok = p.items != null;
-      return '<button class="st-p" data-act="loadProj" data-v="' + esc(p.project) + '" data-k="sp-' + esc(p.project) + '"' + (ok ? '' : ' disabled') + '><span class="st-pn"><b>' + esc(nm) + '</b><small class="mono">' + esc(p.project) + (ok ? ' · ' + fmt(p.items) + ' Pos.' : '') + '</small></span>' +
-        '<span class="st-pv">' + (p.total != null ? '<b class="mono">' + eur(Math.round(p.total)) + '</b>' : '') + '<small class="mono' + (p.status === 'failed' ? ' pm-bad' : '') + '">' + (p.status === 'running' ? 'läuft…' : p.status === 'failed' ? 'Fehler' : p.confidence != null ? 'Konfidenz ' + p.confidence + ' %' : '') + '</small></span>' + IC.arrow + '</button>';
-    }).join('') + '</div>';
-  var recent = '<section class="card st-rec" aria-label="Analysierte Projekte"><div class="card-h"><span class="mono"><b>[03]</b> Bereits analysiert</span><span class="mono faint">' + (L && L.length ? L.length + ' im Backend' : '') + '</span></div>' + list +
-    '<div class="st-foot"><button class="lnk" data-act="loadProj" data-v="demo">Design-Demo mit Beispieldaten öffnen (Kita Sonnenhof)</button></div></section>';
   return '<div class="start" data-k="start"><div class="eyebrow mono"><span class="num">[Start]</span>' + api0 + '</div>' +
     '<h1>Neues LV analysieren</h1><p class="st-lead muted">Lade ein Leistungsverzeichnis hoch. Jede Position bekommt einen Preis aus euren Alt-LVs, eine Konfidenz und eine Quelle. Ein Bauplan als Kontext prüft zusätzlich die Mengen.</p>' +
-    '<div class="st-grid">' + form + samples + '</div>' + recent + '</div>';
+    '<div class="st-grid">' + form + samples + '</div></div>';
 }
 var STARTA = {
   home: function () {
@@ -2580,7 +2568,7 @@ var LIVEA = {
   projects: function () { var o = !S.projOpen; set({ projOpen: o, projList: o ? null : S.projList }); if (o) pingApi(); },
   loadProj: function (ds) {
     S.projOpen = false;
-    if (ds.v === 'demo') { showDemo(); return; }
+    if (ds.v === 'demo') { A.home(); return; }
     render(); loadProject(ds.v).catch(function (e) { toast('Laden fehlgeschlagen: ' + e.message); });
   },
   newProj: function () { STARTA.home(); },
