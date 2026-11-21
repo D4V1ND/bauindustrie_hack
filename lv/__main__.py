@@ -1,4 +1,5 @@
-"""Command line: python -m lv ingest|price <LV file> --project <ID> [--plan <plan>]"""
+"""Command line: python -m lv ingest|price <LV file> --project <ID> [--plan <plan>]
+                 python -m lv comment <ID> <item number> [--price N] [--text "..."] [--doubt]"""
 import argparse
 import json
 import re
@@ -11,7 +12,7 @@ from lv.extract import add_texts, read
 from lv.match import group_label
 from lv.model import LV, load, save
 from lv.predict import NO_ANSWER, JudgeAnswer, predict
-from lv.risk import Checks, assess
+from lv.risk import Checks, assess, comment
 
 DATA = Path(__file__).resolve().parent.parent / "data"
 FOLDERS = {"ingest": "library", "price": "out"}
@@ -35,7 +36,29 @@ def main(argv: list[str] | None = None, data: Path = DATA) -> None:
             command.add_argument("--plan", type=Path, metavar="PLAN",
                                  help="a construction plan (PNG, JPG or PDF): also compare the LV's quantities with it "
                                       "and write <project>_plan.json (needs OPENAI_API_KEY and OPENAI_MODEL)")
+    note = commands.add_parser("comment", help="save the estimator's comment on one item of a result file and "
+                                               "recalculate the confidence; no AI, no API key needed")
+    note.add_argument("project", help="short project ID of a result file, e.g. P5")
+    note.add_argument("item", help="item number, e.g. 02.0014")
+    note.add_argument("--price", type=float, help="the estimator's own unit price: the item gets confidence 100")
+    note.add_argument("--text", default="", help="the comment")
+    note.add_argument("--doubt", action="store_true", help="the found price does not fit: lowers its confidence")
     args = parser.parse_args(argv)
+    if args.command == "comment":
+        path = data / "out" / f"{args.project}.json"
+        if not path.exists():
+            raise SystemExit(f"No result file for {args.project}: {path} is missing. Run 'lv price' first.")
+        if args.price is None and not args.text and not args.doubt:
+            parser.error("give --price, --text or --doubt")
+        lv = load(path)
+        try:
+            item = comment(lv, args.item, args.text, args.price, args.doubt)
+        except ValueError as error:
+            raise SystemExit(str(error))
+        save(lv, path.parent)
+        print(f"{item.id}: confidence {item.risk.confidence} of 100. {item.risk.price_reason}")
+        print(f"{lv.project}: confidence {lv.risk_summary.confidence} of 100 -> {path}")
+        return
     plan_ai = None
     if getattr(args, "plan", None):  # checked first, so a missing plan or key costs nothing
         if args.copy_only:
@@ -171,6 +194,7 @@ def print_risk(lv: LV) -> None:
     risk = lv.risk_summary
     basis = ", ".join(f"{count} by {name}" for name, count in risk.basis.items())
     print(f"risk: {risk.score} of 100, weighted by value over the normal items (value: {basis})")
+    print(f"confidence: {risk.confidence} of 100 (an item with a price: 100 - risk; an item without one: 0)")
     top = sorted((item for item in lv.items if item.kind == "normal"),
                  key=lambda item: -(item.risk.value or 0.0) * item.risk.score)[:5]
     for item in top:

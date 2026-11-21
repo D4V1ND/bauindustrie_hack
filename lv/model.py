@@ -3,7 +3,7 @@ from datetime import date
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel, computed_field
+from pydantic import BaseModel, Field, computed_field
 
 
 class Source(BaseModel):
@@ -37,6 +37,7 @@ class Risk(BaseModel):
     """Step 4: how unsure the tool is about one line item (SPEC.md, step 4). Scores run from 0 (safe) to 100 and
     are places on a scale, not probabilities."""
     score: int  # the item's risk: price risk and description risk combined
+    confidence: int = 0  # 100 - score when the item has a price (found or entered by the estimator), else 0
     price_risk: int  # from the step 3 method, by code
     price_reason: str
     description: Literal["complete", "gaps", "vague"] | None = None  # None: the description was not checked
@@ -49,8 +50,16 @@ class Risk(BaseModel):
 
 class RiskSummary(BaseModel):
     score: int | None  # the items' scores, weighted by value, over the normal items
+    confidence: int | None = None  # the items' confidence, weighted the same way
     value: float  # the sum of those values
     basis: dict[str, int]  # normal items per value basis: price, reference, assumed
+
+
+class Comment(BaseModel):
+    """What the estimator said about one line item. The latest comment with a price or a doubt decides."""
+    text: str = ""
+    price: float | None = Field(None, gt=0)  # the estimator's own unit price: the item counts as priced
+    effect: Literal["note", "doubt"] = "note"  # "doubt": the found price does not fit
 
 
 class MethodSum(BaseModel):
@@ -88,6 +97,7 @@ class LineItem(BaseModel):
     item_type_reason: str = ""  # step 2: one sentence on why the item got this type; text to show, nothing more
     prediction: Prediction | None = None  # step 3; never written into unit_price
     risk: Risk | None = None  # step 4
+    comments: list[Comment] = []  # the estimator's comments, oldest first; never written by a model
 
 
 class LV(BaseModel):

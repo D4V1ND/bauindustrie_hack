@@ -320,8 +320,17 @@ estimator; they sit at the top of `lv/risk.py`.
 `risk_summary.basis` counts the normal items per value basis, so a reader sees how much of the weighting is assumed.
 Optional items get a `risk` but stay out of the LV's score, as they stay out of the totals.
 
-Each item's `risk`: `score`, `price_risk`, `price_reason`, `description` (`complete`, `gaps`, `vague` or empty),
-`description_risk`, `missing[]`, `description_reason`, `value`, `value_basis`.
+Each item's `risk`: `score`, `confidence`, `price_risk`, `price_reason`, `description` (`complete`, `gaps`, `vague`
+or empty), `description_risk`, `missing[]`, `description_reason`, `value`, `value_basis`.
+
+**Confidence**, the number to show an estimator: 100 − `score` for an item with a price, 0 for an item without one
+(`reference` and `none`). `risk_summary.confidence` weighs it by value like the score, so an LV where step 3 found
+few prices has a low confidence (P5: 5, P4: 3). It is a place on a scale, not a measured chance of being right.
+
+**Comments.** `lv comment <project> <item number> [--price N] [--text "..."] [--doubt]` saves the estimator's
+comment on one item in `data/out/<project>.json` and recalculates every score; the descriptions checked before are
+kept, no AI is asked. A price makes the item priced (price risk 0, confidence 100, value from that price); a doubt
+on a found price gives it price risk 75; a note changes nothing. The latest comment with a price or a doubt decides.
 
 Known limits: a value from related items inherits their prices, token prices included; on an LV where step 3 finds
 little, most values are assumed (P4: 178 of 296 items had no candidate the judge accepted); the flags of the first
@@ -388,6 +397,7 @@ Known limits: only items in pieces
 .venv\Scripts\python.exe -m lv ingest "<prices file>" --project P3 --texts "<print 1.pdf>" "<print 2.pdf>"   # prices and texts in separate files
 .venv\Scripts\python.exe -m lv price "<new LV file>" --project P4         # flow B
 .venv\Scripts\python.exe -m lv price "<new LV file>" --project P4 --copy-only   # steps 0 and 1 and exact matches only, no AI
+.venv\Scripts\python.exe -m lv comment P4 01.01.0002 --price 7500 --text "..."    # the estimator's comment; recalculates confidence
 .venv\Scripts\python.exe -m lv price "<new LV file>" --project P4 --plan "<plan.pdf>"   # also compare with a construction plan
 .venv\Scripts\python.exe -m lv.ai                                         # one real AI call, to check the key
 .venv\Scripts\python.exe -m lv check --hide P2                            # accuracy check (not built yet)
