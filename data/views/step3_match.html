@@ -76,6 +76,15 @@ pre{margin:0;padding:0 14px 14px;white-space:pre-wrap;word-break:break-word;font
 ul.notes li{margin:4px 0}
 </style>
 <style>
+.code{margin:8px 0 0;padding:12px 14px;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow-x:auto;white-space:pre;word-break:normal;font-family:var(--mono);font-size:12px;line-height:1.5;color:var(--fg)}
+.code.tree{color:var(--fg)}
+table.fmt{min-width:560px;max-width:none}
+</style>
+<style>
+.filters{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin-top:14px}
+.filters select{font:inherit;padding:4px 8px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--fg)}
+</style>
+<style>
 .p5list{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;margin-top:10px}
 details.p5i{margin-top:0;min-width:0}
 details.p5i.priced{border-left:3px solid var(--ok)}
@@ -259,4 +268,276 @@ Judge's reason: "P1/06.01.2 is a manual PN16 DN80 gate valve and matches; the ot
 <details class="p5i priced"><summary><span class="oz"></span><span class="st">LKW bis 12 to Nutzlast</span><span class="unit"></span><span class="cnt"><b>5</b> candidates</span><span class="res"><span class="chip v-size">adjusted</span> <b class="num">€101.01</b></span></summary><div class="res-line"><span class="chip v-size">adjusted</span> <b class="num">€101.01</b> · × 5  = <b class="num">€505.05</b> <span class="was">before: reference</span><div class="why">The Lkw-Kipper candidates are close but differ in payload or drive; the small transporters are a different vehicle class.</div></div><p class="calc">Calculated:  = €101.01</p><div class="scroll"><table class="p5"><thead><tr><th>RRF</th><th>Found by</th><th>Library item</th><th>Short text</th><th>Unit price</th><th>Word score</th><th>Meaning score</th><th>Judge</th><th>Difference</th></tr></thead><tbody><tr><td class="num">1</td><td><span class="chip c-both">Both</span><div class="rk">W4 · M1</div></td><td class="cand-id"></td><td class="ctext">Lkw-Kipper mit Allradantrieb, 15 t NL</td><td class="num">€106.90</td><td><div class="score top"><span class="num">15%</span><span class="bar w"><i style="width:15%"></i></span></div></td><td><div class="score top"><span class="num">84%</span><span class="bar m"><i style="width:84%"></i></span></div></td><td><span class="chip v-size">size only</span></td><td class="diff">15 t NL all-wheel vs up to 12 t NL; all-wheel drive extra</td></tr><tr><td class="num">2</td><td><span class="chip c-both">Both</span><div class="rk">W3 · M2</div></td><td class="cand-id"></td><td class="ctext">Lkw-Kipper 7 t NL</td><td class="num">€91.20</td><td><div class="score top"><span class="num">17%</span><span class="bar w"><i style="width:17%"></i></span></div></td><td><div class="score top"><span class="num">84%</span><span class="bar m"><i style="width:84%"></i></span></div></td><td><span class="chip v-size">size only</span></td><td class="diff">7 t NL vs up to 12 t NL</td></tr><tr><td class="num">3</td><td><span class="chip c-both">Both</span><div class="rk">W2 · M9</div></td><td class="cand-id"></td><td class="ctext">wie vor, jedoch Lkw-Kipper (4-Achser) mit Allradantrieb, 12 t NL</td><td class="num">€1.06</td><td><div class="score top"><span class="num">19%</span><span class="bar w"><i style="width:19%"></i></span></div></td><td><div class="score top"><span class="num">60%</span><span class="bar m"><i style="width:60%"></i></span></div></td><td><span class="chip v-type">type only</span></td><td class="diff">4-axle Lkw-Kipper with all-wheel drive 12 t, add-on to an excavator item</td></tr><tr><td class="num">4</td><td><span class="chip c-both">Both</span><div class="rk">W1 · M11</div></td><td class="cand-id"></td><td class="ctext">Kleintransporter Nutzlast 1,0 to mit Bedienung</td><td class="num">€92.00</td><td><div class="score top"><span class="num">20%</span><span class="bar w"><i style="width:20%"></i></span></div></td><td><div class="score top"><span class="num">59%</span><span class="bar m"><i style="width:59%"></i></span></div></td><td><span class="chip v-diff">different</span></td><td class="diff">Kleintransporter 1 t with driver, not a 12 t truck</td></tr><tr><td class="num">5</td><td><span class="chip c-meaning">Meaning</span><div class="rk">M3</div></td><td class="cand-id"></td><td class="ctext">Kleintransporter, -bus</td><td class="num">€85.10</td><td><div class="score"><span class="num">0%</span><span class="bar w"><i style="width:0%"></i></span></div></td><td><div class="score top"><span class="num">73%</span><span class="bar m"><i style="width:73%"></i></span></div></td><td><span class="chip v-diff">different</span></td><td class="diff">Kleintransporter/bus, not a truck</td></tr></tbody></table></div></details>
 </div>
 <!-- P5 section end -->
+
+<!-- P4 section start -->
+<h2 id="p4">P4: the same test on a larger LV</h2>
+<p>P4 is a road and water pipe project with 296 line items, priced from P1, P2 and P3 with the RRF top 5 and the judge, the same way as P5 above. Step 2 item types were kept from the earlier run. Real run on 21 Nov 2026: 80 judge calls, 3 min. P4 has no real prices either.</p>
+<div class="ba">
+  <div class="box"><div class="k">Words only, 5 candidates (earlier run)</div><div class="big num">5 of 296 priced</div><p>Total of priced items: <b class="num">€22,532.74</b></p></div>
+  <div class="box"><div class="k">RRF top 5, words + meaning (this run)</div><div class="big num">4 of 296 priced</div><p>Total of priced items: <b class="num">€276.74</b></p></div>
+</div>
+<div class="scroll"><table class="methods"><thead><tr><th>Method</th><th>Earlier run</th><th>This run</th></tr></thead><tbody><tr><td>copied</td><td class="num">1</td><td class="num">1</td></tr><tr><td>similar</td><td class="num">4</td><td class="num">3</td></tr><tr><td>adjusted</td><td class="num">0</td><td class="num">0</td></tr><tr><td>reference</td><td class="num">95</td><td class="num">114</td></tr><tr><td>none</td><td class="num">196</td><td class="num">178</td></tr></tbody></table></div>
+<p class="small">Of the 1313 shortlisted candidates, 65 were in the word ranking only, 356 in the meaning ranking only and 892 in both.</p>
+<h3>What changed, item by item</h3>
+<ul class="notes">
+  <li><b>Gate valve DN 80 (03.03.0017) lost its price.</b> P1's "Absperrschieber DN 80, PN 16" was on the shortlist again, but this time the judge said <i>type only</i>: "no material or coating stated". In the single test call at the top of this page it said <i>same</i>. By its own rule (in doubt, the stricter verdict), <i>type only</i> is the defensible answer.</li>
+  <li><b>"Baustelle räumen" (3 identical items) lost its price</b> of €7,500 each. P3's "Baustelle räumen" was on the shortlist; the judge now says the scope wording differs. Same candidate, stricter verdict.</li>
+  <li><b>Bauzaun H = 2,0 m (01.01.0005) is priced at €0.10/m.</b> Found by meaning only: P3's "Ortsfester Schutzzaun (h = 2,00 m)", judged <i>same</i>. The match is right, but €0.10/m is one of P3's token prices, not a real price.</li>
+  <li><b>Pump operation per hour (02.04.0004) is newly priced</b> at €6.80/h from P3's "Pumpe 10 l/s pro h". Plausible.</li>
+  <li>Unchanged: the exact match "Muffe PE DN/OD63 SDR11" (€32.74) and "Baufacharbeiter" (€85/h).</li>
+</ul>
+<p class="small"><b>What this shows:</b> the shortlist did its job, since every lost price still had its candidate in the top 5. The judge is now the deciding factor, and on borderline items it does not give the same verdict twice. The page's top section and this run disagree on the same gate valve.</p>
+<div class="filters"><label for="p4filter">Show</label>
+<select id="p4filter"><option value="all">all 296 items</option><option value="priced">priced items</option><option value="changed">items whose result changed</option><option value="unpriced">items without a price</option></select>
+<span id="p4count" class="small"></span></div>
+<div class="p5list" id="p4list"><p class="small">Loading the 296 items…</p></div>
+<script>
+(() => {
+  const VERDICT = {same: ["v-same", "same"], size_only: ["v-size", "size only"], type_only: ["v-type", "type only"], different: ["v-diff", "different"]};
+  const METHOD = {copied: "v-same", similar: "v-same", adjusted: "v-size", reference: "v-type", none: "v-diff"};
+  const PRICED = ["copied", "similar", "adjusted"];
+  const euro = v => "€" + v.toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const chip = (cls, text) => el("span", "chip " + cls, text);
+  const outcome = (method, median) => { const s = el("span"); s.append(chip(METHOD[method], method)); if (PRICED.includes(method)) s.append(" ", el("b", "num", euro(median))); return s; };
+  const score = (v, kind, top) => { const d = el("div", "score" + (top ? " top" : "")); d.append(el("span", "num", Math.round(v * 100) + "%")); const b = el("span", "bar " + kind), i = el("i"); i.style.width = Math.max(0, Math.min(100, v * 100)) + "%"; b.append(i); d.append(b); return d; };
+  const changed = r => r.method !== r.was || r.median !== r.was_median;
+  function body(r) {
+    const wrap = el("div");
+    const line = el("div", "res-line"); line.append(outcome(r.method, r.median));
+    if (PRICED.includes(r.method)) line.append(" · × " + r.qty + " " + r.unit + " = ", el("b", "num", euro(r.median * (r.qty || 0))));
+    line.append(el("span", "was", "before: " + r.was + (PRICED.includes(r.was) ? " " + euro(r.was_median) : "")));
+    line.append(el("div", "why", (r.judged_item ? "Identical to item " + r.judged_item + ", judged once. " : "") + r.reason));
+    wrap.append(line);
+    if (r.calc) wrap.append(el("p", "calc", "Calculated: " + r.calc + " = " + euro(r.result)));
+    if (!r.cands.length) { wrap.append(el("p", "none", r.method === "copied" ? "Exact match in the library, so the price is copied without a search or a judge." : "No candidate: no library item with the same unit and surcharge status.")); return wrap; }
+    const sc = el("div", "scroll"), t = el("table", "p5"), head = el("tr");
+    ["RRF", "Found by", "Library item", "Short text", "Unit price", "Word score", "Meaning score", "Judge", "Difference"].forEach(h => head.append(el("th", null, h)));
+    const thead = el("thead"); thead.append(head); t.append(thead);
+    const tb = el("tbody");
+    for (const c of r.cands) {
+      const tr = el("tr", c.verdict === "same" ? "hit" : null);
+      tr.append(el("td", "num", c.place));
+      const fb = el("td"); fb.append(chip({words: "c-words", meaning: "c-meaning", both: "c-both"}[c.tag], c.tag[0].toUpperCase() + c.tag.slice(1)), el("div", "rk", c.ranks)); tr.append(fb);
+      tr.append(el("td", "cand-id", c.id), el("td", "ctext", c.short), el("td", "num", euro(c.price)));
+      const ws = el("td"); ws.append(score(c.ws, "w", c.tag !== "meaning")); const ms = el("td"); ms.append(score(c.ms, "m", c.tag !== "words")); tr.append(ws, ms);
+      const v = el("td"); v.append(c.verdict ? chip(...VERDICT[c.verdict]) : chip("v-diff", "no answer")); tr.append(v);
+      tr.append(el("td", "diff", c.diff));
+      tb.append(tr);
+    }
+    t.append(tb); sc.append(t); wrap.append(sc); return wrap;
+  }
+  function render(rows, filter) {
+    const list = document.getElementById("p4list"); list.textContent = "";
+    const shown = rows.filter(r => filter === "all" || (filter === "priced" && PRICED.includes(r.method)) || (filter === "changed" && changed(r)) || (filter === "unpriced" && !PRICED.includes(r.method)));
+    document.getElementById("p4count").textContent = shown.length + " shown";
+    for (const r of shown) {
+      const det = el("details", "p5i" + (PRICED.includes(r.method) ? " priced" : "")), sum = el("summary");
+      sum.append(el("span", "oz", r.oz), el("span", "st", r.short), el("span", "unit", r.unit || "no unit"));
+      const cnt = el("span", "cnt"); cnt.append(el("b", null, r.cands.length), r.cands.length === 1 ? " candidate" : " candidates"); sum.append(cnt);
+      const res = el("span", "res"); res.append(outcome(r.method, r.median)); sum.append(res);
+      det.append(sum);
+      det.addEventListener("toggle", () => { if (det.open && det.children.length === 1) det.append(body(r)); });
+      list.append(det);
+    }
+  }
+  fetch("step3_p4.json").then(r => r.json()).then(rows => {
+    const sel = document.getElementById("p4filter");
+    render(rows, sel.value); sel.addEventListener("change", () => render(rows, sel.value));
+  }).catch(() => { document.getElementById("p4list").textContent = "The P4 item list could not be loaded."; });
+})();
+</script>
+<!-- P4 section end -->
+
+<!-- Format section start -->
+<h2 id="format">Result format: what the frontend gets</h2>
+<p><code>lv price</code> writes two JSON files for each new LV. The first holds every line item with its step 2 and step 3 results; the second logs every judge call, so a "why?" view can show what the judge read and thought. Both examples below are real, from the latest P5 run (judge at effort xhigh); only the judge log entry is cut to one item.</p>
+<p class="small">The exact shapes are JSON Schemas generated from the code: <code>docs/result.schema.json</code> and <code>docs/judge-log.schema.json</code>, explained in <code>docs/result-format.md</code>.</p>
+
+<h3>The structure</h3>
+<pre class="code tree">P5.json                          the LV, one file per new LV
+├─ project, name, date, source_file, priced
+├─ item_types[]                  {name, trade, description}                      step 2
+├─ summary                       {methods: {&lt;method&gt;: {items, total}}, total}    step 3
+└─ items[]                       one per line item, in LV order
+   ├─ id, oz, section[], short_text, long_text, quantity, unit, kind, group
+   ├─ item_type, trade, item_type_reason                                         step 2
+   └─ prediction                                                                 step 3
+      ├─ method                  copied | similar | adjusted | reference | none
+      ├─ median, min, max, mean, count     the price; only for copied, similar, adjusted
+      ├─ sources[]               {id, short_text, unit_price, verdict, difference, why}   what the price rests on
+      ├─ judged[]                same shape: the 3 best candidates, best first, each with a why
+      ├─ reason                  the judge&#x27;s sentence for this item
+      ├─ rule, calculation, result         only for adjusted
+      └─ judged_item             on a copy: the identical item that was judged
+
+P5_judge.json                    one entry per judge call (up to 15 items of one item type)
+└─ [ ]
+   ├─ call                       1, 2, 3 … in the order the calls were made
+   ├─ items[]                    ids of the items this call asked about
+   ├─ question                   exactly what the judge read, texts only, no prices
+   ├─ thinking                   the judge&#x27;s summarised thinking (&quot;&quot; when it did not think)
+   └─ answer.items[]             {id, judged[{cand, verdict, dimension, cand_size, target_size, difference, why}], reason}</pre>
+
+<h3>What each method means for the screen</h3>
+<div class="scroll"><table class="methods fmt"><thead><tr><th>method</th><th>Meaning</th><th>Show</th></tr></thead><tbody>
+<tr><td><span class="chip v-same">copied</span></td><td>the library holds the same item word for word</td><td><code>median</code> as the price, marked exact</td></tr>
+<tr><td><span class="chip v-same">similar</span></td><td>the judge called a library item the same thing</td><td><code>median</code> as the price, with every source</td></tr>
+<tr><td><span class="chip v-size">adjusted</span></td><td>two sizes around the target; the price is interpolated</td><td><code>median</code>, both sources and <code>calculation</code></td></tr>
+<tr><td><span class="chip v-type">reference</span></td><td>related library items, none the same</td><td>no price; <code>sources</code> as "related, not the same"</td></tr>
+<tr><td><span class="chip v-diff">none</span></td><td>nothing usable</td><td>no price</td></tr>
+</tbody></table></div>
+
+<h3>Example 1: one line item in <code>P5.json</code></h3>
+<p>"Bagger bis 1 m³", 10 hours. The judge called P3's "Hydraulikbagger 1,0 m³" the same thing, so the item is priced at <b class="num">€113.50/h</b>, <b class="num">€1,135.00</b> in total. The match is the <b>first</b> entry in <code>judged</code>, with its <code>why</code>; the other two entries say why they are not the match. The judge read 5 candidates; the file keeps the best 3.</p>
+<pre class="code">{
+  &quot;id&quot;: &quot;P5/04.0006&quot;,
+  &quot;oz&quot;: &quot;04.0006&quot;,
+  &quot;section&quot;: [
+    &quot;04 Stundenlohnarbeiten (Regie)&quot;
+  ],
+  &quot;short_text&quot;: &quot;Bagger bis 1 m3&quot;,
+  &quot;long_text&quot;: &quot;Bagger bis 1 m3&quot;,
+  &quot;quantity&quot;: 10.0,
+  &quot;unit&quot;: &quot;h&quot;,
+  &quot;unit_price&quot;: null,
+  &quot;total_price&quot;: null,
+  &quot;kind&quot;: &quot;normal&quot;,
+  &quot;read_by&quot;: &quot;gaeb&quot;,
+  &quot;group&quot;: &quot;b355a78a8cf4&quot;,
+  &quot;item_type&quot;: &quot;Sonstiges&quot;,
+  &quot;trade&quot;: &quot;Sonstiges&quot;,
+  &quot;item_type_reason&quot;: &quot;No valid answer came back from the model after two tries, so code set this item to Sonstiges.&quot;,
+  &quot;prediction&quot;: {
+    &quot;method&quot;: &quot;similar&quot;,
+    &quot;min&quot;: 113.5,
+    &quot;max&quot;: 113.5,
+    &quot;median&quot;: 113.5,
+    &quot;mean&quot;: 113.5,
+    &quot;count&quot;: 1,
+    &quot;sources&quot;: [
+      {
+        &quot;id&quot;: &quot;P3/7.1.100&quot;,
+        &quot;short_text&quot;: &quot;Hydraulikbagger 1,0 m³&quot;,
+        &quot;unit_price&quot;: 113.5,
+        &quot;verdict&quot;: &quot;same&quot;,
+        &quot;difference&quot;: &quot;&quot;,
+        &quot;why&quot;: &quot;A 1,0 m³ hydraulic excavator matches an excavator up to 1 m³.&quot;
+      }
+    ],
+    &quot;rule&quot;: null,
+    &quot;calculation&quot;: null,
+    &quot;result&quot;: null,
+    &quot;reason&quot;: &quot;Only the 1,0 m³ Hydraulikbagger matches; the others are larger special excavators or other machines.&quot;,
+    &quot;judged&quot;: [
+      {
+        &quot;id&quot;: &quot;P3/7.1.100&quot;,
+        &quot;short_text&quot;: &quot;Hydraulikbagger 1,0 m³&quot;,
+        &quot;unit_price&quot;: 113.5,
+        &quot;verdict&quot;: &quot;same&quot;,
+        &quot;difference&quot;: &quot;&quot;,
+        &quot;why&quot;: &quot;A 1,0 m³ hydraulic excavator matches an excavator up to 1 m³.&quot;
+      },
+      {
+        &quot;id&quot;: &quot;P3/2.5.20&quot;,
+        &quot;short_text&quot;: &quot;wie vor, jedoch Bagger zum Verfüllen einschließlich Anbauverdichtungsgerät&quot;,
+        &quot;unit_price&quot;: 1.13,
+        &quot;verdict&quot;: &quot;type_only&quot;,
+        &quot;difference&quot;: &quot;25 t backfill excavator with compactor vs excavator up to 1 m³&quot;,
+        &quot;why&quot;: &quot;A 25 t excavator with an attachment compactor is not an excavator up to 1 m³.&quot;
+      },
+      {
+        &quot;id&quot;: &quot;P3/2.5.10&quot;,
+        &quot;short_text&quot;: &quot;Bagger (25 to) mit Humusschaufel (b = 2,0 m)&quot;,
+        &quot;unit_price&quot;: 1.13,
+        &quot;verdict&quot;: &quot;type_only&quot;,
+        &quot;difference&quot;: &quot;25 t excavator with Humusschaufel, operator, archaeology vs excavator up to 1 m³&quot;,
+        &quot;why&quot;: &quot;Size is given in tonnes, not m³, and scope includes a special bucket and operator.&quot;
+      }
+    ],
+    &quot;judged_item&quot;: null
+  }
+}</pre>
+
+<h3>Example 2: the judge call behind it, in <code>P5_judge.json</code></h3>
+<p>Call 17 judged all seven hourly-rate items of P5 together. To find an item's call, look for its <code>id</code> in <code>items</code> (or its <code>prediction.judged_item</code> for an identical item).</p>
+<pre class="code">{
+  &quot;call&quot;: 17,
+  &quot;items&quot;: [
+    &quot;P5/04.0003&quot;,
+    &quot;P5/04.0004&quot;,
+    &quot;P5/04.0005&quot;,
+    &quot;P5/04.0006&quot;,
+    &quot;P5/04.0007&quot;
+  ],
+  &quot;question&quot;: &quot;HINT: the 5 new items below were sorted under \&quot;Sonstiges\&quot; (trade: Sonstiges) by an earlier step. Decide by the texts only.\n\n… (items 04.0001 to 04.0005) …\n\n### P5/04.0006 | unit h | qty 10\nNEW: Bagger bis 1 m3 — Bagger bis 1 m3\n- P3/2.5.20: wie vor, jedoch Bagger zum Verfüllen einschließlich Anbauverdichtungsgerät —  [REFERS TO PREVIOUS ITEM: Bagger (25 to) mit Humusschaufel (b = 2,0 m) — Bagger mit Humusschaufel (ohne Zähne) einschließlich Bedienung nach Vorgabe des Landesamtes für Denkmalpflege ste]\n- P3/2.5.10: Bagger (25 to) mit Humusschaufel (b = 2,0 m) — Bagger mit Humusschaufel (ohne Zähne) einschließlich Bedienung nach Vorgabe des Landesamtes für Denkmalpflege stellen. Abtrag erfolgt nach Angabe des Grabungsleiters. Vergütung nach tatsächlichem Aufwand.\n- P3/2.5.30: wie vor, jedoch Lkw-Kipper (4-Achser) mit Allradantrieb, 12 t NL —  [REFERS TO PREVIOUS ITEM: Bagger (25 to) mit Humusschaufel (b = 2,0 m) — Bagger mit Humusschaufel (ohne Zähne) einschließlich Bedienung nach Vorgabe des Landesamtes für Denkmalpflege ste]\n- P3/7.1.180: wie vor, jedoch Kompressor, ca. 3 m³ / min. mit 1 Hammer —  [REFERS TO PREVIOUS ITEM: Kompressor 7 m³ / min. einschl. Hammer —]\n- P3/7.1.100: Hydraulikbagger 1,0 m³ —\n\n… (item 04.0007) …&quot;,
+  &quot;thinking&quot;: &quot;… I&#x27;m weighing the candidate groupings for the P5/04.0003 Facharbeiter item in unit h, starting with BGr. V, which I&#x27;m checking against the BRTV Bau Berufsgruppen to see whether it really covers skilled construction workers.\n\nI&#x27;m checking which Berufsgruppe in the older BRTV Bau structure matches a Facharbeiter, and I&#x27;m leaning toward treating Baufacharbeiter as the same kind of worker. Spezialbaufacharbeiter looks like a different wage group, so I&#x27;d mark it as a type-only match.\n\nI&#x27;m now weighing the Transporter item in unit h, where the candidates are Kleintransporter and Kleinbus. Transporter reads as a van, and Kleintransporter looks close to it, but without a stated payload I&#x27;m leaning to …&quot;,
+  &quot;answer&quot;: {
+    &quot;items&quot;: [
+      &quot;… (items 04.0001 to 04.0005) …&quot;,
+      {
+        &quot;id&quot;: &quot;P5/04.0006&quot;,
+        &quot;judged&quot;: [
+          {
+            &quot;cand&quot;: &quot;P3/2.5.20&quot;,
+            &quot;verdict&quot;: &quot;type_only&quot;,
+            &quot;dimension&quot;: null,
+            &quot;cand_size&quot;: null,
+            &quot;target_size&quot;: null,
+            &quot;difference&quot;: &quot;25 t backfill excavator with compactor vs excavator up to 1 m³&quot;,
+            &quot;why&quot;: &quot;A 25 t excavator with an attachment compactor is not an excavator up to 1 m³.&quot;
+          },
+          {
+            &quot;cand&quot;: &quot;P3/2.5.10&quot;,
+            &quot;verdict&quot;: &quot;type_only&quot;,
+            &quot;dimension&quot;: null,
+            &quot;cand_size&quot;: null,
+            &quot;target_size&quot;: null,
+            &quot;difference&quot;: &quot;25 t excavator with Humusschaufel, operator, archaeology vs excavator up to 1 m³&quot;,
+            &quot;why&quot;: &quot;Size is given in tonnes, not m³, and scope includes a special bucket and operator.&quot;
+          },
+          {
+            &quot;cand&quot;: &quot;P3/2.5.30&quot;,
+            &quot;verdict&quot;: &quot;different&quot;,
+            &quot;dimension&quot;: null,
+            &quot;cand_size&quot;: null,
+            &quot;target_size&quot;: null,
+            &quot;difference&quot;: &quot;Lkw-Kipper, not an excavator&quot;,
+            &quot;why&quot;: &quot;A tipper truck is a different machine from an excavator.&quot;
+          },
+          {
+            &quot;cand&quot;: &quot;P3/7.1.180&quot;,
+            &quot;verdict&quot;: &quot;different&quot;,
+            &quot;dimension&quot;: null,
+            &quot;cand_size&quot;: null,
+            &quot;target_size&quot;: null,
+            &quot;difference&quot;: &quot;compressor with hammer, not an excavator&quot;,
+            &quot;why&quot;: &quot;A compressor with a hammer is a different machine from an excavator.&quot;
+          },
+          {
+            &quot;cand&quot;: &quot;P3/7.1.100&quot;,
+            &quot;verdict&quot;: &quot;same&quot;,
+            &quot;dimension&quot;: null,
+            &quot;cand_size&quot;: null,
+            &quot;target_size&quot;: null,
+            &quot;difference&quot;: &quot;&quot;,
+            &quot;why&quot;: &quot;A 1,0 m³ hydraulic excavator matches an excavator up to 1 m³.&quot;
+          }
+        ],
+        &quot;reason&quot;: &quot;Only the 1,0 m³ Hydraulikbagger matches; the others are larger special excavators or other machines.&quot;
+      },
+      &quot;… (item 04.0007) …&quot;
+    ]
+  }
+}</pre>
+
+<h3>Rules for the screen</h3>
+<ul class="notes">
+  <li>The predicted price is <code>prediction.median</code>, and only when <code>method</code> is copied, similar or adjusted. Next to it: <code>min</code>–<code>max</code> and <code>count</code> when there is more than one past price.</li>
+  <li>Every price shows its source(s): <code>id</code>, <code>short_text</code>, <code>unit_price</code>. Traceability is a hard requirement.</li>
+  <li><code>unit_price</code> and <code>total_price</code> on the item itself are empty in a new LV. Never show them as the prediction.</li>
+  <li>reference and none have no price. Never fill one in from <code>judged</code> or <code>sources</code>.</li>
+  <li>Totals come from <code>summary</code>. Flag any source <code>unit_price</code> below 2: P3's bid holds token prices such as €1.13/h in the example above.</li>
+</ul>
+<!-- Format section end -->
 </div>
