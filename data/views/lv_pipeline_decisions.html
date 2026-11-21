@@ -464,6 +464,7 @@ h3{margin:44px 0 14px;font:700 clamp(17px,2vw,20px)/1.25 var(--display);color:va
           <tr><th scope="row">Judge whether a past item is the same thing</th><td data-l="Model">Claude Sonnet 5.5</td><td data-l="Effort">xhigh</td><td data-l="Calls">1 per item type, at most 15 items</td></tr>
           <tr><th scope="row">Turn item texts into vectors for the search by meaning</th><td data-l="Model">Voyage AI <code>voyage-4</code></td><td data-l="Effort">none</td><td data-l="Calls">once per text, then saved</td></tr>
           <tr><th scope="row">Say whether an item's description is complete enough to price</th><td data-l="Model">Claude Sonnet 5.5</td><td data-l="Effort">xhigh</td><td data-l="Calls">1 per 25 items</td></tr>
+          <tr><th scope="row">Read a construction plan, only when one is given</th><td data-l="Model">OpenAI vision model (<code>OPENAI_MODEL</code>)</td><td data-l="Effort">default</td><td data-l="Calls">3 readings per plan, plus up to 3 for matching</td></tr>
         </tbody>
       </table>
     </div>
@@ -662,7 +663,7 @@ surcharge item or a "wie vor" item, name the item it belongs to, since that is w
           <tr><th scope="row">Packing the questions</th><td data-l="What we decided">Identical items are judged once. Items of one item type travel in one call, at most 15, with the type named as a hint.</td><td class="w" data-l="Who"><span class="who code">Code</span></td></tr>
           <tr><th scope="row">Check the answers</th><td data-l="What we decided">Each item must come back with exactly its own candidates. Otherwise it is asked again on its own.</td><td class="w" data-l="Who"><span class="who code">Code</span></td></tr>
           <tr><th scope="row">Price and total</th><td data-l="What we decided">Lowest, highest, median, mean and count of the past prices, with every source. The total is median × quantity over normal items that were copied, similar or adjusted.</td><td class="w" data-l="Who"><span class="who code">Code</span></td></tr>
-          <tr><th scope="row">Saved for "why?"</th><td data-l="What we decided">Per item: the 3 best candidates, best first, each with its verdict, what differs, and one sentence saying why it is the match or why it is not, plus its short text and price. The judge still reads 5, because a shortlist of 3 would have lost one of P5's five prices; the judge's sentence; for a copy, the item that was actually judged. Per judge call, in a log beside the result file: the question as sent, the judge's summarised thinking and its answer. The format for the frontend is in <code>docs/result-format.md</code>.</td><td class="w" data-l="Who"><span class="who rule">Decision</span></td></tr>
+          <tr><th scope="row">Saved for "why?"</th><td data-l="What we decided">Per item: the 3 best candidates, best first, each with its verdict, what differs, and one sentence saying why it is the match or why it is not, plus its short text and price. The judge still reads 5, because a shortlist of 3 would have lost one of P5's five prices; the judge's sentence; for a copy, the item that was actually judged. Per judge call, in a log beside the result file: the question as sent, the judge's summarised thinking and its answer; each item names its call (<code>judge_call</code>). The format for the frontend is in <code>docs/result-format.md</code>.</td><td class="w" data-l="Who"><span class="who rule">Decision</span></td></tr>
         </tbody>
       </table>
     </div>
@@ -781,7 +782,7 @@ NEW: Flansch DN 150, PN 10 — Glatter Flansch, Edelstahl, als Zulage zur Rohrle
         <tbody>
           <tr><th scope="row">Words only</th><td data-l="P5, 50 items">3 priced · 25 references · 22 nothing</td><td data-l="P4, 296 items">5 priced · 95 references · 196 nothing</td></tr>
           <tr><th scope="row">Words + meaning, judge at high</th><td data-l="P5, 50 items">9 priced · 26 references · 15 nothing</td><td data-l="P4, 296 items">4 priced · 114 references · 178 nothing</td></tr>
-          <tr class="sum"><th scope="row">Words + meaning, judge at xhigh</th><td data-l="P5, 50 items">5 priced · 33 references · 12 nothing</td><td data-l="P4, 296 items">not run yet</td></tr>
+          <tr class="sum"><th scope="row">Words + meaning, judge at xhigh</th><td data-l="P5, 50 items">5 priced · 33 references · 12 nothing</td><td data-l="P4, 296 items">10 priced · 121 references · 165 nothing</td></tr>
         </tbody>
       </table>
     </div>
@@ -858,6 +859,8 @@ NEW: Flansch DN 150, PN 10 — Glatter Flansch, Edelstahl, als Zulage zur Rohrle
           <tr><th scope="row">The item's score</th><td data-l="What we decided">0.6 × price risk + 0.4 × description risk. A place on a scale from 0 to 100, not a probability.</td><td class="w" data-l="Who"><span class="who code">Code</span></td></tr>
           <tr><th scope="row">How much an item counts</th><td data-l="What we decided">By its value: the found price × quantity. Without a price: the middle price of its related past items × quantity. With nothing: the value of a typical item of this LV. The value is a weight and is never shown as a price.</td><td class="w" data-l="Who"><span class="who code">Code</span></td></tr>
           <tr><th scope="row">The LV's score</th><td data-l="What we decided">The items' scores weighted by value, over the normal items. Saved with it: how many values rest on a price, on related items, or on an assumption.</td><td class="w" data-l="Who"><span class="who code">Code</span></td></tr>
+          <tr><th scope="row">Confidence</th><td data-l="What we decided">The other side of the score, for the screen: 100 − risk score when the item has a price (found, or entered by the estimator), 0 when it has none. The LV's confidence is weighted by value like its score.</td><td class="w" data-l="Who"><span class="who code">Code</span></td></tr>
+          <tr><th scope="row">The estimator's comments</th><td data-l="What we decided"><code>lv comment &lt;project&gt; &lt;item&gt; --price … --text …</code> saves a comment on an item and recalculates every score at once, with no AI call. An own price gives the item confidence 100; <code>--doubt</code> marks a found price as not fitting. Comments are kept on the item, oldest first.</td><td class="w" data-l="Who"><span class="who code">Code</span></td></tr>
           <tr><th scope="row">The AI does not rate importance</th><td data-l="What we decided">Asking the model how big an item is would be a price guess, which the rules forbid.</td><td class="w" data-l="Who"><span class="who rule">Decision</span></td></tr>
         </tbody>
       </table>
@@ -912,23 +915,25 @@ Answer for every item id, each once:
     <h3>How it tested</h3>
     <div class="ledger nums">
       <table>
-        <thead><tr><th scope="col">P5, 50 items, first real run</th><th scope="col">Result</th></tr></thead>
+        <thead><tr><th scope="col">First real runs</th><th scope="col">P5, 50 items</th><th scope="col">P4, 296 items</th></tr></thead>
         <tbody>
-          <tr><th scope="row">Step 3 outcome in this run</th><td data-l="Result">5 similar · 33 reference · 12 none</td></tr>
-          <tr><th scope="row">Descriptions</th><td data-l="Result">30 complete · 20 with gaps · 0 vague</td></tr>
-          <tr><th scope="row">Value basis</th><td data-l="Result">5 by price · 33 by related items · 12 assumed</td></tr>
-          <tr class="sum"><th scope="row">The LV's score</th><td data-l="Result">51 of 100</td></tr>
+          <tr><th scope="row">Step 3 outcome in this run</th><td data-l="P5, 50 items">5 similar · 33 reference · 12 none</td><td data-l="P4, 296 items">10 priced · 121 reference · 165 none</td></tr>
+          <tr><th scope="row">Descriptions</th><td data-l="P5, 50 items">30 complete · 20 with gaps · 0 vague</td><td data-l="P4, 296 items">172 complete · 115 with gaps · 9 vague</td></tr>
+          <tr><th scope="row">Value basis</th><td data-l="P5, 50 items">5 by price · 33 by related items · 12 assumed</td><td data-l="P4, 296 items">9 by price · 109 by related items · 154 assumed</td></tr>
+          <tr class="sum"><th scope="row">The LV's score</th><td data-l="P5, 50 items">51 of 100</td><td data-l="P4, 296 items">52 of 100</td></tr>
+          <tr><th scope="row">The LV's confidence</th><td data-l="P5, 50 items">5 of 100 (5 items priced)</td><td data-l="P4, 296 items">3 of 100 (10 items priced)</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="fn">Two description calls, 40 seconds. Examples: "Asphalt schneiden" scores 19 (same past item found, text complete). "Transporter" scores 65 (only related items; vehicle size and operator not stated). "Pass- und Gelenkstück DN 800" scores 80 (nothing found; length or angle not stated).</p>
+    <p class="fn">P4 ran all five steps in 9 min 29 s: item types 40 s, assignment 31 s, judge 373 s, description check 119 s. P5's description check took 2 calls and 40 seconds. Examples from P5: "Asphalt schneiden" scores 19 (same past item found, text complete). "Transporter" scores 65 (only related items; vehicle size and operator not stated). "Pass- und Gelenkstück DN 800" scores 80 (nothing found; length or angle not stated).</p>
     <div class="dlg note">
       <span class="tag">Weak spots</span>
       <ul>
         <li><strong>The weights are rough.</strong> The three items that move P5's score most are all weighted by related items' prices, not by a found price:<ul><li>Rohrgrabenaushub, bis 2m, seitlich lagern, wieder einbauen: score 49, value about 39,388 (from related items).</li><li>Rohrgrabenaushub, Abfuhr auf AG-Zwischenlager: score 49, value about 27,300 (from related items).</li><li>Rohrauflager und -einbettung, Feinkies 0/32 mm, bis DN 900 m: score 49, value about 14,605 (from related items).</li></ul></li>
         <li><strong>Values inherit bad past prices,</strong> near-zero ones included.</li>
         <li><strong>Where step 3 finds little, most values are assumed.</strong> On P4, 178 of 296 items had no candidate the judge accepted.</li>
-        <li><strong>The scale is a first guess.</strong> All numbers are starting values to tune with an estimator. Not run on P4 yet.</li>
+        <li><strong>The scale is a first guess.</strong> All numbers are starting values to tune with an estimator.</li>
+        <li><strong>The description check waits for the judge.</strong> It needs only the texts and the item types, so it could run beside the judge and save about 2 minutes on P4.</li>
         <li>5 automated tests, with a stand-in for the AI.</li>
       </ul>
     </div>
@@ -948,6 +953,8 @@ Answer for every item id, each once:
           <tr><th scope="row">PDF reading</th><td data-l="Where it stands">Built for P3, by code. P6 exists only as PDFs in other layouts and cannot be read yet.</td></tr>
           <tr><th scope="row">Near-zero prices and lump sums</th><td data-l="Where it stands">Open, set aside for now (21 Nov): two near-zero prices reached a price through the search by meaning. A flat cut-off would not work, because real prices can be that low too (holding a fence costs 0.03 per metre and day in P2). No rule yet for these, or for lump sums that depend on the project.</td></tr>
           <tr><th scope="row">A second judge opinion</th><td data-l="Where it stands">Decided for now: one judge call per item. Asking twice and flagging a disagreement as "unsure" was proposed and set aside.</td></tr>
+          <tr><th scope="row">Plan check</th><td data-l="Where it stands">Linked: <code>lv price … --plan</code> runs the VLM prototype (PR #2) on step 0's items, in parallel with steps 1 to 4, and writes <code>&lt;project&gt;_plan.json</code>, merged into the result file at the end (each item gets its plan status and markers, the LV gets all findings), plus an overview (plan with the items numbered, and Excel). Run on the Hörsaal H1 plan: 41 of 52 items located, 27 of 30 compared items match, in parallel with the LV pipeline (5 min 37 s in total). Open: one AI provider or two, and German or English keys in the plan file.</td></tr>
+          <tr><th scope="row">Backend API</th><td data-l="Where it stands">Built (21 Nov): <code>lv/api.py</code> with FastAPI. An upload starts <code>lv price</code> in its own process and answers at once; the frontend polls the run's status, then reads the one result file, a judge call by its <code>judge_call</code>, and the plan image to draw the markers on. A comment is saved into the result file without AI. Endpoints and examples are in the README; <code>copy_only</code> runs cost nothing. Open: a login, which addresses may call it, and uploading past LVs to the library.</td></tr>
           <tr><th scope="row">Voyage rate limit</th><td data-l="Where it stands">Without a payment method Voyage allows 3 calls and 10,000 tokens a minute: embedding the library took 9 minutes, once. Vectors are saved, so a new LV only embeds its own items.</td></tr>
           <tr><th scope="row">Accuracy check command</th><td data-l="Where it stands">Specified, not built: hide one past project, predict it from the others, compare.</td></tr>
           <tr><th scope="row">Trade list</th><td data-l="Where it stands">Open: 17 stand-in names are used until an official list is chosen.</td></tr>
@@ -963,7 +970,7 @@ Answer for every item id, each once:
     <div class="disc">
       <svg class="art" viewBox="0 0 80 80" aria-hidden="true"><use href="#i-tag"/></svg>
       <p class="part">Bottom line</p>
-      <p class="bl"><strong>Reading, linking and sorting work on any LV today.</strong> The price lookup is honest but thin: with three past projects and the search by meaning, the judge at xhigh prices 5 of P5's 50 items and shows the nearest past items for 33 more. Step 4 puts P5's risk at 51 of 100. More past LVs of the same kind of work will change that more than any prompt.</p>
+      <p class="bl"><strong>Reading, linking and sorting work on any LV today.</strong> The price lookup is honest but thin: with three past projects and the search by meaning, the judge at xhigh prices 5 of P5's 50 items and shows the nearest past items for 33 more. Step 4 puts P5's risk at 51 of 100 and P4's at 52. More past LVs of the same kind of work will change that more than any prompt.</p>
     </div>
     <div class="sources">
       <h2>Where this comes from</h2>

@@ -8,10 +8,11 @@
 __pycache__/
 .pytest_cache/
 
-# LV pipeline: price library, results and saved vectors (company data)
+# LV pipeline: price library, results, saved vectors and API uploads (company data)
 data/library/
 data/out/
 data/embeddings/
+data/uploads/
 
 # Local plan files for VLM tests
 vlm/plans/*

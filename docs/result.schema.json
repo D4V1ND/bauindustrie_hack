@@ -1,5 +1,114 @@
 {
  "$defs": {
+  "Comment": {
+   "description": "What the estimator said about one line item. The latest comment with a price or a doubt decides.",
+   "properties": {
+    "text": {
+     "default": "",
+     "title": "Text",
+     "type": "string"
+    },
+    "price": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Price"
+    },
+    "effect": {
+     "default": "note",
+     "enum": [
+      "note",
+      "doubt"
+     ],
+     "title": "Effect",
+     "type": "string"
+    }
+   },
+   "title": "Comment",
+   "type": "object"
+  },
+  "ItemPlan": {
+   "description": "Plan check: what the construction plan says about one line item (SPEC.md, plan check).",
+   "properties": {
+    "status": {
+     "enum": [
+      "ok",
+      "ok_unstable",
+      "differs",
+      "not_in_plan",
+      "units_differ",
+      "not_checked"
+     ],
+     "title": "Status",
+     "type": "string"
+    },
+    "quantity": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Quantity"
+    },
+    "unit": {
+     "default": "",
+     "title": "Unit",
+     "type": "string"
+    },
+    "matched_by": {
+     "default": "",
+     "enum": [
+      "plan_code",
+      "dimensions",
+      "ai_match",
+      "room",
+      ""
+     ],
+     "title": "Matched By",
+     "type": "string"
+    },
+    "rooms": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Rooms",
+     "type": "array"
+    },
+    "markers": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/PlanMarker"
+     },
+     "title": "Markers",
+     "type": "array"
+    },
+    "findings": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Findings",
+     "type": "array"
+    }
+   },
+   "required": [
+    "status"
+   ],
+   "title": "ItemPlan",
+   "type": "object"
+  },
   "ItemType": {
    "description": "Step 2: one item type of an LV's own list, with the one trade it belongs to.",
    "properties": {
@@ -148,6 +257,25 @@
       }
      ],
      "default": null
+    },
+    "comments": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/Comment"
+     },
+     "title": "Comments",
+     "type": "array"
+    },
+    "plan": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/ItemPlan"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
     }
    },
    "required": [
@@ -178,6 +306,242 @@
     "total"
    ],
    "title": "MethodSum",
+   "type": "object"
+  },
+  "PlanFinding": {
+   "properties": {
+    "id": {
+     "title": "Id",
+     "type": "string"
+    },
+    "oz": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "title": "Oz"
+    },
+    "kind": {
+     "enum": [
+      "quantity_differs",
+      "not_in_plan",
+      "missing_in_lv",
+      "units_differ",
+      "unstable_count",
+      "other"
+     ],
+     "title": "Kind",
+     "type": "string"
+    },
+    "severity": {
+     "enum": [
+      "error",
+      "risk",
+      "note"
+     ],
+     "title": "Severity",
+     "type": "string"
+    },
+    "title": {
+     "title": "Title",
+     "type": "string"
+    },
+    "description": {
+     "title": "Description",
+     "type": "string"
+    },
+    "lv_quantity": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Lv Quantity"
+    },
+    "lv_unit": {
+     "default": "",
+     "title": "Lv Unit",
+     "type": "string"
+    },
+    "plan_quantity": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Plan Quantity"
+    },
+    "plan_unit": {
+     "default": "",
+     "title": "Plan Unit",
+     "type": "string"
+    },
+    "confidence": {
+     "default": "",
+     "title": "Confidence",
+     "type": "string"
+    },
+    "decision": {
+     "default": "open",
+     "title": "Decision",
+     "type": "string"
+    },
+    "markers": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/PlanMarker"
+     },
+     "title": "Markers",
+     "type": "array"
+    }
+   },
+   "required": [
+    "id",
+    "oz",
+    "kind",
+    "severity",
+    "title",
+    "description"
+   ],
+   "title": "PlanFinding",
+   "type": "object"
+  },
+  "PlanMarker": {
+   "description": "Where something is on the plan image: x and y relative to its width and height (0 to 1, from the top left).",
+   "properties": {
+    "page": {
+     "default": 1,
+     "title": "Page",
+     "type": "integer"
+    },
+    "x": {
+     "title": "X",
+     "type": "number"
+    },
+    "y": {
+     "title": "Y",
+     "type": "number"
+    },
+    "shape": {
+     "default": "point",
+     "enum": [
+      "point",
+      "frame"
+     ],
+     "title": "Shape",
+     "type": "string"
+    },
+    "width": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Width"
+    },
+    "height": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Height"
+    },
+    "label": {
+     "default": "",
+     "title": "Label",
+     "type": "string"
+    }
+   },
+   "required": [
+    "x",
+    "y"
+   ],
+   "title": "PlanMarker",
+   "type": "object"
+  },
+  "PlanSummary": {
+   "description": "Plan check: the plan, all findings and the files behind them.",
+   "properties": {
+    "file": {
+     "title": "File",
+     "type": "string"
+    },
+    "width_px": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Width Px"
+    },
+    "height_px": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Height Px"
+    },
+    "checked": {
+     "title": "Checked",
+     "type": "integer"
+    },
+    "findings": {
+     "items": {
+      "$ref": "#/$defs/PlanFinding"
+     },
+     "title": "Findings",
+     "type": "array"
+    },
+    "raw_file": {
+     "title": "Raw File",
+     "type": "string"
+    },
+    "overview_files": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Overview Files",
+     "type": "array"
+    }
+   },
+   "required": [
+    "file",
+    "checked",
+    "findings",
+    "raw_file"
+   ],
+   "title": "PlanSummary",
    "type": "object"
   },
   "Prediction": {
@@ -315,6 +679,18 @@
      ],
      "default": null,
      "title": "Judged Item"
+    },
+    "judge_call": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Judge Call"
     }
    },
    "required": [
@@ -328,6 +704,11 @@
    "properties": {
     "score": {
      "title": "Score",
+     "type": "integer"
+    },
+    "confidence": {
+     "default": 0,
+     "title": "Confidence",
      "type": "integer"
     },
     "price_risk": {
@@ -423,6 +804,18 @@
       }
      ],
      "title": "Score"
+    },
+    "confidence": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Confidence"
     },
     "value": {
      "title": "Value",
@@ -567,6 +960,17 @@
    "anyOf": [
     {
      "$ref": "#/$defs/RiskSummary"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null
+  },
+  "plan": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/PlanSummary"
     },
     {
      "type": "null"

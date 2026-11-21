@@ -396,8 +396,74 @@ Built before tasks 6 and 7: step 3 does not need trades or item types.
     0 vague. Examples: "Asphalt schneiden" 19 (similar, complete); "Transporter" 65 (reference; vehicle size
     and operator not stated); "FBS Pass- und Gelenkstück DN 800" 80 (nothing found; length or angle not stated).
   - Limits: the five heaviest items are all weighted by related items' prices, not by a found price; values inherit
-    token prices; all numbers of the scale are starting values. Not run on P4 yet.
+    token prices; all numbers of the scale are starting values.
+  - P4, all steps in one `lv price` run: 9 min 29 s end to end. Opus item types 40 s, assignment 31 s (12 calls),
+    judge 373 s (67 calls, then 15 asked again), description check 119 s (12 calls); reading, search and saving
+    about 6 s. Step 3: 1 copied, 8 similar, 1 adjusted, 121 reference, 165 none, total 23,604.14; thinking saved for
+    77 of 82 calls. Step 4: LV score 52 of 100 over a value of 582,810.29; value basis 9 by price, 109 by related
+    items, 154 assumed; descriptions 172 complete, 115 with gaps, 9 vague.
+  - P4 against its run at `high`: "Baustelle räumen" (3 identical lump sums, 7,500 each) is `similar` again, the
+    judge varying once more. Bauzaun (the 0.10 token price) and the pump operation became `reference`. New prices:
+    two plate load tests (100 per test), bitumen spraying (1.60 per m2), asphalt cutting (adjusted, 15.68 per m) and a
+    longitudinal crossing surcharge at 0.50 per m, one of P3's near-zero prices.
+  - Speed: the description check needs only texts and item types, so it could run beside the judge (about 2 min
+    less on P4). Not built.
   - Files: `lv/risk.py`, `lv/model.py`, `lv/ai.py`, `lv/__main__.py`, `tests/test_risk.py`, docs and views.
+
+- [x] **Task 19: Optional plan check, linking the VLM prototype (PR #2) to the pipeline** (small)
+  - Does: `lv price … --plan <plan>` also reads a construction plan with the prototype's OpenAI vision model
+    (`vlm/extract_plan.py`, 3 readings), compares it with the LV in `vlm/compare.py` and writes
+    `data/out/<project>_plan.json`. The LV comes from step 0's reader through `lv/plan.py`, not from
+    `vlm/gaeb_llm.py`. A bad plan file, `--copy-only`, or a missing OpenAI key stops the command before anything runs;
+    the plan check runs after the LV result is saved.
+  - Merged first: PR #1 (steps 0 to 4) and PR #2 (the VLM prototype); the one conflict, `.gitignore`, keeps both lists.
+  - Checked: tests for the item adapter, for the prototype's comparison on step 0 items without any AI call
+    (a matching count, a differing count with its marker, an item in m2 left unchecked), and for the early stops; by
+    hand, a real image without an OpenAI key stops with the prototype's message and writes nothing.
+  - Not checked: a real plan run. This repository has no plan file and no OpenAI key.
+  - Files: `lv/plan.py`, `lv/__main__.py`, `tests/test_plan.py`, `requirements.txt`, `SPEC.md`, `docs/result-format.md`,
+    `vlm/README.md`.
+
+- [x] **Task 20: The plan check runs beside steps 1 to 4** (small)
+  - Does: with `--plan`, the plan check starts in a background thread right after step 0 and runs while steps 1 to 4
+    go on; `lv price` collects it after saving the LV result. A failing plan check ends the command with an error
+    that says the LV result is saved. Progress lines are now whole lines ("asking …" and "… done in N s"), so the
+    plan check's own lines cannot break into them.
+  - Why: the plan check needs only step 0's items, and it is the slow part when a plan is given.
+  - Checked: tests for the background runner, for the plan check running in its own thread and writing its file,
+    and for a failing plan check keeping the LV result. Not measured: the time saved, which needs a real plan run.
+
+- [x] **Task 21: Keep the plan link working with PR #5, and write the plan overview** (small)
+  - PR #5 (coordinates per item, rooms, a fixed overview per plan) changed `extract_runs` to return the readings and
+    the rooms as a pair. `lv/plan.py` now takes both and passes the rooms on; without this, `lv price --plan` would
+    crash in the plan check, and the tests would not have shown it. A new test guards the pair.
+  - `lv price … --plan` also writes the prototype's overview: `<project>__<plan>_uebersicht.png` and `.xlsx`.
+    `requirements.txt`: `pillow`, `openpyxl`.
+  - Real run, Hörsaal H1 with its plan: LV pipeline 2 min 3 s, plan check 5 min 33 s in parallel, 5 min 37 s end to end.
+    41 of 52 items located on the plan (8 by plan code, 20 by AI matching, 13 by room). 27 of 30 compared items
+    match; seats (240) and podium stairs (2) are now matched. 4 findings: aisle steps not counted, the podium in m2
+    against 1 piece, and one pair that is a single thing: the plan's 3 exit signs (NA) against the LV's exit-sign item.
+
+- [x] **Task 22: One structured result: judge_call link, and the plan check merged into <project>.json** (small)
+  - `prediction.judge_call`: the `call` number in `<project>_judge.json` that decided the item, the last call that
+    asked about it. Set by `lv price` from the judge log.
+  - With `--plan`, `lv/plan.py` `merge` writes the plan check into the LV in English keys: `plan` on each item (status,
+    plan quantity, how matched, rooms, markers, finding ids) and `plan` on the LV (plan file and size, all findings
+    including those no item covers, raw file and overview names). The LV file is saved again after the merge;
+    `<project>_plan.json` stays as the raw record.
+  - Existing files filled in without AI calls: H1 (judge_call on 52 of 52 items, plan on all 52, 4 findings), P5 (50
+    of 50), P4 (264 of 296; the other 32 were copied or had no candidates).
+  - Tests: judge_call points at the last call that asked about the item, the retried items at their own call; the
+    merge (ok, differs with its finding and marker, an m2 item not checked, a plan component no item covers); the
+    command writes the merged file.
+
+- [x] **Task 23: Backend API for the frontend** (small)
+  - `lv/api.py` (FastAPI): `POST /projects` saves the LV and the optional plan under `data/uploads/<project>/` and
+    starts `python -m lv price` in its own process (`LV_DATA` tells it the data folder); its printed lines are the
+    run's log. Status, project list, result, judge log and one judge call, plan files by name, comments.
+  - README: architecture, endpoints, a typical session, shapes, errors. Interactive docs at `/docs`.
+  - Tests: a copy-only upload runs end to end and takes a comment; bad uploads are refused before anything runs;
+    only files named in the result's `plan` are served.
 
 ### Checkpoint: step 3
 - [x] All tests pass without network and without a key.
