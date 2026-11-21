@@ -5,6 +5,8 @@ The plan is read and compared by the VLM prototype in `vlm/`: an OpenAI vision m
 comes from step 0's reader, not from an LLM, so `vlm/gaeb_llm.py` is not used here.
 """
 import sys
+import threading
+import time
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -44,8 +46,9 @@ def positions(lv: LV) -> dict:
             "pruefung": {"quelle": "lv step 0, the GAEB reader", "gelesen": len(lv.items)}}
 
 
-def check(lv: LV, plan: Path, client_and_model: tuple, runs: int = RUNS) -> dict:
-    """Reads the plan `runs` times and compares it with the LV: the prototype's result, joined to the LV by `oz`."""
+def check(lv_positions: dict, plan: Path, client_and_model: tuple, runs: int = RUNS) -> dict:
+    """Reads the plan `runs` times and compares it with the LV's positions (from `positions`): the prototype's
+    result, joined to the LV by `oz`."""
     _on_path()
     import compare
     import extract_plan
@@ -54,7 +57,32 @@ def check(lv: LV, plan: Path, client_and_model: tuple, runs: int = RUNS) -> dict
     plan_runs = extract_plan.extract_runs(plan, runs, client=openai_client, model=model)
     width, height = extract_plan.image_size(plan)
     meta = {"id": plan.stem, "datei": plan.name, "breite_px": width, "hoehe_px": height}
-    return compare.build_result(positions(lv), plan_runs, meta, openai_client, model)
+    return compare.build_result(lv_positions, plan_runs, meta, openai_client, model)
+
+
+class Background:
+    """Runs one job in a thread while the LV pipeline goes on, and hands back its result or its error.
+    A daemon thread: when the LV run stops with an error, the command ends without waiting for the plan check."""
+
+    def __init__(self, job, *args):
+        self.result_value, self.error, self.started = None, None, time.monotonic()
+        self.thread = threading.Thread(target=self._run, args=(job, args), daemon=True)
+        self.thread.start()
+
+    def _run(self, job, args) -> None:
+        try:
+            self.result_value = job(*args)
+        except BaseException as error:  # handed to the caller by result(); a thread cannot raise into the main one
+            self.error = error
+
+    def done(self) -> bool:
+        return not self.thread.is_alive()
+
+    def result(self):
+        self.thread.join()
+        if self.error is not None:
+            raise self.error
+        return self.result_value
 
 
 def _on_path() -> None:

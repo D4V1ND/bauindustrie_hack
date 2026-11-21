@@ -1,8 +1,12 @@
+import json
+import re
+import threading
 from pathlib import Path
 
 import pytest
 
-from lv import plan
+from lv import ai, plan
+from lv.categorise import Assigned, Assignments, Proposal, ProposedType
 from lv.__main__ import main
 from lv.model import LV, LineItem
 
@@ -55,3 +59,57 @@ def test_a_plan_that_cannot_be_checked_stops_the_command_before_anything_runs(tm
     with pytest.raises(SystemExit, match=message):
         main(["price", str(RAW / P5_NEW), "--project", "P5", *args], data=tmp_path)
     assert not (tmp_path / "out").exists()  # nothing was read, asked or written
+
+
+def test_a_background_job_hands_back_its_result_or_its_error():
+    assert plan.Background(lambda a, b: a + b, 2, 3).result() == 5
+    with pytest.raises(ValueError, match="no plan"):
+        plan.Background(lambda: (_ for _ in ()).throw(ValueError("no plan"))).result()
+
+
+def fake_ai(monkeypatch):
+    """Stands in for every Claude call of steps 2 to 4: one item type, no judge answers, no description checks."""
+    def ask(model, system, questions, shape, effort):
+        if shape is Proposal:
+            return [Proposal(item_types=[ProposedType(name="Bauleistung", trade="Erdarbeiten", description="all")])]
+        if shape is Assignments:
+            return [Assignments(items=[Assigned(id=id, item_type="Bauleistung", reason="All one type.")
+                                       for id in re.findall(r"^### (\S+) \|", q, flags=re.M)]) for q in questions]
+        return [None for _ in questions]
+    monkeypatch.setattr(ai, "ask", ask)
+    monkeypatch.setattr(ai, "ask_with_thinking", lambda *a, **k: [(None, "") for _ in ask(*a, **k)])
+    monkeypatch.setattr(ai, "voyage_key", lambda: None)
+    monkeypatch.setattr(plan, "client", lambda: ("openai client", "vision-model"))
+
+
+def test_the_plan_check_runs_in_its_own_thread_and_writes_its_own_file(tmp_path, monkeypatch, capsys):
+    fake_ai(monkeypatch)
+    ran_on = []
+
+    def check(lv_positions, plan_path, client_and_model):
+        ran_on.append(threading.current_thread() is not threading.main_thread())
+        return {"positionen": lv_positions["positionen"], "befunde": [], "zusammenfassung": {"befunde": 0, "geprueft": 0}}
+
+    monkeypatch.setattr(plan, "check", check)
+    drawing = tmp_path / "EG.png"
+    drawing.write_bytes(b"not read by the fake")
+    main(["price", str(RAW / P5_NEW), "--project", "P5", "--plan", str(drawing)], data=tmp_path)
+
+    assert ran_on == [True]
+    written = json.loads((tmp_path / "out" / "P5_plan.json").read_text(encoding="utf-8"))
+    assert len(written["positionen"]) == 50 and (tmp_path / "out" / "P5.json").exists()
+    assert "plan check: started in parallel" in capsys.readouterr().out
+
+
+def test_a_failing_plan_check_keeps_the_lv_result(tmp_path, monkeypatch):
+    fake_ai(monkeypatch)
+
+    def check(lv_positions, plan_path, client_and_model):
+        raise ConnectionError("vision model unreachable")
+
+    monkeypatch.setattr(plan, "check", check)
+    drawing = tmp_path / "EG.png"
+    drawing.write_bytes(b"x")
+    with pytest.raises(SystemExit, match="plan check failed; the LV result above is saved. ConnectionError"):
+        main(["price", str(RAW / P5_NEW), "--project", "P5", "--plan", str(drawing)], data=tmp_path)
+    assert (tmp_path / "out" / "P5.json").exists() and not (tmp_path / "out" / "P5_plan.json").exists()

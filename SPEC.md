@@ -339,7 +339,9 @@ the plan is optional.
 | Read the plan | AI (OpenAI vision model, `OPENAI_MODEL`) | `vlm/extract_plan.py`: countable components with counts and approximate x/y markers, read 3 times; the median count is used and counts that vary are flagged |
 | Compare | code, then AI | `vlm/compare.py`: matches by plan codes (F1, T3) and dimensions first, then lets the model match the rest by majority vote; writes findings per item (quantity differs, not in the plan, in the plan but not in the LV, units not comparable) with markers and an open decision field |
 
-The plan check runs after the LV result is saved, so a failing plan check loses nothing of it. A plan that is not
+The plan check starts right after step 0, since it needs only step 0's items, and runs in a background thread beside
+steps 1 to 4 (`lv/plan.py`, `Background`). Its result is collected after the LV result is saved, so a failing plan
+check loses nothing of it; the command then ends with an error that says so. A plan that is not
 an image or PDF, a missing file, or a missing `OPENAI_API_KEY` / `OPENAI_MODEL` (in the root `.env` or in `vlm/.env`)
 stops the command before anything runs; `--copy-only` and `--plan` cannot be combined.
 

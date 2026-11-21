@@ -424,6 +424,15 @@ Built before tasks 6 and 7: step 3 does not need trades or item types.
   - Files: `lv/plan.py`, `lv/__main__.py`, `tests/test_plan.py`, `requirements.txt`, `SPEC.md`, `docs/result-format.md`,
     `vlm/README.md`.
 
+- [x] **Task 20: The plan check runs beside steps 1 to 4** (small)
+  - Does: with `--plan`, the plan check starts in a background thread right after step 0 and runs while steps 1 to 4
+    go on; `lv price` collects it after saving the LV result. A failing plan check ends the command with an error
+    that says the LV result is saved. Progress lines are now whole lines ("asking …" and "… done in N s"), so the
+    plan check's own lines cannot break into them.
+  - Why: the plan check needs only step 0's items, and it is the slow part when a plan is given.
+  - Checked: tests for the background runner, for the plan check running in its own thread and writing its file,
+    and for a failing plan check keeping the LV result. Not measured: the time saved, which needs a real plan run.
+
 ### Checkpoint: step 3
 - [x] All tests pass without network and without a key.
 - [x] `lv price --copy-only` on P2's own `.X83` copies only correct prices.
