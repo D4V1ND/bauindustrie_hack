@@ -747,6 +747,31 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .rl{margin-top:12px;padding:9px 12px;border-left:2px solid currentColor;font-size:13px}
 .rl.hi{background:var(--bad-bg)}.rl.mid{background:var(--warn-bg)}
 .rl svg.i{flex:none;width:15px;height:15px}
+
+/* ---- estimate + confidence ---- */
+.est{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-top:14px}
+.est .muted{font-size:13px}
+.estconf{margin-top:34px}
+.conf-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.conf-h .mono{color:var(--ink-3)}
+.conf-v{display:inline-flex;align-items:baseline;gap:8px;font:.62rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.conf-v b{font:300 22px/1 var(--sans);letter-spacing:-.03em;color:var(--ink)}
+.conf-v.hi{color:var(--ok)}.conf-v.mid{color:var(--warn)}.conf-v.lo{color:var(--bad)}
+.cmeter{display:flex;gap:3px;height:22px}
+.cmeter i{flex:1;background:var(--line);transform-origin:bottom;animation:segin .5s var(--ease) both;animation-delay:calc(var(--i) * 14ms + .3s)}
+.cmeter.hi i.on{background:var(--ok)}.cmeter.mid i.on{background:var(--warn)}.cmeter.lo i.on{background:var(--bad)}
+@keyframes segin{from{transform:scaleY(.2);opacity:0}to{transform:none;opacity:1}}
+.conf-s{display:flex;justify-content:space-between;margin-top:6px;font:.58rem/1 var(--mono);color:var(--ink-3)}
+.estfacts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:auto;border-top:1px solid var(--line)}
+.cost .estconf{margin-bottom:26px}
+.estfacts>div{padding:14px 12px 0 0}
+.estfacts>div+div{padding-left:14px;border-left:1px solid var(--line)}
+.estfacts .mono{display:block;color:var(--ink-3);font-size:.58rem}
+.estfacts b{display:block;margin-top:7px;font-size:16px;font-weight:500;letter-spacing:-.01em}
+.pconf{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:14px;margin-top:16px;padding-top:14px;border-top:1px dashed var(--line-2)}
+.pconf .mono{color:var(--ink-3)}
+.pconf .cmeter{height:12px;gap:2px}
+.pconf .conf-v b{font-size:17px}
 </style>
 </head>
 <body>
@@ -1016,19 +1041,23 @@ function vMenu(id, cur, up) {
     }).join('') + '</div>';
 }
 
+function confLvl(v) { return v >= 75 ? 'hi' : v >= 50 ? 'mid' : 'lo'; }
+function confWord(v) { return v >= 75 ? 'hoch' : v >= 50 ? 'mittel' : 'niedrig'; }
+function cmeter(v, n) {
+  var on = Math.round(v / 100 * n), o = '<span class="cmeter ' + confLvl(v) + '" role="img" aria-label="Konfidenz ' + v + ' %">';
+  for (var i = 0; i < n; i++) o += '<i' + (i < on ? ' class="on"' : '') + ' style="--i:' + i + '"></i>';
+  return o + '</span>';
+}
 function vCost() {
-  var X = function (v) { return ((v - 0.82) / 0.76 * 100).toFixed(1) + '%'; };
+  var all = derive().all, w = 0, c = 0;
+  all.forEach(function (r) { w += r.gp; c += r.gp * (S.confirmed[r.oz] ? 100 : r.conf); });
+  var conf = Math.round(c / w);
   return '<section class="card cost rise' + (S.analyzing ? ' scan' : '') + '" style="flex:2 1 560px;--d:200ms" aria-label="Kostenschätzung">' +
     '<div class="card-h"><span class="mono"><b>[01]</b> Kostenschätzung</span><span class="mono">3 Alt-LVs · 9.120 bepreiste Positionen</span></div>' +
-    '<div style="display:flex;align-items:baseline;gap:14px;margin-top:14px;flex-wrap:wrap"><span class="big"><span data-count="0.82" data-dec="2">0,82</span> – <span data-count="1.58" data-dec="2">1,58</span> Mio. €</span><span class="muted" style="font-size:13px">netto · Spanne aus Min-/Max-Preisen</span></div>' +
-    '<div class="cost-mid"><div class="costbar" role="img" aria-label="Spanne 0,82 bis 1,58 Mio. €. Prognose Zuschlag 1,21 Mio. €, unsere KI-Kalkulation 1,14 Mio. €."><div class="track"><i></i><i></i><i></i></div>' +
-      '<span class="cb-cap" style="left:0"></span><span class="cb-cap" style="right:0"></span>' +
-      '<div class="pin pin-top" style="left:' + X(1.21) + '"><div class="lbl">Prognose Zuschlag · 1,21 Mio. €</div><div class="stem"></div></div>' +
-      '<div class="pin-avg" style="left:' + X(1.19) + '" title="Ø ähnliche Ausschreibungen 1,19 Mio. €"></div>' +
-      '<div class="pin pin-ai" style="left:' + X(1.14) + '"><svg width="14" height="9" viewBox="0 0 14 9" aria-hidden="true"><path d="M7 0 14 9H0z" fill="currentColor"/></svg><span>Unsere KI-Kalkulation · 1,14 Mio. €</span></div>' +
-    '</div>' +
-    '<div class="costends"><div><b>0,82 Mio. €</b>Niedrigster möglicher Preis</div><div style="text-align:right"><b>1,58 Mio. €</b>Höchster möglicher Preis</div></div></div>' +
-    '<div class="legend"><span><i style="background:var(--ok)"></i>Unter Zuschlagsniveau</span><span><i style="background:var(--warn)"></i>Zuschlagszone ±5 %</span><span><i style="background:var(--bad)"></i>Über Marktniveau</span><span><i style="width:0;height:12px;border-left:1px dashed var(--ink-2)"></i>Ø ähnliche Ausschreibungen 1,19 Mio. €</span></div>' +
+    '<div class="est"><span class="big"><span data-count="1.14" data-dec="2">1,14</span> Mio. €</span><span class="muted">netto · finale KI-Schätzung</span></div>' +
+    '<div class="estconf"><div class="conf-h"><span class="mono">Konfidenz</span><span class="conf-v ' + confLvl(conf) + '" data-k="cv' + conf + '"><b>' + conf + ' %</b>' + confWord(conf) + '</span></div>' +
+      cmeter(conf, 50) + '<div class="conf-s"><span>0</span><span>50</span><span>100</span></div></div>' +
+    '<div class="estfacts"><div><span class="mono">Prognose Zuschlag</span><b>1,21 Mio. €</b></div><div><span class="mono">Abstand</span><b style="color:var(--ok)">−5,8 %</b></div><div><span class="mono">Ø ähnliche Ausschreibungen</span><b>1,19 Mio. €</b></div></div>' +
   '</section>';
 }
 
@@ -1263,7 +1292,7 @@ function vDrawer(d) {
       (p.risk >= 40 ? '<div class="rl ' + k + '">' + IC.warn + '<span>' + esc(p.why) + '</span></div>' : '') + '</div></header>' +
     '<div class="dw-body"><div class="dw-swap ' + (S.leaving ? 'leaving' : S.swapDir) + '" data-k="b' + p.oz + '">' +
       '<section class="price' + (ok ? ' is-ok' : '') + (S.editEp ? ' is-edit' : '') + '" aria-label="Preis">' +
-        '<div class="mono lab">' + (p.manual ? 'Eigener Preis · ' + pct(md) + ' zum KI-Vorschlag' : 'KI-Preisvorschlag · ' + p.conf + ' % sicher') + '</div>' +
+        '<div class="mono lab">' + (p.manual ? 'Eigener Preis · ' + pct(md) + ' zum KI-Vorschlag' : 'KI-Preisvorschlag') + '</div>' +
         '<div class="prow">' + (S.editEp
           ? '<label class="epedit"><span class="sr">Einheitspreis in Euro</span><input id="epin" inputmode="decimal" autocomplete="off" data-in="epDraft" data-enter="saveEp" value="' + esc(S.epDraft) + '"><span class="cur">€</span></label>'
           : '<button class="ep' + (S.flashEp ? ' flash' : '') + '" data-k="ep' + p.ep + '" data-act="startEdit" title="Preis bearbeiten" aria-label="Einheitspreis ' + eur(p.ep) + ', bearbeiten">' + eur(p.ep) + '<span class="pen">' + IC.pen + '</span></button>') +
@@ -1272,6 +1301,7 @@ function vDrawer(d) {
           ? '<div class="sub edhint"><span>' + (dd === null ? 'Gültigen Preis eingeben' : Math.abs(dd) < 0.05 ? 'entspricht dem KI-Vorschlag' : '<b style="color:' + (Math.abs(dd) > 10 ? 'var(--warn)' : 'var(--ink)') + '">' + pct(dd) + '</b> zum KI-Vorschlag · GP ' + eur(Math.round(dv * 100) / 100 * p.menge)) + '</span><span class="keys"><kbd>Enter</kbd> übernehmen <kbd>Esc</kbd> verwerfen</span></div>'
           : '<div class="sub">GP <b>' + eur(p.gp) + '</b> · ' + fmt(p.gp / TOTAL * 100, 2) + ' % des LV · ' + qty(p.menge) + ' ' + p.einheit +
             (p.manual ? ' · <button class="lnk" data-act="resetEp">KI-Vorschlag ' + eur(p.aiEp) + ' wiederherstellen</button>' : '') + '</div>') +
+        '<div class="pconf"><span class="mono">Konfidenz</span>' + cmeter(p.conf, 24) + '<span class="conf-v ' + confLvl(p.conf) + '"><b>' + p.conf + ' %</b>' + confWord(p.conf) + '</span></div>' +
         (ok ? '<div class="stamp' + (fresh ? ' fx' : '') + '" data-k="st"><span class="sq">' + IC.tickRaw + '</span><span><b>Bestätigt</b><small>' + (p.manual ? 'Eigener Preis' : 'KI-Preis') + ' · T. Berger</small></span></div>' : '') +
         '<div class="why2"><div class="mono lab">Begründung</div><p>' + esc(C.cands[0].why) + '</p>' +
           '<div class="calc2">' + C.steps.map(function (s, j) { return '<div class="cs' + (j === C.steps.length - 1 ? ' last' : '') + '"><span>' + esc(s[0]) + '</span><span>' + esc(s[1]) + '</span></div>'; }).join('') + '</div>' +
