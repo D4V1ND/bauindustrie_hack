@@ -3,12 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>LV Mastermind</title>
+<title>Needle</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Crect width='20' height='20' fill='%230a0a0a'/%3E%3Cpath d='M15 5C18.5 7.5 13.5 11.5 10.5 10.5S5.5 12 7 15.5' fill='none' stroke='%23e8542c' stroke-width='1.3' stroke-linecap='round'/%3E%3Cpath d='M3.2 16.8L13.7 5.4 14.6 6.3Z' fill='%23fff' stroke='%23fff' stroke-width='.6' stroke-linejoin='round'/%3E%3Ccircle cx='2.4' cy='17.6' r='1.25' fill='%23e8542c'/%3E%3Cellipse cx='15.3' cy='4.7' rx='1.9' ry='.95' transform='rotate(-45 15.3 4.7)' fill='%230a0a0a' stroke='%23fff' stroke-width='1.1'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-/* LV Mastermind V2. Paper and ink, hairlines, square corners, thin display type with
+/* Needle (formerly LV Mastermind) V2. Paper and ink, hairlines, square corners, thin display type with
    mono annotations, one warm accent. Important actions get their own motion. */
 :root{
  --paper:#f4f4f0;--paper-2:#ebeae4;--paper-3:#e2e1d9;--card:#fbfaf7;
@@ -62,10 +63,20 @@ svg.i{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--paper) 84%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
 .top-in{max-width:1360px;margin:0 auto;padding:12px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:10px;font-size:14px;min-width:0}
-.mark{position:relative;width:16px;height:16px;flex:none}
-.mark::before,.mark::after{content:"";position:absolute;width:7px;height:7px}
-.mark::before{left:0;top:0;background:var(--ink)}.mark::after{right:0;bottom:0;background:var(--signal);animation:markpulse 3.2s var(--ease) infinite}
-@keyframes markpulse{0%,70%,100%{transform:none}80%{transform:translate(-2px,-2px)}}
+.mark{width:20px;height:20px;flex:none;overflow:visible}
+.nd-th{fill:none;stroke:var(--signal);stroke-width:1.3;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;animation:ndthread 1s var(--ease) .45s forwards}
+.nd{animation:ndin .6s var(--spring) both,ndstitch 6s var(--ease) 2.2s infinite}
+.nd-b{fill:var(--ink);stroke:var(--ink);stroke-width:.6;stroke-linejoin:round}
+.nd-e{fill:var(--paper);stroke:var(--ink);stroke-width:1.1}
+.nd-t{fill:var(--signal);transform-origin:2.4px 17.6px;transform:scale(0);animation:ndtip .4s var(--spring) .9s forwards,ndpulse 6s var(--ease) 2.2s infinite}
+@keyframes ndin{from{transform:translate(7px,-7px);opacity:0}}
+@keyframes ndthread{to{stroke-dashoffset:0}}
+@keyframes ndtip{to{transform:none}}
+@keyframes ndstitch{0%,84%,100%{transform:none}90%{transform:translate(-1.6px,1.6px)}}
+@keyframes ndpulse{0%,86%,100%{transform:none}92%{transform:scale(1.7)}}
+.brand-b:hover .nd-th{animation:ndredraw .9s var(--ease)}
+@keyframes ndredraw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@media (prefers-reduced-motion:reduce){.nd,.nd-t,.nd-th{animation:none!important}.nd-th{stroke-dashoffset:0}.nd-t{transform:none}}
 .brand b{font-weight:600;letter-spacing:-.02em;font-size:15px}
 .crumb{color:var(--ink-3)}
 .crumb a{color:var(--ink-2);text-decoration:none}.crumb a:hover{color:var(--signal)}
@@ -1608,7 +1619,7 @@ function isDark() {
 // ================= views =================
 function vHeader() {
   return '<header class="top"><div class="top-in">' +
-    '<div class="brand"><button class="brand-b" data-act="home" aria-label="Startseite"><span class="mark" aria-hidden="true"></span><b>LV Mastermind</b></button><span class="crumb">/ <span class="pmw"><button class="crumb-b" data-act="projects" aria-expanded="' + !!S.projOpen + '">Projekte' + IC.chev + '</button>' + vProjMenu() + '</span> /</span>' + (S.home ? '<span>Neues LV</span>' : '<span>' + esc(P.short) + '</span>') + '</div>' +
+    '<div class="brand"><button class="brand-b" data-act="home" aria-label="Startseite"><svg class="mark" viewBox="0 0 20 20" aria-hidden="true"><path class="nd-th" pathLength="1" d="M15 5C18.5 7.5 13.5 11.5 10.5 10.5S5.5 12 7 15.5"/><g class="nd"><path class="nd-b" d="M3.2 16.8L13.7 5.4 14.6 6.3Z"/><ellipse class="nd-e" cx="15.3" cy="4.7" rx="1.9" ry=".95" transform="rotate(-45 15.3 4.7)"/></g><circle class="nd-t" cx="2.4" cy="17.6" r="1.25"/></svg><b>Needle</b></button><span class="crumb">/ <span class="pmw"><button class="crumb-b" data-act="projects" aria-expanded="' + !!S.projOpen + '">Projekte' + IC.chev + '</button>' + vProjMenu() + '</span> /</span>' + (S.home ? '<span>Neues LV</span>' : '<span>' + esc(P.short) + '</span>') + '</div>' +
     '<div class="top-r">' +
       '<button class="theme-btn" data-act="theme" aria-label="Farbschema wechseln"><span class="theme-icon"></span>' + (isDark() ? 'Hell' : 'Dunkel') + '</button>' +
       (S.home ? '' : '<button class="btn btn-primary" data-act="newProj">' + IC.plus + 'Neues Projekt</button>') +
@@ -2274,7 +2285,7 @@ function download() {
   var items = (P.live ? d.full : d.all).filter(function (r) { return !r.np; }).map(function (r) {
     return '      <Item RNoPart="' + r.oz + '"><Qty>' + r.menge + '</Qty><QU>' + x(r.einheit) + '</QU><UP>' + r.ep.toFixed(2) + '</UP><IT>' + r.gp.toFixed(2) + '</IT><Description><OutlineText>' + x(r.kurz) + '</OutlineText></Description></Item>';
   }).join('\n');
-  var xml = '<?xml version="1.0" encoding="UTF-8"?>\n<!-- ' + (P.live ? 'Export LV Mastermind, Projekt ' + x(P.id) : 'Mock-Export LV Mastermind (Demo-Daten)') + ' -->\n<GAEB xmlns="http://www.gaeb.de/GAEB_DA_XML/DA84/3.3">\n  <GAEBInfo><Version>3.3</Version><ProgSystem>LV Mastermind</ProgSystem></GAEBInfo>\n  <Award><DP>84</DP><BoQ><BoQInfo><Name>' + x(P.name) + '</Name></BoQInfo><BoQBody>\n' + items + '\n  </BoQBody></BoQ></Award>\n</GAEB>\n';
+  var xml = '<?xml version="1.0" encoding="UTF-8"?>\n<!-- ' + (P.live ? 'Export Needle, Projekt ' + x(P.id) : 'Mock-Export Needle (Demo-Daten)') + ' -->\n<GAEB xmlns="http://www.gaeb.de/GAEB_DA_XML/DA84/3.3">\n  <GAEBInfo><Version>3.3</Version><ProgSystem>LV Mastermind</ProgSystem></GAEBInfo>\n  <Award><DP>84</DP><BoQ><BoQInfo><Name>' + x(P.name) + '</Name></BoQInfo><BoQBody>\n' + items + '\n  </BoQBody></BoQ></Award>\n</GAEB>\n';
   var a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([xml], { type: 'application/xml' }));
   a.download = slug(P.short) + '.X84';
