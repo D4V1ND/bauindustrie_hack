@@ -1019,6 +1019,21 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .okline.auto{background:transparent;color:var(--ink-2);border:1px dashed var(--line-2);min-height:52px}
 .okline.auto svg.i{color:var(--ink-3)}
 .okline.auto .lnk{color:var(--ink)}
+
+/* ---- confidence replaces risk; 0 % = no price ---- */
+.rsk b small{font-size:.75em;opacity:.6;margin-left:1px}
+.rsk.zero b{color:var(--bad)}
+.mtag.offen{color:var(--bad)}.mtag.offen>i{background:var(--bad)}
+.np{font:.66rem/1 var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--bad)}
+.lv-r.noprice::before{content:"";position:absolute;left:0;top:-1px;bottom:-1px;width:2px;background:var(--bad)}
+.okbtn.need{border-style:dashed;border-color:var(--bad);color:var(--bad)}
+.okbtn.need:hover{background:var(--bad);color:var(--paper)}
+.okbtn.need svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2}
+.ep.epnp{font-size:26px;letter-spacing:-.02em;font-weight:300;color:var(--bad);border-bottom:1.5px dashed var(--bad)}
+.confirm.need{background:transparent;color:var(--ink);border:1px dashed var(--bad)}
+.confirm.need .cbadge{color:var(--bad)}
+.npn{font-weight:500;color:var(--bad)}
+.plan-lg .lgt{margin-right:2px}
 </style>
 </head>
 <body>
@@ -1036,7 +1051,9 @@ var D = (function () {
     SK: { ini: 'SK', name: 'Sophie Krüger', role: 'Rohbau', color: 'var(--tm-sk)' }
   };
   var pos = [
-    { oz: '04.05.0030', kurz: 'Beschallungsanlage Mehrzweck- und Gruppenräume', lang: 'Beschallungsanlage liefern, montieren und in Betrieb nehmen. Pauschal, komplett. Alle Anforderungen des Nutzers müssen erfüllt sein.', menge: 1, einheit: 'psch', gewerk: 'Elektro / TGA', ep: 38000, risk: 91, mode: 'unsicher', conf: 34, why: 'Pauschal ohne Spezifikation' },
+    { oz: '04.05.0030', kurz: 'Beschallungsanlage Mehrzweck- und Gruppenräume', lang: 'Beschallungsanlage liefern, montieren und in Betrieb nehmen. Pauschal, komplett. Alle Anforderungen des Nutzers müssen erfüllt sein.', menge: 1, einheit: 'psch', gewerk: 'Elektro / TGA', ep: 0, risk: 91, mode: 'offen', conf: 0, why: 'Pauschal ohne Spezifikation, keine Referenz' },
+    { oz: '04.06.0010', kurz: 'Brandmeldeanlage nach Brandschutzkonzept', lang: 'Brandmeldeanlage gemäß Brandschutzkonzept liefern, montieren und abnahmefähig übergeben. Umfang nach Brandschutzkonzept (liegt nicht bei).', menge: 1, einheit: 'psch', gewerk: 'Elektro / TGA', ep: 0, risk: 88, mode: 'offen', conf: 0, why: 'Brandschutzkonzept fehlt, keine Referenz' },
+    { oz: '06.03.0010', kurz: 'Spielgeräte Außenbereich, Auswahl durch AG', lang: 'Spielgeräte für den Außenbereich liefern und montieren, Auswahl und Anzahl durch den Auftraggeber.', menge: 1, einheit: 'psch', gewerk: 'Ausstattung', ep: 0, risk: 80, mode: 'offen', conf: 0, why: 'Leistung nicht beschrieben' },
     { oz: '01.04.0010', kurz: 'Beton für Fundamente, Sorte nach Erfordernis', lang: 'Beton für Einzel- und Streifenfundamente, Festigkeitsklasse nach Erfordernis, inkl. Schalung.', menge: 64, einheit: 'm³', gewerk: 'Rohbau', ep: 240, risk: 82, mode: 'unsicher', conf: 48, why: 'Widerspruch zur Statik (C30/37)' },
     { oz: '03.02.0100', kurz: 'Erdaushub Baugrube, Bodenklasse 3–5', lang: 'Boden der Baugrube lösen, laden und abfahren, Bodenklasse 3–5, Entsorgung nach Wahl des AN.', menge: 920, einheit: 'm³', gewerk: 'Erdbau', ep: 18.5, risk: 74, mode: 'adaptiert', conf: 58, why: 'Bodenklasse & Entsorgung unklar' },
     { oz: '02.01.0010', kurz: 'Holz-Alu-Fenster, 3-fach-Verglasung', lang: 'Holz-Aluminium-Fenster, Dreh-Kipp, Uw ≤ 0,9 W/m²K, Schallschutzklasse 3, inkl. Anschlüsse und Abdichtung.', menge: 64, einheit: 'Stk', gewerk: 'Fenster & Fassade', ep: 1380, risk: 61, mode: 'adaptiert', conf: 78, why: 'LV 64 Stk, Plan 71 Stk' },
@@ -1178,7 +1195,7 @@ var LVX = (function () {
 })();
 
 // ================= state =================
-var S = { tab: 'home', filter: 'all', sel: null, q: '', sort: { k: 'risk', d: -1 }, density: 'compact', group: false, gewerk: '', owner: '',
+var S = { tab: 'home', filter: 'all', sel: null, q: '', sort: { k: 'conf', d: 1 }, density: 'compact', group: false, gewerk: '', owner: '',
   picked: {}, owners: {}, confirmed: {}, bundled: {}, collapsed: {}, toast: null, dtab: '', sugg: {}, editEp: false, epDraft: '', eps: {},
   accepted: {}, justOk: {}, comments: {}, cmt: '', notes: {}, noteDraft: '', compose: null, seqs: {}, chats: {}, draft: '', thinking: false,
   preview: null, fx: null, holding: false, analyzing: false, analyzed: 'heute, 08:47 · vor 12 Min.', flashEp: 0, focusEp: false,
@@ -1190,6 +1207,8 @@ function fmt(n, d) { return new Intl.NumberFormat('de-DE', { minimumFractionDigi
 function eur(n) { return fmt(n, n < 1000 ? 2 : 0) + ' €'; }
 function qty(n) { return n % 1 === 0 ? fmt(n, 0) : fmt(n, 1); }
 function rk(r) { return r >= 70 ? 'hi' : r >= 40 ? 'mid' : 'lo'; }
+// confidence -> colour class (red below 50 %, amber below 75 %, grey above)
+function ck(c) { return c === 0 ? 'hi zero' : c < 50 ? 'hi' : c < 75 ? 'mid' : 'lo'; }
 function pct(d) { return (d >= 0 ? '+' : '−') + fmt(Math.abs(d), Math.abs(d) < 10 ? 1 : 0) + ' %'; }
 var IC = {
   expand: '<svg class="i" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>',
@@ -1231,7 +1250,7 @@ function derive() {
   var all = D.pos.map(function (p) {
     var ep = S.eps[p.oz] !== undefined ? S.eps[p.oz] : p.ep;
     var mg = S.mg[p.oz] !== undefined ? S.mg[p.oz] : p.menge;
-    return Object.assign({}, p, { ep: ep, menge: mg, aiEp: p.ep, manual: S.eps[p.oz] !== undefined, gp: mg * ep });
+    return Object.assign({}, p, { ep: ep, menge: mg, aiEp: p.ep, manual: S.eps[p.oz] !== undefined, gp: mg * ep, np: p.conf === 0 && S.eps[p.oz] === undefined });
   });
   var tot = all.reduce(function (a, r) { return a + r.gp; }, 0);
   var maxGp = Math.max.apply(null, all.map(function (r) { return r.gp; }));
@@ -1240,7 +1259,7 @@ function derive() {
   var full = all.concat(LVX.map(function (p, i) {
     var ep = S.eps[p.oz] !== undefined ? S.eps[p.oz] : p.ep, mg = S.mg[p.oz] !== undefined ? S.mg[p.oz] : p.menge;
     return { oz: p.oz, kurz: p.kurz, lang: p.kurz + '. Text unverändert aus dem Alt-LV übernommen.', menge: mg, einheit: p.einheit, gewerk: p.gewerk, ep: ep, aiEp: p.ep, manual: S.eps[p.oz] !== undefined, gp: mg * ep,
-      risk: 2 + (i * 7) % 11, mode: 'übernommen', conf: 88 + (i * 5) % 12, why: '1:1 aus Alt-LV', owner: '', gen: true };
+      risk: 2 + (i * 7) % 11, np: false, mode: 'übernommen', conf: 88 + (i * 5) % 12, why: '1:1 aus Alt-LV', owner: '', gen: true };
   }));
   var q = S.q.trim().toLowerCase();
   var base = (S.scope === 'all' ? full : all).filter(function (r) {
@@ -1251,7 +1270,8 @@ function derive() {
   });
   var fdef = {
     all: function () { return true; },
-    risk: function (r) { return r.risk >= 70; },
+    noprice: function (r) { return r.conf === 0; },
+    low: function (r) { return r.conf < 50; },
     review: function (r) { return !S.confirmed[r.oz] && r.mode !== 'übernommen'; },
     cost: function (r) { return !!driver[r.oz]; },
     bundle: function (r) { return r.why.indexOf('Bündelbar') === 0 || !!S.bundled[r.oz]; }
@@ -1343,7 +1363,7 @@ function vCost() {
   var conf = Math.round(c / w);
   return '<section class="card cost rise' + (S.analyzing ? ' scan' : '') + '" style="flex:2 1 560px;--d:200ms" aria-label="Kostenschätzung">' +
     '<div class="card-h"><span class="mono"><b>[01]</b> Kostenschätzung</span><span class="mono">3 Alt-LVs · 9.120 bepreiste Positionen</span></div>' +
-    '<div class="est"><span class="big"><span data-count="1.14" data-dec="2">1,14</span> Mio. €</span><span class="muted">netto · finale KI-Schätzung</span></div>' +
+    '<div class="est"><span class="big"><span data-count="1.14" data-dec="2">1,14</span> Mio. €</span><span class="muted">netto · finale KI-Schätzung' + (function () { var n = derive().all.filter(function (r) { return r.np; }).length; return n ? ' · <b class="npn">' + n + ' Positionen ohne Preis</b> nicht enthalten' : ''; })() + '</span></div>' +
     '<div class="estconf"><div class="conf-h"><span class="mono">Konfidenz</span><span class="conf-v ' + confLvl(conf) + '" data-k="cv' + conf + '"><b>' + conf + ' %</b>' + confWord(conf) + '</span></div>' +
       cmeter(conf, 50) + '<div class="conf-s"><span>0</span><span>50</span><span>100</span></div></div>' +
     '<div class="estfacts"><div><span class="mono">Prognose Zuschlag</span><b>1,21 Mio. €</b></div><div><span class="mono">Abstand</span><b style="color:var(--ok)">−5,8 %</b></div><div><span class="mono">Ø ähnliche Ausschreibungen</span><b>1,19 Mio. €</b></div></div>' +
@@ -1372,7 +1392,7 @@ function dial() {
 }
 
 function vBid() {
-  var f = [['p', '+', 'Projektgröße passt in euren Korridor (0,5–5 Mio. €)'], ['p', '+', '84 % der Positionen direkt aus eigener Preisbasis'], ['p', '+', 'Kalkulation 5,8 % unter prognostiziertem Zuschlag'], ['m', '–', '3 Positionen mit Risiko ≥ 70, davon 1 pauschal']];
+  var f = [['p', '+', 'Projektgröße passt in euren Korridor (0,5–5 Mio. €)'], ['p', '+', '84 % der Positionen direkt aus eigener Preisbasis'], ['p', '+', 'Kalkulation 5,8 % unter prognostiziertem Zuschlag'], ['m', '–', '3 Positionen ohne Preis (Konfidenz 0 %), alle pauschal']];
   return '<section class="card bid rise' + (S.analyzing ? ' scan' : '') + '" style="flex:1 1 340px;--d:260ms" aria-label="Bid / No Bid">' +
     '<div class="card-h"><span class="mono"><b>[02]</b> Bid / No Bid</span><span class="mono">Vorher 66 · <b style="color:var(--ok)">▲ +6</b></span></div>' +
     '<div class="bid-head">' + dial() +
@@ -1400,27 +1420,27 @@ function vSummary(d) {
 }
 
 function vRow(r, d) {
-  var ow = ownerOf(r), m = ow ? T[ow] : null, ok = !!S.confirmed[r.oz], pk = !!S.picked[r.oz], fresh = S.justOk[r.oz] !== undefined, n = cmtN(r.oz), k = rk(r.risk);
-  var chip = r.gen ? '<span class="mtag ' + (r.manual ? 'adaptiert' : '') + '"><i></i>' + (r.manual ? 'manuell' : '1:1 · ' + r.conf + ' %') + '</span>' : ok ? '<span class="mtag ok"><i></i>' + (r.manual ? 'manuell' : 'bestätigt') + '</span>' : '<span class="mtag ' + r.mode + '"><i></i>' + r.mode + ' · ' + r.conf + ' %</span>';
-  return '<div class="lv-grid lv-r' + (pk ? ' picked' : '') + (r.oz === S.sel ? ' sel' : '') + (r.gen ? ' gen' : '') + (ok ? ' is-ok' : '') + (fresh ? ' fx-ok' : '') + '" style="--i:' + (fresh ? S.justOk[r.oz] : 0) + '" role="row" data-k="r' + r.oz + '" data-act="open" data-oz="' + r.oz + '">' +
+  var ow = ownerOf(r), m = ow ? T[ow] : null, ok = !!S.confirmed[r.oz], pk = !!S.picked[r.oz], fresh = S.justOk[r.oz] !== undefined, n = cmtN(r.oz), k = ck(r.conf);
+  var chip = r.np ? '<span class="mtag offen"><i></i>Preis fehlt</span>' : r.gen ? '<span class="mtag ' + (r.manual ? 'adaptiert' : '') + '"><i></i>' + (r.manual ? 'manuell' : '1:1 · ' + r.conf + ' %') + '</span>' : ok ? '<span class="mtag ok"><i></i>' + (r.manual ? 'manuell' : 'bestätigt') + '</span>' : '<span class="mtag ' + r.mode + '"><i></i>' + r.mode + ' · ' + r.conf + ' %</span>';
+  return '<div class="lv-grid lv-r' + (pk ? ' picked' : '') + (r.oz === S.sel ? ' sel' : '') + (r.np ? ' noprice' : '') + (r.gen ? ' gen' : '') + (ok ? ' is-ok' : '') + (fresh ? ' fx-ok' : '') + '" style="--i:' + (fresh ? S.justOk[r.oz] : 0) + '" role="row" data-k="r' + r.oz + '" data-act="open" data-oz="' + r.oz + '">' +
     '<span role="cell" class="c2">' + (r.gen ? '' : '<input type="checkbox" class="cb"' + (pk ? ' checked' : '') + ' data-act="pick" data-oz="' + r.oz + '" aria-label="Position ' + r.oz + ' auswählen">') + '</span>' +
-    '<span role="cell"><span class="rsk ' + k + '" title="Risiko ' + r.risk + ' von 100 · ' + esc(r.why) + '"><b>' + r.risk + '</b><i class="rbar"><i style="width:' + r.risk + '%"></i></i></span></span>' +
+    '<span role="cell"><span class="rsk ' + k + '" title="Konfidenz ' + r.conf + ' % · ' + esc(r.why) + '"><b>' + r.conf + '<small>%</small></b><i class="rbar"><i style="width:' + Math.max(r.conf, 0) + '%"></i></i></span></span>' +
     '<span role="cell" style="min-width:0"><span class="ozl mono">' + r.oz + (PLAN[r.oz] ? '<span class="ploc" title="Im Bauplan verortet">' + IC.pin + PLAN[r.oz][2] + '</span>' : '') + '</span><button class="kurz" data-act="open" data-oz="' + r.oz + '">' + esc(r.kurz) + '</button>' +
       (S.density === 'details' ? '<span class="lang">' + esc(r.lang) + '</span>' : '') +
       '<span class="rmeta"><button class="gw" data-act="gewerk" data-v="' + esc(r.gewerk) + '" title="Nur ' + esc(r.gewerk) + ' anzeigen">' + esc(r.gewerk) + '</button>' +
       (r.gen ? '<span class="why lo">' + esc(r.why) + '</span>' : '<span class="why ' + k + '">' + IC.warn + esc(r.why) + '</span>') +
       (S.bundled[r.oz] ? '<span class="chip bundle">Bündel · ' + esc(S.bundled[r.oz]) + '</span>' : '') +
       (n ? '<span class="why lo" title="Kommentare">' + IC.chat + n + '</span>' : '') + '</span></span>' +
-    '<span role="cell" class="c2" style="display:flex;flex-direction:column;align-items:flex-end;gap:5px"><span style="font-size:13px;font-weight:500">' + eur(r.ep) + '</span><span class="qty">' + qty(r.menge) + ' ' + r.einheit + '</span>' + chip + '</span>' +
-    '<span role="cell" class="num c2"><span style="font-size:14px;font-weight:500">' + eur(r.gp) + '</span><span class="gpbar" title="' + fmt(r.gp / d.tot * 100, 1) + ' % des Volumens"><i style="width:' + Math.max(4, Math.round(r.gp / d.maxGp * 100)) + '%;background:' + (d.driver[r.oz] ? 'var(--signal)' : 'var(--ink-3)') + '"></i></span></span>' +
-    '<span role="cell">' + (r.gen ? '<span class="auto1" title="1:1 übernommen, keine Bestätigung nötig">1:1</span>' : '<button class="okbtn' + (ok ? ' is-ok' : '') + (fresh && ok ? ' fx' : '') + '" data-act="toggleOk" data-oz="' + r.oz + '" aria-pressed="' + ok + '" aria-label="' + (ok ? 'Bestätigung zurücknehmen' : 'Preis bestätigen') + '" title="' + (ok ? 'Bestätigung zurücknehmen' : 'Preis bestätigen') + '">' + IC.tickRaw + (fresh && ok && S.justOk[r.oz] === 0 ? particles('conf', 10, 34) : '') + '</button>') + '</span>' +
+    '<span role="cell" class="c2" style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">' + (r.np ? '<span class="np">Kein Preis</span>' : '<span style="font-size:13px;font-weight:500">' + eur(r.ep) + '</span>') + '<span class="qty">' + qty(r.menge) + ' ' + r.einheit + '</span>' + chip + '</span>' +
+    '<span role="cell" class="num c2"><span style="font-size:14px;font-weight:500">' + (r.np ? '<span class="np">–</span>' : eur(r.gp)) + '</span><span class="gpbar" title="' + fmt(r.gp / d.tot * 100, 1) + ' % des Volumens"><i style="width:' + Math.max(4, Math.round(r.gp / d.maxGp * 100)) + '%;background:' + (d.driver[r.oz] ? 'var(--signal)' : 'var(--ink-3)') + '"></i></span></span>' +
+    '<span role="cell">' + (r.np ? '<button class="okbtn need" data-act="priceNow" data-oz="' + r.oz + '" aria-label="Preis für ' + r.oz + ' eingeben" title="Preis eingeben">' + IC.pen + '</button>' : r.gen ? '<span class="auto1" title="1:1 übernommen, keine Bestätigung nötig">1:1</span>' : '<button class="okbtn' + (ok ? ' is-ok' : '') + (fresh && ok ? ' fx' : '') + '" data-act="toggleOk" data-oz="' + r.oz + '" aria-pressed="' + ok + '" aria-label="' + (ok ? 'Bestätigung zurücknehmen' : 'Preis bestätigen') + '" title="' + (ok ? 'Bestätigung zurücknehmen' : 'Preis bestätigen') + '">' + IC.tickRaw + (fresh && ok && S.justOk[r.oz] === 0 ? particles('conf', 10, 34) : '') + '</button>') + '</span>' +
   '</div>';
 }
 
 
 // ---- Bauplan: every position sits on an x/y point of sheet A-102 ----
 var PLAN = {
-  '04.05.0030': [800, 500, 'EG'], '01.04.0010': [96, 604, 'EG'], '03.02.0100': [962, 96, 'EG'], '02.01.0010': [232, 620, 'EG'],
+  '04.05.0030': [800, 500, 'EG'], '04.06.0010': [430, 300, 'EG'], '06.03.0010': [930, 640, 'EG'], '01.04.0010': [96, 604, 'EG'], '03.02.0100': [962, 96, 'EG'], '02.01.0010': [232, 620, 'EG'],
   '01.02.0020': [610, 400, 'EG'], '02.03.0010': [480, 214, 'EG'], '01.02.0010': [330, 360, 'EG'], '05.03.0010': [170, 216, 'EG'],
   '01.03.0040': [700, 300, 'EG'], '01.03.0041': [700, 196, '1.OG'], '05.01.0020': [384, 516, 'EG'], '06.01.0051': [536, 506, 'EG'], '06.01.0050': [160, 498, 'EG']
 };
@@ -1457,9 +1477,9 @@ function vPlan(d, full) {
   // markers
   d.all.forEach(function (r) {
     var p = PLAN[r.oz]; if (!p) return;
-    var k = S.confirmed[r.oz] ? 'ok' : rk(r.risk), off = p[2] !== fl;
+    var k = S.confirmed[r.oz] ? 'ok' : ck(r.conf), off = p[2] !== fl;
     o += '<g class="mk ' + k + (off ? ' off' : '') + (shown[r.oz] ? '' : ' dim') + (r.oz === S.sel ? ' sel' : '') + '" data-act="open" data-oz="' + r.oz + '" transform="translate(' + p[0] + ' ' + p[1] + ')" tabindex="0" role="button" aria-label="' + esc(r.oz + ' ' + r.kurz) + '">' +
-      '<circle class="mk-ring" r="24"/><rect class="mk-b" x="-14" y="-14" width="28" height="28"/><text class="mk-t" y="4.5">' + (S.confirmed[r.oz] ? '✓' : r.risk) + '</text></g>';
+      '<circle class="mk-ring" r="24"/><rect class="mk-b" x="-14" y="-14" width="28" height="28"/><text class="mk-t" y="4.5">' + (S.confirmed[r.oz] ? '✓' : r.np ? '€?' : r.conf) + '</text></g>';
   });
   o += '</svg>';
   var hi = d.all.filter(function (r) { return PLAN[r.oz] && shown[r.oz]; }).length;
@@ -1468,17 +1488,17 @@ function vPlan(d, full) {
       '<div class="plan-ctl"><div class="seg" role="group" aria-label="Geschoss">' + ['EG', '1.OG'].map(function (g) { return '<button class="' + (fl === g ? 'on' : '') + '" data-act="floor" data-v="' + g + '" aria-pressed="' + (fl === g) + '">' + g + '</button>'; }).join('') + '</div>' +
       (full ? '<button class="ic pfs-b" data-act="planFull" data-v="0" aria-label="Vollbild schließen" title="Schließen (Esc)">' + IC.x + '</button>' : '<button class="ic pfs-b" data-act="planFull" data-v="1" aria-label="Bauplan im Vollbild" title="Vollbild">' + IC.expand + '</button>') + '</div></div>' +
     '<div class="plan-c">' + o + '<div class="plan-tip" aria-hidden="true"></div></div>' +
-    '<div class="plan-f"><span class="mono plan-xy">' + hi + ' Positionen verortet · M 1:100</span><span class="plan-lg"><i class="hi"></i>hoch<i class="mid"></i>mittel<i class="lo"></i>niedrig<i class="ok"></i>bestätigt</span></div>' +
+    '<div class="plan-f"><span class="mono plan-xy">' + hi + ' Positionen verortet · M 1:100</span><span class="plan-lg"><span class="lgt">Konfidenz</span><i class="hi"></i>&lt; 50<i class="mid"></i>&lt; 75<i class="lo"></i>≥ 75<i class="ok"></i>bestätigt</span></div>' +
   '</aside>';
 }
 
 function vTable(d) {
-  var sortDef = { risk: 'Risiko', oz: 'OZ', kurz: 'Leistung', menge: 'Menge', ep: 'EP · Menge', gp: 'GP' };
+  var sortDef = { conf: 'Konf.', oz: 'OZ', kurz: 'Leistung', menge: 'Menge', ep: 'EP · Menge', gp: 'GP' };
   var th = function (k, right) {
     var on = S.sort.k === k;
     return '<span role="columnheader" aria-sort="' + (on ? (S.sort.d < 0 ? 'descending' : 'ascending') : 'none') + '"' + (right ? ' style="text-align:right"' : '') + '><button class="sort' + (on ? ' on' : '') + '" data-act="sort" data-v="' + k + '">' + sortDef[k] + (on ? ' <b>' + (S.sort.d < 0 ? '↓' : '↑') + '</b>' : '') + '</button></span>';
   };
-  var filters = [['all', 'Alle'], ['risk', 'Hohes Risiko'], ['review', 'Zu prüfen'], ['cost', 'Kostentreiber 80 %'], ['bundle', 'Bündelbar']];
+  var filters = [['all', 'Alle'], ['noprice', 'Ohne Preis'], ['low', 'Konfidenz < 50 %'], ['review', 'Zu prüfen'], ['cost', 'Kostentreiber 80 %'], ['bundle', 'Bündelbar']];
   var allPicked = d.rows.length > 0 && d.rows.every(function (r) { return S.picked[r.oz]; });
   var body = '', isAll = S.scope === 'all', vis = isAll ? d.rows.slice(0, S.lvLimit) : d.rows, genN = d.full.length - d.all.length;
   if (S.group) {
@@ -1513,7 +1533,7 @@ function vTable(d) {
         '<button class="btn btn-quiet" data-act="csv" title="CSV kopieren">' + IC.copy + 'CSV</button></div></div>' +
     '<div class="tbl"><div role="table" aria-label="Positionen des Leistungsverzeichnisses">' +
       '<div class="lv-grid th mono" role="row"><span role="columnheader"><input type="checkbox" class="cb' + (!allPicked && d.rows.some(function (r) { return S.picked[r.oz]; }) ? ' some' : '') + '"' + (allPicked ? ' checked' : '') + ' data-act="pickAll" aria-label="Alle angezeigten Positionen auswählen"></span>' +
-        th('risk') + '<span role="columnheader" class="thl">' + th('oz').replace(/^<span[^>]*>|<\/span>$/g, '') + '<i>/</i>' + th('kurz').replace(/^<span[^>]*>|<\/span>$/g, '') + '</span>' + th('ep', 1) + th('gp', 1) + '<span role="columnheader" style="text-align:center">OK</span></div>' +
+        th('conf') + '<span role="columnheader" class="thl">' + th('oz').replace(/^<span[^>]*>|<\/span>$/g, '') + '<i>/</i>' + th('kurz').replace(/^<span[^>]*>|<\/span>$/g, '') + '</span>' + th('ep', 1) + th('gp', 1) + '<span role="columnheader" style="text-align:center">OK</span></div>' +
       body +
       (body ? '' : '<div class="empty">Keine Position passt zu diesen Filtern. ' + (isAll ? '' : '<button class="lnk" data-act="scope" data-v="all">Im gesamten LV suchen</button> · ') + '<button class="lnk" data-act="resetFilters">Filter zurücksetzen</button></div>') +
       '<div class="foot"><span class="mono">' + fmt(vis.length) + ' Positionen angezeigt · ' + okN + ' von ' + d.all.length + ' bestätigt</span><span class="ft-r"><span class="mono">Gesamt LV · KI-Kalkulation</span><b>' + eur(Math.round(d.tot)) + '</b></span></div>' +
@@ -1575,15 +1595,17 @@ function vDrawer(d) {
   if (!S.sel) return '';
   var p = d.full.find(function (x) { return x.oz === S.sel; });
   if (!p) return '';
-  var R = D.rich[p.oz] || {}, k = rk(p.risk), nav = navInfo(d), ok = !!S.confirmed[p.oz], fresh = S.justOk[p.oz] !== undefined;
+  var R = D.rich[p.oz] || {}, k = ck(p.conf), nav = navInfo(d), ok = !!S.confirmed[p.oz], fresh = S.justOk[p.oz] !== undefined;
   var C = candidates(p, R);
-  var md = (p.ep - p.aiEp) / p.aiEp * 100;
+  var noAi = !p.aiEp, md = noAi ? 0 : (p.ep - p.aiEp) / p.aiEp * 100;
   var dv = parseFloat(String(S.epDraft).replace(',', '.'));
-  var dd = isFinite(dv) && dv > 0 ? (dv - p.aiEp) / p.aiEp * 100 : null;
-  var devWarn = S.editEp ? (dd !== null && Math.abs(dd) > 10) : Math.abs(md) > 10;
+  var dd = isFinite(dv) && dv > 0 ? (noAi ? 0 : (dv - p.aiEp) / p.aiEp * 100) : null;
+  var devWarn = !noAi && (S.editEp ? (dd !== null && Math.abs(dd) > 10) : Math.abs(md) > 10);
   var nextOpen = nav.list.slice(nav.idx + 1).find(function (r) { return !S.confirmed[r.oz]; });
 
-  var cta = p.gen
+  var cta = p.np
+    ? '<button class="confirm need" data-k="ctanp" data-act="startEdit"><span class="cbadge">' + IC.pen + '</span><span class="cl"><b>Erst Preis eingeben</b><small>Keine KI-Schätzung für diese Position</small></span><span class="ca"><small>Menge</small><b>' + qty(p.menge) + ' ' + p.einheit + '</b></span></button>'
+    : p.gen
     ? '<div class="okline auto" data-k="okauto">' + IC.tick + (p.manual ? 'Eigener Preis gespeichert · zählt direkt ins Angebot' : '1:1 aus Alt-LV · keine Bestätigung nötig') + (p.manual ? '<button class="lnk" data-act="resetEp">Rückgängig</button>' : '') + '</div>'
     : ok
     ? '<div class="okline' + (fresh ? ' fx' : '') + '" data-k="okl">' + IC.tick + (p.manual ? 'Eigener Preis bestätigt' : 'KI-Preis bestätigt') +
@@ -1603,7 +1625,7 @@ function vDrawer(d) {
   var subName = p.oz.indexOf('04') === 0 ? 'Elektro Lindner GmbH' : 'Lieferant (Vorschlag)';
   var chat = S.chats[p.oz] || [];
   var sameAll = d.full.filter(function (r) { return r.gewerk === p.gewerk && r.oz !== p.oz; });
-  var same = sameAll.slice().sort(function (a, b) { return b.risk - a.risk; }).slice(0, 5);
+  var same = sameAll.slice().sort(function (a, b) { return a.conf - b.conf; }).slice(0, 5);
   var tabs = [['team', 'Team', cm.length], ['ext', 'Extern', thread.length + notes.length]];
   var dt = S.dtab === 'ext' ? 'ext' : 'team';
   var panel = '';
@@ -1611,7 +1633,7 @@ function vDrawer(d) {
   {
     var gsum = sameAll.reduce(function (a, r) { return a + r.gp; }, p.gp);
     gwPanel = 
-      (same.length ? '<ol class="gwl">' + same.map(function (r) { var ok2 = !!S.confirmed[r.oz]; return '<li data-k="g' + r.oz + '"><button data-act="open" data-oz="' + r.oz + '"><span class="rsk ' + rk(r.risk) + '"><b>' + r.risk + '</b><i class="rbar"><i style="width:' + r.risk + '%"></i></i></span><span class="gwm"><span class="mono">' + r.oz + '</span><span class="gwk">' + esc(r.kurz) + '</span></span><span class="gwr"><b>' + eur(r.gp) + '</b>' + (ok2 ? '<span class="mtag ok"><i></i>bestätigt</span>' : '<span class="mtag ' + r.mode + '"><i></i>' + r.conf + ' %</span>') + '</span>' + IC.arrow + '</button></li>'; }).join('') + '</ol>' +
+      (same.length ? '<ol class="gwl">' + same.map(function (r) { var ok2 = !!S.confirmed[r.oz]; return '<li data-k="g' + r.oz + '"><button data-act="open" data-oz="' + r.oz + '"><span class="rsk ' + ck(r.conf) + '"><b>' + r.conf + '<small>%</small></b><i class="rbar"><i style="width:' + r.conf + '%"></i></i></span><span class="gwm"><span class="mono">' + r.oz + '</span><span class="gwk">' + esc(r.kurz) + '</span></span><span class="gwr"><b>' + (r.np ? 'Kein Preis' : eur(r.gp)) + '</b>' + (r.np ? '<span class="mtag offen"><i></i>Preis fehlt</span>' : ok2 ? '<span class="mtag ok"><i></i>bestätigt</span>' : '<span class="mtag ' + r.mode + '"><i></i>' + r.conf + ' %</span>') + '</span>' + IC.arrow + '</button></li>'; }).join('') + '</ol>' +
         '<button class="lnk gwall" data-act="gewerkAll" data-v="' + esc(p.gewerk) + '">' + (sameAll.length > same.length ? 'Alle ' + (sameAll.length + 1) + ' im LV anzeigen' : 'Alle im LV filtern') + '</button>'
       : '<p class="pempty">Keine weiteren Positionen in diesem Gewerk.</p>');
     gwPanel = '<section class="comm gwsec" aria-label="Gewerk"><button class="mini" data-act="aiClose" tabindex="-1"><span class="mono">Gewerk</span><b>' + esc(p.gewerk) + '</b><span class="muted">' + (sameAll.length + 1) + ' Pos. · Σ ' + eur(gsum) + '</span></button><div class="comm-h"><span class="mono">Gewerk · <b>' + esc(p.gewerk) + '</b></span><span class="mono">' + (sameAll.length + 1) + ' Pos. · Σ ' + eur(gsum) + '</span></div><div class="panel">' + gwPanel + '</div></section>';
@@ -1644,27 +1666,30 @@ function vDrawer(d) {
       '<button class="ic" data-act="nav" data-v="1"' + (nav.idx >= nav.list.length - 1 ? ' disabled' : '') + ' aria-label="Nächste Position" title="Nächste (↓)">' + IC.chev + '</button></div>' +
       '<button class="ic xbtn" data-act="close" aria-label="Panel schließen" title="Schließen (Esc)">' + IC.x + '</button></div>' +
       '<div class="dw-swap ' + (S.leaving ? 'leaving' : S.swapDir) + '" data-k="h' + p.oz + '"><h2 class="dw-title">' + esc(p.kurz) + '</h2>' +
-      '<dl class="dmeta"><div><dt>Risiko</dt><dd class="rsk ' + k + '"><b>' + p.risk + '</b><i class="rbar"><i style="width:' + p.risk + '%"></i></i></dd></div>' +
+      '<dl class="dmeta"><div><dt>GP</dt><dd>' + (p.np ? 'noch offen' : eur(p.gp)) + '</dd></div>' +
         '<div><dt>Grundlage</dt><dd><span class="mtag ' + p.mode + '"><i></i>' + p.mode + '</span></dd></div>' +
         '<div><dt>Menge</dt><dd>' + qty(p.menge) + ' ' + p.einheit + '</dd></div></dl>' +
-      (p.risk >= 40 ? '<div class="rl ' + k + '">' + IC.warn + '<span>' + esc(p.why) + '</span></div>' : '') + '</div></header>' +
+      (p.conf < 75 ? '<div class="rl ' + k + '">' + IC.warn + '<span>' + esc(p.why) + '</span></div>' : '') + '</div></header>' +
     '<div class="dw-body"><div class="dw-swap ' + (S.leaving ? 'leaving' : S.swapDir) + '" data-k="b' + p.oz + '">' +
-      '<section class="price' + (ok ? ' is-ok' : '') + (S.editEp ? ' is-edit' : '') + '" aria-label="Preis"><button class="mini" data-act="aiClose" tabindex="-1"><span class="mono">' + (p.manual ? 'Eigener Preis' : 'KI-Preis') + '</span><b>' + eur(p.ep) + '</b><span class="muted">je ' + p.einheit + ' · GP ' + eur(p.gp) + '</span><span class="conf-v ' + confLvl(p.conf) + '"><b>' + p.conf + ' %</b></span></button><div class="ptop"><div class="pmain">' +
-        '<div class="mono lab">' + (p.manual ? 'Eigener Preis · ' + pct(md) + ' zum KI-Vorschlag' : 'KI-Preisvorschlag') + '</div>' +
+      '<section class="price' + (ok ? ' is-ok' : '') + (S.editEp ? ' is-edit' : '') + '" aria-label="Preis"><button class="mini" data-act="aiClose" tabindex="-1"><span class="mono">' + (p.np ? 'Preis' : p.manual ? 'Eigener Preis' : 'KI-Preis') + '</span><b>' + (p.np ? 'fehlt' : eur(p.ep)) + '</b><span class="muted">' + (p.np ? 'Keine KI-Schätzung' : 'je ' + p.einheit + ' · GP ' + eur(p.gp)) + '</span><span class="conf-v ' + confLvl(p.conf) + '"><b>' + p.conf + ' %</b></span></button><div class="ptop"><div class="pmain">' +
+        '<div class="mono lab">' + (p.np ? 'Kein Preisvorschlag möglich' : p.manual ? (noAi ? 'Eigener Preis · ohne KI-Vorschlag' : 'Eigener Preis · ' + pct(md) + ' zum KI-Vorschlag') : 'KI-Preisvorschlag') + '</div>' +
         '<div class="prow">' + (S.editEp
           ? '<label class="epedit"><span class="sr">Einheitspreis in Euro</span><input id="epin" inputmode="decimal" autocomplete="off" data-in="epDraft" data-enter="saveEp" value="' + esc(S.epDraft) + '"><span class="cur">€</span></label>'
+          : p.np ? '<button class="ep epnp" data-k="epnp" data-act="startEdit" aria-label="Preis eingeben">Preis eingeben<span class="pen">' + IC.pen + '</span></button>'
           : '<button class="ep' + (S.flashEp ? ' flash' : '') + '" data-k="ep' + p.ep + '" data-act="startEdit" title="Preis bearbeiten" aria-label="Einheitspreis ' + eur(p.ep) + ', bearbeiten">' + eur(p.ep) + '<span class="pen">' + IC.pen + '</span></button>') +
-          '<span class="muted">je ' + p.einheit + '</span></div>' +
+          (p.np && !S.editEp ? '' : '<span class="muted">je ' + p.einheit + '</span>') + '</div>' +
         (S.editEp
-          ? '<div class="sub edhint"><span>' + (dd === null ? 'Gültigen Preis eingeben' : Math.abs(dd) < 0.05 ? 'entspricht dem KI-Vorschlag' : '<b style="color:' + (Math.abs(dd) > 10 ? 'var(--warn)' : 'var(--ink)') + '">' + pct(dd) + '</b> zum KI-Vorschlag · GP ' + eur(Math.round(dv * 100) / 100 * p.menge)) + '</span><span class="keys"><kbd>Enter</kbd> übernehmen <kbd>Esc</kbd> verwerfen</span></div>'
+          ? '<div class="sub edhint"><span>' + (dd === null ? 'Gültigen Preis eingeben' : noAi ? 'GP ' + eur(Math.round(dv * 100) / 100 * p.menge) : Math.abs(dd) < 0.05 ? 'entspricht dem KI-Vorschlag' : '<b style="color:' + (Math.abs(dd) > 10 ? 'var(--warn)' : 'var(--ink)') + '">' + pct(dd) + '</b> zum KI-Vorschlag · GP ' + eur(Math.round(dv * 100) / 100 * p.menge)) + '</span><span class="keys"><kbd>Enter</kbd> übernehmen <kbd>Esc</kbd> verwerfen</span></div>'
+          : p.np ? '<div class="sub">' + qty(p.menge) + ' ' + p.einheit + ' · GP wird nach der Eingabe berechnet</div>'
           : '<div class="sub">GP <b>' + eur(p.gp) + '</b> · ' + fmt(p.gp / TOTAL * 100, 2) + ' % des LV · ' + qty(p.menge) + ' ' + p.einheit +
-            (p.manual ? ' · <button class="lnk" data-act="resetEp">KI-Vorschlag ' + eur(p.aiEp) + ' wiederherstellen</button>' : '') + '</div>') +
+            (p.manual ? ' · <button class="lnk" data-act="resetEp">' + (noAi ? 'Preis entfernen' : 'KI-Vorschlag ' + eur(p.aiEp) + ' wiederherstellen') + '</button>' : '') + '</div>') +
         (ok ? '<div class="stamp' + (fresh ? ' fx' : '') + '" data-k="st"><span class="sq">' + IC.tickRaw + '</span><span><b>Bestätigt</b><small>' + (p.manual ? 'Eigener Preis' : 'KI-Preis') + ' · T. Berger</small></span></div>' : '') + '</div>' +
         '<div class="pconf"><span class="mono">Konfidenz</span><span class="conf-v ' + confLvl(p.conf) + '"><b>' + p.conf + ' %</b>' + confWord(p.conf) + '</span>' + cmeter(p.conf, 10) + '</div></div>' +
+        (noAi ? '<div class="why2"><div class="mono lab">Warum kein Preis</div><p>' + esc(p.why) + '. In euren Alt-LVs gibt es keine vergleichbare Position. Kalkuliere den Preis selbst oder frag über »Extern« einen Lieferanten an.</p></div></section>' :
         '<div class="why2' + (S.whyOpen ? ' open' : '') + '"><div class="mono lab">Begründung</div><p>' + esc(C.cands[0].why) + '</p>' +
           '<div class="whymore" aria-hidden="' + !S.whyOpen + '"><div class="whyin"><div class="calc2">' + C.steps.map(function (s, j) { return '<div class="cs' + (j === C.steps.length - 1 ? ' last' : '') + '"><span>' + esc(s[0]) + '</span><span>' + esc(s[1]) + '</span></div>'; }).join('') + '</div>' +
           ((R.similar || []).length ? '<div class="refs"><span class="mono">Quellen</span>' + R.similar.map(function (x) { var e = D.extra[x[0]]; return e ? '<button class="ref" data-act="preview" data-key="' + x[0] + '">' + esc(e.proj) + '<small>' + esc(x[1]) + '</small></button>' : ''; }).join('') + '</div>' : '') +
-        '</div></div><button class="whytg" data-act="whyToggle" aria-expanded="' + !!S.whyOpen + '">' + (S.whyOpen ? 'Weniger anzeigen' : 'Berechnung &amp; Quellen anzeigen') + IC.chev + '</button></div></section>' +
+        '</div></div><button class="whytg" data-act="whyToggle" aria-expanded="' + !!S.whyOpen + '">' + (S.whyOpen ? 'Weniger anzeigen' : 'Berechnung &amp; Quellen anzeigen') + IC.chev + '</button></div></section>') +
       '<div class="lower"><div class="lowin">' + gwPanel + '<section class="comm" aria-label="Kommunikation"><button class="mini" data-act="aiClose" tabindex="-1"><span class="mono">Kommunikation</span><b>Team ' + cm.length + '</b><span class="muted">Extern ' + (thread.length + notes.length) + '</span></button><div class="comm-h"><span class="mono">Kommunikation</span>' +
         '<div class="ctabs" role="tablist">' + tabs.map(function (t) { var on = dt === t[0]; return '<button role="tab" class="ctab' + (on ? ' on' : '') + '" aria-selected="' + on + '" data-act="dtab" data-v="' + t[0] + '">' + t[1] + (t[2] ? '<span class="dn">' + t[2] + '</span>' : '') + '</button>'; }).join('') + '</div></div>' +
         '<div class="panel" data-k="p' + dt + '">' + panel + '</div></section></div></div>' +
@@ -1677,7 +1702,7 @@ function vDrawer(d) {
         (S.thinking ? '<div class="cp-m agent" data-k="cth"><span class="agent-ic">' + IC.star + '</span><div class="bub thinking"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>' : '') +
       '</div></section></div></div>' +
     '</div></div>' +
-    '<div class="dw-cta" data-k="cta-bar">' + (devWarn && !ok && !p.gen ? '<p class="hint" data-k="hint">' + IC.warn + '<span>Mehr als 10 % neben der Empfehlung. Gedrückt halten und kurz im Team begründen.</span></p>' : '') + cta + '</div>' +
+    '<div class="dw-cta" data-k="cta-bar">' + (devWarn && !ok && !p.gen && !noAi ? '<p class="hint" data-k="hint">' + IC.warn + '<span>Mehr als 10 % neben der Empfehlung. Gedrückt halten und kurz im Team begründen.</span></p>' : '') + cta + '</div>' +
     '<footer class="ask">' +
       '<div class="askin"><span style="color:var(--signal);display:flex">' + IC.star + '</span><label style="flex:1;display:flex"><span class="sr">Frage an den Agenten</span><input data-in="draft" data-enter="sendDraft" value="' + esc(S.draft) + '" placeholder="Agent fragen zu ' + p.oz + '…"></label><button class="send" data-act="sendDraft" aria-label="Senden">' + IC.arrow + '</button></div></footer>' +
   '</aside>';
@@ -1873,7 +1898,7 @@ function planHot(oz, mkEl) {
   if (!mkEl) return; // from a table row: only the marker lights up
   var plan = mkEl.closest('.plan'), tip = plan && plan.querySelector('.plan-tip'), p = PLAN[oz], r = derive().all.find(function (x) { return x.oz === oz; });
   if (!tip || !r) return;
-  tip.innerHTML = '<span class="mono">' + oz + '</span><b>' + esc(r.kurz) + '</b><span>' + eur(r.ep) + ' je ' + r.einheit + '</span>';
+  tip.innerHTML = '<span class="mono">' + oz + ' · Konfidenz ' + r.conf + ' %</span><b>' + esc(r.kurz) + '</b><span>' + (r.np ? 'Noch kein Preis' : eur(r.ep) + ' je ' + r.einheit) + '</span>';
   tip.style.left = (p[0] / 10) + '%'; tip.style.top = (p[1] / 7) + '%';
   tip.classList.toggle('flip', p[0] > 620);
   tip.classList.add('on');
@@ -1949,16 +1974,18 @@ var A = {
     d.rows.forEach(function (r) { if (all) delete x[r.oz]; else x[r.oz] = true; }); set({ picked: x });
   },
   toggleOk: function (ds) {
+    var tr = derive().full.find(function (x) { return x.oz === ds.oz; }); if (tr && tr.np) { A.priceNow(ds); return; }
     var c = Object.assign({}, S.confirmed); c[ds.oz] = !c[ds.oz];
     if (c[ds.oz]) flagOk([ds.oz]);
     set({ confirmed: c });
     toast(c[ds.oz] ? 'Preis für ' + ds.oz + ' bestätigt' : 'Bestätigung für ' + ds.oz + ' zurückgenommen');
   },
-  sort: function (ds) { var on = S.sort.k === ds.v; set({ sort: { k: ds.v, d: on ? -S.sort.d : ((ds.v === 'oz' || ds.v === 'kurz') ? 1 : -1) } }); },
+  sort: function (ds) { var on = S.sort.k === ds.v; set({ sort: { k: ds.v, d: on ? -S.sort.d : ((ds.v === 'oz' || ds.v === 'kurz' || ds.v === 'conf') ? 1 : -1) } }); },
   filter: function (ds) { set({ filter: ds.v }); },
   gewerk: function (ds) { set({ gewerk: ds.v }); },
   gewerkAll: function (ds) { set({ gewerk: ds.v, scope: 'all', lvLimit: 60, sel: null }); var t = document.querySelector('.lv-head'); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); },
   scope: function (ds) { set({ scope: ds.v, lvLimit: 60, filter: ds.v === 'all' ? S.filter : S.filter }); },
+  priceNow: function (ds) { openPos(ds.oz); A.startEdit(); },
   more: function () { set({ lvLimit: S.lvLimit + 60 }); },
   ownerFilter: function (ds) { set({ owner: ds.v }); },
   resetFilters: function () { set({ q: '', gewerk: '', owner: '', filter: 'all' }); },
@@ -1967,7 +1994,7 @@ var A = {
   collapse: function (ds) { var c = Object.assign({}, S.collapsed); c[ds.v] = !c[ds.v]; set({ collapsed: c }); },
   csv: function () {
     var rows = derive().rows, q = function (t) { return '"' + String(t).replace(/"/g, '""') + '"'; };
-    var lines = ['OZ;Kurztext;Gewerk;Menge;Einheit;EP;GP;Risiko;Status'].concat(rows.map(function (r) { return [r.oz, q(r.kurz), q(r.gewerk), fmt(r.menge, r.menge % 1 ? 1 : 0), r.einheit, fmt(r.ep, 2), fmt(r.gp, 2), r.risk, S.confirmed[r.oz] ? 'bestätigt' : r.mode].join(';'); }));
+    var lines = ['OZ;Kurztext;Gewerk;Menge;Einheit;EP;GP;Konfidenz;Status'].concat(rows.map(function (r) { return [r.oz, q(r.kurz), q(r.gewerk), fmt(r.menge, r.menge % 1 ? 1 : 0), r.einheit, fmt(r.ep, 2), fmt(r.gp, 2), r.risk, S.confirmed[r.oz] ? 'bestätigt' : r.mode].join(';'); }));
     try { navigator.clipboard.writeText(lines.join('\n')).then(function () { toast(rows.length + ' Zeilen als CSV kopiert'); }, function () { toast('Kopieren nicht möglich'); }); } catch (e) { toast('Kopieren nicht möglich'); }
   },
   bulkOk: function () {
@@ -2003,7 +2030,7 @@ var A = {
     var changed = p.ep !== (i === 0 ? p.aiEp : +ds.ep);
     set({ eps: e, sugg: g, confirmed: c, editEp: false, flashEp: changed ? 1 : 0 }); S.flashEp = 0;
   },
-  startEdit: function () { var p = cur(); S.focusEp = true; set({ editEp: true, epDraft: String(p.ep) }); },
+  startEdit: function () { var p = cur(); S.focusEp = true; set({ editEp: true, epDraft: p.np ? '' : String(p.ep) }); },
   okNext: function () {
     if (S.confirming) return;
     S.confirming = true; render();
