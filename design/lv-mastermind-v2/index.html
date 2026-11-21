@@ -1081,6 +1081,11 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .lv-more:hover b svg{transform:translateX(3px)}
 .lv-more:focus-visible{outline:2px solid var(--signal);outline-offset:-2px}
 .lv-r.gen .rsk{opacity:.55}
+/* table rows: same quiet selection as the Gewerk list (thin ink line, no grey block) */
+.lv-r:hover,.lv-r.sel{background:transparent}
+.lv-r.sel,.lv-r.picked:not(.sel){box-shadow:none}
+.lv-r::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:2px;background:var(--ink);transform:scaleY(0);transition:transform .22s var(--ease)}
+.lv-r:hover::before,.lv-r.sel::before,.lv-r.picked::before{transform:none}
 .auto1{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;font:.58rem/1 var(--mono);letter-spacing:.04em;color:var(--ink-3);border:1px dashed var(--line-2)}
 .okline.auto{background:transparent;color:var(--ink-2);border:1px dashed var(--line-2);min-height:52px}
 .okline.auto svg.i{color:var(--ink-3)}
