@@ -1551,7 +1551,7 @@ function deDate(s) { var t = new Date(s); return isNaN(t) ? String(s) : t.toLoca
 function daysTo(s) { return Math.max(0, Math.ceil((new Date(s) - new Date()) / 864e5)); }
 function vHero(d) {
   return '<div class="hero rise">' +
-    '<div style="min-width:0"><div class="eyebrow mono"><span class="num">[' + esc(P.id) + ']</span><span>' + (P.live ? 'Leistungsverzeichnis' : 'Öffentliche Ausschreibung') + '</span><span class="live"><i></i>' + (P.live ? 'Backend · ' + fmt(P.n) + ' Positionen analysiert' : 'Analysiert ' + esc(S.analyzed)) + '</span></div>' +
+    '<div style="min-width:0">' +
     '<h1>' + esc(P.name) + '</h1></div>' +
     '<div class="hero-actions">' +
       '<button class="btn btn-quiet btn-rep" data-act="report" data-v="1">' + IC.doc + 'Konfidenzbericht</button>' +
