@@ -1003,6 +1003,78 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .gwl button:hover::before{transform:none}
 .gwk{transition:color .15s;text-decoration:underline;text-decoration-color:transparent;text-underline-offset:3px;transition:text-decoration-color .2s}
 .gwl button:hover .gwk{text-decoration-color:var(--ink-3)}
+
+/* ---- [05] LV-Editor ---- */
+.ed{margin-top:28px;border:1px solid var(--line);background:color-mix(in srgb,var(--card) 82%,transparent)}
+.ed-h{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 24px;transition:background .15s}
+.ed-h:hover{background:color-mix(in srgb,var(--paper-2) 50%,transparent)}
+.ed-h:focus-visible{outline:2px solid var(--signal);outline-offset:-2px}
+.ed-t{display:flex;flex-direction:column;gap:6px}
+.ed-t b{font-size:22px;font-weight:300;letter-spacing:-.03em}
+.ed-t small{color:var(--ink-3);font-size:12.5px}
+.ed-s{display:flex;align-items:center;gap:18px}
+.ed-o{display:inline-flex;align-items:center;gap:10px;height:34px;padding:0 12px 0 14px;border:1px solid var(--ink);font:.66rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;transition:background .15s,color .15s}
+.ed-h:hover .ed-o{background:var(--ink);color:var(--paper)}
+.ed-chev{display:flex;transition:transform .35s var(--spring)}
+.ed.is-open .ed-chev{transform:rotate(180deg)}
+.ed.is-open .ed-o{background:var(--ink);color:var(--paper)}
+.ed-body{border-top:1px solid var(--line);animation:edin .45s var(--ease)}
+@keyframes edin{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+.ed-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:0 24px;border-bottom:1px solid var(--line)}
+.ed-tabs{display:flex;gap:4px}
+.ed-tabs button{all:unset;cursor:pointer;height:46px;padding:0 10px;display:inline-flex;align-items:center;gap:7px;font:.64rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);box-shadow:inset 0 -2px 0 transparent;transition:color .15s,box-shadow .2s}
+.ed-tabs button:hover{color:var(--ink)}
+.ed-tabs button.on{color:var(--ink);box-shadow:inset 0 -2px 0 var(--ink)}
+.ed-tabs button span{opacity:.55}.ed-tabs button.on span{opacity:1;color:var(--signal)}
+.ed-tabs button:focus-visible{outline:2px solid var(--signal);outline-offset:-2px}
+.ed-tools{display:flex;align-items:center;gap:8px;padding:8px 0}
+.ed-tools .search{width:260px}
+.ed-sel{position:relative;display:inline-flex;align-items:center}
+.ed-sel select{appearance:none;height:34px;padding:0 30px 0 10px;border:1px solid var(--line-2);background:transparent;font:13px var(--sans);color:var(--ink);cursor:pointer}
+.ed-sel select:focus{outline:0;border-color:var(--ink)}
+.ed-sel svg{position:absolute;right:9px;width:13px;height:13px;pointer-events:none;color:var(--ink-3)}
+.ed-th,.ed-r{display:grid;grid-template-columns:96px minmax(0,1fr) 150px 150px 120px 70px;gap:14px;align-items:center;padding:0 24px}
+.ed-th{height:36px;color:var(--ink-3);font-size:.58rem;border-bottom:1px solid var(--ink)}
+.ed-th .r{text-align:right}
+.ed-list{max-height:640px;overflow:auto;overscroll-behavior:contain}
+.ed-g{position:sticky;top:0;z-index:1;display:flex;align-items:center;gap:12px;height:38px;padding:0 24px;background:var(--paper-2);border-bottom:1px solid var(--line)}
+.ed-g .mono{font-size:.62rem}
+.ed-g b{font-weight:500;font-size:13px}
+.ed-g .ed-gs{font-variant-numeric:tabular-nums}
+.ed-r{position:relative;min-height:44px;border-bottom:1px solid var(--line);transition:background .15s}
+.ed-r:hover{background:color-mix(in srgb,var(--paper-2) 45%,transparent)}
+.ed-r.ch::before{content:"";position:absolute;left:0;top:-1px;bottom:-1px;width:2px;background:var(--signal)}
+.ed-oz{font-size:.66rem;color:var(--ink-3)}
+.ed-k{font-size:13px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ed-ki{all:unset;cursor:pointer;margin-left:6px;padding:2px 5px;font:.54rem/1 var(--mono);letter-spacing:.06em;border:1px solid var(--line-2);color:var(--ink-3);vertical-align:2px}
+.ed-ki:hover{border-color:var(--ink);color:var(--ink)}
+.ed-c{display:flex;align-items:center;justify-content:flex-end;gap:6px}
+.ed-in{width:100%;min-width:0;height:30px;padding:0 8px;border:1px solid transparent;background:transparent;text-align:right;font:13px var(--sans);font-variant-numeric:tabular-nums;color:var(--ink);transition:border-color .15s,background .15s,box-shadow .15s}
+.ed-r:hover .ed-in{border-color:var(--line-2)}
+.ed-in:focus{outline:0;border-color:var(--ink);background:var(--card);box-shadow:3px 3px 0 var(--signal)}
+.ed-r.ch .ed-in{color:var(--signal)}
+.ed-u{flex:none;width:26px;font:.6rem var(--mono);color:var(--ink-3)}
+.ed-gp{text-align:right;font-size:13px;font-weight:500;font-variant-numeric:tabular-nums}
+.ed-a{display:flex;align-items:center;justify-content:flex-end;gap:4px}
+.ed-x{width:26px;height:26px;font-size:14px;color:var(--ink-3)}
+.ed-x:hover{color:var(--signal)}
+.ed-cb{all:unset;cursor:pointer;height:26px;min-width:26px;padding:0 4px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:3px;color:var(--ink-3);border:1px solid transparent;transition:color .15s,border-color .15s}
+.ed-cb svg{width:14px;height:14px}
+.ed-cb b{font:500 .6rem/1 var(--mono)}
+.ed-cb.has{color:var(--ink)}
+.ed-cb:hover,.ed-cb.on{border-color:var(--ink);color:var(--ink)}
+.ed-cb:focus-visible{outline:2px solid var(--signal)}
+.ed-r.open{background:color-mix(in srgb,var(--paper-2) 45%,transparent);border-bottom-color:transparent}
+.ed-cm{padding:6px 24px 14px 134px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--paper-2) 45%,transparent);animation:edin .3s var(--ease)}
+.ed-msg{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;font-size:13px;line-height:1.45;max-width:640px}
+.ed-msg>i{flex:none;width:22px;height:22px;display:grid;place-items:center;font:500 .55rem/1 var(--mono);font-style:normal;color:#fff}
+.ed-msg>span{display:flex;flex-direction:column;gap:2px}
+.ed-msg .mono{font-size:.56rem}
+.ed-cf{display:flex;gap:8px;max-width:640px}
+.ed-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 24px;border-top:1px solid var(--ink)}
+.ed-foot .mono{color:var(--ink-3);font-size:.6rem}
+.ed-foot .ft-r{display:flex;align-items:baseline;gap:12px}
+.ed-foot .ft-r b{font-size:18px;font-weight:400;letter-spacing:-.02em}
 </style>
 </head>
 <body>
@@ -1128,11 +1200,45 @@ var D = (function () {
 var T = D.team, TEAM = ['TB', 'LW', 'MA', 'SK'];
 var TOTAL = 1142380;
 
+// ================= full LV (1.284 Positionen) for the LV-Editor =================
+var LVX = (function () {
+  var seed = 7; function rnd() { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
+  var G = [
+    ['Rohbau', '01', ['01', '02', '03', '04', '05', '06'], 260, [['Stahlbeton C30/37 Stützen 30/30 cm', 'm³', 420], ['Stahlbetondecke C25/30, d = 22 cm', 'm³', 265], ['Schalung Deckenrand', 'm', 38], ['Mauerwerk KS 17,5 cm', 'm²', 74], ['Betonstahlmatten Q188A', 't', 1450], ['Fertigteilsturz 1,26 m', 'Stk', 64], ['Unterzug C30/37, 30/50 cm', 'm³', 455], ['Perimeterdämmung XPS 120 mm', 'm²', 39], ['Abdichtung erdberührte Wände', 'm²', 46], ['Aussparung Decke bis 0,1 m²', 'Stk', 28]]],
+    ['Fenster & Fassade', '02', ['01', '02'], 90, [['Holz-Alu-Fenster 1-flügelig', 'Stk', 1120], ['Fenstertür 2-flügelig', 'Stk', 2380], ['Fensterbank innen, Holz', 'Stk', 84], ['Außenjalousie, Funkmotor', 'Stk', 640], ['WDVS Mineralwolle 160 mm', 'm²', 112], ['Sockelputz', 'm²', 48]]],
+    ['Metallbau', '02', ['03', '04'], 70, [['Handlauf Edelstahl Ø 42 mm', 'm', 168], ['Stahltreppe Nebeneingang', 'Stk', 8600], ['Gitterrost verzinkt', 'm²', 182], ['Absturzsicherung Flachdach', 'm', 214], ['Fahrradständer verzinkt', 'Stk', 145]]],
+    ['Erdbau', '03', ['01', '02', '03'], 60, [['Oberboden abtragen und lagern', 'm²', 4.8], ['Grabenaushub Leitungen', 'm³', 34], ['Verfüllung Arbeitsraum', 'm³', 22], ['Kiesfilterschicht 0/32', 'm³', 41], ['Bodenaustausch Frostschutz', 'm³', 38]]],
+    ['Elektro / TGA', '04', ['01', '02', '03', '04', '05'], 210, [['Mantelleitung NYM-J 3×1,5', 'm', 2.9], ['Schalterprogramm UP, weiß', 'Stk', 18], ['Steckdose kindersicher', 'Stk', 24], ['LED-Panel 600×600, 30 W', 'Stk', 142], ['Notleuchte Rettungsweg', 'Stk', 168], ['Rauchmelder vernetzt', 'Stk', 96], ['Unterverteilung 3-reihig', 'Stk', 1480], ['Kabeltrasse 200 mm', 'm', 36], ['Datendose Cat. 6A', 'Stk', 62]]],
+    ['Bodenbelag', '05', ['01', '02'], 70, [['Linoleum 2,5 mm, Gruppenraum', 'm²', 42], ['Sockelleiste Linoleum', 'm', 12], ['Sauberlaufzone', 'm²', 118], ['Ausgleichsspachtel 5 mm', 'm²', 9.5]]],
+    ['Fliesen', '05', ['03', '04'], 80, [['Bodenfliesen R10, 30×30 cm', 'm²', 72], ['Wandfliesen 20×20 cm', 'm²', 68], ['Abdichtung Nassbereich', 'm²', 31], ['Fliesensockel', 'm', 14]]],
+    ['Ausstattung', '06', ['01', '02'], 90, [['Kindertisch höhenverstellbar', 'Stk', 286], ['Garderobe mit Bank', 'Stk', 640], ['Regal Buche 4 Fächer', 'Stk', 340], ['Wickelkommode mit Treppe', 'Stk', 1890], ['Spielteppich 2×3 m', 'Stk', 410]]],
+    ['Trockenbau', '07', ['01', '02', '03'], 120, [['GK-Ständerwand 100 mm', 'm²', 58], ['Abhangdecke GK, gelocht', 'm²', 64], ['Revisionsklappe 40×40', 'Stk', 92], ['Vorsatzschale Installation', 'm²', 49]]],
+    ['Maler', '08', ['01', '02'], 70, [['Dispersionsanstrich Wände', 'm²', 6.4], ['Deckenanstrich weiß', 'm²', 7.2], ['Lackierung Türzargen', 'Stk', 48]]],
+    ['Heizung / Sanitär', '09', ['01', '02', '03', '04'], 151, [['Fußbodenheizung, Rohr 16 mm', 'm²', 54], ['Kinder-WC wandhängend', 'Stk', 690], ['Waschtisch Kinderhöhe', 'Stk', 520], ['Kupferrohr 18 mm', 'm', 31], ['Heizkreisverteiler 8-fach', 'Stk', 960], ['Wärmepumpe Luft/Wasser 24 kW', 'Stk', 18400]]]
+  ];
+  var V = ['', ', EG', ', 1. OG', ', Gruppenraum 1', ', Gruppenraum 2', ', Mehrzweckraum', ', Flur', ', Personal', ', Küche', ', Typ A', ', Typ B'];
+  var out = [];
+  G.forEach(function (g) {
+    var n = g[3], subs = g[2], per = Math.ceil(n / subs.length);
+    for (var i = 0; i < n; i++) {
+      var sub = subs[Math.floor(i / per)], k = i % per, t = g[4][i % g[4].length], v = V[Math.floor(i / g[4].length) % V.length];
+      var ep = Math.round(t[2] * (0.85 + rnd() * 0.3) * 100) / 100;
+      out.push({ oz: g[1] + '.' + sub + '.' + String(110 + k * 10).padStart(4, '0'), kurz: t[0] + v, einheit: t[1], ep: ep, menge: 1 + Math.round(rnd() * (t[2] > 1000 ? 6 : t[2] > 200 ? 40 : 400)), gewerk: g[0] });
+    }
+  });
+  var core = D.pos.reduce(function (a, p) { return a + p.menge * p.ep; }, 0), raw = out.reduce(function (a, p) { return a + p.menge * p.ep; }, 0), f = (TOTAL - core) / raw;
+  out.forEach(function (p) { var m = p.menge * f; p.menge = p.einheit === 'Stk' ? Math.max(1, Math.round(m)) : Math.max(0.5, Math.round(m * 10) / 10); });
+  var now = out.reduce(function (a, p) { return a + p.menge * p.ep; }, 0), g = (TOTAL - core) / now;
+  out.forEach(function (p) { p.ep = Math.round(p.ep * g * 100) / 100; });
+  return out;
+})();
+
 // ================= state =================
 var S = { tab: 'home', filter: 'all', sel: null, q: '', sort: { k: 'risk', d: -1 }, density: 'compact', group: false, gewerk: '', owner: '',
   picked: {}, owners: {}, confirmed: {}, bundled: {}, collapsed: {}, toast: null, dtab: '', sugg: {}, editEp: false, epDraft: '', eps: {},
   accepted: {}, justOk: {}, comments: {}, cmt: '', notes: {}, noteDraft: '', compose: null, seqs: {}, chats: {}, draft: '', thinking: false,
-  preview: null, fx: null, holding: false, analyzing: false, analyzed: 'heute, 08:47 · vor 12 Min.', flashEp: 0, focusEp: false };
+  preview: null, fx: null, holding: false, analyzing: false, analyzed: 'heute, 08:47 · vor 12 Min.', flashEp: 0, focusEp: false,
+  lvOpen: false, lvq: '', lvGw: '', lvF: 'all', lvLimit: 60, lvEp: {}, mg: {}, lvCo: null, lvCd: '' };
 
 // ================= helpers =================
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -1180,7 +1286,8 @@ function cmtN(oz) { var rr = D.rich[oz] || {}; return (rr.comments || []).length
 function derive() {
   var all = D.pos.map(function (p) {
     var ep = S.eps[p.oz] !== undefined ? S.eps[p.oz] : p.ep;
-    return Object.assign({}, p, { ep: ep, aiEp: p.ep, manual: S.eps[p.oz] !== undefined, gp: p.menge * ep });
+    var mg = S.mg[p.oz] !== undefined ? S.mg[p.oz] : p.menge;
+    return Object.assign({}, p, { ep: ep, menge: mg, aiEp: p.ep, manual: S.eps[p.oz] !== undefined, gp: mg * ep });
   });
   var tot = all.reduce(function (a, r) { return a + r.gp; }, 0);
   var maxGp = Math.max.apply(null, all.map(function (r) { return r.gp; }));
@@ -1461,6 +1568,71 @@ function vTable(d) {
     '</div></div></div></div></section>';
 }
 
+
+// ================= [05] LV-Editor =================
+function lvAll(d) {
+  var core = d.all.map(function (r) { var o = D.pos.find(function (p) { return p.oz === r.oz; }); return { oz: r.oz, kurz: r.kurz, einheit: r.einheit, ep: r.ep, menge: r.menge, gp: r.gp, gewerk: r.gewerk, core: true, risk: r.risk, ep0: o.ep, menge0: o.menge }; });
+  var gen = LVX.map(function (p) { var ep = S.lvEp[p.oz] !== undefined ? S.lvEp[p.oz] : p.ep, mg = S.mg[p.oz] !== undefined ? S.mg[p.oz] : p.menge; return { oz: p.oz, kurz: p.kurz, einheit: p.einheit, ep: ep, menge: mg, gp: ep * mg, gewerk: p.gewerk, ep0: p.ep, menge0: p.menge }; });
+  return core.concat(gen).sort(function (a, b) { return a.oz < b.oz ? -1 : a.oz > b.oz ? 1 : 0; });
+}
+function lvCmts(oz) { return ((D.rich[oz] || {}).comments || []).concat(S.comments[oz] || []); }
+function lvNum(v) { return fmt(v, v % 1 ? 2 : 0); }
+function vEditor(d) {
+  var all = lvAll(d), edited = all.filter(function (r) { return r.ep !== r.ep0 || r.menge !== r.menge0; });
+  var delta = edited.reduce(function (a, r) { return a + r.gp - r.ep0 * r.menge0; }, 0);
+  var head = '<button class="ed-h" data-act="lvToggle" aria-expanded="' + S.lvOpen + '" aria-controls="lved">' +
+    '<span class="ed-t"><span class="mono faint"><span style="color:var(--ink)">[05]</span> LV-Editor</span><b>Gesamtes LV bearbeiten</b><small>' + fmt(all.length) + ' Positionen · Preise, Mengen und Kommentare direkt im LV ändern</small></span>' +
+    '<span class="ed-s">' + (edited.length ? '<span class="mtag adaptiert"><i></i>' + edited.length + ' geändert · ' + (delta >= 0 ? '+' : '−') + eur(Math.abs(Math.round(delta))) + '</span>' : '') +
+    '<span class="ed-o">' + (S.lvOpen ? 'Schließen' : 'Öffnen') + '<span class="ed-chev">' + IC.chev + '</span></span></span></button>';
+  if (!S.lvOpen) return '<section class="ed rise" style="--d:440ms" aria-label="LV-Editor" data-k="ed">' + head + '</section>';
+  var q = S.lvq.trim().toLowerCase(), gws = [];
+  all.forEach(function (r) { if (gws.indexOf(r.gewerk) < 0) gws.push(r.gewerk); });
+  var fd = { all: function () { return true; }, edited: function (r) { return r.ep !== r.ep0 || r.menge !== r.menge0; }, cmt: function (r) { return lvCmts(r.oz).length > 0; }, ki: function (r) { return !!r.core; } };
+  var base = all.filter(function (r) { return (!S.lvGw || r.gewerk === S.lvGw) && (!q || (r.oz + ' ' + r.kurz + ' ' + r.gewerk).toLowerCase().indexOf(q) >= 0); });
+  var rows = base.filter(fd[S.lvF] || fd.all), shown = rows.slice(0, S.lvLimit);
+  var gsum = {}; rows.forEach(function (r) { gsum[r.gewerk] = (gsum[r.gewerk] || [0, 0]); gsum[r.gewerk][0]++; gsum[r.gewerk][1] += r.gp; });
+  var body = '', lastG = null;
+  shown.forEach(function (r) {
+    if (r.gewerk !== lastG) { lastG = r.gewerk; body += '<div class="ed-g" data-k="eg' + esc(r.gewerk) + '"><span class="mono">' + r.oz.slice(0, 2) + '</span><b>' + esc(r.gewerk) + '</b><span class="mono faint">' + gsum[r.gewerk][0] + ' Pos.</span><span style="flex:1"></span><b class="ed-gs">' + eur(Math.round(gsum[r.gewerk][1])) + '</b></div>'; }
+    var ch = r.ep !== r.ep0 || r.menge !== r.menge0, cm = lvCmts(r.oz), open = S.lvCo === r.oz;
+    body += '<div class="ed-r' + (ch ? ' ch' : '') + (open ? ' open' : '') + '" data-k="e' + r.oz + '" role="row">' +
+      '<span class="mono ed-oz" role="cell">' + r.oz + '</span>' +
+      '<span class="ed-k" role="cell">' + esc(r.kurz) + (r.core ? ' <button class="ed-ki" data-act="open" data-oz="' + r.oz + '" title="KI-Analyse öffnen">KI · ' + r.risk + '</button>' : '') + '</span>' +
+      '<span role="cell" class="ed-c"><input class="ed-in" data-lvf="menge" data-oz="' + r.oz + '" inputmode="decimal" value="' + lvNum(r.menge) + '" aria-label="Menge ' + r.oz + '"><span class="ed-u">' + esc(r.einheit) + '</span></span>' +
+      '<span role="cell" class="ed-c"><input class="ed-in" data-lvf="ep" data-oz="' + r.oz + '" inputmode="decimal" value="' + fmt(r.ep, 2) + '" aria-label="Einheitspreis ' + r.oz + '"><span class="ed-u">€</span></span>' +
+      '<span role="cell" class="ed-gp">' + eur(Math.round(r.gp * 100) / 100) + '</span>' +
+      '<span role="cell" class="ed-a">' +
+        (ch ? '<button class="ic ed-x" data-act="lvReset" data-oz="' + r.oz + '" title="Änderung zurücksetzen" aria-label="Änderung an ' + r.oz + ' zurücksetzen">↺</button>' : '<i class="ed-x"></i>') +
+        '<button class="ed-cb' + (cm.length ? ' has' : '') + (open ? ' on' : '') + '" data-act="lvCmt" data-oz="' + r.oz + '" aria-expanded="' + open + '" aria-label="Kommentare zu ' + r.oz + '">' + IC.chat + (cm.length ? '<b>' + cm.length + '</b>' : '') + '</button></span>' +
+      '</div>';
+    if (open) body += '<div class="ed-cm" data-k="ec' + r.oz + '">' +
+      (cm.length ? cm.map(function (c) { var m = T[c.by] || { ini: c.by, color: 'var(--ink-3)' }; return '<div class="ed-msg"><i style="background:' + m.color + '">' + esc(m.ini) + '</i><span><span class="mono faint">' + esc(m.name || c.by) + ' · ' + esc(c.time || '') + '</span>' + esc(c.t) + '</span></div>'; }).join('') : '<p class="mono faint" style="margin:0 0 8px">Noch keine Kommentare zu dieser Position</p>') +
+      '<div class="ed-cf"><input class="fld" id="lvcd" data-in="lvCd" data-enter="lvSend" value="' + esc(S.lvCd) + '" placeholder="Kommentar zu ' + r.oz + ' schreiben…"><button class="btn btn-quiet" data-act="lvSend">Senden</button></div></div>';
+  });
+  var tabs = [['all', 'Alle'], ['edited', 'Geändert'], ['cmt', 'Kommentiert'], ['ki', 'KI-analysiert']];
+  var sum = rows.reduce(function (a, r) { return a + r.gp; }, 0);
+  return '<section class="ed is-open" aria-label="LV-Editor" data-k="ed">' + head +
+    '<div class="ed-body" id="lved">' +
+      '<div class="ed-bar"><div class="ed-tabs" role="group" aria-label="Status">' + tabs.map(function (t) { var on = (S.lvF || 'all') === t[0]; return '<button class="' + (on ? 'on' : '') + '" aria-pressed="' + on + '" data-act="lvF" data-v="' + t[0] + '">' + t[1] + '<span>' + fmt(base.filter(fd[t[0]]).length) + '</span></button>'; }).join('') + '</div>' +
+        '<div class="ed-tools"><label class="search">' + IC.search + '<span class="sr">Im LV suchen</span><input type="search" data-in="lvq" value="' + esc(S.lvq) + '" placeholder="OZ oder Text im gesamten LV…"></label>' +
+        '<label class="ed-sel"><span class="sr">Gewerk</span><select data-change="lvGw" data-val="' + esc(S.lvGw) + '"><option value="">Alle Gewerke</option>' + gws.map(function (g) { return '<option value="' + esc(g) + '"' + (S.lvGw === g ? ' selected' : '') + '>' + esc(g) + '</option>'; }).join('') + '</select>' + IC.chev + '</label>' +
+        (edited.length ? '<button class="btn btn-quiet" data-act="lvResetAll">Alle Änderungen verwerfen</button>' : '') + '</div></div>' +
+      '<div class="ed-th mono" role="row"><span>OZ</span><span>Kurztext</span><span class="r">Menge</span><span class="r">EP</span><span class="r">GP</span><span></span></div>' +
+      '<div class="ed-list" role="table" aria-label="Gesamtes Leistungsverzeichnis">' + (body || '<div class="empty">Keine Position passt. <button class="lnk" data-act="lvClear">Filter zurücksetzen</button></div>') + '</div>' +
+      '<div class="ed-foot"><span class="mono">' + fmt(shown.length) + ' von ' + fmt(rows.length) + ' angezeigt</span>' +
+        (rows.length > shown.length ? '<button class="btn btn-quiet" data-act="lvMore">Weitere 60 laden</button>' : '<span></span>') +
+        '<span class="ft-r"><span class="mono">Summe Auswahl</span><b>' + eur(Math.round(sum)) + '</b></span></div>' +
+    '</div></section>';
+}
+function lvParse(v) { v = String(v).trim().replace(/\s|€/g, ''); if (v.indexOf(',') >= 0) v = v.replace(/\./g, '').replace(',', '.'); return parseFloat(v); }
+function lvCommit(oz, f, raw) {
+  var v = lvParse(raw), isCore = D.pos.some(function (p) { return p.oz === oz; });
+  if (!(v >= 0)) { toast('Ungültiger Wert'); render(); return; }
+  v = Math.round(v * 100) / 100;
+  if (f === 'menge') { var m = Object.assign({}, S.mg); m[oz] = v; set({ mg: m }); }
+  else if (isCore) { var e = Object.assign({}, S.eps); e[oz] = v; set({ eps: e }); }
+  else { var x = Object.assign({}, S.lvEp); x[oz] = v; set({ lvEp: x }); }
+}
 function vDock(d) {
   var pr = d.all.filter(function (r) { return S.picked[r.oz]; });
   if (!pr.length) return '';
@@ -1658,7 +1830,7 @@ function vToast() { return S.toast ? '<div class="toast" role="status" data-k="t
 function view() {
   var d = derive();
   return vHeader() + '<main>' + vHero(d) +
-    (S.tab === 'home' ? '<div class="grid2">' + vCost() + vBid() + '</div>' + vSummary(d) + vTable(d) : vKontext()) +
+    (S.tab === 'home' ? '<div class="grid2">' + vCost() + vBid() + '</div>' + vSummary(d) + vTable(d) + vEditor(d) : vKontext()) +
     '</main>' + vDock(d) + (S.planFull ? '<div class="planfs" data-k="planfs"><div class="planfs-bg" data-act="planFull" data-v="0"></div>' + vPlan(d, true) + '</div>' : '') + vDrawer(d) + vPreview(d) + vFx() + vToast();
 }
 
@@ -1970,6 +2142,14 @@ var A = {
   aiClose: function () { clearTimeout(aiT); var a = document.activeElement; if (a && a.blur) a.blur(); if (S.aiOpen) aiShut(); },
   floor: function (ds) { set({ floor: ds.v }); },
   planFull: function (ds) { planHot(null); set({ planFull: ds.v === '1' }); },
+  lvToggle: function () { set({ lvOpen: !S.lvOpen, lvCo: null }); },
+  lvF: function (ds) { set({ lvF: ds.v, lvLimit: 60 }); },
+  lvMore: function () { set({ lvLimit: S.lvLimit + 60 }); },
+  lvClear: function () { set({ lvq: '', lvGw: '', lvF: 'all', lvLimit: 60 }); },
+  lvCmt: function (ds) { set({ lvCo: S.lvCo === ds.oz ? null : ds.oz, lvCd: '' }); var i = document.getElementById('lvcd'); if (i) i.focus(); },
+  lvSend: function () { var v = S.lvCd.trim(); if (!v || !S.lvCo) return; var c = Object.assign({}, S.comments); c[S.lvCo] = (c[S.lvCo] || []).concat([{ by: 'TB', time: 'gerade eben', t: v }]); set({ comments: c, lvCd: '' }); },
+  lvReset: function (ds) { var m = Object.assign({}, S.mg), e = Object.assign({}, S.eps), x = Object.assign({}, S.lvEp); delete m[ds.oz]; delete e[ds.oz]; delete x[ds.oz]; set({ mg: m, eps: e, lvEp: x }); },
+  lvResetAll: function () { var core = {}; D.pos.forEach(function (p) { core[p.oz] = 1; }); var e = {}; Object.keys(S.eps).forEach(function (k) { if (!core[k]) e[k] = S.eps[k]; }); set({ mg: {}, lvEp: {}, eps: e }); toast('Alle Änderungen im LV verworfen'); },
   whyToggle: function () { set({ whyOpen: !S.whyOpen }); },
   dtab: function (ds) { set({ dtab: ds.v }); },
   resetEp: function () { var p = cur(), e = Object.assign({}, S.eps), g = Object.assign({}, S.sugg), c = Object.assign({}, S.confirmed); delete e[p.oz]; delete g[p.oz]; delete c[p.oz]; set({ eps: e, sugg: g, confirmed: c, editEp: false, flashEp: 1 }); S.flashEp = 0; toast('KI-Vorschlag für ' + p.oz + ' wiederhergestellt'); },
@@ -1998,10 +2178,13 @@ document.addEventListener('input', function (e) {
   if (!k) return;
   S[k] = e.target.value;
   if (k === 'q' || k === 'epDraft') render();
+  if (k === 'lvq') { S.lvLimit = 60; render(); }
 });
 document.addEventListener('change', function (e) {
+  if (e.target.getAttribute && e.target.getAttribute('data-lvf')) { lvCommit(e.target.getAttribute('data-oz'), e.target.getAttribute('data-lvf'), e.target.value); return; }
   var k = e.target.getAttribute && e.target.getAttribute('data-change');
   if (!k) return;
+  if (k === 'lvGw') { set({ lvGw: e.target.value, lvLimit: 60 }); return; }
   var v = e.target.value;
   if (k === 'bulkAssign' && v && T[v]) {
     var pr = derive().all.filter(function (r) { return S.picked[r.oz]; }), o = Object.assign({}, S.owners);
@@ -2011,7 +2194,8 @@ document.addEventListener('change', function (e) {
 });
 document.addEventListener('keydown', function (e) {
   var tg = e.target.tagName, inField = tg === 'INPUT' || tg === 'TEXTAREA' || tg === 'SELECT';
-  if (e.key === 'Enter' && inField && e.target.getAttribute('data-enter')) { e.preventDefault(); var n = e.target.getAttribute('data-enter'); if (n === 'saveEp') saveEp(); else if (n === 'sendCmt') addComment(); else if (n === 'sendDraft') send(S.draft); return; }
+  if (e.key === 'Enter' && inField && e.target.getAttribute('data-enter')) { e.preventDefault(); var n = e.target.getAttribute('data-enter'); if (n === 'saveEp') saveEp(); else if (n === 'sendCmt') addComment(); else if (n === 'sendDraft') send(S.draft); else if (n === 'lvSend') A.lvSend(); return; }
+  if (e.key === 'Enter' && e.target.getAttribute && e.target.getAttribute('data-lvf')) { e.preventDefault(); e.target.blur(); return; }
   if ((e.key === 'Enter' || e.key === ' ') && e.target.hasAttribute && e.target.hasAttribute('data-hold')) { e.preventDefault(); confirmCurrent(); return; }
   if (S.menu && (e.key === 'ArrowDown' || e.key === 'ArrowUp') && e.target.classList && e.target.classList.contains('mi')) {
     e.preventDefault(); var sib = e.key === 'ArrowDown' ? e.target.nextElementSibling : e.target.previousElementSibling;
