@@ -1627,7 +1627,7 @@ function vRow(r, d) {
   return '<div class="lv-grid lv-r' + (pk ? ' picked' : '') + (r.oz === S.sel ? ' sel' : '') + (r.np ? ' noprice' : '') + (r.gen ? ' gen' : '') + (ok ? ' is-ok' : '') + (fresh ? ' fx-ok' : '') + '" style="--i:' + (fresh ? S.justOk[r.oz] : 0) + '" role="row" data-k="r' + r.oz + '" data-act="open" data-oz="' + r.oz + '">' +
     '<span role="cell" class="c2">' + (r.gen ? '' : '<input type="checkbox" class="cb"' + (pk ? ' checked' : '') + ' data-act="pick" data-oz="' + r.oz + '" aria-label="Position ' + r.oz + ' auswählen">') + '</span>' +
     '<span role="cell"><span class="rsk ' + k + '" title="Konfidenz ' + r.conf + ' % · ' + esc(r.why) + '"><b>' + r.conf + '<small>%</small></b><i class="rbar"><i style="width:' + Math.max(r.conf, 0) + '%"></i></i></span></span>' +
-    '<span role="cell" style="min-width:0"><span class="ozl mono">' + r.oz + (PLAN[r.oz] ? '<span class="ploc" title="Im Bauplan verortet">' + IC.pin + PLAN[r.oz][2] + '</span>' : '') + '</span><button class="kurz" data-act="open" data-oz="' + r.oz + '">' + esc(r.kurz) + '</button>' +
+    '<span role="cell" style="min-width:0"><span class="ozl mono">' + r.oz + '</span><button class="kurz" data-act="open" data-oz="' + r.oz + '">' + esc(r.kurz) + '</button>' +
       (S.density === 'details' ? '<span class="lang">' + esc(r.lang) + '</span>' : '') +
       '<span class="rmeta"><button class="gw" data-act="gewerk" data-v="' + esc(r.gewerk) + '" title="Nur ' + esc(r.gewerk) + ' anzeigen">' + esc(r.gewerk) + '</button>' +
       (r.gen ? '<span class="why lo">' + esc(r.why) + '</span>' : '<span class="why ' + k + '">' + IC.warn + esc(r.why) + '</span>') +
