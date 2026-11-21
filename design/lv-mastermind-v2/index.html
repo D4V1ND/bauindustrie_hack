@@ -656,6 +656,49 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .msgs p{margin:5px 0 0;line-height:1.55}
 .msgs small{display:block;margin-top:4px;font-size:11.5px;color:var(--ink-3)}
 .xact{display:flex;gap:8px;margin-top:16px}
+
+/* ---- [04] polish ---- */
+.lv-head{margin:48px 0 18px;align-items:flex-end}
+.lv-stats{display:flex;gap:28px}
+.lv-stat{min-width:150px;text-align:right}
+.lv-stat .mono{color:var(--ink-3)}
+.lv-stat b{display:block;font-size:22px;font-weight:300;letter-spacing:-.035em;margin-top:6px;line-height:1}
+.lv-stat b small{font-size:14px;color:var(--ink-3);letter-spacing:0}
+.lv-meter{display:block;height:2px;background:var(--line);margin-top:9px;position:relative;overflow:hidden}
+.lv-meter>i{position:absolute;left:0;top:0;bottom:0;background:var(--ok);transition:width .8s var(--ease)}
+.lv-bar{padding:0 12px 0 6px;background:var(--card);border:1px solid var(--line);border-bottom:1px solid var(--line);min-height:52px}
+.lv-bar .filters{gap:0;align-self:stretch}
+.lv-bar .pill{position:relative;height:auto;align-self:stretch;min-height:50px;padding:0 12px;border:0;background:transparent;color:var(--ink-3)}
+.lv-bar .pill::after{content:"";position:absolute;left:12px;right:12px;bottom:-1px;height:2px;background:var(--ink);transform:scaleX(0);transform-origin:left;transition:transform .3s var(--ease)}
+.lv-bar .pill:hover{color:var(--ink);background:transparent}
+.lv-bar .pill.on{background:transparent;color:var(--ink)}
+.lv-bar .pill.on::after{transform:scaleX(1)}
+.lv-bar .pill .cnt{min-width:18px;height:17px;padding:0 5px;display:inline-flex;align-items:center;justify-content:center;background:var(--paper-2);color:var(--ink-3);opacity:1;font-size:.6rem;transition:background .2s,color .2s}
+.lv-bar .pill.on .cnt{background:var(--ink);color:var(--paper)}
+.lv-bar .ftag{align-self:center;margin-left:8px}
+.lv-bar .tools{padding:9px 0}
+.lv-bar .search{background:var(--paper)}
+.lv-bar .btn-quiet{border-color:transparent}
+.lv-bar .btn-quiet:hover,.lv-bar .btn-quiet.on{border-color:var(--line-2);background:var(--paper-2)}
+.tbl{border-top:0}
+.th{height:40px;background:transparent;border-bottom:1px solid var(--ink);font-size:.6rem}
+.foot{align-items:center;padding:14px 16px;background:transparent;border-top:1px solid var(--ink)}
+.foot>.mono{color:var(--ink-3)}
+.ft-r{display:flex;align-items:baseline;gap:14px}
+.ft-r .mono{color:var(--ink-3)}
+.ft-r b{font-size:18px;font-weight:400;letter-spacing:-.02em}
+/* checkbox */
+.cb{appearance:none;-webkit-appearance:none;position:relative;width:16px;height:16px;margin:0;border:1px solid var(--line-2);background:var(--card);cursor:pointer;display:inline-grid;place-items:center;transition:border-color .15s,background .15s,box-shadow .15s}
+.cb:hover{border-color:var(--ink)}
+.cb:focus-visible{outline:none;box-shadow:0 0 0 2px var(--paper),0 0 0 3.5px var(--signal)}
+.cb::before{content:"";width:4px;height:8px;border:solid var(--paper);border-width:0 1.6px 1.6px 0;transform:translateY(-1px) rotate(45deg) scale(0);transition:transform .22s var(--spring)}
+.cb:checked{background:var(--ink);border-color:var(--ink)}
+.cb:checked::before{transform:translateY(-1px) rotate(45deg) scale(1)}
+.cb.some{border-color:var(--ink)}
+.cb.some::before{width:8px;height:0;border-width:0 0 1.6px 0;border-color:var(--ink);transform:none}
+.lv-r .cb{margin-top:2px}
+.lv-r.picked:not(.sel){box-shadow:inset 2px 0 0 var(--ink)}
+@media (max-width:760px){.lv-stats{gap:18px}.lv-stat{min-width:0;text-align:left}.lv-bar .tools{width:100%}}
 </style>
 </head>
 <body>
@@ -1034,7 +1077,8 @@ function vTable(d) {
   var okN = d.all.filter(function (r) { return S.confirmed[r.oz]; }).length;
   return '<section aria-label="Leistungsverzeichnis" class="rise" style="--d:380ms">' +
     '<div class="lv-head"><div><div class="mono faint"><span style="color:var(--ink)">[04]</span> Leistungsverzeichnis</div><div class="lv-title">' + d.rows.length + ' von 1.284 Positionen <small>· sortiert nach ' + sortDef[S.sort.k] + (S.sort.d < 0 ? ' ↓' : ' ↑') + '</small></div></div>' +
-      '<div class="lv-sum"><span class="mono faint">Summe angezeigt</span><b>' + eur(sum) + '</b></div></div>' +
+      '<div class="lv-stats"><div class="lv-stat"><span class="mono">Bestätigt</span><b>' + okN + '<small> / ' + d.all.length + '</small></b><i class="lv-meter"><i style="width:' + (okN / d.all.length * 100) + '%"></i></i></div>' +
+        '<div class="lv-stat"><span class="mono">Summe angezeigt</span><b>' + eur(sum) + '</b><i class="lv-meter"><i style="width:' + Math.min(100, sum / d.tot * 100) + '%;background:var(--ink)"></i></i></div></div></div>' +
     '<div class="lv-bar"><div class="filters" role="group" aria-label="Filter">' + filters.map(function (x) {
       var on = d.f === x[0];
       return '<button class="pill' + (on ? ' on' : '') + '" aria-pressed="' + on + '" data-act="filter" data-v="' + x[0] + '">' + x[1] + '<span class="cnt">' + d.base.filter(d.fdef[x[0]]).length + '</span></button>';
@@ -1046,11 +1090,11 @@ function vTable(d) {
         '<button class="btn btn-quiet' + (S.group ? ' on' : '') + '" data-act="group" aria-pressed="' + S.group + '">' + IC.layers + 'Nach Gewerk</button>' +
         '<button class="btn btn-quiet" data-act="csv" title="CSV kopieren">' + IC.copy + 'CSV</button></div></div>' +
     '<div class="tbl"><div style="min-width:1030px" role="table" aria-label="Positionen des Leistungsverzeichnisses">' +
-      '<div class="lv-grid th mono" role="row"><span role="columnheader"><input type="checkbox" class="cb"' + (allPicked ? ' checked' : '') + ' data-act="pickAll" aria-label="Alle angezeigten Positionen auswählen"></span>' +
+      '<div class="lv-grid th mono" role="row"><span role="columnheader"><input type="checkbox" class="cb' + (!allPicked && d.rows.some(function (r) { return S.picked[r.oz]; }) ? ' some' : '') + '"' + (allPicked ? ' checked' : '') + ' data-act="pickAll" aria-label="Alle angezeigten Positionen auswählen"></span>' +
         th('risk') + th('oz') + th('kurz') + th('menge', 1) + th('ep', 1) + th('gp', 1) + '<span role="columnheader" style="text-align:center">OK</span></div>' +
       body +
       (body ? '' : '<div class="empty">Keine Position passt zu diesen Filtern. <button class="lnk" data-act="resetFilters">Filter zurücksetzen</button></div>') +
-      '<div class="foot"><span class="muted">Summe angezeigt: <b style="color:var(--ink);font-weight:500">' + eur(sum) + '</b> · ' + okN + ' von ' + d.all.length + ' Preisen bestätigt</span><span>Gesamt LV (KI-Kalkulation): <b style="font-weight:500">' + eur(Math.round(d.tot)) + '</b></span></div>' +
+      '<div class="foot"><span class="mono">' + d.rows.length + ' Positionen angezeigt · ' + okN + ' von ' + d.all.length + ' bestätigt</span><span class="ft-r"><span class="mono">Gesamt LV · KI-Kalkulation</span><b>' + eur(Math.round(d.tot)) + '</b></span></div>' +
     '</div></div></section>';
 }
 
