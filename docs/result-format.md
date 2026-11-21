@@ -1,0 +1,315 @@
+# Result format of `lv price`
+
+What the backend writes for one new LV (Leistungsverzeichnis, bill of quantities), for the frontend to show.
+The exact shapes are in two JSON Schemas generated from the code:
+
+| File (in `data/out/`) | What it holds | Schema |
+|---|---|---|
+| `<project>.json`, e.g. `P5.json` | the LV: every line item with its trade, item type and price lookup, plus a summary | [`result.schema.json`](result.schema.json) |
+| `<project>_judge.json`, e.g. `P5_judge.json` | every call to the judge (an AI model): what it read, its thinking, its answer | [`judge-log.schema.json`](judge-log.schema.json) |
+
+Regenerate both schemas after a change to `lv/model.py` or the judge's answer shape (see the end of this file).
+
+## `<project>.json`
+
+### Top level
+
+| Field | Type | Meaning |
+|---|---|---|
+| `project` | string | short project ID, e.g. `"P5"` |
+| `name`, `date`, `source_file` | string, date or null, string | from the GAEB file |
+| `items` | array of line items | in LV order |
+| `item_types` | array of `{name, trade, description}` | step 2: the LV's own list of item types |
+| `summary` | object | step 3: items and money per method, and the project total (see below) |
+| `risk_summary` | object | step 4: the LV's risk score and what it rests on (see below) |
+| `priced` | boolean | whether the file itself had prices; `false` for a new LV |
+
+### A line item (`items[]`)
+
+| Field | Type | Meaning |
+|---|---|---|
+| `id` | string | project + `/` + item number, unique everywhere, e.g. `"P5/04.0004"` |
+| `oz` | string | item number (Ordnungszahl) as printed in the LV |
+| `section` | array of strings | section titles, outermost first |
+| `short_text`, `long_text` | string | the item's texts. Some may contain anonymiser tokens such as `[PERSON_020]` |
+| `quantity`, `unit` | number or null, string | e.g. `5`, `"h"` |
+| `unit_price`, `total_price` | null in a new LV | never filled by the tool. **Do not show these as the predicted price** |
+| `kind` | `"normal"` or `"optional"` | optional items (Bedarfspositionen) are not added to totals |
+| `group` | string | items with the same `group` are word-for-word the same item |
+| `item_type`, `trade`, `item_type_reason` | string | step 2: the item's type, its trade, one sentence why |
+| `prediction` | object | step 3: what the price lookup found (below) |
+| `risk` | object | step 4: the item's risk score and its two parts (below) |
+
+### `prediction`
+
+| Field | Type | Meaning |
+|---|---|---|
+| `method` | `"copied"`, `"similar"`, `"adjusted"`, `"reference"`, `"none"` | how the result came about (table below) |
+| `median` | number or null | **the price to show** per unit; set only for `copied`, `similar`, `adjusted` |
+| `min`, `max` | number or null | range of the past prices behind it |
+| `mean`, `count` | number or null, integer | average of those prices, and how many there are |
+| `sources` | array of sources | the past items the price rests on (`copied`, `similar`, `adjusted`), or the references shown instead of a price (`reference`) |
+| `judged` | array of sources | the 3 best candidates the judge looked at, best first, each with its `why`. The judge reads 5; the file keeps 3 |
+| `reason` | string | one sentence from the judge, or a fixed sentence when code decided alone |
+| `rule`, `calculation`, `result` | string, string, number | only for `adjusted`: e.g. `"linear interpolation by DN"`, `"80 + (125 - 100) / (150 - 100) x (120 - 80)"`, `100.0` |
+| `judged_item` | string or null | set when this item is identical to another item of the LV: the `id` of the item that was actually judged |
+
+| `method` | What it means | Show |
+|---|---|---|
+| `copied` | the library holds the same item word for word | the price, as exact |
+| `similar` | the judge called a library item the same thing | the price, with its source(s) |
+| `adjusted` | two sizes around the target were found; the price is interpolated | the price, with both sources and the calculation |
+| `reference` | related library items, but none the same | no price; the sources as "related, not the same" |
+| `none` | nothing usable | no price |
+
+### A source (`sources[]` and `judged[]`)
+
+| Field | Type | Meaning |
+|---|---|---|
+| `id` | string | the library item, e.g. `"P3/7.1.160"`; the part before `/` is the past project |
+| `short_text` | string | its short text |
+| `unit_price` | number | its price in that past project |
+| `verdict` | `"exact"`, `"same"`, `"size_only"`, `"type_only"`, `"different"` | `exact`: copied without a judge. The others are the judge's verdicts |
+| `difference` | string | a few words from the judge on what differs; empty when nothing does |
+| `why` | string | one sentence from the judge: for `same`, why this is the match; for every other verdict, why it is not |
+
+### `summary`
+
+```json
+{"methods": {"copied": {"items": 0, "total": 0.0}, "similar": {"items": 9, "total": 12720.6},
+             "adjusted": {"items": 0, "total": 0.0}, "reference": {"items": 28, "total": 0.0},
+             "none": {"items": 13, "total": 0.0}},
+ "total": 12720.6}
+```
+
+`items` counts every item; `total` adds up `median × quantity` over the normal items with a price.
+
+### Example: one item from P5 (judge at effort xhigh)
+
+```json
+{
+  "id": "P5/04.0006",
+  "oz": "04.0006",
+  "section": [
+    "04 Stundenlohnarbeiten (Regie)"
+  ],
+  "short_text": "Bagger bis 1 m3",
+  "long_text": "Bagger bis 1 m3",
+  "quantity": 10.0,
+  "unit": "h",
+  "unit_price": null,
+  "total_price": null,
+  "kind": "normal",
+  "read_by": "gaeb",
+  "group": "b355a78a8cf4",
+  "item_type": "Sonstiges",
+  "trade": "Sonstiges",
+  "item_type_reason": "No valid answer came back from the model after two tries, so code set this item to Sonstiges.",
+  "prediction": {
+    "method": "similar",
+    "min": 113.5,
+    "max": 113.5,
+    "median": 113.5,
+    "mean": 113.5,
+    "count": 1,
+    "sources": [
+      {
+        "id": "P3/7.1.100",
+        "short_text": "Hydraulikbagger 1,0 m³",
+        "unit_price": 113.5,
+        "verdict": "same",
+        "difference": "",
+        "why": "A 1,0 m³ hydraulic excavator matches an excavator up to 1 m³."
+      }
+    ],
+    "rule": null,
+    "calculation": null,
+    "result": null,
+    "reason": "Only the 1,0 m³ Hydraulikbagger matches; the others are larger special excavators or other machines.",
+    "judged": [
+      {
+        "id": "P3/7.1.100",
+        "short_text": "Hydraulikbagger 1,0 m³",
+        "unit_price": 113.5,
+        "verdict": "same",
+        "difference": "",
+        "why": "A 1,0 m³ hydraulic excavator matches an excavator up to 1 m³."
+      },
+      {
+        "id": "P3/2.5.20",
+        "short_text": "wie vor, jedoch Bagger zum Verfüllen einschließlich Anbauverdichtungsgerät",
+        "unit_price": 1.13,
+        "verdict": "type_only",
+        "difference": "25 t backfill excavator with compactor vs excavator up to 1 m³",
+        "why": "A 25 t excavator with an attachment compactor is not an excavator up to 1 m³."
+      },
+      {
+        "id": "P3/2.5.10",
+        "short_text": "Bagger (25 to) mit Humusschaufel (b = 2,0 m)",
+        "unit_price": 1.13,
+        "verdict": "type_only",
+        "difference": "25 t excavator with Humusschaufel, operator, archaeology vs excavator up to 1 m³",
+        "why": "Size is given in tonnes, not m³, and scope includes a special bucket and operator."
+      }
+    ],
+    "judged_item": null
+  }
+}
+```
+
+Shown to an estimator: **Bagger bis 1 m³, 10 h: €113.50 per h (similar), €1,135.00 in total**, source P3 "Hydraulikbagger 1,0 m³". The match is the first entry in `judged`; the other two say why they are not it.
+Behind a "why" control: the judge's reason and the five candidates with their verdicts.
+
+### `risk` (step 4)
+
+Scores run from 0 (safe) to 100. They are places on a scale, not probabilities.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `score` | integer | **the item's risk**: 0.6 × `price_risk` + 0.4 × `description_risk`; the price risk alone when the description was not checked |
+| `price_risk` | integer | from the step 3 method: copied 5, similar 25 (40 when its past prices lie more than 10% apart), adjusted 45, reference 75, none 100 |
+| `price_reason` | string | one fixed sentence saying why |
+| `description` | `"complete"`, `"gaps"`, `"vague"` or null | does the text state what an estimator needs to price the item? null: not checked |
+| `description_risk` | integer or null | complete 10, gaps 50, vague 90 |
+| `missing` | array of strings | what the text does not state, at most 3 short phrases |
+| `description_reason` | string | one sentence from the model |
+| `value` | number or null | roughly what the item is worth. **A weight, never a price to show** |
+| `value_basis` | `"price"`, `"reference"`, `"assumed"` | found price × quantity; middle price of the related items × quantity; or the value of a typical item |
+
+Example, P5 "Transporter", 5 h:
+
+```json
+{
+  "score": 65,
+  "price_risk": 75,
+  "price_reason": "Only related past items were found, none the same. No price.",
+  "description": "gaps",
+  "description_risk": 50,
+  "missing": [
+    "vehicle size or payload",
+    "operator included"
+  ],
+  "description_reason": "A transporter hourly rate needs a vehicle size or payload, and it is unclear whether the driver is included.",
+  "value": 456.0,
+  "value_basis": "reference"
+}
+```
+
+### `risk_summary` (step 4)
+
+```json
+{"score": 51, "value": 167595.45, "basis": {"price": 5, "reference": 33, "assumed": 12}}
+```
+
+`score` is the items' scores weighted by `value`, over the normal items. `basis` counts those items per value basis:
+here 12 of 50 values are assumed, so show `basis` next to the score.
+
+## `<project>_judge.json`
+
+An array, one entry per judge call. One call judges up to 15 items of the same item type.
+
+```json
+{
+  "call": 17,
+  "items": [
+    "P5/04.0003",
+    "P5/04.0004",
+    "P5/04.0005",
+    "P5/04.0006",
+    "P5/04.0007"
+  ],
+  "question": "HINT: the 5 new items below were sorted under \"Sonstiges\" (trade: Sonstiges) by an earlier step. Decide by the texts only.\n\n### P5/04.0003 | unit h | qty 20\nNEW: Facharbeiter — Facharbeiter\n- P3/7.1.60: BGr.V, Baufacharbeiter — \n- P3/7.1.40: BGr.III, Spezialba …",
+  "thinking": "I'm weighing the candidate groupings for the P5/04.0003 Facharbeiter item in unit h, starting with BGr. V, which I'm checking against the BRTV Bau Berufsgruppen to see whether it really covers skilled construction workers.\n\nI'm checking which Berufsgruppe in t …",
+  "answer": {
+    "items": [
+      {
+        "id": "P5/04.0006",
+        "judged": [
+          {
+            "cand": "P3/2.5.20",
+            "verdict": "type_only",
+            "dimension": null,
+            "cand_size": null,
+            "target_size": null,
+            "difference": "25 t backfill excavator with compactor vs excavator up to 1 m³",
+            "why": "A 25 t excavator with an attachment compactor is not an excavator up to 1 m³."
+          },
+          {
+            "cand": "P3/2.5.10",
+            "verdict": "type_only",
+            "dimension": null,
+            "cand_size": null,
+            "target_size": null,
+            "difference": "25 t excavator with Humusschaufel, operator, archaeology vs excavator up to 1 m³",
+            "why": "Size is given in tonnes, not m³, and scope includes a special bucket and operator."
+          },
+          {
+            "cand": "P3/2.5.30",
+            "verdict": "different",
+            "dimension": null,
+            "cand_size": null,
+            "target_size": null,
+            "difference": "Lkw-Kipper, not an excavator",
+            "why": "A tipper truck is a different machine from an excavator."
+          },
+          {
+            "cand": "P3/7.1.180",
+            "verdict": "different",
+            "dimension": null,
+            "cand_size": null,
+            "target_size": null,
+            "difference": "compressor with hammer, not an excavator",
+            "why": "A compressor with a hammer is a different machine from an excavator."
+          },
+          {
+            "cand": "P3/7.1.100",
+            "verdict": "same",
+            "dimension": null,
+            "cand_size": null,
+            "target_size": null,
+            "difference": "",
+            "why": "A 1,0 m³ hydraulic excavator matches an excavator up to 1 m³."
+          }
+        ],
+        "reason": "Only the 1,0 m³ Hydraulikbagger matches; the others are larger special excavators or other machines."
+      },
+      "… the other items of this call …"
+    ]
+  }
+}
+```
+
+To find an item's call: the entry whose `items` contains the item's `id`, or its `prediction.judged_item` for an
+identical item. An item may appear in two calls when its first answer did not fit and it was asked again on its
+own; the later call is the one that counted.
+
+## Rules for showing results
+
+- The predicted price is `prediction.median`, and only when `method` is `copied`, `similar` or `adjusted`. Show
+  `min`–`max` and `count` next to it when `count` > 1.
+- Every price must show its source(s): `id`, `short_text`, `unit_price`. Traceability is a hard requirement.
+- `reference` and `none` have no price. Never fill one in from `judged` or `sources`.
+- `judged` is ordered best first. If its first entry has the verdict `same`, that is the match and its `why` says why;
+  every other entry's `why` says why it is not the match.
+- Totals come from `summary`; do not add up items yourself.
+- Show `risk.score` with its reasons: `price_reason`, `description_reason` and `missing`. A list sorted by
+  `risk.score × risk.value` puts the items that matter most first.
+- Never show `risk.value` as a price, and show `risk_summary.basis` next to `risk_summary.score`.
+
+## Known limits
+
+- **Token prices.** P3's bid has prices below €2 such as €0.10 per m. They can reach `similar` (P4's
+  "Bauzaun" was priced at €0.10/m this way). Flag a `unit_price` below 2 in a source; the rule is not settled.
+- **`thinking` can be empty** for a call: the judge (effort `xhigh`) decides itself whether to think, and skipped it
+  in 1 of 20 P5 calls. The judge's `reason` and each `difference` are always there.
+- **The judge varies between runs** on borderline items: the same candidate can be `same` in one run and
+  `type_only` in the next.
+
+## Regenerating the schemas
+
+```powershell
+.venv\Scripts\python.exe -c "import json; from lv.model import LV; open('docs/result.schema.json','w',encoding='utf-8').write(json.dumps(LV.model_json_schema(mode='serialization'), ensure_ascii=False, indent=1) + '\n')"
+```
+
+`judge-log.schema.json` wraps the judge's answer shape (`JudgeAnswer` in `lv/predict.py`); regenerate it the same
+way when that shape changes.
