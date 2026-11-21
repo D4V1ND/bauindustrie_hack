@@ -3,9 +3,10 @@ from pathlib import Path
 import pytest
 
 from lv.__main__ import main
+from lv.ai import JUDGE_RULES
 from lv.extract import read
 from lv.model import LV, LineItem, load
-from lv.predict import predict
+from lv.predict import Judged, Verdicts, predict
 
 RAW = Path(__file__).resolve().parent.parent / "data" / "raw" / "Challenge A Dataset"
 P2_PRICED, P2_NEW = "StBALV23040.D86", "[NUMMER_001]_leer.X83"
@@ -91,6 +92,202 @@ def test_an_item_without_a_quantity_adds_nothing():
     predict(new, [lv("P1", item("P1/1", "Rohr DN 100", unit_price=10.0))], judge=None)
 
     assert (new.summary.methods["copied"].items, new.summary.total) == (1, 0.0)
+
+
+# --- the judge: replaced by a fake that answers with fixed verdicts ------------------------------------------
+
+class FakeJudge:
+    """Answers every item with the same verdicts and keeps what it was sent."""
+
+    def __init__(self, *judged: Judged, reason: str = "The judge's sentence."):
+        self.judged, self.reason, self.sent = list(judged), reason, []
+
+    def __call__(self, blocks: list[str]) -> list[Verdicts | None]:
+        self.sent += blocks
+        return [Verdicts(id="?", judged=self.judged, reason=self.reason) for _ in blocks]
+
+
+def said(cand: str, verdict: str, cand_size: float | None = None, target_size: float | None = None,
+         dimension: str | None = None, difference: str = "") -> Judged:
+    return Judged(cand=cand, verdict=verdict, cand_size=cand_size, target_size=target_size,
+                  dimension=dimension if dimension or cand_size is None else "DN", difference=difference)
+
+
+def flanges() -> list[LV]:
+    """The price library of the judge tests: the same flange in four sizes, and a pipe."""
+    return [lv("P1", item("P1/50", "Flansch DN 50, PN 10", "Glatter Flansch aus Edelstahl", unit_price=40.0),
+               item("P1/100", "Flansch DN 100, PN 10", "Glatter Flansch aus Edelstahl", unit_price=80.0),
+               item("P1/150", "Flansch DN 150, PN 10", "Glatter Flansch aus Edelstahl", unit_price=120.0),
+               item("P1/200", "Flansch DN 200, PN 10", "Glatter Flansch aus Edelstahl", unit_price=7777.77),
+               item("P1/rohr", "Rohr DN 125", "Edelstahlrohr geschweisst", unit="m", unit_price=55.0))]
+
+
+def a_flange(**changes) -> LV:
+    return lv("P4", item("P4/1", "Flansch DN 125, PN 10", "Glatter Flansch, Edelstahl", quantity=3.0, **changes))
+
+
+def found_with(*judged: Judged, new: LV | None = None, **judge_settings):
+    new = new or a_flange()
+    predict(new, flanges(), judge=FakeJudge(*judged, **judge_settings))
+    return new.items[0].prediction
+
+
+def test_similar_when_a_candidate_is_the_same_item():
+    found = found_with(said("P1/100", "same", difference="wording"), said("P1/150", "same"), said("P1/50", "different"))
+
+    assert (found.method, found.min, found.max, found.median, found.mean, found.count) == ("similar", 80.0, 120.0, 100.0, 100.0, 2)
+    assert [(s.id, s.unit_price, s.verdict, s.difference) for s in found.sources] == [
+        ("P1/100", 80.0, "same", "wording"), ("P1/150", 120.0, "same", "")]
+    assert found.reason == "The judge's sentence."
+
+
+def test_similar_wins_over_size_only_candidates():
+    found = found_with(said("P1/100", "size_only", 100, 125), said("P1/150", "size_only", 150, 125), said("P1/50", "same"))
+
+    assert (found.method, found.median, [s.id for s in found.sources]) == ("similar", 40.0, ["P1/50"])
+
+
+def test_a_size_only_candidate_with_two_equal_sizes_counts_as_the_same_item():
+    found = found_with(said("P1/100", "size_only", 125, 125))
+
+    assert (found.method, found.median, found.count) == ("similar", 80.0, 1)
+
+
+def test_adjusted_interpolates_between_a_smaller_and_a_larger_size():
+    found = found_with(said("P1/100", "size_only", 100, 125, difference="DN 100 vs DN 125"),
+                       said("P1/150", "size_only", 150, 125, difference="DN 150 vs DN 125"))
+
+    assert (found.method, found.min, found.max, found.median, found.mean, found.count) == ("adjusted", 80.0, 120.0, 100.0, 100.0, 2)
+    assert (found.rule, found.calculation, found.result) == (
+        "linear interpolation by DN", "80 + (125 - 100) / (150 - 100) x (120 - 80)", 100.0)
+    assert [(s.id, s.unit_price, s.verdict, s.difference) for s in found.sources] == [
+        ("P1/100", 80.0, "size_only", "DN 100 vs DN 125"), ("P1/150", 120.0, "size_only", "DN 150 vs DN 125")]
+
+
+def test_adjusted_uses_the_nearest_smaller_and_the_nearest_larger_size_and_keeps_the_cents():
+    found = found_with(said("P1/50", "size_only", 50, 125), said("P1/100", "size_only", 100, 125),
+                       said("P1/150", "size_only", 150, 125), said("P1/200", "size_only", 200, 125),
+                       new=lv("P4", item("P4/1", "Flansch DN 125, PN 10", "Glatter Flansch aus Edelstahl")))
+    assert [s.id for s in found.sources] == ["P1/100", "P1/150"]
+
+    found = found_with(said("P1/150", "size_only", 150, 160), said("P1/200", "size_only", 200, 160))
+    assert found.calculation == "120 + (160 - 150) / (200 - 150) x (7777.77 - 120)"
+    assert found.result == 1651.55 == round(eval(found.calculation.replace("x", "*")), 2)  # recomputing gives the result
+
+
+@pytest.mark.parametrize("judged", [
+    [said("P1/100", "size_only", 100, 125), said("P1/50", "size_only", 50, 125)],          # both smaller
+    [said("P1/150", "type_only", difference="galvanised steel vs stainless")],            # another material
+    [said("P1/100", "size_only", 100, 125), said("P1/150", "size_only", 150, 130)],        # two different targets
+    [said("P1/100", "size_only", 100, 125), said("P1/150", "size_only", 150, 125, dimension="PN")],  # two dimensions
+    [said("P1/100", "size_only"), said("P1/150", "size_only", 150, 125)],                  # a size is missing
+])
+def test_reference_lists_the_sources_and_proposes_no_price(judged):
+    found = found_with(*judged)
+
+    assert (found.method, found.min, found.max, found.median, found.mean, found.count) == ("reference", None, None, None, None, 0)
+    assert {s.id for s in found.sources} == {j.cand for j in judged}
+    assert all(s.unit_price > 0 for s in found.sources) and found.rule is None and found.reason
+
+
+def test_none_when_every_candidate_is_different():
+    found = found_with(said("P1/100", "different"), said("P1/150", "different"), reason="All are other products.")
+
+    assert (found.method, found.sources, found.median, found.reason) == ("none", [], None, "All are other products.")
+
+
+def test_a_verdict_for_an_item_that_was_not_offered_is_ignored():
+    found = found_with(said("P9/404", "same"), said("P1/rohr", "same"))  # an invented id; an item with another unit
+
+    assert (found.method, found.sources) == ("none", [])
+
+
+def test_none_when_the_judge_gives_no_answer_for_the_item():
+    new = a_flange()
+
+    predict(new, flanges(), judge=lambda blocks: [None for _ in blocks])
+
+    assert (new.items[0].prediction.method, new.items[0].prediction.sources) == ("none", [])
+    assert "no answer" in new.items[0].prediction.reason
+
+
+def test_the_judge_is_only_asked_about_items_that_have_candidates_and_no_exact_match():
+    judge = FakeJudge(said("P1/100", "same"))
+    new = lv("P4", item("P4/1", "Flansch DN 100, PN 10", "Glatter Flansch aus Edelstahl"),   # exact match
+             item("P4/2", "Flansch DN 125, PN 10", "Glatter Flansch aus Edelstahl"),         # has candidates
+             item("P4/3", "Bauzaun", "Mobilzaun umsetzen"))                                  # nothing like it
+
+    predict(new, flanges(), judge=judge)
+
+    assert [i.prediction.method for i in new.items] == ["copied", "similar", "none"]
+    assert len(judge.sent) == 1 and judge.sent[0].startswith("### P4/2 ")
+    assert "No library item" in new.items[2].prediction.reason
+
+
+def test_the_judge_is_not_called_when_nothing_needs_judging():
+    def judge(blocks):
+        raise AssertionError("must not be called")
+
+    new = lv("P4", item("P4/1", "Bauzaun", "Mobilzaun umsetzen"))
+    predict(new, flanges(), judge=judge)
+
+    assert new.items[0].prediction.method == "none"
+
+
+def test_the_judge_reads_texts_and_never_a_price():
+    library = [lv("P1", item("P1/1", "Zulage Flansch DN 100", "Glatter Flansch aus Edelstahl", unit_price=7777.77, total_price=8888.88),
+                  item("P1/2", "Zulage Flansch DN 150", "wie vor, jedoch DN 150", unit_price=6666.66, quantity=4321.0))]
+    new = lv("P4", item("P4/1", "Zulage Flansch DN 80", "Glatter Flansch aus Edelstahl, PN 10", quantity=3.0),
+             item("P4/2", "Zulage Flansch DN 125", "wie vor, jedoch DN 125", quantity=12.0))
+    judge = FakeJudge()
+
+    predict(new, library, judge=judge)
+
+    assert judge.sent[1] == "\n".join([
+        "### P4/2 | unit St | qty 12 | SURCHARGE ITEM",
+        "NEW: Zulage Flansch DN 125 — wie vor, jedoch DN 125",
+        "NEW REFERS TO PREVIOUS ITEM: Zulage Flansch DN 80 — Glatter Flansch aus Edelstahl, PN 10",
+        "- P1/2: Zulage Flansch DN 150 — wie vor, jedoch DN 150 [REFERS TO PREVIOUS ITEM: Zulage Flansch DN 100 — Glatter Flansch aus Edelstahl]",
+        "- P1/1: Zulage Flansch DN 100 — Glatter Flansch aus Edelstahl",
+    ])
+    assert not any(number in block for block in judge.sent for number in ("7777", "8888", "6666", "4321"))
+
+
+def test_long_texts_are_cut_before_they_go_to_the_judge():
+    new = lv("P4", item("P4/1", "Flansch DN 125", "Glatter Flansch aus Edelstahl, " * 60))
+    judge = FakeJudge()
+
+    predict(new, flanges(), judge=judge)
+
+    assert len(judge.sent[0].splitlines()[1]) < 480
+
+
+def test_the_rules_the_judge_gets_are_the_estimators_rules():
+    assert "You never state, estimate or guess a\nprice." in JUDGE_RULES
+    assert "When in doubt between two verdicts, pick the\nstricter one." in JUDGE_RULES
+    assert set(Judged.model_fields) == {"cand", "verdict", "dimension", "cand_size", "target_size", "difference"}
+    assert set(Verdicts.model_fields) == {"id", "judged", "reason"}  # the shape named in the rules' "Output" part
+
+
+def test_total_counts_similar_and_adjusted_but_not_reference():
+    new = lv("P4", item("P4/1", "Flansch DN 125, PN 10", "Glatter Flansch, Edelstahl", quantity=3.0))
+    predict(new, flanges(), judge=FakeJudge(said("P1/100", "size_only", 100, 125), said("P1/150", "size_only", 150, 125)))
+    assert (new.summary.total, new.summary.methods["adjusted"].total) == (300.0, 300.0)
+
+    new = a_flange()
+    predict(new, flanges(), judge=FakeJudge(said("P1/100", "type_only")))
+    assert (new.summary.total, new.summary.methods["reference"].items) == (0.0, 1)
+
+
+def test_every_source_is_a_real_item_of_the_price_library():
+    library = flanges()
+    ids = {i.id for past in library for i in past.items}
+    new = lv("P4", *[item(f"P4/{dn}", f"Flansch DN {dn}, PN 10", "Glatter Flansch aus Edelstahl") for dn in (100, 110, 125)])
+
+    predict(new, library, judge=FakeJudge(said("P1/100", "size_only", 100, 110), said("P1/150", "type_only"), said("P7/1", "same")))
+
+    assert all(s.id in ids for i in new.items for s in i.prediction.sources)
+    assert all(i.prediction.sources for i in new.items if i.prediction.method != "none")
 
 
 # --- measured on the real files: P2's tender file priced from P2's own priced file ----------------------------

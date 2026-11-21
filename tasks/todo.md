@@ -150,7 +150,7 @@ Built before tasks 6 and 7: step 3 does not need trades or item types.
   - Depends on: 4.
   - Files: `lv/match.py`, `tests/test_match.py`.
 
-- [ ] **Task 10: Judge and verdicts to prediction** (medium)
+- [x] **Task 10: Judge and verdicts to prediction** (medium)
   - Does: writes the judge's input (texts only), holds the estimator's judging rules as the prompt, and turns the
     verdicts into `similar`, `adjusted`, `reference` or `none` in code.
   - Acceptance (all with a fake judge):
