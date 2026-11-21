@@ -6,3 +6,5 @@ pypdf>=4.0
 voyageai>=0.3.7
 openai>=1.0
 pymupdf>=1.24
+pillow>=10
+openpyxl>=3.1

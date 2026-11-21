@@ -91,6 +91,7 @@ def test_the_plan_check_runs_in_its_own_thread_and_writes_its_own_file(tmp_path,
         return {"positionen": lv_positions["positionen"], "befunde": [], "zusammenfassung": {"befunde": 0, "geprueft": 0}}
 
     monkeypatch.setattr(plan, "check", check)
+    monkeypatch.setattr(plan, "overview", lambda result, drawing, out, project: (out / "o.png", out / "o.xlsx"))
     drawing = tmp_path / "EG.png"
     drawing.write_bytes(b"not read by the fake")
     main(["price", str(RAW / P5_NEW), "--project", "P5", "--plan", str(drawing)], data=tmp_path)
@@ -113,3 +114,43 @@ def test_a_failing_plan_check_keeps_the_lv_result(tmp_path, monkeypatch):
     with pytest.raises(SystemExit, match="plan check failed; the LV result above is saved. ConnectionError"):
         main(["price", str(RAW / P5_NEW), "--project", "P5", "--plan", str(drawing)], data=tmp_path)
     assert (tmp_path / "out" / "P5.json").exists() and not (tmp_path / "out" / "P5_plan.json").exists()
+
+
+def test_check_passes_the_plan_readings_and_the_rooms_on_to_the_comparison(tmp_path, monkeypatch):
+    """Guards the link to the prototype: since PR #5, extract_runs returns the readings and the rooms as a pair."""
+    plan._on_path()
+    import extract_plan
+
+    reading = [{"kategorie": "Fenster", "typ_bezeichnung": "F1", "bezeichnung": "Fenster", "anzahl": 2,
+                "marker": [{"seite": 1, "x": 0.2, "y": 0.3}]}]
+    rooms = [{"name": "Hörsaal", "flaeche": 80, "seite": 1, "x": 0.5, "y": 0.5, "breite": 0.4, "hoehe": 0.4}]
+    monkeypatch.setattr(extract_plan, "extract_runs", lambda path, runs, client, model: ([reading] * runs, rooms))
+    monkeypatch.setattr(extract_plan, "image_size", lambda path: (1000, 800))
+    lv = an_lv(item("03.01.0010", "Fenster F1", 2), item("03.01.0030", "Linoleum Hörsaal", 80, "m2"))
+
+    result = plan.check(plan.positions(lv), tmp_path / "EG.png", (None, "no model"))  # no client: no AI call
+
+    assert result["eingaben"]["plan"] == {"id": "EG", "datei": "EG.png", "breite_px": 1000, "hoehe_px": 800}
+    assert {p["oz"]: p["pruefung"] for p in result["positionen"]}["03.01.0010"] == "ok"
+
+
+def test_the_overview_writes_a_plan_image_and_an_excel_file(tmp_path):
+    import pymupdf
+
+    drawing = tmp_path / "EG.png"
+    page = pymupdf.open().new_page(width=400, height=300)
+    page.insert_text((40, 60), "EG")
+    page.get_pixmap().save(drawing)
+    plan._on_path()
+    import compare
+
+    lv = an_lv(item("03.01.0010", "Fenster F1", 2))
+    reading = [{"kategorie": "Fenster", "typ_bezeichnung": "F1", "bezeichnung": "Fenster", "anzahl": 3,
+                "marker": [{"seite": 1, "x": 0.2, "y": 0.3}]}]
+    result = compare.build_result(plan.positions(lv), [reading] * 3,
+                                  {"id": "EG", "datei": "EG.png", "breite_px": 400, "hoehe_px": 300})
+
+    png, xlsx = plan.overview(result, drawing, tmp_path, "P9")
+
+    assert (png.name, xlsx.name) == ("P9__EG_uebersicht.png", "P9__EG_uebersicht.xlsx")
+    assert png.stat().st_size > 0 and xlsx.stat().st_size > 0

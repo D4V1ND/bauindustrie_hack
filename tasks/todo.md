@@ -433,6 +433,17 @@ Built before tasks 6 and 7: step 3 does not need trades or item types.
   - Checked: tests for the background runner, for the plan check running in its own thread and writing its file,
     and for a failing plan check keeping the LV result. Not measured: the time saved, which needs a real plan run.
 
+- [x] **Task 21: Keep the plan link working with PR #5, and write the plan overview** (small)
+  - PR #5 (coordinates per item, rooms, a fixed overview per plan) changed `extract_runs` to return the readings and
+    the rooms as a pair. `lv/plan.py` now takes both and passes the rooms on; without this, `lv price --plan` would
+    crash in the plan check, and the tests would not have shown it. A new test guards the pair.
+  - `lv price … --plan` also writes the prototype's overview: `<project>__<plan>_uebersicht.png` and `.xlsx`.
+    `requirements.txt`: `pillow`, `openpyxl`.
+  - Real run, Hörsaal H1 with its plan: LV pipeline 2 min 3 s, plan check 5 min 33 s in parallel, 5 min 37 s end to end.
+    41 of 52 items located on the plan (8 by plan code, 20 by AI matching, 13 by room). 27 of 30 compared items
+    match; seats (240) and podium stairs (2) are now matched. 4 findings: aisle steps not counted, the podium in m2
+    against 1 piece, and one pair that is a single thing: the plan's 3 exit signs (NA) against the LV's exit-sign item.
+
 ### Checkpoint: step 3
 - [x] All tests pass without network and without a key.
 - [x] `lv price --copy-only` on P2's own `.X83` copies only correct prices.

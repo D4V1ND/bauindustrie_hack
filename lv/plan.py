@@ -54,10 +54,19 @@ def check(lv_positions: dict, plan: Path, client_and_model: tuple, runs: int = R
     import extract_plan
 
     openai_client, model = client_and_model
-    plan_runs = extract_plan.extract_runs(plan, runs, client=openai_client, model=model)
+    plan_runs, rooms = extract_plan.extract_runs(plan, runs, client=openai_client, model=model)  # rooms: since PR #5
     width, height = extract_plan.image_size(plan)
     meta = {"id": plan.stem, "datei": plan.name, "breite_px": width, "hoehe_px": height}
-    return compare.build_result(lv_positions, plan_runs, meta, openai_client, model)
+    return compare.build_result(lv_positions, plan_runs, meta, openai_client, model, rooms)
+
+
+def overview(result: dict, plan: Path, out_dir: Path, project: str) -> tuple[Path, Path]:
+    """The prototype's fixed overview of a plan check: the plan with every located item numbered (PNG), and all items
+    with status and findings (Excel). Written as <project>__<plan>_uebersicht.png and .xlsx."""
+    _on_path()
+    import overview as prototype_overview
+
+    return prototype_overview.make(result, plan, out_dir, project)
 
 
 class Background:
