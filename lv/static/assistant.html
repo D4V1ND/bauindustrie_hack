@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LV Assistent</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+<style>
+  :root {
+    --bg: #f6f6f4; --panel: #ffffff; --line: #e3e2de; --text: #1d1d1b; --muted: #6d6c67;
+    --accent: #1f5f4a; --accent-soft: #e6efeb; --warn: #8a5a00; --warn-soft: #fbf1dc; --user: #f0efeb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #161615; --panel: #1f1f1d; --line: #33332f; --text: #ecebe6; --muted: #9b9a93;
+      --accent: #7cc4a8; --accent-soft: #23332d; --warn: #e6b65c; --warn-soft: #3a2f1a; --user: #2a2a27;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+  .shell { display: flex; height: 100vh; }
+  .main { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--muted); padding: 24px; }
+  aside { width: 440px; max-width: 100%; background: var(--panel); border-left: 1px solid var(--line);
+          display: flex; flex-direction: column; height: 100vh; }
+  @media (max-width: 720px) { .main { display: none; } aside { width: 100%; border-left: 0; } }
+  header { padding: 12px 16px; border-bottom: 1px solid var(--line); display: flex; gap: 8px; align-items: center; }
+  header h1 { font-size: 15px; margin: 0; font-weight: 600; flex: 1; }
+  select, button, textarea { font: inherit; color: inherit; }
+  select { background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 4px 6px; }
+  .pill { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+  .pill.wait { background: var(--warn-soft); color: var(--warn); }
+  .tabs { display: flex; gap: 2px; padding: 8px 12px 0; border-bottom: 1px solid var(--line); overflow-x: auto; }
+  .tab { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border: 1px solid transparent;
+         border-bottom: 0; border-radius: 6px 6px 0 0; cursor: pointer; white-space: nowrap; color: var(--muted); }
+  .tab.on { background: var(--bg); border-color: var(--line); color: var(--text); }
+  .tab .x { border: 0; background: none; cursor: pointer; color: var(--muted); padding: 0 2px; }
+  .add { border: 0; background: none; cursor: pointer; font-size: 18px; color: var(--muted); padding: 0 8px; }
+  .notice { margin: 12px 16px 0; padding: 10px 12px; border-radius: 8px; background: var(--warn-soft);
+            color: var(--warn); font-size: 13px; }
+  .log { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .msg { max-width: 100%; }
+  .msg.user { align-self: flex-end; background: var(--user); padding: 8px 12px; border-radius: 10px; max-width: 85%; }
+  .msg.assistant .body p:first-child { margin-top: 0; }
+  .msg .body table { border-collapse: collapse; font-size: 13px; margin: 6px 0; }
+  .msg .body th, .msg .body td { border: 1px solid var(--line); padding: 3px 6px; text-align: left; }
+  .chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .chip { font-size: 12px; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+  .chip.act { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+  .empty { color: var(--muted); text-align: center; margin-top: 40px; }
+  form { border-top: 1px solid var(--line); padding: 12px 16px; display: flex; gap: 8px; }
+  textarea { flex: 1; resize: none; height: 44px; border: 1px solid var(--line); border-radius: 8px;
+             padding: 10px; background: var(--bg); }
+  form button { border: 0; border-radius: 8px; background: var(--accent); color: var(--panel); padding: 0 14px;
+                cursor: pointer; }
+  form button:disabled, textarea:disabled { opacity: .5; cursor: not-allowed; }
+  .thinking { color: var(--muted); font-style: italic; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="main">Das LV ist links. Der Assistent sitzt rechts.</div>
+  <aside>
+    <header>
+      <h1>Assistent</h1>
+      <select id="project" aria-label="Projekt"></select>
+      <span id="pill" class="pill">bereit</span>
+    </header>
+    <nav class="tabs" id="tabs"></nav>
+    <div id="notice" class="notice" hidden></div>
+    <div class="log" id="log"></div>
+    <form id="form">
+      <textarea id="input" placeholder="Frag nach Positionen, Preisen, Risiken ..."></textarea>
+      <button id="send">Senden</button>
+    </form>
+  </aside>
+</div>
+<script>
+const API = location.origin;
+const $ = id => document.getElementById(id);
+let project = null, tabs = [], current = null, ready = false, busy = false, poll = null;
+
+async function call(path, options = {}) {
+  const response = await fetch(API + path, { headers: { "Content-Type": "application/json" }, ...options });
+  if (response.status === 204) return null;
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(body.detail || response.statusText);
+  return body;
+}
+
+async function loadProjects() {
+  const found = await call("/projects").catch(() => []);
+  const select = $("project");
+  select.innerHTML = found.map(p => `<option value="${p.project}">${p.project}</option>`).join("") +
+    `<option value="">Nur Bibliothek</option>`;
+  // The open tender: from the page that embeds the panel (?project=P5), else the last one used, else the first.
+  let saved = null;
+  try { saved = localStorage.getItem("lv-project"); } catch {}
+  const wanted = new URLSearchParams(location.search).get("project") ?? saved;
+  if (wanted !== null && [...select.options].some(o => o.value === wanted)) select.value = wanted;
+  project = select.value || null;
+}
+
+async function status() {
+  const state = await call("/assistant/status" + (project ? `?project=${project}` : "")).catch(e => ({ state: "error", message: e.message }));
+  ready = state.state === "ready";
+  $("pill").textContent = { ready: "bereit", extracting: "Extraktion läuft", indexing: "indexiert", missing: "kein LV",
+                            failed: "fehlgeschlagen", error: "Server?" }[state.state] || state.state;
+  $("pill").className = "pill" + (ready ? "" : " wait");
+  $("notice").hidden = ready; $("notice").textContent = state.message || "";
+  lock();
+  clearTimeout(poll);
+  if (!ready) poll = setTimeout(status, 3000);
+}
+
+function lock() { $("input").disabled = $("send").disabled = !ready || busy || !current; }
+
+async function loadTabs() {
+  tabs = (await call("/assistant/tabs" + (project ? `?project=${project}` : ""))).filter(t => t.project === project);
+  if (!tabs.length) tabs = [await call("/assistant/tabs", { method: "POST", body: JSON.stringify({ project }) })];
+  if (!current || !tabs.some(t => t.id === current.id)) await openTab(tabs[tabs.length - 1].id);
+  drawTabs();
+}
+
+function drawTabs() {
+  $("tabs").innerHTML = tabs.map(t => `<div class="tab ${current && t.id === current.id ? "on" : ""}" data-id="${t.id}"
+      title="Doppelklick zum Umbenennen"><span>${escape(t.title)}</span>
+      <button class="x" data-close="${t.id}" aria-label="Tab schließen">×</button></div>`).join("") +
+    `<button class="add" id="add" aria-label="Neuer Tab">+</button>`;
+}
+
+async function openTab(id) { current = await call(`/assistant/tabs/${id}`); drawLog(); drawTabs(); lock(); }
+
+function drawLog(extra = "") {
+  const shown = current ? current.shown : [];
+  $("log").innerHTML = (shown.length ? shown.map(message).join("") :
+    `<div class="empty">Frag zum Beispiel: Was hat GGG DN 250 verlegen bei uns gekostet?</div>`) + extra;
+  $("log").scrollTop = $("log").scrollHeight;
+}
+
+function message(m) {
+  const body = m.role === "assistant" ? DOMPurify.sanitize(marked.parse(m.text || "")) : escape(m.text);
+  const chips = [...(m.actions || []).map(a => `<span class="chip act">${escape(a)}</span>`),
+                 ...(m.positions || []).slice(0, 8).map(p => `<span class="chip">${escape(p)}</span>`)].join("");
+  return `<div class="msg ${m.role}"><div class="body">${body}</div>${chips ? `<div class="chips">${chips}</div>` : ""}</div>`;
+}
+
+function escape(text) { return String(text).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+
+$("tabs").addEventListener("click", async event => {
+  const close = event.target.closest("[data-close]");
+  if (close) {
+    event.stopPropagation();
+    if (!confirm("Diesen Tab und seinen Verlauf löschen?")) return;
+    await call(`/assistant/tabs/${close.dataset.close}`, { method: "DELETE" });
+    if (current && current.id === close.dataset.close) current = null;
+    return loadTabs();
+  }
+  if (event.target.id === "add") {
+    const tab = await call("/assistant/tabs", { method: "POST", body: JSON.stringify({ project, title: `Chat ${tabs.length + 1}` }) });
+    tabs.push(tab); return openTab(tab.id);
+  }
+  const tab = event.target.closest(".tab");
+  if (tab) openTab(tab.dataset.id);
+});
+
+$("tabs").addEventListener("dblclick", async event => {
+  const tab = event.target.closest(".tab"); if (!tab) return;
+  const title = prompt("Neuer Name für den Tab:", tabs.find(t => t.id === tab.dataset.id).title);
+  if (!title) return;
+  await call(`/assistant/tabs/${tab.dataset.id}`, { method: "PATCH", body: JSON.stringify({ title }) });
+  loadTabs();
+});
+
+$("project").addEventListener("change", async () => {
+  project = $("project").value || null; current = null;
+  try { localStorage.setItem("lv-project", project || ""); } catch {}
+  await loadTabs(); status();
+});
+
+$("form").addEventListener("submit", async event => {
+  event.preventDefault();
+  const text = $("input").value.trim(); if (!text || !ready || busy) return;
+  busy = true; lock();
+  current.shown.push({ role: "user", text });
+  drawLog(`<div class="msg assistant thinking">sucht in den Positionen ...</div>`);
+  $("input").value = "";
+  try {
+    const reply = await call(`/assistant/tabs/${current.id}/messages`, { method: "POST", body: JSON.stringify({ text }) });
+    if (reply.state === "waiting") { $("input").value = text; current.shown.pop(); status(); }
+    current = await call(`/assistant/tabs/${current.id}`);
+    drawLog(reply.state === "waiting" ? `<div class="notice">${escape(reply.text)}</div>` : "");
+  } catch (error) {
+    current.shown.pop(); $("input").value = text;
+    drawLog(`<div class="notice">Fehler: ${escape(error.message)}</div>`);
+  } finally { busy = false; lock(); }
+});
+
+$("input").addEventListener("keydown", event => {
+  if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); $("form").requestSubmit(); }
+});
+
+(async () => { await loadProjects(); await loadTabs(); await status(); })();
+</script>
+</body>
+</html>

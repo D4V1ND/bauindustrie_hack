@@ -61,6 +61,8 @@ class Comment(BaseModel):
     text: str = ""
     price: float | None = Field(None, gt=0)  # the estimator's own unit price: the item counts as priced
     effect: Literal["note", "doubt"] = "note"  # "doubt": the found price does not fit
+    author: Literal["estimator", "assistant"] = "estimator"  # "assistant": written by the assistant when asked to
+    edited: bool = False  # the text was changed after it was first saved
 
 
 class MethodSum(BaseModel):
@@ -147,7 +149,7 @@ class LineItem(BaseModel):
     item_type_reason: str = ""  # step 2: one sentence on why the item got this type; text to show, nothing more
     prediction: Prediction | None = None  # step 3; never written into unit_price
     risk: Risk | None = None  # step 4
-    comments: list[Comment] = []  # the estimator's comments, oldest first; never written by a model
+    comments: list[Comment] = []  # the estimator's comments, oldest first; the assistant writes one only when asked
     plan: ItemPlan | None = None  # plan check, only when a plan was given
 
 

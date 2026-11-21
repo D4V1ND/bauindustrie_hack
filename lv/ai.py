@@ -18,6 +18,7 @@ PROPOSE_MODEL, PROPOSE_EFFORT = "claude-opus-5-5", "medium"  # step 2: one call 
 ASSIGN_MODEL, ASSIGN_EFFORT = "claude-sonnet-5-5", "high"  # step 2: gives items their type and the reason for it
 JUDGE_MODEL, JUDGE_EFFORT = "claude-sonnet-5-5", "xhigh"  # step 3 judge: at "high" it answers without thinking
 RISK_MODEL, RISK_EFFORT = "claude-sonnet-5-5", "xhigh"  # step 4: is an item's text complete enough to price?
+ASSISTANT_MODEL, ASSISTANT_EFFORT = "claude-opus-5-5", "medium"  # the chat assistant (lv/assistant.py)
 MAX_OUTPUT_TOKENS = 16000  # answers are small; the room is for the model's thinking
 MAX_PARALLEL_CALLS = 4
 ENV_FILE = Path(__file__).resolve().parent.parent / ".env"
@@ -274,6 +275,23 @@ def _batch(chat, model: str, system: str, questions: list[str]) -> list:
     if len(errors) == len(questions):  # e.g. a wrong key or model name: say so instead of returning nothing
         raise RuntimeError(f"Every call to {model} failed. First error: {errors[0]}")
     return [None if isinstance(answer, Exception) else answer for answer in answers]
+
+
+def env(name: str) -> str | None:
+    """A setting from the environment or, if not set there, from the root .env."""
+    return os.environ.get(name) or dotenv_values(ENV_FILE).get(name)
+
+
+def anthropic_client():
+    """The Anthropic SDK client for the assistant. The address comes only from .env, never from the shell: a shell
+    may set ANTHROPIC_BASE_URL for another tool, and the key must not go there."""
+    key = env("ANTHROPIC_API_KEY")
+    if not key:
+        raise MissingKey(f"The assistant asks Claude, and no ANTHROPIC_API_KEY is set up in {ENV_FILE}.")
+    import anthropic  # imported here: most commands never ask
+
+    return anthropic.Anthropic(api_key=key, max_retries=3,
+                               base_url=dotenv_values(ENV_FILE).get("ANTHROPIC_BASE_URL") or "https://api.anthropic.com")
 
 
 def voyage_key() -> str | None:

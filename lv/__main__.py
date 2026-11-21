@@ -1,5 +1,6 @@
 """Command line: python -m lv ingest|price <LV file> --project <ID> [--plan <plan>]
-                 python -m lv comment <ID> <item number> [--price N] [--text "..."] [--doubt]"""
+                 python -m lv comment <ID> <item number> [--price N] [--text "..."] [--doubt]
+                 python -m lv index [<ID> ...]"""
 import argparse
 import json
 import os
@@ -7,7 +8,7 @@ import re
 import time
 from pathlib import Path
 
-from lv import ai, plan
+from lv import ai, index, plan
 from lv.categorise import Assignments, Proposal, assign, overview, propose
 from lv.extract import add_texts, read
 from lv.match import group_label
@@ -44,7 +45,18 @@ def main(argv: list[str] | None = None, data: Path = DATA) -> None:
     note.add_argument("--price", type=float, help="the estimator's own unit price: the item gets confidence 100")
     note.add_argument("--text", default="", help="the comment")
     note.add_argument("--doubt", action="store_true", help="the found price does not fit: lowers its confidence")
+    again = commands.add_parser("index", help="build the assistant's search index again (all projects, or the "
+                                              "ones named); embeds only texts not embedded before")
+    again.add_argument("projects", nargs="*", help="project IDs, e.g. P1 H1; none: every project")
     args = parser.parse_args(argv)
+    if args.command == "index":
+        found = [(path, "library") for path in sorted((data / "library").glob("*.json"))] + \
+                [(path, "tender") for path in sorted((data / "out").glob("*.json")) if "_" not in path.stem]
+        for path, source in found:
+            if not args.projects or path.stem in args.projects:
+                print(f"{path.stem} ({source}):", flush=True)
+                _index(load(path), data, source)
+        return
     if args.command == "comment":
         path = data / "out" / f"{args.project}.json"
         if not path.exists():
@@ -138,6 +150,23 @@ def main(argv: list[str] | None = None, data: Path = DATA) -> None:
         save(lv, path.parent)  # the one structured result: the LV with its plan check merged in
         print(f"plan check merged into {path.name}: {sum(1 for item in lv.items if item.plan)} items, "
               f"{len(lv.plan.findings)} findings")
+    # last step of every run: the assistant answers from this index, and waits while the run is going
+    _index(lv, data, "library" if args.command == "ingest" else "tender", meaning=not getattr(args, "copy_only", False))
+
+
+def _index(lv: LV, data: Path, source: str, meaning: bool = True) -> None:
+    """Indexes the LV for the assistant. A copy-only run asks no AI, so its index is by words only. A Voyage failure
+    does not fail the run: the index is then built by words only, and `python -m lv index` embeds the rest later."""
+    embed = index.voyage_embed if meaning and ai.voyage_key() else None
+    if embed is None:
+        print("assistant index: no meaning search: " + ("copy-only run" if not meaning else "no VOYAGE_API_KEY in .env"),
+              flush=True)
+    try:
+        index.build(lv, data, source, embed, say=lambda line: print(line, flush=True))
+    except RuntimeError as error:
+        print(f"assistant index: meaning search not ready ({error}); built by words only", flush=True)
+        index.build(lv, data, source, None, say=lambda _: None)
+    print(f"assistant index: {lv.project} ready", flush=True)
 
 
 def _ask(job: str, model: str, effort: str, rules: str, questions: list[str], shape: type,

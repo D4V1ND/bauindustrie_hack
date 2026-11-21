@@ -211,3 +211,75 @@ of steps 0–4 is already saved, so `has_result` is `true`.
   project with a result file shows `done`.
 - **No login, and every origin may call the API (CORS).** Fine for the hackathon. Before it runs anywhere public,
   add a login and allow only the frontend's address.
+## Assistant
+
+A chat assistant for the right-hand panel. It answers questions about the open tender and the past projects from
+the company's own data, writes comments on line items when asked, and drafts Bieterfragen. Try it at
+http://localhost:8000/assistant (a plain panel with tabs, `lv/static/assistant.html`).
+
+| File | What it does |
+|---|---|
+| `lv/index.py` | The search index: one card per line item, three vectors per card (short text, comments, long text) |
+| `lv/assistant.py` | The tools, the Claude loop, tabs, memory and Bieterfragen |
+| `lv/assistant_prompt.md` | The assistant's instructions: how the tool works, what the estimators told us, rules it may not break |
+
+### How a position is found
+
+Each line item becomes a **card**. The search part is three texts, each embedded on its own with Voyage
+(`voyage-4`): **short** (section path and short text, weight 0.5), **comments** (weight 0.3) and **long** (the
+first 1,500 characters of the long text, weight 0.2). A card without comments shares their weight between the other
+two. A question is embedded as a query and compared with all three; that ranking is merged with a word search
+(TF-IDF, so exact numbers like "DN 250" still win) by reciprocal rank fusion. The context part of a card
+(project, item number, unit, quantity, price or prediction, comments) is what the model reads to answer.
+
+Vectors are saved per text in `data/embeddings/voyage-4-rag.json`, so every text is embedded only once. A new
+comment re-embeds only that comment. Without `VOYAGE_API_KEY`, or while vectors are missing, the search runs by
+words only.
+
+### When it is indexed
+
+- `python -m lv ingest ...` and `python -m lv price ...` index the LV as their **last step**. A run's status stays
+  `running` until that is done. A `--copy-only` run builds a word-only index (it promises no AI calls).
+- **While a tender's run is going, the assistant does not answer about it.** It replies with `state: "waiting"`
+  ("Bitte warte, bis die Extraktion abgeschlossen ist"), asks no model and saves nothing. The panel polls
+  `GET /assistant/status` and unlocks the input when the state is `ready`.
+- A result without an index (from before this feature) or with an outdated one is indexed in the background the
+  first time the assistant is asked; the state is `indexing` until then.
+- `python -m lv index [P1 H1 ...]` builds the indexes again by hand and embeds what is missing.
+- **Voyage free tier** (no payment method): 3 calls and 10,000 tokens a minute. The indexer waits for that by
+  itself: the 720 past line items take about 10 minutes once, a new tender of a few hundred items a few minutes.
+  With a payment method, set `VOYAGE_RPM` and `VOYAGE_TPM` in `.env` higher.
+
+### What the model may do
+
+| Tool | What it does | Guard in code |
+|---|---|---|
+| `search_positions` | finds cards in the open tender, the library or both | read only |
+| `get_position`, `project_overview`, `list_projects` | details, totals, cost drivers | read only; only the tab's tender and the library |
+| `save_comment`, `edit_comment` | comment on an item of the open tender (`author: "assistant"`) | only the tab's tender, never the library, never while it runs |
+| `draft_bidder_question`, `update_bidder_question`, `list_bidder_questions` | drafts in `data/out/<project>_bidder_questions.json` | drafts only, nothing is ever sent |
+| `remember`, `forget` | facts in `data/assistant/memory.json`, shown to the model in every tab | |
+
+The model is `claude-opus-5-5` at effort `medium` (`ASSISTANT_MODEL` in `lv/ai.py`), with adaptive thinking and
+server-side refusal fallback. It needs `ANTHROPIC_API_KEY` in `.env`. The address of the API is read only from
+`.env` (`ANTHROPIC_BASE_URL`), never from the shell.
+
+### Endpoints
+
+| Method | Path | What it does |
+|---|---|---|
+| `GET` | `/assistant/status?project=H1` | `ready`, `extracting`, `indexing`, `missing` or `failed`, with a message to show |
+| `GET` | `/assistant/tabs?project=H1` | the chat tabs, oldest first |
+| `POST` | `/assistant/tabs` | new tab: `{"project": "H1" or null, "title": "..."}` (null: only the library) |
+| `GET` | `/assistant/tabs/{id}` | one tab with its messages (`shown`) |
+| `PATCH` | `/assistant/tabs/{id}` | rename: `{"title": "..."}` |
+| `DELETE` | `/assistant/tabs/{id}` | delete a tab |
+| `POST` | `/assistant/tabs/{id}/messages` | ask: `{"text": "..."}` → `{state, text, actions, positions, tab}` |
+| `GET`, `POST` | `/assistant/memory` | the stored facts; add one: `{"text": "...", "project": null}` |
+| `DELETE` | `/assistant/memory/{id}` | forget one |
+| `GET` | `/projects/{project}/bidder-questions` | the drafted Bieterfragen |
+| `PATCH` | `/projects/{project}/bidder-questions/{id}` | change a draft or its `status` (`draft`, `ready`, `discarded`) |
+
+`state` of an answer: `answered`, `waiting` (the tender is still extracting or indexing), `refused` or `error`.
+`actions` lists what the assistant changed (e.g. "Kommentar an 03.0040 gespeichert"), so the view can reload that
+item; `positions` lists the cards it looked at.

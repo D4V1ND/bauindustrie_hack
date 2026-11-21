@@ -18,10 +18,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
+from lv import assistant, index
 from lv.__main__ import DATA
 from lv.extract import READERS
 from lv.model import LV, LineItem, RiskSummary, load, save
 from lv.plan import PLAN_SUFFIXES, ROOT
+from lv import ai
 from lv.risk import comment
 
 PROJECT = re.compile(r"[A-Za-z0-9-]{1,40}")  # no "_", so a project never collides with <project>_judge.json
@@ -33,7 +35,7 @@ app = FastAPI(title="LV pricing API", version="1.0",
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])  # ponytail: any
 # origin, fine for the hackathon; name the frontend's origin before it runs anywhere public
 runs: dict[str, subprocess.Popen] = {}  # project -> its latest run started by this server
-saving = threading.Lock()  # ponytail: one lock for all comments, per-project locks if many estimators comment at once
+saving = assistant.saving  # one lock for every result file write, shared with the assistant; ponytail: per-project locks if many estimators comment at once
 
 
 class Status(BaseModel):
@@ -179,6 +181,7 @@ def add_comment(project: str, item: str, new: NewComment) -> Commented:
         except ValueError as error:
             raise HTTPException(404, str(error))
         save(lv, DATA / "out")
+    index.refresh(lv, DATA, "tender")  # the assistant finds the new comment at once
     return Commented(item=commented, risk_summary=lv.risk_summary)
 
 
@@ -222,3 +225,179 @@ def _lv(project: str) -> LV:
     if not path.exists():
         raise HTTPException(404, f"{project} has no result yet." if project in runs else f"No project {project}.")
     return load(path)
+
+
+# --- assistant (README.md, "Assistant") --------------------------------------------------------------------------
+
+STATIC = Path(__file__).resolve().parent / "static"
+indexing: set[str] = set()  # projects this server is indexing in the background
+asking: dict[str, threading.Lock] = {}  # one message at a time per tab
+
+
+class NewTab(BaseModel):
+    project: str | None = Field(None, description="the tender of this tab; null: only the price library")
+    title: str = ""
+
+
+class TabTitle(BaseModel):
+    title: str = Field(..., min_length=1, max_length=80)
+
+
+class Message(BaseModel):
+    text: str = Field(..., min_length=1, max_length=8000)
+
+
+class NewFact(BaseModel):
+    text: str = Field(..., min_length=1, max_length=500)
+    project: str | None = None
+
+
+class QuestionChange(BaseModel):
+    subject: str | None = None
+    question: str | None = None
+    reason_internal: str | None = None
+    status: Literal["draft", "ready", "discarded"] | None = None
+
+
+def _run_state(project: str) -> str | None:
+    run = runs.get(project)
+    if run is None:
+        return None
+    code = run.poll()
+    return "running" if code is None else "failed" if code else "done"
+
+
+def _start_index(project: str, source: str) -> None:
+    """Builds a missing or stale index in the background; the assistant waits until it is there."""
+    if project in indexing or index.state(DATA, project, source) == "indexing":
+        return
+    indexing.add(project)
+
+    def job() -> None:
+        try:
+            path = DATA / ("library" if source == "library" else "out") / f"{project}.json"
+            index.build_file(path, DATA, source, say=lambda line: print(f"[{project}] {line}", flush=True))
+        except Exception as error:  # the next status call tries again
+            print(f"[{project}] assistant index failed: {error}", flush=True)
+        finally:
+            indexing.discard(project)
+
+    threading.Thread(target=job, daemon=True).start()
+
+
+def _ready(project: str | None) -> assistant.Readiness:
+    return assistant.readiness(DATA, project, _run_state, _start_index)
+
+
+def _tab(tab_id: str) -> assistant.Tab:
+    tab = assistant.get_tab(DATA, tab_id)
+    if tab is None:
+        raise HTTPException(404, f"No tab {tab_id}.")
+    return tab
+
+
+@app.get("/assistant", include_in_schema=False)
+def assistant_panel() -> FileResponse:
+    """The chat panel with tabs (lv/static/assistant.html), to try the assistant or to embed it in the frontend."""
+    return FileResponse(STATIC / "assistant.html")
+
+
+@app.get("/assistant/status", response_model=assistant.Readiness)
+def assistant_status(project: str | None = None) -> assistant.Readiness:
+    """Whether the assistant can answer for this tender: `extracting` while its run is going, `indexing` while its
+    positions are being embedded, `ready` when it can. Poll it while it is not ready."""
+    return _ready(_known(project) if project else None)
+
+
+@app.get("/assistant/tabs", response_model=list[assistant.TabInfo])
+def assistant_tabs(project: str | None = None) -> list[assistant.TabInfo]:
+    """The chat tabs, oldest first; with `project`, only that tender's tabs."""
+    return assistant.list_tabs(DATA, project)
+
+
+@app.post("/assistant/tabs", status_code=201, response_model=assistant.Tab)
+def assistant_new_tab(new: NewTab) -> assistant.Tab:
+    if new.project is not None:
+        _known(new.project)
+        if not (DATA / "out" / f"{new.project}.json").exists() and new.project not in runs:
+            raise HTTPException(404, f"No project {new.project}.")
+    return assistant.new_tab(DATA, new.project, new.title)
+
+
+@app.get("/assistant/tabs/{tab_id}", response_model=assistant.Tab, response_model_exclude={"messages"})
+def assistant_tab(tab_id: str) -> assistant.Tab:
+    """One tab with its messages as the panel shows them."""
+    return _tab(tab_id)
+
+
+@app.patch("/assistant/tabs/{tab_id}", response_model=assistant.TabInfo)
+def assistant_rename_tab(tab_id: str, change: TabTitle) -> assistant.TabInfo:
+    tab = _tab(tab_id)
+    tab.title = change.title.strip()
+    assistant.save_tab(DATA, tab)
+    return assistant.TabInfo(**tab.model_dump(include={"id", "title", "project", "created", "updated"}),
+                             messages=len(tab.shown))
+
+
+@app.delete("/assistant/tabs/{tab_id}", status_code=204)
+def assistant_delete_tab(tab_id: str) -> None:
+    if not assistant.delete_tab(DATA, tab_id):
+        raise HTTPException(404, f"No tab {tab_id}.")
+
+
+@app.post("/assistant/tabs/{tab_id}/messages", response_model=assistant.Reply)
+def assistant_message(tab_id: str, message: Message) -> assistant.Reply:
+    """Asks the assistant. While the tab's tender is extracting or indexing, the answer is `state: "waiting"` with
+    the reason, no model is asked and nothing is saved. Takes seconds to a minute: the model searches first."""
+    lock = asking.setdefault(tab_id, threading.Lock())
+    if not lock.acquire(blocking=False):
+        raise HTTPException(409, "This tab is still answering the last message.")
+    try:
+        tab = _tab(tab_id)
+        try:
+            return assistant.ask(DATA, tab, message.text.strip(), _ready(tab.project), _running)
+        except ai.MissingKey as error:
+            raise HTTPException(503, str(error))
+        except Exception as error:  # e.g. the Claude API is down or the key is wrong: say so instead of a bare 500
+            if type(error).__module__.startswith("anthropic"):
+                raise HTTPException(502, f"Claude API: {type(error).__name__}: {error}")
+            raise
+    finally:
+        lock.release()
+
+
+@app.get("/assistant/memory", response_model=list[assistant.Fact])
+def assistant_memory() -> list[assistant.Fact]:
+    """What the assistant remembers across tabs (data/assistant/memory.json)."""
+    return assistant.memory(DATA)
+
+
+@app.post("/assistant/memory", status_code=201, response_model=assistant.Fact)
+def assistant_remember(fact: NewFact) -> assistant.Fact:
+    return assistant.remember(DATA, fact.text, _known(fact.project) if fact.project else None, by="estimator")
+
+
+@app.delete("/assistant/memory/{fact_id}", status_code=204)
+def assistant_forget(fact_id: str) -> None:
+    if not assistant.forget(DATA, fact_id):
+        raise HTTPException(404, f"No stored fact {fact_id}.")
+
+
+@app.get("/projects/{project}/bidder-questions", response_model=list[assistant.BidderQuestion])
+def bidder_questions(project: str) -> list[assistant.BidderQuestion]:
+    """The Bieterfragen drafted for this tender (by the assistant, on the estimator's request). Never sent anywhere."""
+    return assistant.bidder_questions(DATA, _known(project))
+
+
+@app.patch("/projects/{project}/bidder-questions/{question}", response_model=assistant.BidderQuestion)
+def change_bidder_question(project: str, question: str, change: QuestionChange) -> assistant.BidderQuestion:
+    with assistant.saving:
+        found = assistant.bidder_questions(DATA, _known(project))
+        draft = next((q for q in found if q.id == question), None)
+        if draft is None:
+            raise HTTPException(404, f"{project} has no bidder question {question}.")
+        for field, new in change.model_dump(exclude_none=True).items():
+            setattr(draft, field, new)
+        draft.updated = assistant._now()
+        assistant.save_bidder_questions(DATA, project, found)
+    return draft
