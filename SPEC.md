@@ -1,6 +1,7 @@
 # Spec: LV estimating backend, steps 0–3
 
-Status: steps 0 and 1 are built, step 3 is being built, step 2 is not built. Terms in **bold** are defined in [CONTEXT.md](CONTEXT.md).
+Status: steps 0, 1 and 3 are built. Step 2 is not built. Step 3's judge has not been checked with a planned real
+run yet (see `tasks/todo.md`, task 11). Terms in **bold** are defined in [CONTEXT.md](CONTEXT.md).
 
 ## Objective
 
@@ -260,7 +261,7 @@ def group_label(item: LineItem) -> str:
 
 `pytest`, tests in `tests/`, run against the real files in `data/raw/`. One small test per piece of real logic; no
 mocks of the dataset. The tests need no network and no API key: in step 3 the judge is replaced by a fake that
-returns fixed verdicts. Real AI calls are checked by hand (`python -m lv.ai`, then `lv price` on P5) and by reading
+returns fixed verdicts, and `tests/conftest.py` hides the key from every test, so no test can reach Claude. Real AI calls are checked by hand (`python -m lv.ai`, then `lv price` on P5) and by reading
 the output.
 
 ## Boundaries

@@ -11,7 +11,7 @@ class Capital(BaseModel):
 
 @pytest.fixture
 def no_key(monkeypatch, tmp_path):
-    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    """An empty place for the key file. conftest.py already hides the real key from every test."""
     monkeypatch.setattr(ai, "ENV_FILE", tmp_path / ".env")
     return tmp_path / ".env"
 

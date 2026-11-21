@@ -14,6 +14,7 @@ from lv.match import Described, describe, group_label, searcher
 from lv.model import LV, LineItem, MethodSum, Prediction, Source, Summary
 
 METHODS = ("copied", "similar", "adjusted", "reference", "none")
+NO_ANSWER = "The judge gave no answer for this item."
 
 
 class Judged(BaseModel):
@@ -88,7 +89,7 @@ def judge_input(new: Described, candidates: list[Described]) -> str:
 
 def _from_verdicts(candidates: list[Described], answer: Verdicts | None) -> Prediction:
     if answer is None:
-        return Prediction(method="none", reason="The judge gave no answer for this item.")
+        return Prediction(method="none", reason=NO_ANSWER)
     price = {candidate.item.id: candidate.item.unit_price for candidate in candidates}  # best candidate first
     first = {}
     for entry in answer.judged:

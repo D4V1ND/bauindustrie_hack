@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 
+from lv import ai
 from lv.__main__ import main
 from lv.ai import JUDGE_RULES
 from lv.extract import read
@@ -9,7 +10,7 @@ from lv.model import LV, LineItem, load
 from lv.predict import Judged, Verdicts, predict
 
 RAW = Path(__file__).resolve().parent.parent / "data" / "raw" / "Challenge A Dataset"
-P2_PRICED, P2_NEW = "StBALV23040.D86", "[NUMMER_001]_leer.X83"
+P2_PRICED, P2_NEW, P5_NEW = "StBALV23040.D86", "[NUMMER_001]_leer.X83", "GAEB-[PROJEKT_004].X83"
 
 
 def item(id: str, short_text: str, long_text: str = "", **changes) -> LineItem:
@@ -312,6 +313,52 @@ def test_p2_priced_from_itself_copies_only_correct_prices():
     assert two_prices == {"3.2.23": (19.60, 21.00, 20.30), "5.2.21": (19.60, 21.00, 20.30),
                           "7.1.1": (236.47, 610.86, 423.67), "9.1.1": (236.47, 610.86, 423.67)}
     assert all(i.prediction.median == real[plain(i.oz)] for i in copied if i.oz not in two_prices)
+
+
+# --- the command -------------------------------------------------------------------------------------------------
+
+def test_price_command_stops_without_a_key_only_when_the_judge_is_needed(tmp_path):
+    main(["price", str(RAW / P5_NEW), "--project", "P5"], data=tmp_path)  # empty library: nothing to judge
+    assert load(tmp_path / "out" / "P5.json").summary.methods["none"].items == 50
+
+    main(["ingest", str(RAW / P2_PRICED), "--project", "P2"], data=tmp_path)
+    (tmp_path / "out" / "P5.json").unlink()
+    with pytest.raises(SystemExit, match="ANTHROPIC_API_KEY="):
+        main(["price", str(RAW / P5_NEW), "--project", "P5"], data=tmp_path)
+    assert not (tmp_path / "out" / "P5.json").exists()
+
+    main(["price", str(RAW / P5_NEW), "--project", "P5", "--copy-only"], data=tmp_path)
+    assert (tmp_path / "out" / "P5.json").exists()
+
+
+def test_price_command_asks_the_judge_and_writes_what_code_made_of_the_verdicts(tmp_path, capsys, monkeypatch):
+    asked = []
+
+    def fake_ask(model, system, questions, shape):
+        asked.append((model, system, shape))
+        answers = []
+        for block in questions:  # the first candidate of every item is "the same", the others are "different"
+            cands = [line[2:].split(": ")[0] for line in block.splitlines() if line.startswith("- ")]
+            answers.append(Verdicts(id=block.split()[1], reason="First candidate matches.", judged=[
+                said(cand, "same" if n == 0 else "different") for n, cand in enumerate(cands)]))
+        return answers[:-1] + [None]  # and one call fails
+
+    monkeypatch.setattr(ai, "ask", fake_ask)
+    main(["ingest", str(RAW / P2_PRICED), "--project", "P2"], data=tmp_path)
+    main(["price", str(RAW / P5_NEW), "--project", "P5"], data=tmp_path)
+
+    printed = capsys.readouterr().out
+    result, library = load(tmp_path / "out" / "P5.json"), load(tmp_path / "library" / "P2.json")
+    price = {i.id: i.unit_price for i in library.items}
+    methods = result.summary.methods
+    assert asked == [("claude-sonnet-5-5", JUDGE_RULES, Verdicts)]
+    assert methods["similar"].items > 0 and sum(m.items for m in methods.values()) == 50
+    assert methods["similar"].items + 1 + sum(1 for i in result.items if "No library item" in i.prediction.reason) == 50
+    assert all(price[s.id] == s.unit_price == i.prediction.median for i in result.items for s in i.prediction.sources)
+    assert f"about {methods['similar'].items + 1} items" in printed and "gave no answer for 1 of these items" in printed
+    assert result.summary.total == pytest.approx(sum(i.prediction.median * i.quantity for i in result.items
+                                                     if i.prediction.method == "similar"))
+    assert not result.priced
 
 
 def test_price_command_prints_the_summary_and_writes_it(tmp_path, capsys):

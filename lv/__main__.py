@@ -2,10 +2,11 @@
 import argparse
 from pathlib import Path
 
+from lv import ai
 from lv.extract import read
 from lv.match import group_label
 from lv.model import LV, load, save
-from lv.predict import predict
+from lv.predict import NO_ANSWER, Verdicts, predict
 
 DATA = Path(__file__).resolve().parent.parent / "data"
 FOLDERS = {"ingest": "library", "price": "out"}
@@ -36,16 +37,28 @@ def main(argv: list[str] | None = None, data: Path = DATA) -> None:
         library = [load(path) for path in sorted((data / "library").glob("*.json"))]
         priced = sum(1 for past in library for item in past.items if item.unit_price)
         print(f"price library: {priced} line items with a price from {len(library)} project(s)")
-        predict(lv, library, judge=None)
+        try:
+            predict(lv, library, judge=None if args.copy_only else ask_judge)
+        except (ai.MissingKey, RuntimeError) as stop:  # RuntimeError: every call to the judge failed
+            raise SystemExit(str(stop))
         print_summary(lv)
     path = save(lv, data / FOLDERS[args.command])
     print(f"{len(lv.items)} line items -> {path}")
+
+
+def ask_judge(blocks: list[str]) -> list[Verdicts | None]:
+    """The real judge: one Claude call per item that has candidates."""
+    print(f"asking the judge ({ai.JUDGE_MODEL}) about {len(blocks)} items ...")
+    return ai.ask(ai.JUDGE_MODEL, ai.JUDGE_RULES, blocks, Verdicts)
 
 
 def print_summary(lv: LV) -> None:
     for method, entry in lv.summary.methods.items():
         print(f"  {method:<10}{entry.items:>5} items{entry.total:>16,.2f}")
     print(f"  {'total':<10}{len(lv.items):>5} items{lv.summary.total:>16,.2f}  (normal items with a price; median x quantity)")
+    unanswered = sum(1 for item in lv.items if item.prediction.reason == NO_ANSWER)
+    if unanswered:
+        print(f"  The judge gave no answer for {unanswered} of these items (counted under 'none'). Run again to retry.")
 
 
 if __name__ == "__main__":

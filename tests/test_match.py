@@ -71,7 +71,7 @@ def test_groups_in_the_real_files():
 
 def test_both_commands_write_the_group_label(tmp_path):
     main(["ingest", str(RAW / "StBALV23040.D86"), "--project", "P2"], data=tmp_path)
-    main(["price", str(RAW / "GAEB-[PROJEKT_004].X83"), "--project", "P5"], data=tmp_path)
+    main(["price", str(RAW / "GAEB-[PROJEKT_004].X83"), "--project", "P5", "--copy-only"], data=tmp_path)
 
     for path in (tmp_path / "library" / "P2.json", tmp_path / "out" / "P5.json"):
         assert all(len(i.group) == 12 and i.group == group_label(i) for i in load(path).items)

@@ -165,7 +165,11 @@ Built before tasks 6 and 7: step 3 does not need trades or item types.
   - Depends on: 5, 8, 9.
   - Files: `lv/predict.py`, `lv/ai.py`, `tests/test_predict.py`.
 
-- [ ] **Task 11: `lv price` with the judge** (small)
+- [x] **Task 11: `lv price` with the judge** (small)
+  - Built and tested with a fake judge. The planned real run on P5 is still yours (last acceptance point).
+  - Found while building: once `.env` held a key, one test that ran `lv price` reached the real judge (2 test runs,
+    28 calls each, P5 against P2). `tests/conftest.py` now hides the key from every test.
+  - Items that would go to the judge with P1 and P2 in the library: 32 of 50 for P5, 206 of 296 for P4.
   - Does: makes `lv price` call the real judge for the items that have candidates, and only for those.
   - Acceptance:
     - A missing API key stops the command with a message that says what to do, and only when at least one item
