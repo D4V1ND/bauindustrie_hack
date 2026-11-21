@@ -1123,18 +1123,18 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .up-note{margin:12px 0 0;font-size:10.5px}
 .plan-empty{flex:1;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:12px;padding:28px 24px;color:var(--ink-2);font-size:13px;line-height:1.55}
 .plan-empty>.i{width:26px;height:26px;color:var(--ink-3)}.plan-empty p{margin:0;max-width:340px}
-/* no plan: collapsed strip <-> open panel; same track structure so the columns animate */
-.lv-split{transition:grid-template-columns .45s var(--ease)}
-.lv-split.pn-min{grid-template-columns:minmax(48px,0fr) minmax(0,57fr)}
-.plan-min{min-height:300px}
-.plan-tab{all:unset;box-sizing:border-box;cursor:pointer;flex:1;display:flex;flex-direction:column;align-items:center;gap:14px;padding:16px 0;color:var(--ink-3);transition:background .15s,color .15s}
+/* no plan: a horizontal bar above the table by default; opened, the panel sits left and the table narrows */
+.lv-split.pn-min{grid-template-columns:minmax(0,1fr);gap:10px}
+.plan-min{position:static}
+.plan-tab{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:12px;min-height:48px;padding:0 16px;color:var(--ink-2);font-size:13px;transition:background .15s,color .15s}
 .plan-tab:hover{background:var(--paper-2);color:var(--ink)}
 .plan-tab:focus-visible{outline:2px solid var(--signal);outline-offset:-2px}
-.plan-tab .i{width:18px;height:18px;flex:none}
-.plan-tab .i:last-child{transform:rotate(-90deg)}
-.plan-tab span{writing-mode:vertical-rl;transform:rotate(180deg);font:.6rem/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
-.plan-cl .i{transform:rotate(90deg)}
-@media (max-width:1100px){.lv-split.pn-min{grid-template-columns:1fr}.plan-min{min-height:0}.plan-tab{flex-direction:row;padding:0 16px;min-height:46px}.plan-tab span{writing-mode:horizontal-tb;transform:none;flex:1}.plan-tab .i:last-child{transform:none}}
+.plan-tab .i{width:17px;height:17px;flex:none;color:var(--ink-3)}
+.plan-tab .mono{color:var(--ink-3);font-size:.6rem}
+.plan-tab b{font-weight:500;color:var(--ink)}
+.plan-tab .pt-open{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font:.6rem/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.plan-tab:hover .pt-open{color:var(--ink)}
+.plan-cl .i{transform:rotate(180deg)}
 .verdict2.warn{color:var(--warn)}
 @media (max-width:640px){.up-grid,.up-f{grid-template-columns:1fr}.pmenu{width:min(340px,calc(100vw - 32px))}}
 .cmts .panel{padding:12px 0 6px}
@@ -1665,7 +1665,7 @@ function vPlan(d, full) {
   var shown = {}; d.rows.forEach(function (r) { shown[r.oz] = true; });
   var fl = FLOORS.indexOf(S.floor) >= 0 ? S.floor : FLOORS[0];
   // no plan: a collapsed strip by default, opens into the hint panel (the table gives up the space)
-  if (P.live && !P.plan && !S.planOpen) return '<aside class="plan plan-none plan-min" aria-label="Bauplan"><button class="plan-tab" data-act="planOpen" data-v="1" aria-expanded="false" title="Bauplan-Feld öffnen">' + IC.layers + '<span>Bauplan · nicht hochgeladen</span>' + IC.chev + '</button></aside>';
+  if (P.live && !P.plan && !S.planOpen) return '<aside class="plan plan-none plan-min" aria-label="Bauplan"><button class="plan-tab" data-act="planOpen" data-v="1" aria-expanded="false">' + IC.layers + '<span class="mono">Bauplan</span><b>Nicht hochgeladen</b><span class="pt-open">Öffnen' + IC.chev + '</span></button></aside>';
   if (P.live && !P.plan) return '<aside class="plan plan-none" aria-label="Bauplan"><div class="plan-h"><div><span class="mono">Bauplan</span><b>Nicht hochgeladen</b></div><button class="ic plan-cl" data-act="planOpen" data-v="0" aria-expanded="true" aria-label="Bauplan-Feld einklappen" title="Einklappen">' + IC.chev + '</button></div>' +
     '<div class="plan-empty">' + IC.layers + '<p>Lade beim nächsten Upload einen Bauplan (PNG oder JPG) als Kontext hoch. Dann prüft das Backend die Mengen gegen den Plan und die Positionen erscheinen hier.</p><button class="btn btn-sm btn-quiet" data-act="newProj">' + IC.plus + 'Neues Projekt mit Plan</button></div></aside>';
   var img = P.live && /\.(png|jpe?g)$/i.test(P.plan.file);
