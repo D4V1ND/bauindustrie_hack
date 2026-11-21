@@ -1549,14 +1549,7 @@ function vHeader() {
 
 function deDate(s) { var t = new Date(s); return isNaN(t) ? String(s) : t.toLocaleDateString('de-DE'); }
 function daysTo(s) { return Math.max(0, Math.ceil((new Date(s) - new Date()) / 864e5)); }
-function liveMeta() {
-  var lib = P.lib.split(' · '), fd = (P.plan && P.plan.findings) || [];
-  return [['Projekt-ID', P.id, P.priced ? 'LV enthält schon Preise' : 'Neues LV ohne Preise'], ['LV-Datei', P.file || '–', P.date ? 'vom ' + deDate(P.date) : 'GAEB'],
-    ['Leistungsverzeichnis', fmt(P.n) + ' Positionen', P.gewerke + ' Gewerke'],
-    ['Bauplan', P.plan ? P.plan.file : 'keiner', P.plan ? fd.length + ' Befunde · ' + (P.plan.checked || 0) + ' Pos. geprüft' : 'beim Upload als Kontext'], ['Preisbasis', lib[0], lib[1] || 'Alt-LVs mit Preisen']];
-}
 function vHero(d) {
-  var okN = d.all.filter(function (r) { return S.confirmed[r.oz]; }).length;
   return '<div class="hero rise">' +
     '<div style="min-width:0"><div class="eyebrow mono"><span class="num">[' + esc(P.id) + ']</span><span>' + (P.live ? 'Leistungsverzeichnis' : 'Öffentliche Ausschreibung') + '</span><span class="live"><i></i>' + (P.live ? 'Backend · ' + fmt(P.n) + ' Positionen analysiert' : 'Analysiert ' + esc(S.analyzed)) + '</span></div>' +
     '<h1>' + esc(P.name) + '</h1></div>' +
@@ -1564,18 +1557,6 @@ function vHero(d) {
       '<button class="btn btn-quiet btn-rep" data-act="report" data-v="1">' + IC.doc + 'Konfidenzbericht</button>' +
       '<button class="btn btn-primary btn-export" data-act="export">' + IC.down + 'Export GAEB X84<span class="xsep"></span><span class="xamt">' + eur(Math.round(d.tot)) + '</span>' + IC.arrow + '</button>' +
     '</div></div>' +
-    '<div class="prog rise" style="--d:80ms">' +
-      '<div><div class="mono faint">Preise bestätigt</div><div class="prog-n"><b>' + okN + '</b> / ' + d.all.length + '</div></div>' +
-      '<div class="ticks" role="img" aria-label="' + okN + ' von ' + d.all.length + ' Preisen bestätigt">' + d.all.slice().sort(function (a, b) { return a.oz.localeCompare(b.oz); }).map(function (r) {
-        return '<span class="tick-s' + (S.confirmed[r.oz] ? ' ok' : '') + (S.justOk[r.oz] !== undefined ? ' bump' : '') + '" title="' + r.oz + '"></span>';
-      }).join('') + '</div>' +
-      '<div class="deadline"><span class="mono faint">LV</span><b>' + fmt(P.live ? P.n : d.all.length) + '</b><span class="mono faint">Positionen</span></div>' +
-    '</div>' +
-    '<dl class="meta rise" style="--d:140ms">' + (P.live ? liveMeta() : [
-      ['Bauherr', 'Kommune (anonymisiert)', 'Öffentlicher Auftraggeber'], ['Vergabe', 'Öffentlich, VOB/A', 'Einheitspreisvertrag'],
-      ['Leistungsverzeichnis', 'GAEB X83', '1.284 Positionen · 11 Gewerke'],
-      ['Pläne', '14 Blätter', 'Grundrisse, Schnitte, Statik']
-    ]).map(function (m) { return '<div><dt class="mono">' + m[0] + '</dt><dd>' + m[1] + '</dd><dd>' + m[2] + '</dd></div>'; }).join('') + '</dl>' +
     '<nav class="tabs" aria-label="Projektbereiche">' +
       '<button class="tab' + (S.tab === 'home' ? ' on' : '') + '" data-act="tab" data-v="home" aria-current="' + (S.tab === 'home') + '">' + IC.home + 'Home</button>' +
       '<button class="tab' + (S.tab === 'kontext' ? ' on' : '') + '" data-act="tab" data-v="kontext" aria-current="' + (S.tab === 'kontext') + '">' + IC.doc + 'Kontext</button>' +
