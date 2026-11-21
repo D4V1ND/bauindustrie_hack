@@ -11,7 +11,7 @@ load_dotenv(Path(__file__).parent / ".env")
 
 
 def client_and_model() -> tuple[OpenAI, str]:
-    key, model = os.getenv("OPENAI_API_KEY"), os.getenv("OPENAI_MODEL")
+    key, model = (os.getenv("OPENAI_API_KEY") or "").strip(), (os.getenv("OPENAI_MODEL") or "").strip()  # pasted values may end in a newline
     if not key or not model:
         sys.exit("Fehlt: OPENAI_API_KEY und/oder OPENAI_MODEL in vlm/.env")
     return OpenAI(api_key=key), model

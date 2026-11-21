@@ -224,7 +224,7 @@ class MissingKey(Exception):
 def structured(model: str, shape: type[Shape], effort: str, thinking: bool = False):
     """The chat model, set up to answer in `shape` with the given effort level. With `thinking`, each answer also
     carries the model's summarised thinking: {"raw": message, "parsed": shape or None, "parsing_error": ...}."""
-    key = os.environ.get("ANTHROPIC_API_KEY") or dotenv_values(ENV_FILE).get("ANTHROPIC_API_KEY")
+    key = (os.environ.get("ANTHROPIC_API_KEY") or dotenv_values(ENV_FILE).get("ANTHROPIC_API_KEY") or "").strip()  # a pasted key often ends in a newline
     if not key:
         raise MissingKey(
             "This step asks Claude, and no API key is set up.\n"
@@ -278,7 +278,7 @@ def _batch(chat, model: str, system: str, questions: list[str]) -> list:
 
 def voyage_key() -> str | None:
     """The Voyage AI key, if set up. Without it the search runs by words only."""
-    return os.environ.get("VOYAGE_API_KEY") or dotenv_values(ENV_FILE).get("VOYAGE_API_KEY")
+    return (os.environ.get("VOYAGE_API_KEY") or dotenv_values(ENV_FILE).get("VOYAGE_API_KEY") or "").strip() or None
 
 
 @functools.cache
