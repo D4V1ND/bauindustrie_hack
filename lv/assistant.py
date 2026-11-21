@@ -16,7 +16,7 @@ from typing import Any, Literal
 from pydantic import BaseModel
 
 from lv import ai, index
-from lv.model import LV, load, save
+from lv.model import LV, Brief, load, save
 from lv.risk import assess, comment
 
 PROMPT = (Path(__file__).resolve().parent / "assistant_prompt.md").read_text(encoding="utf-8")
@@ -41,7 +41,7 @@ class Shown(BaseModel):
     role: Literal["user", "assistant"]
     text: str
     at: str
-    actions: list[str] = []  # what the assistant changed, e.g. "Kommentar an 03.0040 gespeichert"
+    actions: list[str] = []  # what the assistant changed, e.g. "Comment saved on 03.0040"
     positions: list[str] = []  # card ids the answer looked at
 
 
@@ -184,30 +184,32 @@ class Readiness(BaseModel):
 def readiness(data: Path, project: str | None, run_state: Callable[[str], str | None],
               start_index: Callable[[str, str], None]) -> Readiness:
     """Whether the assistant may answer for this tab. While the tender's run is going (extraction, pricing,
-    indexing), it may not. An index that is missing or older than its result file is built in the background."""
+    indexing), it may not; nor while the tender or a library project has no index yet, because a search would miss
+    them. An index that is missing or older than its result file is built in the background."""
+    def built(name: str, source: str) -> bool:
+        found = index.state(data, name, source)
+        if found in ("missing", "stale"):
+            start_index(name, source)
+        return found == "ready"
+
     library = sorted(path.stem for path in (data / "library").glob("*.json"))
-    for name in library:
-        if index.state(data, name, "library") in ("missing", "stale"):
-            start_index(name, "library")
-    if project is None:
-        return Readiness(state="ready", message="", library=library)
-    run = run_state(project)
-    if run == "running":
-        return Readiness(state="extracting", library=library, message=(
-            f"Die Extraktion von {project} läuft noch. Ich kann Fragen zu diesem LV beantworten, sobald sie fertig "
-            "und alles für mich indexiert ist. Bitte warte, bis die Extraktion abgeschlossen ist."))
-    if not (data / "out" / f"{project}.json").exists():
-        return Readiness(state="failed" if run == "failed" else "missing", library=library, message=(
-            f"Für {project} gibt es noch kein Ergebnis" + (", die letzte Extraktion ist fehlgeschlagen." if run ==
-                                                            "failed" else ". Lade zuerst ein LV hoch.")))
-    built = index.state(data, project, "tender")
-    if built in ("missing", "stale"):
-        start_index(project, "tender")
-        built = "indexing"
-    if built == "indexing":
+    waiting = [name for name in library if not built(name, "library")]
+    if project is not None:
+        run = run_state(project)
+        if run == "running":
+            return Readiness(state="extracting", library=library, message=(
+                f"The extraction of {project} is still running. I can answer questions about this LV once it is "
+                "done and everything is indexed for me. Please wait until the extraction has finished."))
+        if not (data / "out" / f"{project}.json").exists():
+            return Readiness(state="failed" if run == "failed" else "missing", library=library, message=(
+                f"There is no result for {project} yet" + (", the last extraction failed." if run == "failed"
+                                                             else ". Upload an LV first.")))
+        if not built(project, "tender"):
+            waiting.insert(0, project)
+    if waiting:
         return Readiness(state="indexing", library=library, message=(
-            f"Die Positionen von {project} werden gerade für mich indexiert. Bitte warte einen Moment, bis das "
-            "fertig ist."))
+            f"The items of {', '.join(waiting)} are being indexed for me. Please wait a moment until that is "
+            "done."))
     return Readiness(state="ready", message="", library=library)
 
 
@@ -298,6 +300,10 @@ class Session:
         found = item.model_dump(exclude={"group", "plan"} if not item.plan else {"group"}, exclude_none=True)
         found["source"] = "library" if project in self.library() else "tender"
         found["comments"] = [{"number": n, **c.model_dump()} for n, c in enumerate(item.comments, start=1)]
+        past = [entry for key in ("sources", "judged") for entry in found.get("prediction", {}).get(key, [])]
+        units = self._units({entry["id"].split("/", 1)[0] for entry in past})
+        for entry in past:  # a Source has no unit; without it a price per m and one per m³ look alike
+            entry["unit"] = units.get(entry["id"], "")
         return found
 
     def project_overview(self, project: str) -> dict:
@@ -332,12 +338,7 @@ class Session:
             "plan_findings": len(lv.plan.findings) if lv.plan else None}
 
     def list_projects(self) -> dict:
-        def name(path: Path) -> str:
-            found = index.indexes(self.data, [path.stem])
-            return found[0].name if found else load(path).name
-        return {"open_tender": self.tab.project,
-                "library": [{"project": p.stem, "name": name(p)}
-                            for p in sorted((self.data / "library").glob("*.json"))]}
+        return {"open_tender": self.tab.project, "library": library_info(self.data)}
 
     def list_bidder_questions(self) -> dict:
         return {"questions": [q.model_dump() for q in bidder_questions(self.data, self._own())]}
@@ -352,7 +353,7 @@ class Session:
         lv, item = self._write_item(oz, lambda lv: comment(lv, oz, text, price, doubt))
         item.comments[-1].author = "assistant"
         self._save(lv)
-        self.actions.append(f"Kommentar an {item.oz} gespeichert")
+        self.actions.append(f"Comment saved on {item.oz}")
         return {"saved": item.comments[-1].model_dump(), "confidence": item.risk.confidence if item.risk else None}
 
     def edit_comment(self, oz: str, comment_number: int, text: str) -> dict:
@@ -366,7 +367,7 @@ class Session:
             return item
         lv, item = self._write_item(oz, change)
         self._save(lv)
-        self.actions.append(f"Kommentar {comment_number} an {item.oz} geändert")
+        self.actions.append(f"Comment {comment_number} on {item.oz} changed")
         return {"comment": item.comments[comment_number - 1].model_dump()}
 
     def draft_bidder_question(self, items: list[str], subject: str, question: str, reason_internal: str) -> dict:
@@ -379,7 +380,7 @@ class Session:
                                    question=question.strip(), reason_internal=reason_internal.strip(),
                                    created=_now(), updated=_now())
             save_bidder_questions(self.data, project, found + [draft])
-        self.actions.append(f"Bieterfrage {draft.id} entworfen")
+        self.actions.append(f"Bidder question {draft.id} drafted")
         return {"saved": draft.model_dump()}
 
     def update_bidder_question(self, id: str, subject: str | None, question: str | None,
@@ -396,18 +397,18 @@ class Session:
                     setattr(draft, field, new.strip() if field != "status" else new)
             draft.updated = _now()
             save_bidder_questions(self.data, project, found)
-        self.actions.append(f"Bieterfrage {id} geändert")
+        self.actions.append(f"Bidder question {id} changed")
         return {"saved": draft.model_dump()}
 
     def remember(self, text: str, only_this_project: bool) -> dict:
         fact = remember(self.data, text, self.tab.project if only_this_project else None)
-        self.actions.append("Gemerkt: " + fact.text[:60])
+        self.actions.append("Remembered: " + fact.text[:60])
         return {"saved": fact.model_dump()}
 
     def forget(self, id: str) -> dict:
         if not forget(self.data, id):
             raise ToolError(f"No stored fact {id}.")
-        self.actions.append(f"Vergessen: {id}")
+        self.actions.append(f"Forgot: {id}")
         return {"forgotten": id}
 
     # helpers -----------------------------------------------------------------------------------------------------
@@ -429,6 +430,10 @@ class Session:
         if not path.exists():
             raise ToolError(f"{project} has no result yet.")
         return load(path)
+
+    def _units(self, projects: set[str]) -> dict[str, str]:
+        """Item id -> unit for the library projects named."""
+        return {item.id: item.unit for project in projects & set(self.library()) for item in self._lv(project).items}
 
     def _write_item(self, oz: str, change: Callable[[LV], Any]):
         project = self._own(write=True)
@@ -486,10 +491,21 @@ class Reply(BaseModel):
     tab: TabInfo
 
 
+def library_info(data: Path) -> list[dict]:
+    """The past projects of the price library: ID, name and the date of their LV (how old their prices are)."""
+    found = []
+    for path in sorted((data / "library").glob("*.json")):
+        lv = load(path)  # ponytail: reads each library file per message; cache by mtime if the library grows large
+        found.append({"project": path.stem, "name": lv.name, "date": str(lv.date) if lv.date else None})
+    return found
+
+
 def _context(data: Path, tab: Tab) -> str:
     facts = [f for f in memory(data) if f.project in (None, tab.project)][-MAX_MEMORY:]
     lines = [f"Today: {datetime.now().date().isoformat()}.",
-             f"Open tender in this tab: {tab.project or 'none (only the price library)'}."]
+             f"Open tender in this tab: {tab.project or 'none (only the price library)'}.",
+             "Price library: " + "; ".join(f"{p['project']} {p['name']} (LV date {p['date'] or 'unknown'})"
+                                          for p in library_info(data)) + "."]
     lines.append("Memory:" if facts else "Memory: nothing stored yet.")
     lines += [f"- [{f.id}] {f.text}" + (f" (only {f.project})" if f.project else "") for f in facts]
     return "\n".join(lines)
@@ -527,7 +543,7 @@ def ask(data: Path, tab: Tab, text: str, ready: Readiness, running: Callable[[st
         blocks = [block.model_dump(mode="json", exclude_none=True) for block in response.content]
         messages.append({"role": "assistant", "content": blocks})
         if response.stop_reason == "refusal":
-            state, answer = "refused", "Dabei kann ich nicht helfen. Frag mich gern etwas zu den LVs und Preisen."
+            state, answer = "refused", "I can't help with that. Feel free to ask me about the LVs and prices."
             break
         if response.stop_reason == "pause_turn":
             continue
@@ -535,7 +551,7 @@ def ask(data: Path, tab: Tab, text: str, ready: Readiness, running: Callable[[st
         answer = "\n\n".join(block.text for block in response.content if block.type == "text").strip()
         if response.stop_reason != "tool_use" or not uses:
             if response.stop_reason == "max_tokens":
-                answer += "\n\n(Die Antwort wurde abgeschnitten.)"
+                answer += "\n\n(The answer was cut off.)"
             break
         results = []
         for use in uses:
@@ -551,15 +567,41 @@ def ask(data: Path, tab: Tab, text: str, ready: Readiness, running: Callable[[st
         messages.append({"role": "user", "content": results})
     else:
         state = "error"
-        answer = (answer + "\n\n" if answer else "") + "Ich habe zu viele Schritte gebraucht und hier abgebrochen."
+        answer = (answer + "\n\n" if answer else "") + "I needed too many steps and stopped here."
     if state == "refused":
         messages = messages[:-1]  # a refused turn is not kept, so the next message starts clean
         messages.append({"role": "assistant", "content": [{"type": "text", "text": answer}]})
     tab.messages = messages
     tab.shown += [Shown(role="user", text=text, at=_now()),
-                  Shown(role="assistant", text=answer or "(keine Antwort)", at=_now(), actions=session.actions,
+                  Shown(role="assistant", text=answer or "(no answer)", at=_now(), actions=session.actions,
                         positions=list(dict.fromkeys(session.positions)))]
     tab.updated = _now()
     save_tab(data, tab)
     return Reply(state=state, text=answer, actions=session.actions,
                  positions=list(dict.fromkeys(session.positions)), tab=info())
+
+
+# --- the brief at the end of a run --------------------------------------------------------------------------------
+
+BRIEF = {"about": "What is this project about?", "go_no_go": "Does it make sense to tender it?"}
+
+
+def brief(data: Path, project: str, create: Callable[..., Any] | None = None) -> Brief | None:
+    """Asks the BRIEF questions one after the other in a new tab of the tender (the estimator can go on from there)
+    and saves both answers as `brief` in data/out/<project>.json. None: an answer did not come; nothing is saved.
+    The tender and the library must be indexed."""
+    create = create or ai.anthropic_client().beta.messages.create  # first: without a key, no empty tab is left
+    tab = new_tab(data, project, "Project brief")
+    ready = Readiness(state="ready", message="", library=[])
+    answers = {}
+    for field, question in BRIEF.items():
+        reply = ask(data, tab, question, ready, running=lambda _: True, create=create)  # "running": no writes
+        if reply.state != "answered":
+            return None
+        answers[field] = reply.text
+    with saving:
+        lv = load(data / "out" / f"{project}.json")
+        lv.brief = Brief(**answers, tab=tab.id)
+        save(lv, data / "out")
+    index.refresh(lv, data, "tender")  # the result file is newer now; the cards stay the same
+    return lv.brief

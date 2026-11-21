@@ -3,12 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>LV Mastermind</title>
+<title>Needle</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Crect width='20' height='20' fill='%230a0a0a'/%3E%3Cpath d='M2.5 16A7.5 7.5 0 0 1 14.6 10.1' fill='none' stroke='%23fff' stroke-opacity='.35' stroke-width='2.4'/%3E%3Cpath d='M14.6 10.1A7.5 7.5 0 0 1 17.5 16' fill='none' stroke='%23f0542b' stroke-width='2.4'/%3E%3Cpath d='M10 16V9.6' stroke='%23fff' stroke-width='2' stroke-linecap='round' transform='rotate(60 10 16)'/%3E%3Ccircle cx='10' cy='16' r='1.9' fill='%23fff'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-/* LV Mastermind V2. Paper and ink, hairlines, square corners, thin display type with
+/* Needle (formerly LV Mastermind) V2. Paper and ink, hairlines, square corners, thin display type with
    mono annotations, one warm accent. Important actions get their own motion. */
 :root{
  --paper:#f4f4f0;--paper-2:#ebeae4;--paper-3:#e2e1d9;--card:#fbfaf7;
@@ -62,10 +63,15 @@ svg.i{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--paper) 84%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
 .top-in{max-width:1360px;margin:0 auto;padding:12px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:10px;font-size:14px;min-width:0}
-.mark{position:relative;width:16px;height:16px;flex:none}
-.mark::before,.mark::after{content:"";position:absolute;width:7px;height:7px}
-.mark::before{left:0;top:0;background:var(--ink)}.mark::after{right:0;bottom:0;background:var(--signal);animation:markpulse 3.2s var(--ease) infinite}
-@keyframes markpulse{0%,70%,100%{transform:none}80%{transform:translate(-2px,-2px)}}
+.mark{width:21px;height:13px;flex:none;overflow:visible;margin-top:1px}
+.nd-tr{fill:none;stroke:var(--ink);stroke-width:2.4;opacity:.25}
+.nd-hot{fill:none;stroke:var(--signal);stroke-width:2.4}
+.nd{stroke:var(--ink);stroke-width:2;stroke-linecap:round;transform-origin:10px 16px;transform:rotate(60deg);animation:ndswing 1.1s var(--spring) .2s both,ndtwitch 7s var(--ease) 3s infinite}
+.nd-p{fill:var(--ink)}
+@keyframes ndswing{from{transform:rotate(-70deg)}to{transform:rotate(60deg)}}
+@keyframes ndtwitch{0%,88%,100%{transform:rotate(60deg)}92%{transform:rotate(52deg)}96%{transform:rotate(66deg)}}
+.brand-b:hover .nd{animation:ndswing .9s var(--spring)}
+@media (prefers-reduced-motion:reduce){.nd{animation:none!important}}
 .brand b{font-weight:600;letter-spacing:-.02em;font-size:15px}
 .crumb{color:var(--ink-3)}
 .crumb a{color:var(--ink-2);text-decoration:none}.crumb a:hover{color:var(--signal)}
@@ -718,7 +724,7 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .lv-bar .btn-quiet:hover{border-color:var(--line-2);background:var(--paper-2)}
 .lv-bar .btn-quiet.on,.lv-bar .btn-quiet.on:hover{border-color:var(--ink);background:var(--ink);color:var(--paper)}
 .tbl{border-top:0}
-.th{height:40px;background:transparent;border-bottom:1px solid var(--ink);font-size:.6rem}
+.th{height:40px;background:transparent;border-bottom:1px solid var(--line-2);font-size:.6rem}
 .foot{align-items:center;padding:14px 16px;background:transparent;border-top:1px solid var(--ink)}
 .foot>.mono{color:var(--ink-3)}
 .ft-r{display:flex;align-items:baseline;gap:14px}
@@ -765,11 +771,12 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .dw-top{padding:14px 18px 16px 22px;border-bottom:1px solid var(--line)}
 .dw-bar{gap:10px}
 .ozt{font:500 .72rem/1 var(--mono);letter-spacing:.06em;color:var(--paper);background:var(--ink);padding:6px 8px}
-.gwt{font:.64rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.gwt{font:.64rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ozt,.navg{flex:none;white-space:nowrap}
 .navg{display:flex;align-items:center;border:1px solid var(--line-2)}
 .navg .ic{width:28px;height:28px}
 .navg .ic svg{width:14px;height:14px}
-.navc{font:.64rem/1 var(--mono);letter-spacing:.06em;color:var(--ink-3);padding:0 6px;min-width:52px;text-align:center}
+.navc{font:.64rem/1 var(--mono);letter-spacing:.06em;color:var(--ink-3);padding:0 6px;min-width:52px;text-align:center;white-space:nowrap}
 .navc b{color:var(--ink);font-weight:500}
 .xbtn{border:1px solid transparent}
 .xbtn:hover{border-color:var(--line-2)}
@@ -835,12 +842,12 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 
 /* ---- [01] fill ---- */
 .cost .estconf{margin:auto 0}
-.cost .cmeter{height:56px;gap:4px}
+.cost .cmeter{height:40px;gap:4px}
 .cost .conf-v b{font-size:34px}
 .cost .conf-h{margin-bottom:14px}
 .cost .conf-s{margin-top:8px}
-.cost-main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:48px;align-items:center;margin:18px 0 28px}
-.cost-main .est{margin-top:0;flex-direction:column;align-items:flex-start;gap:12px}
+.cost-main{display:grid;grid-template-columns:auto minmax(0,1fr);gap:56px;align-items:stretch;margin:18px 0 28px}
+.cost-main .est{margin-top:0;flex-direction:column;align-items:flex-start;justify-content:center;gap:12px;padding:0 56px 0 0;border-right:1px solid var(--line)}
 .cost-main .estconf{margin:0}
 .cost .big{font-size:clamp(2.8rem,5vw,4rem)}
 .conf-l{display:flex;flex-direction:column;gap:6px;font:500 26px/1 var(--sans);letter-spacing:-.02em;color:var(--ink)}
@@ -849,7 +856,7 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .cost .conf-v{font-size:.72rem}
 .cost .conf-v b{font-size:44px}
 .cost .est>.mono{font-size:.62rem}
-.big.rng{font-size:clamp(2.2rem,4vw,3.4rem);white-space:nowrap}
+.big.rng{font-size:clamp(2.6rem,4.6vw,4.6rem);line-height:.85;letter-spacing:-.035em;white-space:nowrap}
 .big.rng small{font-size:.45em;letter-spacing:0;color:var(--ink-2)}
 .srcs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;border-top:1px solid var(--line);padding-top:20px}
 .src{display:flex;flex-direction:column;gap:6px;padding:16px 16px 14px;border:1px solid var(--line);border-top:4px solid var(--ok);background:var(--ok-bg);min-width:0}
@@ -880,7 +887,7 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .an-t{flex:1;min-width:0}.an-t>b{font-weight:600}
 .an-t p{margin:4px 0 10px;font-size:13.5px;line-height:1.55;color:var(--ink-2)}
 .agentnote>.ic{flex:none}
-@media (max-width:900px){.cost-main{grid-template-columns:1fr;gap:28px}}
+@media (max-width:900px){.cost-main{grid-template-columns:1fr;gap:28px}.cost-main .est{border-right:0;padding:0}}
 /* gauge box (left) + summary box (right) */
 .row2{margin-top:20px;align-items:stretch}
 .sum{display:flex;flex-direction:column}
@@ -895,9 +902,9 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .gwh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:8px}
 .gwh b{font-weight:500;font-size:13.5px}
 .gwh .mono{color:var(--ink-3)}
-.gwl{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
-.gwl li{border-bottom:1px solid var(--line)}
-.gwl button{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:grid;grid-template-columns:38px minmax(0,1fr) auto 14px;gap:12px;align-items:center;padding:10px 4px;transition:background .15s}
+.gwl{list-style:none;margin:0;padding:0}
+.gwl li+li{border-top:1px solid var(--line)}
+.gwl button{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) auto 14px;gap:14px;align-items:center;padding:10px 4px;transition:background .15s}
 .gwl button:hover{background:var(--paper-2)}
 .gwl button:focus-visible{outline:2px solid var(--signal);outline-offset:-2px}
 .gwl button>svg{width:14px;height:14px;color:var(--ink-3);transition:transform .2s var(--ease)}
@@ -1091,8 +1098,12 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 
 .gwl button{position:relative}
 .gwl button:hover{background:transparent}
-.gwl button{margin:0 -8px;width:calc(100% + 16px);padding:10px 8px}
-.gwl button:hover{background:var(--paper-2)}
+.gwl button{transition:padding .22s var(--ease)}
+.gwl button::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:2px;background:var(--ink);transform:scaleY(0);transition:transform .22s var(--ease)}
+.gwl button:hover{padding-left:14px}
+.gwl button:hover::before{transform:none}
+.gwl .gwk{color:var(--ink-2);transition:color .15s}.gwl .gwm .mono{transition:color .15s}
+.gwl button:hover .gwk,.gwl button:hover .gwm .mono{color:var(--ink)}
 .rsk.na b{color:var(--ink-3)}
 
 
@@ -1106,6 +1117,11 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .lv-more:hover b svg{transform:translateX(3px)}
 .lv-more:focus-visible{outline:2px solid var(--signal);outline-offset:-2px}
 .lv-r.gen .rsk{opacity:.55}
+/* table rows: same quiet selection as the Gewerk list (thin ink line, no grey block) */
+.lv-r:hover,.lv-r.sel{background:transparent}
+.lv-r.sel,.lv-r.picked:not(.sel){box-shadow:none}
+.lv-r::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:2px;background:var(--ink);transform:scaleY(0);transition:transform .22s var(--ease)}
+.lv-r:hover::before,.lv-r.sel::before,.lv-r.picked::before{transform:none}
 .auto1{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;font:.58rem/1 var(--mono);letter-spacing:.04em;color:var(--ink-3);border:1px dashed var(--line-2)}
 .okline.auto{background:transparent;color:var(--ink-2);border:1px dashed var(--line-2);min-height:52px}
 .okline.auto svg.i{color:var(--ink-3)}
@@ -1116,13 +1132,12 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .rsk.zero b{color:var(--bad)}
 .mtag.offen{color:var(--bad)}.mtag.offen>i{background:var(--bad)}
 .np{font:.66rem/1 var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--bad)}
-.lv-r.noprice::before{content:"";position:absolute;left:0;top:-1px;bottom:-1px;width:2px;background:var(--bad)}
 .okbtn.need{border-style:dashed;border-color:var(--bad);color:var(--bad)}
 .okbtn.need:hover{background:var(--bad);color:var(--paper)}
 .okbtn.need svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2}
 .ep.epnp{font-size:26px;letter-spacing:-.02em;font-weight:300;color:var(--bad);border-bottom:1.5px dashed var(--bad)}
 .confirm.need{background:transparent;color:var(--ink);border:1px dashed var(--bad)}
-.confirm.need .cbadge{color:var(--bad)}
+.confirm.need .cbadge{background:color-mix(in srgb,var(--bad) 10%,transparent);color:var(--bad)}
 .npn{font-weight:500;color:var(--bad)}
 .plan-lg .lgt{margin-right:2px}
 
@@ -1132,25 +1147,6 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .lv-split .lv-bar .pill{padding:0 9px}
 .lv-split .lv-bar .tools{gap:8px}
 
-/* ---- Konfidenzbericht ---- */
-.btn-rep{height:40px}
-.btn-rep svg{width:15px;height:15px}
-.repfs{position:fixed;inset:0;z-index:40;display:grid;place-items:center;padding:28px}
-.rep-win{position:relative;width:min(960px,100%);height:calc(100vh - 56px);display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);animation:planpop .4s var(--ease)}
-.rep-bar{display:flex;align-items:center;gap:8px;padding:10px 12px 10px 18px;border-bottom:1px solid var(--line)}
-.rep-bar .mono{color:var(--ink-3);font-size:.6rem}
-.rep-bar .btn svg{width:13px;height:13px}
-.rep-scroll{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;background:#e9e6df;padding:28px}
-.rep-scroll .rp{box-shadow:0 10px 30px -18px rgba(0,0,0,.35)}
-@media print{
-  body.printing-rep #app>*:not(.repfs){display:none!important}
-  body.printing-rep{background:#fff!important}
-  body.printing-rep .repfs{position:static;display:block;padding:0}
-  body.printing-rep .planfs-bg,body.printing-rep .rep-bar{display:none!important}
-  body.printing-rep .rep-win{border:0;box-shadow:none;height:auto;animation:none}
-  body.printing-rep .rep-scroll{overflow:visible;background:#fff;padding:0}
-  body.printing-rep .rep-scroll .rp{box-shadow:none;padding:0;max-width:none}
-}
 /* ---- live backend: project menu, upload, empty plan ---- */
 .pmw{position:relative;display:inline-flex}
 .crumb-b{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:3px;color:var(--ink-2)}
@@ -1484,7 +1480,6 @@ function toPos(it) {
   var pr = it.prediction || {}, rk = it.risk || {}, m = pr.method || 'none', own = ownPrice(it), med = pr.median || 0, conf = rk.confidence || 0;
   var why = own != null ? 'Eigener Preis' : (WHY[m] || m);
   if (own == null && m === 'none' && pr.min != null) why += ' · Spanne ' + eur(pr.min) + ' – ' + eur(pr.max);  // no price, only the span of differing items
-  if (own == null && (it.comments || []).some(function (c) { return c.effect === 'doubt'; })) why = 'Preis angezweifelt · ' + why;
   if (rk.missing && rk.missing.length) why += ' · fehlt: ' + rk.missing[0];
   if (it.plan && it.plan.status === 'differs') why = 'Plan ' + qty(it.plan.quantity || 0) + ' ' + (it.plan.unit || '') + ', LV ' + qty(it.quantity || 0) + ' · ' + why;
   var mode = MODE[m] || 'offen';
@@ -1721,7 +1716,7 @@ function isDark() {
 // ================= views =================
 function vHeader() {
   return '<header class="top"><div class="top-in">' +
-    '<div class="brand"><button class="brand-b" data-act="home" aria-label="Startseite"><span class="mark" aria-hidden="true"></span><b>LV Mastermind</b></button><span class="crumb">/ <span class="pmw"><button class="crumb-b" data-act="projects" aria-expanded="' + !!S.projOpen + '">Projekte' + IC.chev + '</button>' + vProjMenu() + '</span> /</span>' + (S.home ? '<span>Neues LV</span>' : '<span>' + esc(P.short) + '</span>') + '</div>' +
+    '<div class="brand"><button class="brand-b" data-act="home" aria-label="Startseite"><svg class="mark" viewBox="1 7.2 18 11" aria-hidden="true"><path class="nd-tr" d="M2.5 16A7.5 7.5 0 0 1 14.6 10.1"/><path class="nd-hot" d="M14.6 10.1A7.5 7.5 0 0 1 17.5 16"/><path class="nd" d="M10 16V9.6"/><circle class="nd-p" cx="10" cy="16" r="1.9"/></svg><b>Needle</b></button><span class="crumb">/ <span class="pmw"><button class="crumb-b" data-act="projects" aria-expanded="' + !!S.projOpen + '">Projekte' + IC.chev + '</button>' + vProjMenu() + '</span> /</span>' + (S.home ? '<span>Neues LV</span>' : '<span>' + esc(P.short) + '</span>') + '</div>' +
     '<div class="top-r">' +
       '<button class="theme-btn" data-act="theme" aria-label="Farbschema wechseln"><span class="theme-icon"></span>' + (isDark() ? 'Hell' : 'Dunkel') + '</button>' +
       (S.home ? '' : '<button class="btn btn-primary" data-act="newProj">' + IC.plus + 'Neues Projekt</button>') +
@@ -1735,7 +1730,6 @@ function vHero(d) {
     '<div style="min-width:0">' +
     '<h1>' + esc(P.name) + '</h1></div>' +
     '<div class="hero-actions">' +
-      '<button class="btn btn-quiet btn-rep" data-act="report" data-v="1">' + IC.doc + 'Konfidenzbericht</button>' +
       '<div class="mw"><button class="btn btn-primary btn-export" data-act="menu" data-v="export" aria-haspopup="true" aria-expanded="' + (S.menu === 'export') + '">' + IC.down + 'Export<span class="xsep"></span><span class="xamt">' + eur(Math.round(d.tot)) + '</span>' + IC.chev + '</button>' +
         (S.menu === 'export' ? '<div class="menu" role="menu" data-k="mexport"><div class="menu-h mono">Exportieren als</div>' +
           '<button class="mi" role="menuitem" data-act="exportAs" data-v="gaeb"><span class="mt">GAEB X84<small>Angebot mit allen Preisen</small></span></button>' +
@@ -1849,10 +1843,9 @@ function vCost() {
     ['hi', cnt.similar, 'Ähnliche Position aus altem LV', 'Gleichwertige Leistung, Preis übernommen'],
     ['mid', cnt.adjusted, 'Angepasst (Größe/Material)', 'Aus ähnlichen Positionen umgerechnet'],
     ['lo', cnt.open, 'Noch kein Preis, bitte prüfen', R.sgN ? 'Nur ein Vorschlag aus verwandten Positionen' : 'Keine passende Position in den alten LVs']];
-  var note = 'netto · Spanne aus den Preisen der alten LVs' + (R.sgN ? ' · inkl. ' + (R.sgN === 1 ? 'Vorschlag für 1 Position' : 'Vorschlägen für ' + R.sgN + ' Positionen') + ' ohne Preis' : '') + (R.openN ? ' · <b class="npn">' + R.openN + (R.openN === 1 ? ' Position' : ' Positionen') + ' ohne Vorschlag</b> nicht enthalten' : '');
   return '<section class="card cost rise' + (S.analyzing ? ' scan' : '') + '" style="flex:1 1 100%;--d:200ms" aria-label="Kostenschätzung">' +
     '<div class="card-h"><span class="mono"><b>01</b> Kostenschätzung</span><span class="mono">' + (P.live ? esc(P.lib) : '3 Alt-LVs · 9.120 bepreiste Positionen') + '</span></div>' +
-    '<div class="cost-main"><div class="est"><span class="mono faint">Gesamtpreis von – bis</span><span class="big rng">' + rg[0] + ' <small>' + rg[1] + '</small></span><span class="muted">' + note + '</span></div>' +
+    '<div class="cost-main"><div class="est"><span class="big rng">' + rg[0] + ' <small>' + rg[1] + '</small></span></div>' +
     '<div class="estconf"><div class="conf-h"><span class="conf-l">Konfidenz<small>Wie sicher die Preise sind, gewichtet nach Volumen</small></span><span class="conf-v ' + confLvl(conf) + '" data-k="cv' + conf + '"><b>' + conf + ' %</b>' + confWord(conf) + '</span></div>' +
       cmeter(conf, 50) + '<div class="conf-s"><span>0</span><span>50</span><span>100</span></div></div></div>' +
     '<div class="srcs" role="list" aria-label="Woher die Preise kommen">' + boxes.map(function (b) {
@@ -2012,57 +2005,6 @@ function vTable(d) {
 }
 
 
-// ================= Konfidenzbericht (export) =================
-var REPCSS = '.rp{font-family:Geist,system-ui,sans-serif;color:#141414;background:#fff;max-width:860px;margin:0 auto;padding:56px 60px 64px;font-size:13px;line-height:1.5}' +
-  '.rp *{box-sizing:border-box}.rp .m{font-family:"Geist Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#7a7770}' +
-  '.rp h1{font-size:30px;font-weight:300;letter-spacing:-.03em;margin:10px 0 4px}.rp h2{font-size:15px;font-weight:500;margin:0 0 12px}' +
-  '.rp .hd{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding-bottom:22px;border-bottom:2px solid #141414}' +
-  '.rp .sec{margin-top:30px}.rp .kpi{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;border:1px solid #e3e0d8;margin-top:24px}' +
-  '.rp .kpi>div{padding:16px 18px;border-left:1px solid #e3e0d8}.rp .kpi>div:first-child{border-left:0}.rp .kpi b{display:block;font-size:26px;font-weight:300;letter-spacing:-.03em;margin-top:6px}' +
-  '.rp .bar{display:flex;height:14px;margin-top:10px;background:#efece5}.rp .bar i{display:block;height:100%}' +
-  '.rp .z{background:#b8332b}.rp .l{background:#d9772f}.rp .md{background:#c9a227}.rp .h{background:#8a877f}' +
-  '.rp .lg{display:flex;flex-wrap:wrap;gap:16px;margin-top:10px}.rp .lg span{display:inline-flex;align-items:center;gap:6px}.rp .lg i{width:9px;height:9px;display:inline-block}' +
-  '.rp table{width:100%;border-collapse:collapse}.rp th{text-align:left;font-family:"Geist Mono",ui-monospace,monospace;font-size:9.5px;font-weight:400;letter-spacing:.08em;text-transform:uppercase;color:#7a7770;padding:8px 8px;border-bottom:1px solid #141414}' +
-  '.rp td{padding:9px 8px;border-bottom:1px solid #e3e0d8;vertical-align:top}.rp td.r,.rp th.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}.rp .oz{font-family:"Geist Mono",ui-monospace,monospace;font-size:11px;color:#7a7770;white-space:nowrap}' +
-  '.rp .c{font-family:"Geist Mono",ui-monospace,monospace;font-weight:500}.rp .c.z,.rp .c.l{background:none;color:#b8332b}.rp .c.md{background:none;color:#b07a10}.rp .c.h{background:none;color:#5d5a53}' +
-  '.rp .why{color:#5d5a53;font-size:12px}.rp .note{margin-top:34px;padding-top:14px;border-top:1px solid #e3e0d8;color:#7a7770;font-size:11.5px}' +
-  '.rp .mini{display:inline-block;width:70px;height:5px;background:#efece5;vertical-align:middle;margin-left:8px}.rp .mini i{display:block;height:100%}';
-function repData(d) {
-  var rows = d.full.map(function (r) { return Object.assign({}, r, { c: S.confirmed[r.oz] ? 100 : r.conf }); });
-  var w = 0, c = 0; rows.forEach(function (r) { var k = cw(r); w += k; c += k * r.c; });
-  var bk = [['z', 'Ohne Preis · 0 %', function (r) { return r.conf === 0; }], ['l', '1 – 49 %', function (r) { return r.conf > 0 && r.conf < 50; }], ['md', '50 – 74 %', function (r) { return r.conf >= 50 && r.conf < 75; }], ['h', '≥ 75 %', function (r) { return r.conf >= 75; }]].map(function (b) {
-    var xs = rows.filter(b[2]); return { k: b[0], label: b[1], n: xs.length, gp: xs.reduce(function (a, r) { return a + r.gp; }, 0) };
-  });
-  var gw = {}, order = [];
-  rows.forEach(function (r) { if (!gw[r.gewerk]) { gw[r.gewerk] = { n: 0, gp: 0, cw: 0, low: 0, np: 0 }; order.push(r.gewerk); } var g = gw[r.gewerk]; g.n++; g.gp += r.gp; g.cw += r.gp * r.c; if (r.conf < 50) g.low++; if (r.np) g.np++; });
-  var gws = order.map(function (k) { var g = gw[k]; return { name: k, n: g.n, gp: g.gp, conf: g.gp ? Math.round(g.cw / g.gp) : 0, low: g.low, np: g.np }; }).sort(function (a, b) { return a.conf - b.conf; });
-  return { rows: rows, conf: Math.round(c / w), tot: w, bk: bk, gws: gws,
-    np: rows.filter(function (r) { return r.np; }), low: rows.filter(function (r) { return !r.np && r.conf < 50; }).sort(function (a, b) { return a.conf - b.conf; }),
-    ok: d.all.filter(function (r) { return S.confirmed[r.oz]; }).length, core: d.all.length };
-}
-function repHTML(d) {
-  var R = repData(d), now = new Date(), date = now.toLocaleDateString('de-DE') + ', ' + now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-  var cls = function (v) { return v === 0 ? 'z' : v < 50 ? 'l' : v < 75 ? 'md' : 'h'; };
-  var list = function (xs, empty) { return xs.length ? '<table><thead><tr><th>OZ</th><th>Leistung</th><th>Grund</th><th class="r">Menge</th><th class="r">Konf.</th></tr></thead><tbody>' + xs.map(function (r) { return '<tr><td class="oz">' + r.oz + '</td><td>' + esc(r.kurz) + '<div class="why">' + esc(r.gewerk) + '</div></td><td class="why">' + esc(r.why) + '</td><td class="r">' + qty(r.menge) + ' ' + esc(r.einheit) + '</td><td class="r"><span class="c ' + cls(r.conf) + '">' + r.conf + ' %</span></td></tr>'; }).join('') + '</tbody></table>' : '<p class="why">' + empty + '</p>'; };
-  return '<div class="rp">' +
-    '<div class="hd"><div><div class="m">Konfidenzbericht · ' + esc(P.id) + '</div><h1>' + esc(P.name) + '</h1><div class="why">' + (P.live ? esc(P.file) + ' · ' + fmt(P.n) + ' Positionen' + '' : 'Öffentliche Ausschreibung · VOB/A') + '</div></div><div class="m" style="text-align:right">Stand<br><span style="color:#141414">' + date + '</span><br><br>LV Mastermind</div></div>' +
-    '<div class="kpi"><div><div class="m">Gesamtkonfidenz (GP-gewichtet)</div><b>' + R.conf + ' %</b><div class="bar"><i class="' + cls(R.conf) + '" style="width:' + R.conf + '%"></i></div></div>' +
-      '<div><div class="m">Positionen</div><b>' + fmt(R.rows.length) + '</b></div><div><div class="m">Ohne Preis</div><b style="color:#b8332b">' + R.np.length + '</b></div><div><div class="m">Bestätigt</div><b>' + R.ok + ' / ' + R.core + '</b></div></div>' +
-    '<div class="sec"><h2>Verteilung nach Konfidenz</h2><div class="m">Anteil am Volumen (GP)</div><div class="bar">' + R.bk.map(function (b) { return '<i class="' + b.k + '" style="width:' + (b.gp / R.tot * 100) + '%"></i>'; }).join('') + '</div>' +
-      '<table style="margin-top:14px"><thead><tr><th>Konfidenz</th><th class="r">Positionen</th><th class="r">GP</th><th class="r">Anteil Volumen</th></tr></thead><tbody>' + R.bk.map(function (b) { return '<tr><td><span class="lg" style="margin:0"><span><i class="' + b.k + '"></i>' + b.label + '</span></span></td><td class="r">' + fmt(b.n) + '</td><td class="r">' + (b.k === 'z' ? '–' : eur(Math.round(b.gp))) + '</td><td class="r">' + fmt(b.gp / R.tot * 100, 1) + ' %</td></tr>'; }).join('') + '</tbody></table></div>' +
-    '<div class="sec"><h2>Positionen ohne Preis · zuerst bearbeiten</h2>' + list(R.np, 'Alle Positionen haben einen Preis.') + '</div>' +
-    '<div class="sec"><h2>Niedrige Konfidenz (unter 50 %)</h2>' + list(R.low, 'Keine Positionen unter 50 %.') + '</div>' +
-    '<div class="sec"><h2>Konfidenz je Gewerk</h2><table><thead><tr><th>Gewerk</th><th class="r">Pos.</th><th class="r">GP</th><th class="r">Unter 50 %</th><th class="r">Konfidenz</th></tr></thead><tbody>' +
-      R.gws.map(function (g) { return '<tr><td>' + esc(g.name) + (g.np ? ' <span class="c z" style="font-size:11px">· ' + g.np + ' ohne Preis</span>' : '') + '</td><td class="r">' + fmt(g.n) + '</td><td class="r">' + eur(Math.round(g.gp)) + '</td><td class="r">' + g.low + '</td><td class="r"><span class="c ' + cls(g.conf) + '">' + g.conf + ' %</span><span class="mini"><i class="' + cls(g.conf) + '" style="width:' + g.conf + '%"></i></span></td></tr>'; }).join('') + '</tbody></table></div>' +
-    '<div class="note">Konfidenz = Sicherheit der KI-Preisschätzung je Position, gewichtet mit dem Gesamtpreis. Bestätigte Positionen zählen mit 100 %. Positionen mit 0 % haben keine vergleichbare Referenz in den Alt-LVs und sind in der Angebotssumme nicht enthalten. Grundlage: ' + (P.live ? esc(P.lib) : '3 Alt-LVs, 9.120 bepreiste Positionen') + '.</div>' +
-  '</div>';
-}
-function vReport(d) {
-  if (!S.report) return '';
-  return '<div class="repfs" data-k="repfs"><div class="planfs-bg" data-act="report" data-v="0"></div><div class="rep-win" role="dialog" aria-label="Konfidenzbericht"><div class="rep-bar"><span class="mono">Konfidenzbericht · Vorschau</span><span style="flex:1"></span>' +
-    '<button class="btn btn-sm btn-quiet" data-act="repHtml">' + IC.down + 'HTML</button><button class="btn btn-sm btn-primary" data-act="repPrint">' + IC.doc + 'Als PDF drucken</button><button class="ic" data-act="report" data-v="0" aria-label="Vorschau schließen" title="Schließen (Esc)">' + IC.x + '</button></div>' +
-    '<div class="rep-scroll"><style>' + REPCSS + '</style>' + repHTML(d) + '</div></div></div>';
-}
 function vDock(d) {
   var pr = d.all.filter(function (r) { return S.picked[r.oz]; });
   if (!pr.length) return '';
@@ -2156,7 +2098,7 @@ function vDrawer(d) {
   {
     var gsum = sameAll.reduce(function (a, r) { return a + r.gp; }, p.gp);
     gwPanel = 
-      (same.length ? '<ol class="gwl">' + same.map(function (r) { var ok2 = !!S.confirmed[r.oz]; return '<li data-k="g' + r.oz + '"><button data-act="open" data-oz="' + r.oz + '"><span class="rsk ' + (r.np ? 'na' : ck(r.conf)) + '"><b>' + (r.np ? '–' : r.conf + '<small>%</small>') + '</b><i class="rbar"><i style="width:' + r.conf + '%"></i></i></span><span class="gwm"><span class="mono">' + r.oz + '</span><span class="gwk">' + esc(r.kurz) + '</span></span><span class="gwr">' + (r.np ? '' : '<b>' + eur(r.gp) + '</b>') + (r.np ? '<span class="mtag offen"><i></i>Preis fehlt</span>' : ok2 ? '<span class="mtag ok"><i></i>bestätigt</span>' : '<span class="mtag ' + r.mode + '"><i></i>' + r.conf + ' %</span>') + '</span>' + IC.arrow + '</button></li>'; }).join('') + '</ol>' +
+      (same.length ? '<ol class="gwl">' + same.map(function (r) { var ok2 = !!S.confirmed[r.oz]; return '<li data-k="g' + r.oz + '"><button data-act="open" data-oz="' + r.oz + '"><span class="gwm"><span class="mono">' + r.oz + '</span><span class="gwk">' + esc(r.kurz) + '</span></span><span class="gwr">' + (r.np ? '' : '<b>' + eur(r.gp) + '</b>') + (r.np ? '<span class="mtag offen"><i></i>Preis fehlt</span>' : ok2 ? '<span class="mtag ok"><i></i>bestätigt</span>' : '<span class="mtag ' + r.mode + '"><i></i>' + r.conf + ' %</span>') + '</span>' + IC.arrow + '</button></li>'; }).join('') + '</ol>' +
         '<button class="lnk gwall" data-act="gewerkAll" data-v="' + esc(p.gewerk) + '">' + (sameAll.length > same.length ? 'Alle ' + (sameAll.length + 1) + ' im LV anzeigen' : 'Alle im LV filtern') + '</button>'
       : '<p class="pempty gw-e">Einzige Position in diesem Gewerk.</p>');
     var gmeta = (sameAll.length + 1) + ' Pos.' + (gsum > 0 ? ' · ' + eur(gsum) : '');
@@ -2184,7 +2126,7 @@ function vDrawer(d) {
   }
 
   return '<aside class="dw' + (S.aiOpen || S.thinking ? ' ai-open' : '') + '" aria-label="Positionsdetails ' + p.oz + '" tabindex="-1" data-k="dw">' +
-    '<header class="dw-top"><div class="dw-bar"><span class="ozt' + (S.swapDir === 'next' ? ' ozflash' : '') + '" data-k="oz' + p.oz + '">' + p.oz + '</span><span class="gwt">' + esc(p.gewerk) + '</span><span style="flex:1"></span>' +
+    '<header class="dw-top"><div class="dw-bar"><span class="ozt' + (S.swapDir === 'next' ? ' ozflash' : '') + '" data-k="oz' + p.oz + '">' + p.oz + '</span><span class="gwt" title="' + esc(p.gewerk) + '">' + esc(p.gewerk) + '</span><span style="flex:1"></span>' +
       '<div class="navg"><button class="ic" data-act="nav" data-v="-1"' + (nav.idx <= 0 ? ' disabled' : '') + ' aria-label="Vorherige Position" title="Vorherige (↑)">' + IC.up + '</button>' +
       '<span class="navc" title="Mit ↑ / ↓ blättern"><b>' + (nav.idx + 1) + '</b> / ' + nav.list.length + '</span>' +
       '<button class="ic" data-act="nav" data-v="1"' + (nav.idx >= nav.list.length - 1 ? ' disabled' : '') + ' aria-label="Nächste Position" title="Nächste (↓)">' + IC.chev + '</button></div>' +
@@ -2209,7 +2151,7 @@ function vDrawer(d) {
           : p.np ? '<div class="sub">' + qty(p.menge) + ' ' + p.einheit + (p.sg ? ' · GP ≈ ' + eur(p.sg.ep * p.menge) + (p.sg.hi > p.sg.lo ? ' (' + eur(p.sg.lo * p.menge) + ' – ' + eur(p.sg.hi * p.menge) + ')' : '') : ' · GP wird nach der Eingabe berechnet') + '</div>'
           : '<div class="sub">GP <b>' + eur(p.gp) + '</b> · ' + fmt(p.gp / TOTAL * 100, 2) + ' % des LV · ' + qty(p.menge) + ' ' + p.einheit +
             (p.manual && !p.srvManual ? ' · <button class="lnk" data-act="resetEp">' + (noAi ? 'Preis entfernen' : 'KI-Vorschlag ' + eur(p.aiEp) + ' wiederherstellen') + '</button>' : '') +
-            (P.live && !p.manual && !p.np ? ' · <button class="lnk" data-act="doubt" title="Senkt die Konfidenz dieser Position im Backend">Preis anzweifeln</button>' : '') + '</div>') +
+            '</div>') +
         (ok ? '<div class="stamp' + (fresh ? ' fx' : '') + '" data-k="st"><span class="sq">' + IC.tickRaw + '</span><span><b>Bestätigt</b><small>' + (p.manual ? 'Eigener Preis' : 'KI-Preis') + '</small></span></div>' : '') + '</div>' +
         '<div class="pconf"><span class="mono">Konfidenz</span><span class="conf-v ' + confLvl(p.conf) + '"><b>' + p.conf + ' %</b>' + confWord(p.conf) + '</span>' + cmeter(p.conf, 10) + '</div></div>' +
         (noAi ? '<div class="why2"><div class="mono lab">Warum kein Preis</div><p>' + esc(P.live && R.brief ? R.brief : p.why) + '. In euren Alt-LVs gibt es keine vergleichbare Position. Kalkuliere den Preis selbst oder hol ein Lieferantenangebot ein.</p></div></section>' :
@@ -2279,7 +2221,7 @@ function view() {
   var d = derive();
   return vHeader() + '<main>' + vHero(d) +
     '<div class="grid2">' + vCost() + '</div><div class="grid2 row2">' + vSummary(d) + '</div>' + vTable(d) +
-    '</main>' + vDock(d) + vReport(d) + (S.planFull ? '<div class="planfs" data-k="planfs"><div class="planfs-bg" data-act="planFull" data-v="0"></div>' + vPlan(d, true) + '</div>' : '') + vDrawer(d) + vPreview(d) + vFx() + vUpload() + vToast();
+    '</main>' + vDock(d) + (S.planFull ? '<div class="planfs" data-k="planfs"><div class="planfs-bg" data-act="planFull" data-v="0"></div>' + vPlan(d, true) + '</div>' : '') + vDrawer(d) + vPreview(d) + vFx() + vUpload() + vToast();
 }
 
 // ================= tiny DOM morph (keeps nodes, so CSS animations only play on real changes) =================
@@ -2477,7 +2419,7 @@ function send(text) {
   setTimeout(function () { var c2 = Object.assign({}, S.chats); c2[oz] = (c2[oz] || []).concat([{ role: 'agent', t: reply(p, text) }]); set({ chats: c2, thinking: false }); }, 1500);
 }
 function cmtList(p) {
-  if (P.live) return (p.cmts || []).map(function (c) { return { t: c.text, tag: c.price != null ? 'Preis ' + eur(c.price) : c.effect === 'doubt' ? 'Zweifel' : '' }; });
+  if (P.live) return (p.cmts || []).map(function (c) { return { t: c.text, tag: c.price != null ? 'Preis ' + eur(c.price) : '' }; });
   return (S.comments[p.oz] || []).map(function (c) { return { t: c.t, tag: '', time: c.time }; });
 }
 function addComment() {
@@ -2492,7 +2434,7 @@ function download() {
   var items = (P.live ? d.full : d.all).filter(function (r) { return !r.np; }).map(function (r) {
     return '      <Item RNoPart="' + r.oz + '"><Qty>' + r.menge + '</Qty><QU>' + x(r.einheit) + '</QU><UP>' + r.ep.toFixed(2) + '</UP><IT>' + r.gp.toFixed(2) + '</IT><Description><OutlineText>' + x(r.kurz) + '</OutlineText></Description></Item>';
   }).join('\n');
-  var xml = '<?xml version="1.0" encoding="UTF-8"?>\n<!-- ' + (P.live ? 'Export LV Mastermind, Projekt ' + x(P.id) : 'Mock-Export LV Mastermind (Demo-Daten)') + ' -->\n<GAEB xmlns="http://www.gaeb.de/GAEB_DA_XML/DA84/3.3">\n  <GAEBInfo><Version>3.3</Version><ProgSystem>LV Mastermind</ProgSystem></GAEBInfo>\n  <Award><DP>84</DP><BoQ><BoQInfo><Name>' + x(P.name) + '</Name></BoQInfo><BoQBody>\n' + items + '\n  </BoQBody></BoQ></Award>\n</GAEB>\n';
+  var xml = '<?xml version="1.0" encoding="UTF-8"?>\n<!-- ' + (P.live ? 'Export Needle, Projekt ' + x(P.id) : 'Mock-Export Needle (Demo-Daten)') + ' -->\n<GAEB xmlns="http://www.gaeb.de/GAEB_DA_XML/DA84/3.3">\n  <GAEBInfo><Version>3.3</Version><ProgSystem>LV Mastermind</ProgSystem></GAEBInfo>\n  <Award><DP>84</DP><BoQ><BoQInfo><Name>' + x(P.name) + '</Name></BoQInfo><BoQBody>\n' + items + '\n  </BoQBody></BoQ></Award>\n</GAEB>\n';
   var a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([xml], { type: 'application/xml' }));
   a.download = slug(P.short) + '.X84';
@@ -2654,14 +2596,6 @@ var A = {
     set(st); toast(a.done);
   },
   aiClose: function () { clearTimeout(aiT); var a = document.activeElement; if (a && a.blur) a.blur(); if (S.aiOpen) aiShut(); },
-  report: function (ds) { set({ report: ds.v === '1' }); },
-  repPrint: function () { document.body.classList.add('printing-rep'); window.print(); setTimeout(function () { document.body.classList.remove('printing-rep'); }, 500); },
-  repHtml: function () {
-    var html = '<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Konfidenzbericht ' + esc(P.short) + '</title><link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500&family=Geist+Mono&display=swap" rel="stylesheet"><style>body{margin:0;background:#f4f2ec}' + REPCSS + '</style></head><body>' + repHTML(derive()) + '</body></html>';
-    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([html], { type: 'text/html' })); a.download = 'Konfidenzbericht_' + slug(P.short) + '.html';
-    document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
-    toast('Konfidenzbericht_' + slug(P.short) + '.html heruntergeladen');
-  },
   floor: function (ds) { set({ floor: ds.v }); },
   planToggle: function () { var v = !planShown(); if (P.live) store('lvm-plan-' + P.id, v); set({ planShow: v }); },
   planFull: function (ds) { planHot(null); set({ planFull: ds.v === '1' }); },
@@ -2818,7 +2752,6 @@ var LIVEA = {
     api('/projects', { method: 'POST', body: fd }).then(function (st) { U.log = st.log || []; render(); upT = setTimeout(function () { pollRun(id); }, 1200); },
       function (e) { U.phase = 'form'; U.err = e.message === 'Failed to fetch' ? 'Der Upload hat nicht geklappt. Bitte gleich noch einmal versuchen.' : e.message; render(); });
   },
-  doubt: function () { var p = cur(); if (p) postComment(p.oz, { doubt: true, text: 'Preis passt nicht (Dashboard)' }, 'Zweifel an ' + p.oz); }
 };
 Object.assign(A, LIVEA, STARTA);
 
@@ -2866,7 +2799,6 @@ document.addEventListener('keydown', function (e) {
     if (S.menu) { var mt = document.querySelector('[data-act="menu"][data-v="' + S.menu + '"]'); set({ menu: null }); if (mt) mt.focus(); return; }
     if (S.adv) { cancelAdvance(); render(); return; }
     if (S.aiOpen) { A.aiClose(); return; }
-    if (S.report) { set({ report: false }); return; }
     if (S.planFull && !S.sel) { set({ planFull: false }); return; }
     if (S.fx && S.fx.phase !== 'run') set({ fx: null });
     else if (S.preview) set({ preview: null });

@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LV Assistent</title>
+<title>LV Assistant</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
 <style>
@@ -60,19 +60,19 @@
 </head>
 <body>
 <div class="shell">
-  <div class="main">Das LV ist links. Der Assistent sitzt rechts.</div>
+  <div class="main">The LV is on the left. The assistant sits on the right.</div>
   <aside>
     <header>
-      <h1>Assistent</h1>
+      <h1>Assistant</h1>
       <select id="project" aria-label="Projekt"></select>
-      <span id="pill" class="pill">bereit</span>
+      <span id="pill" class="pill">ready</span>
     </header>
     <nav class="tabs" id="tabs"></nav>
     <div id="notice" class="notice" hidden></div>
     <div class="log" id="log"></div>
     <form id="form">
-      <textarea id="input" placeholder="Frag nach Positionen, Preisen, Risiken ..."></textarea>
-      <button id="send">Senden</button>
+      <textarea id="input" placeholder="Ask about items, prices, risks ..."></textarea>
+      <button id="send">Send</button>
     </form>
   </aside>
 </div>
@@ -88,7 +88,7 @@ async function call(path, options = {}, again = false) {
   const headers = { "Content-Type": "application/json", ...(passcode() ? { "X-Passcode": passcode() } : {}) };
   const response = await fetch(API + path, { headers, ...options });
   if (response.status === 401 && !again) {
-    const given = (prompt("Passcode für das Backend:") || "").trim();
+    const given = (prompt("Passcode for the backend:") || "").trim();
     if (given) { try { localStorage.setItem("lv-passcode", given); } catch {} return call(path, options, true); }
   }
   if (response.status === 204) return null;
@@ -101,7 +101,7 @@ async function loadProjects() {
   const found = await call("/projects").catch(() => []);
   const select = $("project");
   select.innerHTML = found.map(p => `<option value="${p.project}">${p.project}</option>`).join("") +
-    `<option value="">Nur Bibliothek</option>`;
+    `<option value="">Library only</option>`;
   // The open tender: from the page that embeds the panel (?project=P5), else the last one used, else the first.
   let saved = null;
   try { saved = localStorage.getItem("lv-project"); } catch {}
@@ -113,8 +113,8 @@ async function loadProjects() {
 async function status() {
   const state = await call("/assistant/status" + (project ? `?project=${project}` : "")).catch(e => ({ state: "error", message: e.message }));
   ready = state.state === "ready";
-  $("pill").textContent = { ready: "bereit", extracting: "Extraktion läuft", indexing: "indexiert", missing: "kein LV",
-                            failed: "fehlgeschlagen", error: "Server?" }[state.state] || state.state;
+  $("pill").textContent = { ready: "ready", extracting: "extracting", indexing: "indexing", missing: "no LV",
+                            failed: "failed", error: "server?" }[state.state] || state.state;
   $("pill").className = "pill" + (ready ? "" : " wait");
   $("notice").hidden = ready; $("notice").textContent = state.message || "";
   lock();
@@ -133,9 +133,9 @@ async function loadTabs() {
 
 function drawTabs() {
   $("tabs").innerHTML = tabs.map(t => `<div class="tab ${current && t.id === current.id ? "on" : ""}" data-id="${t.id}"
-      title="Doppelklick zum Umbenennen"><span>${escape(t.title)}</span>
-      <button class="x" data-close="${t.id}" aria-label="Tab schließen">×</button></div>`).join("") +
-    `<button class="add" id="add" aria-label="Neuer Tab">+</button>`;
+      title="Double-click to rename"><span>${escape(t.title)}</span>
+      <button class="x" data-close="${t.id}" aria-label="Close tab">×</button></div>`).join("") +
+    `<button class="add" id="add" aria-label="New tab">+</button>`;
 }
 
 async function openTab(id) { current = await call(`/assistant/tabs/${id}`); drawLog(); drawTabs(); lock(); }
@@ -143,7 +143,7 @@ async function openTab(id) { current = await call(`/assistant/tabs/${id}`); draw
 function drawLog(extra = "") {
   const shown = current ? current.shown : [];
   $("log").innerHTML = (shown.length ? shown.map(message).join("") :
-    `<div class="empty">Frag zum Beispiel: Was hat GGG DN 250 verlegen bei uns gekostet?</div>`) + extra;
+    `<div class="empty">For example: What did laying GGG DN 250 cost us?</div>`) + extra;
   $("log").scrollTop = $("log").scrollHeight;
 }
 
@@ -160,7 +160,7 @@ $("tabs").addEventListener("click", async event => {
   const close = event.target.closest("[data-close]");
   if (close) {
     event.stopPropagation();
-    if (!confirm("Diesen Tab und seinen Verlauf löschen?")) return;
+    if (!confirm("Delete this tab and its history?")) return;
     await call(`/assistant/tabs/${close.dataset.close}`, { method: "DELETE" });
     if (current && current.id === close.dataset.close) current = null;
     return loadTabs();
@@ -175,7 +175,7 @@ $("tabs").addEventListener("click", async event => {
 
 $("tabs").addEventListener("dblclick", async event => {
   const tab = event.target.closest(".tab"); if (!tab) return;
-  const title = prompt("Neuer Name für den Tab:", tabs.find(t => t.id === tab.dataset.id).title);
+  const title = prompt("New name for the tab:", tabs.find(t => t.id === tab.dataset.id).title);
   if (!title) return;
   await call(`/assistant/tabs/${tab.dataset.id}`, { method: "PATCH", body: JSON.stringify({ title }) });
   loadTabs();
@@ -192,7 +192,7 @@ $("form").addEventListener("submit", async event => {
   const text = $("input").value.trim(); if (!text || !ready || busy) return;
   busy = true; lock();
   current.shown.push({ role: "user", text });
-  drawLog(`<div class="msg assistant thinking">sucht in den Positionen ...</div>`);
+  drawLog(`<div class="msg assistant thinking">searching the items ...</div>`);
   $("input").value = "";
   try {
     const reply = await call(`/assistant/tabs/${current.id}/messages`, { method: "POST", body: JSON.stringify({ text }) });
@@ -201,7 +201,7 @@ $("form").addEventListener("submit", async event => {
     drawLog(reply.state === "waiting" ? `<div class="notice">${escape(reply.text)}</div>` : "");
   } catch (error) {
     current.shown.pop(); $("input").value = text;
-    drawLog(`<div class="notice">Fehler: ${escape(error.message)}</div>`);
+    drawLog(`<div class="notice">Error: ${escape(error.message)}</div>`);
   } finally { busy = false; lock(); }
 });
 
