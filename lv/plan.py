@@ -11,7 +11,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from lv.model import LV
+from lv.model import LV, ItemPlan, PlanFinding, PlanMarker, PlanSummary
 
 ROOT = Path(__file__).resolve().parent.parent
 VLM = ROOT / "vlm"
@@ -67,6 +67,54 @@ def overview(result: dict, plan: Path, out_dir: Path, project: str) -> tuple[Pat
     import overview as prototype_overview
 
     return prototype_overview.make(result, plan, out_dir, project)
+
+
+STATUS = {"ok": "ok", "ok_instabil": "ok_unstable", "abweichung": "differs", "nicht_im_plan": "not_in_plan",
+          "einheit_nicht_vergleichbar": "units_differ", "nicht_geprueft": "not_checked"}
+MATCHED_BY = {"Plankürzel": "plan_code", "Maße": "dimensions", "KI-Zuordnung": "ai_match", "Raum": "room"}
+KIND = {"menge_abweichung": "quantity_differs", "nicht_im_plan": "not_in_plan", "fehlt_im_lv": "missing_in_lv",
+        "einheit_nicht_vergleichbar": "units_differ", "instabile_zaehlung": "unstable_count"}
+SEVERITY = {"fehler": "error", "risiko": "risk", "hinweis": "note"}
+CONFIDENCE = {"hoch": "high", "mittel": "medium", "niedrig": "low"}
+
+
+def merge(lv: LV, result: dict, raw_file: str, overview_files: list[str]) -> None:
+    """Writes the plan check's result into the LV, in English keys: `plan` on every item it knows by `oz`, and the
+    plan with all findings on the LV. The plan check's own file stays as it is, as the raw record."""
+    by_oz = {position["oz"]: position for position in result.get("positionen", [])}
+    for item in lv.items:
+        position = by_oz.get(item.oz)
+        if position is None:
+            continue
+        located = position.get("plan") or {}
+        item.plan = ItemPlan(
+            status=STATUS.get(position.get("pruefung"), "not_checked"), quantity=located.get("menge"),
+            unit=located.get("einheit") or "", matched_by=MATCHED_BY.get(located.get("zuordnung"), ""),
+            rooms=[str(room) for room in located.get("raeume", [])], markers=_markers(located.get("marker", [])),
+            findings=list(position.get("befund_ids", [])))
+    drawing = result.get("eingaben", {}).get("plan") or {}
+    lv.plan = PlanSummary(
+        file=drawing.get("datei", ""), width_px=drawing.get("breite_px"), height_px=drawing.get("hoehe_px"),
+        checked=result.get("zusammenfassung", {}).get("geprueft", 0), raw_file=raw_file,
+        overview_files=overview_files, findings=[_finding(f) for f in result.get("befunde", [])])
+
+
+def _finding(found: dict) -> PlanFinding:
+    lv_side, plan_side = found.get("lv") or {}, found.get("plan") or {}
+    return PlanFinding(
+        id=found["id"], oz=found.get("oz"), kind=KIND.get(found.get("art"), "other"),
+        severity=SEVERITY.get(found.get("schwere"), "note"), title=found.get("titel", ""),
+        description=found.get("beschreibung", ""), lv_quantity=lv_side.get("menge"), lv_unit=lv_side.get("einheit") or "",
+        plan_quantity=plan_side.get("menge"), plan_unit=plan_side.get("einheit") or "",
+        confidence=CONFIDENCE.get(found.get("konfidenz"), found.get("konfidenz") or ""),
+        decision={"offen": "open"}.get((found.get("entscheidung") or {}).get("status"), "open"),
+        markers=_markers(found.get("marker", [])))
+
+
+def _markers(markers: list[dict]) -> list[PlanMarker]:
+    return [PlanMarker(page=m.get("seite", 1), x=m["x"], y=m["y"], shape="frame" if m.get("form") == "rahmen" else "point",
+                       width=m.get("breite"), height=m.get("hoehe"), label=m.get("beschriftung") or "")
+            for m in markers if m.get("x") is not None and m.get("y") is not None]
 
 
 class Background:

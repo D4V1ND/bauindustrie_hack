@@ -22,6 +22,7 @@ Regenerate both schemas after a change to `lv/model.py` or the judge's answer sh
 | `item_types` | array of `{name, trade, description}` | step 2: the LV's own list of item types |
 | `summary` | object | step 3: items and money per method, and the project total (see below) |
 | `risk_summary` | object | step 4: the LV's risk score and what it rests on (see below) |
+| `plan` | object or null | plan check, only when a plan was given: the plan, all findings, the files behind them (see below) |
 | `priced` | boolean | whether the file itself had prices; `false` for a new LV |
 
 ### A line item (`items[]`)
@@ -40,6 +41,7 @@ Regenerate both schemas after a change to `lv/model.py` or the judge's answer sh
 | `prediction` | object | step 3: what the price lookup found (below) |
 | `risk` | object | step 4: the item's risk score and its two parts (below) |
 | `comments` | array of `{text, price, effect}` | the estimator's comments, oldest first, written by `lv comment` (below); empty until then |
+| `plan` | object or null | plan check, only when a plan was given: what the plan says about this item (below) |
 
 ### `prediction`
 
@@ -54,6 +56,7 @@ Regenerate both schemas after a change to `lv/model.py` or the judge's answer sh
 | `reason` | string | one sentence from the judge, or a fixed sentence when code decided alone |
 | `rule`, `calculation`, `result` | string, string, number | only for `adjusted`: e.g. `"linear interpolation by DN"`, `"80 + (125 - 100) / (150 - 100) x (120 - 80)"`, `100.0` |
 | `judged_item` | string or null | set when this item is identical to another item of the LV: the `id` of the item that was actually judged |
+| `judge_call` | integer or null | **link to the judge log**: the `call` number in `<project>_judge.json` that decided this item; null when the judge was not asked (an exact copy, or no candidates) |
 
 | `method` | What it means | Show |
 |---|---|---|
@@ -304,11 +307,86 @@ An array, one entry per judge call. One call judges up to 15 items of the same i
 }
 ```
 
-To find an item's call: the entry whose `items` contains the item's `id`, or its `prediction.judged_item` for an
-identical item. An item may appear in two calls when its first answer did not fit and it was asked again on its
-own; the later call is the one that counted.
+To find an item's call, read its `prediction.judge_call`: the entry with that `call` number. An item may appear in
+two calls when its first answer did not fit and it was asked again on its own; `judge_call` names the later one,
+which counted.
 
-## `<project>_plan.json` (only with a plan)
+## The plan check inside `<project>.json` (only with a plan)
+
+`lv price … --plan` merges the plan check into the result file at the end, in English keys.
+
+### `plan` on an item
+
+| Field | Meaning |
+|---|---|
+| `status` | `ok`, `ok_unstable` (counts varied between readings), `differs`, `not_in_plan`, `units_differ`, `not_checked` (only items in pieces are compared by count) |
+| `quantity`, `unit` | what the plan shows: a count, or for items in m2 the area of their rooms (information only) |
+| `matched_by` | `plan_code` (e.g. F1), `dimensions`, `ai_match`, `room`, or empty |
+| `rooms` | for items in m2: the rooms they were placed in |
+| `markers` | where to show the item on the plan: `page`, `x`, `y` relative to the image (0 to 1, from the top left), `shape` `point` or `frame` (then `width`, `height`), `label` |
+| `findings` | ids of its findings in the LV's `plan.findings` |
+
+Example, Hörsaal H1, "Fensterelement Aluminium … (F1–F4)":
+
+```json
+{
+  "status": "ok",
+  "quantity": 4.0,
+  "unit": "St",
+  "matched_by": "plan_code",
+  "rooms": [],
+  "markers": [
+    {
+      "page": 1,
+      "x": 0.099,
+      "y": 0.345,
+      "shape": "point",
+      "width": null,
+      "height": null,
+      "label": "F1–F4"
+    },
+    {
+      "page": 1,
+      "x": 0.099,
+      "y": 0.442,
+      "shape": "point",
+      "width": null,
+      "height": null,
+      "label": "F1–F4"
+    },
+    "… 2 more …"
+  ],
+  "findings": []
+}
+```
+
+### `plan` on the LV
+
+| Field | Meaning |
+|---|---|
+| `file`, `width_px`, `height_px` | the plan image; pixel = `x × width_px`, `y × height_px` |
+| `checked` | items whose quantity was compared |
+| `findings[]` | `id`, `oz` (null for something on the plan that no LV item covers), `kind` (`quantity_differs`, `not_in_plan`, `missing_in_lv`, `units_differ`, `unstable_count`), `severity` (`error`, `risk`, `note`), `title` and `description` (German, written by the plan check), `lv_quantity`, `lv_unit`, `plan_quantity`, `plan_unit`, `confidence`, `decision` (`open`), `markers` |
+| `raw_file` | `<project>_plan.json`, the plan check's own result |
+| `overview_files` | the PNG and Excel overview |
+
+A finding no LV item covers, from H1:
+
+```json
+{
+  "id": "b-004",
+  "oz": null,
+  "kind": "missing_in_lv",
+  "severity": "risk",
+  "title": "Im Plan vorhanden, im LV keine passende Position: NA",
+  "plan_quantity": 3.0,
+  "plan_unit": "St",
+  "confidence": "high",
+  "decision": "open"
+}
+```
+
+## `<project>_plan.json` (only with a plan): the raw record
 
 Written by `lv price … --plan <plan>`. The shape is the VLM prototype's (`vlm/README.md`), with German keys:
 

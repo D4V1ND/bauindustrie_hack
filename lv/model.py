@@ -31,6 +31,7 @@ class Prediction(BaseModel):
     reason: str = ""
     judged: list[Source] = []  # the best candidates the judge saw (at most 3), best first, each with its `why`
     judged_item: str | None = None  # set on a copy: the identical item of this LV that was searched and judged
+    judge_call: int | None = None  # the `call` in <project>_judge.json that decided this item; None: no judge asked
 
 
 class Risk(BaseModel):
@@ -79,6 +80,55 @@ class ItemType(BaseModel):
     description: str = ""
 
 
+class PlanMarker(BaseModel):
+    """Where something is on the plan image: x and y relative to its width and height (0 to 1, from the top left)."""
+    page: int = 1
+    x: float
+    y: float
+    shape: Literal["point", "frame"] = "point"
+    width: float | None = None  # width and height: only for a frame, relative like x and y
+    height: float | None = None
+    label: str = ""
+
+
+class ItemPlan(BaseModel):
+    """Plan check: what the construction plan says about one line item (SPEC.md, plan check)."""
+    status: Literal["ok", "ok_unstable", "differs", "not_in_plan", "units_differ", "not_checked"]
+    quantity: float | None = None  # what the plan shows: a count, or for room items the rooms' area
+    unit: str = ""
+    matched_by: Literal["plan_code", "dimensions", "ai_match", "room", ""] = ""
+    rooms: list[str] = []  # for items in m2: the rooms they were placed in
+    markers: list[PlanMarker] = []  # where to show the item on the plan
+    findings: list[str] = []  # ids of its findings in LV.plan.findings
+
+
+class PlanFinding(BaseModel):
+    id: str
+    oz: str | None  # None: something on the plan that no LV item covers
+    kind: Literal["quantity_differs", "not_in_plan", "missing_in_lv", "units_differ", "unstable_count", "other"]
+    severity: Literal["error", "risk", "note"]
+    title: str  # title and description: written by the plan check in German
+    description: str
+    lv_quantity: float | None = None
+    lv_unit: str = ""
+    plan_quantity: float | None = None
+    plan_unit: str = ""
+    confidence: str = ""  # high, medium or low
+    decision: str = "open"  # for the estimator: open until decided
+    markers: list[PlanMarker] = []
+
+
+class PlanSummary(BaseModel):
+    """Plan check: the plan, all findings and the files behind them."""
+    file: str
+    width_px: int | None = None
+    height_px: int | None = None
+    checked: int  # items whose quantity was compared with the plan
+    findings: list[PlanFinding]
+    raw_file: str  # <project>_plan.json: the plan check's own result
+    overview_files: list[str] = []  # <project>__<plan>_uebersicht.png and .xlsx
+
+
 class LineItem(BaseModel):
     id: str  # project + "/" + oz, unique across all projects
     oz: str
@@ -98,6 +148,7 @@ class LineItem(BaseModel):
     prediction: Prediction | None = None  # step 3; never written into unit_price
     risk: Risk | None = None  # step 4
     comments: list[Comment] = []  # the estimator's comments, oldest first; never written by a model
+    plan: ItemPlan | None = None  # plan check, only when a plan was given
 
 
 class LV(BaseModel):
@@ -109,6 +160,7 @@ class LV(BaseModel):
     item_types: list[ItemType] = []  # step 2: the LV's own list of item types
     summary: Summary | None = None  # step 3: items and sums per method, and the project total
     risk_summary: RiskSummary | None = None  # step 4: the LV's risk score and what it rests on
+    plan: PlanSummary | None = None  # plan check: the plan, its findings and files; only when a plan was given
 
     @computed_field
     @property

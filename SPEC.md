@@ -258,6 +258,7 @@ Each item gains a `prediction`:
 | `rule`, `calculation`, `result` | only for `adjusted`, e.g. `linear interpolation by DN`, `80 + (125 - 100) / (150 - 100) x (120 - 80)`, `100.0` |
 | `reason` | the judge's sentence, or a fixed sentence when code decided alone |
 | `judged_item` | only on a copy: the id of the identical item of this LV that was searched and judged |
+| `judge_call` | the `call` in `<project>_judge.json` that decided the item (the last call that asked about it); empty when the judge was not asked |
 
 The result file `data/out/<project>.json` also holds a `summary`: per method the number of items and the sum of
 `median × quantity`, and the project `total`. Sums count only **normal items** whose method is `copied`, `similar`
@@ -355,9 +356,12 @@ check loses nothing of it; the command then ends with an error that says so. A p
 an image or PDF, a missing file, or a missing `OPENAI_API_KEY` / `OPENAI_MODEL` (in the root `.env` or in `vlm/.env`)
 stops the command before anything runs; `--copy-only` and `--plan` cannot be combined.
 
-The two files join on `oz`: an item of `<project>.json` and its entry in the plan file's `positionen` have the same
-item number. The plan file's shape is the prototype's own, with German keys (`positionen`, `befunde`,
-`zusammenfassung`); see `vlm/README.md` and `docs/result-format.md`.
+At the end the plan check is **merged into `<project>.json`**, in English keys, so that one file holds everything:
+every item gets `plan` (status, the plan's quantity, how it was matched, rooms, markers, finding ids), and the LV
+gets `plan` (the plan file and its size, how many items were compared, all findings including those that no LV item
+covers, and the names of the raw file and the overview). `<project>_plan.json` stays as the plan check's raw record,
+with the prototype's German keys (`vlm/README.md`). Finding titles and descriptions stay German: the prototype
+writes them.
 
 Every item that can be located gets `plan` with markers (x/y relative to the plan image), so a view can show it on
 the plan; items in m2 get frames around their rooms. Run on the Hörsaal H1 LV with its plan: 41 of 52 items located,
