@@ -396,7 +396,18 @@ Built before tasks 6 and 7: step 3 does not need trades or item types.
     0 vague. Examples: "Asphalt schneiden" 19 (similar, complete); "Transporter" 65 (reference; vehicle size
     and operator not stated); "FBS Pass- und Gelenkstück DN 800" 80 (nothing found; length or angle not stated).
   - Limits: the five heaviest items are all weighted by related items' prices, not by a found price; values inherit
-    token prices; all numbers of the scale are starting values. Not run on P4 yet.
+    token prices; all numbers of the scale are starting values.
+  - P4, all steps in one `lv price` run: 9 min 29 s end to end. Opus item types 40 s, assignment 31 s (12 calls),
+    judge 373 s (67 calls, then 15 asked again), description check 119 s (12 calls); reading, search and saving
+    about 6 s. Step 3: 1 copied, 8 similar, 1 adjusted, 121 reference, 165 none, total 23,604.14; thinking saved for
+    77 of 82 calls. Step 4: LV score 52 of 100 over a value of 582,810.29; value basis 9 by price, 109 by related
+    items, 154 assumed; descriptions 172 complete, 115 with gaps, 9 vague.
+  - P4 against its run at `high`: "Baustelle räumen" (3 identical lump sums, 7,500 each) is `similar` again, the
+    judge varying once more. Bauzaun (the 0.10 token price) and the pump operation became `reference`. New prices:
+    two plate load tests (100 per test), bitumen spraying (1.60 per m2), asphalt cutting (adjusted, 15.68 per m) and a
+    longitudinal crossing surcharge at 0.50 per m, one of P3's near-zero prices.
+  - Speed: the description check needs only texts and item types, so it could run beside the judge (about 2 min
+    less on P4). Not built.
   - Files: `lv/risk.py`, `lv/model.py`, `lv/ai.py`, `lv/__main__.py`, `tests/test_risk.py`, docs and views.
 
 ### Checkpoint: step 3
