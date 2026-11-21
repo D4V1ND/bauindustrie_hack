@@ -55,7 +55,11 @@ def main(argv: list[str] | None = None, data: Path = DATA) -> None:
                 lv.item_types = propose(lv, ask_types)
                 asked = assign(lv, lv.item_types, ask_assignments)
                 print(f"  {_items(asked)} asked, {len(lv.items) - asked} copied from an identical item")
-            predict(lv, library, judge=None if args.copy_only else ask_judge)  # step 3
+            embed = ai.embed if ai.voyage_key() and not args.copy_only else None
+            if not args.copy_only:
+                print(f"search: by words and by meaning ({ai.EMBED_MODEL})" if embed
+                      else "search: by words only (no VOYAGE_API_KEY in .env)")
+            predict(lv, library, judge=None if args.copy_only else ask_judge, embed=embed)  # step 3
         except (ai.MissingKey, RuntimeError) as stop:  # RuntimeError: every call of one kind failed
             raise SystemExit(str(stop))
         print_overview(lv)

@@ -5,7 +5,7 @@ import pytest
 
 from lv.__main__ import main
 from lv.extract import read
-from lv.match import describe, group_label, searcher
+from lv.match import EMBED_LONG_TEXT, describe, embed_text, fuse, group_label, searcher
 from lv.model import LV, LineItem, load
 
 RAW = Path(__file__).resolve().parent.parent / "data" / "raw" / "Challenge A Dataset"
@@ -147,3 +147,36 @@ def test_at_most_five_candidates_best_first_and_none_that_is_far_off():
     assert len(found["P4/1"]) == 5 and set(found["P4/1"][:2]) == {"P1/4", "P1/7"}  # the two with DN 100 come first
     assert "P1/8" not in found["P4/1"]
     assert found["P4/2"] == []  # nothing in the library shares a word with it
+
+
+# --- step 3: search by meaning ---------------------------------------------------------------------------------
+
+def test_what_an_embedding_sees():
+    new = an_lv("P4", ("Bogen DN 100", "Edelstahl"), ("[PERSON_115]-Bogen DN 300", "wie vor, jedoch " + "x" * 2000))
+
+    text = embed_text(describe(new)[1])
+
+    assert text.startswith("bogen dn 100 — edelstahl -bogen dn 300 — wie vor, jedoch xxx")  # the referred item first
+    assert "person" not in text  # anonymiser tokens hide a different word in each file
+    assert len(text) == len("bogen dn 100 — edelstahl -bogen dn 300 — ") + EMBED_LONG_TEXT
+
+
+def test_meaning_adds_the_closest_items_the_words_missed():
+    library = an_lv("P1", ("Druckrohr spülen", "mit Trinkwasser", "m"), ("GGG Leitung", "", "m"),
+                    ("GGG Leitung", "", "St"), ("Zulage GGG Leitung", "", "m"))
+    new = an_lv("P4", ("Druckrohr aus duktilem Gusseisen", "", "m"))
+
+    def embed(texts):  # stands in for Voyage: "GGG" and "Gusseisen" mean the same
+        return [[1.0, 0.0] if "ggg" in text or "gusseisen" in text else [0.0, 1.0] for text in texts]
+
+    by_meaning = searcher(describe(library), embed)
+    found = {d.item.id: [c.item.id for c in by_meaning(d)] for d in describe(new)}
+
+    assert search_in(library, new) == {"P4/1": ["P1/1"]}  # by words: only the item sharing "Druckrohr"
+    assert found == {"P4/1": ["P1/1", "P1/2"]}  # words first, then meaning; never another unit or a surcharge item
+
+
+def test_two_rankings_are_merged_by_place_and_agreement_wins():
+    # item 3 is 3rd by words and 1st by meaning: 1/63 + 1/61 beats item 2 at 2nd by words only (1/62)
+    assert fuse([1, 2, 3], [3, 1, 4]) == [1, 3, 2, 4]
+    assert fuse([7, 8], [8, 7]) == [7, 8]  # equal points: library order

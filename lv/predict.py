@@ -10,7 +10,7 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-from lv.match import Described, describe, group_label, same_item, searcher
+from lv.match import Described, Embed, describe, embed_text, group_label, same_item, searcher
 from lv.model import LV, LineItem, MethodSum, Prediction, Source, Summary
 
 METHODS = ("copied", "similar", "adjusted", "reference", "none")
@@ -45,10 +45,11 @@ Judge = Callable[[list[str]], list[JudgeAnswer | None]]
 MAX_PACK = 15  # items in one judge call
 
 
-def predict(new: LV, library: list[LV], judge: Judge | None, packed: bool = True) -> None:
+def predict(new: LV, library: list[LV], judge: Judge | None, packed: bool = True, embed: Embed | None = None) -> None:
     """Gives every item of the new LV its prediction, and the LV its summary. Without a judge: copy only.
 
     `packed=False` asks the judge about every item on its own, as before packs existed (used to compare the two).
+    `embed` adds candidates by meaning to the candidates by words.
     """
     # An item without a price, or priced at zero, is no evidence for a price.
     past_items = [past for lv in library for past in describe(lv) if past.item.unit_price]
@@ -74,7 +75,9 @@ def predict(new: LV, library: list[LV], judge: Judge | None, packed: bool = True
             described.item.prediction = Prediction(
                 method="none", reason="No exact match in the price library. Search and judge were switched off.")
     else:
-        search = searcher(past_items)
+        search = searcher(past_items, embed)
+        if embed:
+            embed([embed_text(d) for d in first.values()])  # all new items in one go; each search then finds its vector saved
         candidates = {described.item.id: search(described) for described in first.values()}
         verdicts = _ask_judge([d for d in first.values() if candidates[d.item.id]], candidates, judge, packed)
         for described in first.values():

@@ -182,14 +182,22 @@ For each item of the new LV, in this order:
 | 2c | Only `type_only` candidates, or `size_only` candidates on one side | code | `reference` |
 | 3 | No candidate, or all candidates `different` | code | `none` |
 
-### Search (code, standard library)
+### Search (code; meaning by Voyage AI)
 
 - Only library items with the same unit and the same surcharge status: a **surcharge item** ("Zulage", "Zuschlag",
   "Mehrpreis", "Aufpreis", "Mehrkosten") only meets other surcharge items.
 - A **repeat item** ("wie vor, jedoch …", "wie Pos. …") is compared together with the text of the item it refers
   to: the last item before it in the same LV that is fully described. It also takes over that item's surcharge status.
-- Ranking: similarity of the words and numbers in short text + long text (rare words weigh more). The 5 best with a
-  score of at least 0.10 are the candidates.
+- **By words:** similarity of the words and numbers in short text + long text (rare words weigh more). Only items with
+  a score of at least 0.10 are ranked.
+- **By meaning** (only when `VOYAGE_API_KEY` is set): cosine of the embeddings from Voyage AI `voyage-4`. What is
+  embedded per item: the text of the item a repeat item refers to, the short text and the first 500 characters of the
+  long text, without anonymiser tokens. Library and new items are embedded the same way; every vector is saved in
+  `data/embeddings/voyage-4.json`, so a text is sent once. It finds other words for the same thing ("Handrad" for
+  "Handbetätigung", "Baufacharbeiter" for "Facharbeiter"), but blurs numbers ("DN 80" looks like "DN 800").
+- **Shortlist:** with meaning, the best 20 of each ranking are merged by place (reciprocal rank fusion: an item earns
+  1 / (60 + its place) in each ranking) and the 5 with the most points are the candidates. Without meaning, the 5 best
+  by words. Scores and places only choose candidates; the judge decides, and the order of the 5 does not change a price.
 
 ### Judge (AI, `claude-sonnet-5-5`)
 
@@ -277,6 +285,8 @@ Step 3 records facts and contains no thresholds. Step 4 will read `method`, `min
 
 - Python 3.13, pip, `.venv` (Windows, PowerShell).
 - GAEB reading and text search: standard library only. PDF text reading: `pypdf`.
+- Search by meaning: Voyage AI `voyage-4` through the `voyageai` package (Anthropic has no embedding model). No
+  vector database: about 1,000 saved vectors are compared in memory.
 - AI: Claude API through `langchain-anthropic`, used thinly: chat model, structured output, `.batch()` with a
   concurrency limit. No agents, chains, vector stores or LangGraph.
   - One model and one effort level per job (effort is how much the model thinks before it answers):

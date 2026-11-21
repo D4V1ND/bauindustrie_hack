@@ -2,7 +2,11 @@
 
 Check one real call by hand:  .venv\\Scripts\\python.exe -m lv.ai
 """
+import functools
+import hashlib
+import json
 import os
+import time
 from pathlib import Path
 from typing import TypeVar
 
@@ -16,6 +20,14 @@ JUDGE_MODEL, JUDGE_EFFORT = "claude-sonnet-5-5", "high"  # step 3 judge: the var
 MAX_OUTPUT_TOKENS = 16000  # answers are small; the room is for the model's thinking
 MAX_PARALLEL_CALLS = 4
 ENV_FILE = Path(__file__).resolve().parent.parent / ".env"
+# Step 3 search by meaning (Voyage AI; Anthropic has no embedding model). The saved vectors are per model, so a
+# new model never meets old vectors.
+EMBED_MODEL = "voyage-4"
+EMBED_FILE = Path(__file__).resolve().parent.parent / "data" / "embeddings" / f"{EMBED_MODEL}.json"
+# ponytail: sized for Voyage's limit without a payment method (3 calls and 10,000 tokens a minute; a text here is at
+# most ~300 tokens). With a payment method the limit is far higher; raise the batch to 128 if embedding is too slow.
+EMBED_BATCH = 32  # texts per Voyage call
+EMBED_TRIES = 10  # a call that hits the rate limit waits a minute and tries again
 
 Shape = TypeVar("Shape", bound=BaseModel)
 
@@ -188,6 +200,48 @@ def ask(model: str, system: str, questions: list[str], shape: type[Shape], effor
     if len(errors) == len(questions):  # e.g. a wrong key or model name: say so instead of returning nothing
         raise RuntimeError(f"Every call to {model} failed. First error: {errors[0]}")
     return [None if isinstance(answer, Exception) else answer for answer in answers]
+
+
+def voyage_key() -> str | None:
+    """The Voyage AI key, if set up. Without it the search runs by words only."""
+    return os.environ.get("VOYAGE_API_KEY") or dotenv_values(ENV_FILE).get("VOYAGE_API_KEY")
+
+
+@functools.cache
+def _saved_vectors() -> dict[str, list[float]]:
+    return json.loads(EMBED_FILE.read_text()) if EMBED_FILE.exists() else {}
+
+
+def embed(texts: list[str]) -> list[list[float]]:
+    """One vector per text (length 1, so the dot product is the cosine). Every vector is saved to EMBED_FILE, so a
+    text is sent to Voyage only once. Both sides of a comparison are embedded the same way: a new item looks for an
+    item of the same kind, not for an answer to a question."""
+    saved = _saved_vectors()
+    name = {text: hashlib.sha1(text.encode()).hexdigest()[:16] for text in texts}
+    missing = list(dict.fromkeys(text for text in texts if name[text] not in saved))
+    if missing:
+        import voyageai  # imported here: most runs find every vector saved
+
+        client = voyageai.Client(api_key=voyage_key())  # no quick retries: each one uses up the per-minute limit
+        busy = (voyageai.error.RateLimitError, voyageai.error.ServiceUnavailableError, voyageai.error.APIConnectionError)
+        for start in range(0, len(missing), EMBED_BATCH):
+            batch = missing[start:start + EMBED_BATCH]
+            for attempt in range(1, EMBED_TRIES + 1):
+                try:
+                    vectors = client.embed(batch, model=EMBED_MODEL, input_type="document").embeddings
+                    break
+                except busy as error:
+                    if attempt == EMBED_TRIES:
+                        raise RuntimeError(f"Voyage AI ({EMBED_MODEL}) failed: {error}") from error
+                    print(f"[Voyage busy or at its rate limit; waiting 60 s, {start}/{len(missing)} texts done]",
+                          flush=True)
+                    time.sleep(60)
+                except voyageai.error.VoyageError as error:
+                    raise RuntimeError(f"Voyage AI ({EMBED_MODEL}) failed: {error}") from error
+            saved |= {name[text]: [round(x, 6) for x in vector] for text, vector in zip(batch, vectors, strict=True)}
+            EMBED_FILE.parent.mkdir(parents=True, exist_ok=True)
+            EMBED_FILE.write_text(json.dumps(saved))  # after every batch: a failed call loses nothing already paid for
+    return [saved[name[text]] for text in texts]
 
 
 if __name__ == "__main__":

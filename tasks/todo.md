@@ -300,6 +300,38 @@ Built before tasks 6 and 7: step 3 does not need trades or item types.
   - Depends on: 3.
   - Files: `lv/extract.py`, `lv/model.py`, `lv/__main__.py`, `tests/test_extract_pdf.py`, `requirements.txt`.
 
+- [x] **Task 15: Search by meaning (Voyage embeddings), merged with the word search by rank** (medium)
+  - Does: embeds every library item and every new item once with Voyage AI `voyage-4` (short text + first 500
+    characters of the long text, without anonymiser tokens), saves the vectors in `data/embeddings/voyage-4.json`,
+    and merges the word ranking and the meaning ranking by reciprocal rank fusion (best 20 of each, top 5 to the
+    judge). Without `VOYAGE_API_KEY`, `lv price` searches by words as before and says so.
+  - Why: word search misses other words for the same thing. P4's DN 80 gate valve ("Handbetätigung") ranked 8th by
+    words against P1's "Absperrschieber DN 80, PN 16 … mit Handrad"; by meaning it ranked 1st, and the judge called it
+    `same` (258.48 per piece; the words-only run had no price).
+  - Found:
+    - Voyage without a payment method allows 3 calls and 10,000 tokens a minute: embedding the 720 library items took
+      9.4 min, P4 7.2 min, once. The code waits a minute when it hits the limit.
+    - Meaning scores sit in a narrow band (best per P5 item 64–93%) and blur numbers: "FBS Pass- und Gelenkstück
+      DN 800" is closest to "Bogen DN 80" (78%). A cut-off cannot separate right from wrong, so the judge reads every
+      candidate.
+    - P5, real run with the step 2 item types kept (21 judge calls, 53 s):
+
+      | | words only, 5 (task 14 run) | RRF top 5 |
+      |---|---|---|
+      | `similar` | 3 | 8 |
+      | `adjusted` | 0 | 1 |
+      | `reference` | 25 | 26 |
+      | `none` | 22 | 15 |
+      | total | 8,385.00 | 13,220.35 |
+
+      New prices, read by hand (P5 has no answer key): TOK-Band, Facharbeiter, Bagger bis 1 m3 plausible;
+      Vorarbeiter (Polier) from P1's "Polier- oder Obermonteur"; Transporter `same` although the judge called it
+      "ambiguous"; LKW bis 12 t interpolated with a 15 t tipper that also has all-wheel drive.
+  - Not measured yet: whether more prices also means more wrong prices. The hidden-project test answers it.
+  - View: `data/views/step3_match.html` (one P4 item end to end; every P5 item with its top 5 and verdicts).
+  - Files: `lv/match.py`, `lv/ai.py`, `lv/predict.py`, `lv/__main__.py`, `tests/test_match.py`, `tests/conftest.py`,
+    `requirements.txt`, `.gitignore`.
+
 ### Checkpoint: step 3
 - [x] All tests pass without network and without a key.
 - [x] `lv price --copy-only` on P2's own `.X83` copies only correct prices.
