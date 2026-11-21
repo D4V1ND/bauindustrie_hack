@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Needle</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Crect width='20' height='20' fill='%230a0a0a'/%3E%3Cpath d='M2.5 16A7.5 7.5 0 0 1 14.6 10.1' fill='none' stroke='%23fff' stroke-opacity='.35' stroke-width='2.4'/%3E%3Cpath d='M14.6 10.1A7.5 7.5 0 0 1 17.5 16' fill='none' stroke='%23f0542b' stroke-width='2.4'/%3E%3Cpath d='M8.7 16L10 8.6 11.3 16Z' fill='%23fff' transform='rotate(60 10 16)'/%3E%3Ccircle cx='10' cy='16' r='1.9' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Crect width='20' height='20' rx='3' fill='%230a0a0a'/%3E%3Cpath fill-rule='evenodd' fill='%23f0542b' transform='translate(5.6 1.2) scale(.73)' d='M2.60 23.60L4.21 18.89L6.39 1.73A1.00 1.00 0 0 0 4.41 1.47L2.22 18.63ZM5.57 3.13L5.00 7.60L4.29 7.51L4.85 3.04Z'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -48,16 +48,13 @@ svg.i{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--paper) 84%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
 .top-in{max-width:1360px;margin:0 auto;padding:12px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:10px;font-size:14px;min-width:0}
-.mark{width:21px;height:13px;flex:none;overflow:visible;margin-top:1px}
-.nd-tr{fill:none;stroke:var(--ink);stroke-width:2.4;opacity:.25}
-.nd-hot{fill:none;stroke:var(--signal);stroke-width:2.4}
-.nd{fill:var(--ink);transform-origin:10px 16px;transform:rotate(60deg);animation:ndswing 1.1s var(--spring) .2s both,ndtwitch 7s var(--ease) 3s infinite}
-.nd-p{fill:var(--ink)}
-@keyframes ndswing{from{transform:rotate(-70deg)}to{transform:rotate(60deg)}}
-@keyframes ndtwitch{0%,88%,100%{transform:rotate(60deg)}92%{transform:rotate(52deg)}96%{transform:rotate(66deg)}}
-.brand-b:hover .nd{animation:ndswing .9s var(--spring)}
-@media (prefers-reduced-motion:reduce){.nd{animation:none!important}}
-.brand b{font-weight:600;letter-spacing:-.02em;font-size:15px}
+.wm{display:inline-flex;align-items:baseline}
+.wm-n{width:.31em;height:.93em;margin:0 .01em -.04em .02em;fill:var(--signal);overflow:visible;transform-origin:30% 98%;animation:wmswing 1.1s var(--spring) .2s both,wmtwitch 7s var(--ease) 3s infinite}
+@keyframes wmswing{from{transform:rotate(-55deg)}to{transform:rotate(0)}}
+@keyframes wmtwitch{0%,88%,100%{transform:rotate(0)}92%{transform:rotate(-9deg)}96%{transform:rotate(5deg)}}
+.brand-b:hover .wm-n{animation:wmswing .9s var(--spring)}
+@media (prefers-reduced-motion:reduce){.wm-n{animation:none!important}}
+.brand b{font-weight:600;letter-spacing:-.03em;font-size:16px}
 .crumb{color:var(--ink-3)}
 .crumb a{color:var(--ink-2);text-decoration:none}.crumb a:hover{color:var(--signal)}
 .top-r{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
@@ -1153,7 +1150,7 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 
 /* start page */
 .brand-b{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:inherit}
-.brand-b:hover b{color:var(--signal)}
+
 .brand-b:focus-visible{outline:2px solid var(--signal);outline-offset:3px;border-radius:4px}
 .start .eyebrow{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
 .st-ok,.st-bad{display:inline-flex;align-items:center;gap:6px}
@@ -1594,7 +1591,7 @@ function segs(arr) {
 // ================= views =================
 function vHeader() {
   return '<header class="top"><div class="top-in">' +
-    '<div class="brand"><button class="brand-b" data-act="home" aria-label="Startseite"><svg class="mark" viewBox="1 7.2 18 11" aria-hidden="true"><path class="nd-tr" d="M2.5 16A7.5 7.5 0 0 1 14.6 10.1"/><path class="nd-hot" d="M14.6 10.1A7.5 7.5 0 0 1 17.5 16"/><path class="nd" d="M8.7 16L10 8.6 11.3 16Z"/><circle class="nd-p" cx="10" cy="16" r="1.9"/></svg><b>Needle</b></button><span class="crumb">/ <span class="pmw"><button class="crumb-b" data-act="projects" aria-expanded="' + !!S.projOpen + '">Projekte' + IC.chev + '</button>' + vProjMenu() + '</span> /</span>' + (S.home ? '<span>Neues LV</span>' : '<span>' + esc(P.short) + '</span>') + '</div>' +
+    '<div class="brand"><button class="brand-b" data-act="home" aria-label="Startseite"><b class="wm">need<svg class="wm-n" viewBox="0 0 8 24" aria-hidden="true"><path fill-rule="evenodd" d="M2.60 23.60L4.21 18.89L6.39 1.73A1.00 1.00 0 0 0 4.41 1.47L2.22 18.63ZM5.57 3.13L5.00 7.60L4.29 7.51L4.85 3.04Z"/></svg>e</b></button><span class="crumb">/ <span class="pmw"><button class="crumb-b" data-act="projects" aria-expanded="' + !!S.projOpen + '">Projekte' + IC.chev + '</button>' + vProjMenu() + '</span> /</span>' + (S.home ? '<span>Neues LV</span>' : '<span>' + esc(P.short) + '</span>') + '</div>' +
     '<div class="top-r">' +
       (S.home ? '' : '<button class="btn btn-primary" data-act="newProj">' + IC.plus + 'Neues Projekt</button>') +
     '</div></div></header>';
@@ -1696,7 +1693,7 @@ function vSummary(d) {
   var drivers = (P.live ? d.full : d.all).filter(function (r) { return r.gp > 0; }).sort(function (a, b) { return b.gp - a.gp; }).slice(0, 5);
   if (!P.live) stats = [['', '812', 'Positionen 1:1 übernommen'], ['blue', '389', 'adaptiert'], ['warn', '83', 'unsicher, bitte prüfen'], ['', '38 → 9', 'Positionen bündelbar'], ['ok', '≈ 31.000 €', 'Nachtragspotenzial (4 Pos.)']];
   return '<section class="card sum rise' + (S.analyzing ? ' scan' : '') + '" style="flex:2 1 640px;--d:320ms" aria-label="Zusammenfassung">' +
-    '<div class="card-h"><span class="mono"><b>02</b> Zusammenfassung</span><span class="mono" style="display:flex;gap:6px;align-items:center;color:var(--signal)">' + IC.star + 'KI · jede Aussage mit Quelle</span></div>' +
+    '<div class="card-h"><span class="mono"><b>02</b> Zusammenfassung</span></div>' +
     '<div class="sum2"><p class="sum-p">' + txt + '</p>' +
     '<div class="sum-drv"><div class="mono faint" style="margin-bottom:8px">Top-Kostentreiber</div>' +
       '<ol class="drv-ol">' + drivers.map(function (r) { return '<li><button class="drv" data-act="open" data-oz="' + r.oz + '"><span class="drv-t"><span>' + esc(r.kurz) + '</span><b>' + eur(r.gp) + '</b></span></button></li>'; }).join('') + '</ol>' +
