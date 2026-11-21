@@ -1075,6 +1075,7 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .ed-foot .mono{color:var(--ink-3);font-size:.6rem}
 .ed-foot .ft-r{display:flex;align-items:baseline;gap:12px}
 .ed-foot .ft-r b{font-size:18px;font-weight:400;letter-spacing:-.02em}
+.ed-mg{font-size:13px;font-variant-numeric:tabular-nums;color:var(--ink-2);padding-right:9px}
 </style>
 </head>
 <body>
@@ -1581,7 +1582,7 @@ function vEditor(d) {
   var all = lvAll(d), edited = all.filter(function (r) { return r.ep !== r.ep0 || r.menge !== r.menge0; });
   var delta = edited.reduce(function (a, r) { return a + r.gp - r.ep0 * r.menge0; }, 0);
   var head = '<button class="ed-h" data-act="lvToggle" aria-expanded="' + S.lvOpen + '" aria-controls="lved">' +
-    '<span class="ed-t"><span class="mono faint"><span style="color:var(--ink)">[05]</span> LV-Editor</span><b>Gesamtes LV bearbeiten</b><small>' + fmt(all.length) + ' Positionen · Preise, Mengen und Kommentare direkt im LV ändern</small></span>' +
+    '<span class="ed-t"><span class="mono faint"><span style="color:var(--ink)">[05]</span> LV-Editor</span><b>Gesamtes LV bearbeiten</b><small>' + fmt(all.length) + ' Positionen · Preise und Kommentare direkt im LV ändern</small></span>' +
     '<span class="ed-s">' + (edited.length ? '<span class="mtag adaptiert"><i></i>' + edited.length + ' geändert · ' + (delta >= 0 ? '+' : '−') + eur(Math.abs(Math.round(delta))) + '</span>' : '') +
     '<span class="ed-o">' + (S.lvOpen ? 'Schließen' : 'Öffnen') + '<span class="ed-chev">' + IC.chev + '</span></span></span></button>';
   if (!S.lvOpen) return '<section class="ed rise" style="--d:440ms" aria-label="LV-Editor" data-k="ed">' + head + '</section>';
@@ -1598,7 +1599,7 @@ function vEditor(d) {
     body += '<div class="ed-r' + (ch ? ' ch' : '') + (open ? ' open' : '') + '" data-k="e' + r.oz + '" role="row">' +
       '<span class="mono ed-oz" role="cell">' + r.oz + '</span>' +
       '<span class="ed-k" role="cell">' + esc(r.kurz) + (r.core ? ' <button class="ed-ki" data-act="open" data-oz="' + r.oz + '" title="KI-Analyse öffnen">KI · ' + r.risk + '</button>' : '') + '</span>' +
-      '<span role="cell" class="ed-c"><input class="ed-in" data-lvf="menge" data-oz="' + r.oz + '" inputmode="decimal" value="' + lvNum(r.menge) + '" aria-label="Menge ' + r.oz + '"><span class="ed-u">' + esc(r.einheit) + '</span></span>' +
+      '<span role="cell" class="ed-c"><span class="ed-mg">' + lvNum(r.menge) + '</span><span class="ed-u">' + esc(r.einheit) + '</span></span>' +
       '<span role="cell" class="ed-c"><input class="ed-in" data-lvf="ep" data-oz="' + r.oz + '" inputmode="decimal" value="' + fmt(r.ep, 2) + '" aria-label="Einheitspreis ' + r.oz + '"><span class="ed-u">€</span></span>' +
       '<span role="cell" class="ed-gp">' + eur(Math.round(r.gp * 100) / 100) + '</span>' +
       '<span role="cell" class="ed-a">' +
