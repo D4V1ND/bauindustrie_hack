@@ -278,7 +278,7 @@ h1{margin:12px 0 0;font-size:clamp(2rem,4.2vw,3.3rem);line-height:1.02;font-weig
 .ftag button:hover{background:color-mix(in srgb,var(--signal) 16%,transparent)}
 
 .tbl{overflow-x:auto;border:1px solid var(--line);background:color-mix(in srgb,var(--card) 88%,transparent)}
-.lv-grid{display:grid;grid-template-columns:34px 56px 92px minmax(300px,1fr) 104px 150px 132px 50px 46px;gap:12px;align-items:center;padding:0 16px}
+.lv-grid{display:grid;grid-template-columns:34px 56px 92px minmax(300px,1fr) 104px 150px 132px 46px;gap:12px;align-items:center;padding:0 16px}
 .th{height:42px;color:var(--ink-3);border-bottom:1px solid var(--line-2);background:var(--paper-2)}
 .sort{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:4px;padding:3px 5px;margin:0 -5px;transition:color .15s,background .15s}
 .sort:hover{color:var(--ink);background:var(--paper-3)}
@@ -594,6 +594,68 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 @media (prefers-reduced-motion:reduce){
  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;animation-delay:0ms!important;transition-duration:.01ms!important}
 }
+
+/* price: single editable proposal */
+.ep{all:unset;cursor:text;position:relative;display:inline-flex;align-items:baseline;gap:8px;font-size:42px;font-weight:250;letter-spacing:-.05em;line-height:1;border-bottom:1.5px dashed transparent;padding-bottom:3px;transition:border-color .2s}
+.ep:hover,.ep:focus-visible{border-bottom-color:var(--line-2)}
+.ep .pen{display:inline-flex;opacity:0;transform:translateX(-4px);transition:opacity .2s,transform .2s var(--ease);color:var(--ink-3)}
+.ep .pen svg{width:16px;height:16px}
+.ep:hover .pen,.ep:focus-visible .pen{opacity:1;transform:none}
+.epedit{display:inline-flex;align-items:baseline;gap:6px;border-bottom:1.5px solid var(--signal);padding-bottom:3px}
+.epedit input{all:unset;font-size:42px;font-weight:250;letter-spacing:-.05em;line-height:1;field-sizing:content;min-width:3ch;max-width:9ch;caret-color:var(--signal)}
+.epedit .cur{font-size:42px;font-weight:250;letter-spacing:-.05em;line-height:1;color:var(--ink-3)}
+.price.is-edit{border-color:var(--ink);box-shadow:4px 4px 0 var(--signal)}
+.edhint{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.keys{font:.6rem/1.8 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.keys kbd{font:inherit;border:1px solid var(--line-2);padding:1px 5px;margin:0 3px 0 6px;color:var(--ink-2)}
+.why2{margin:18px -18px -20px;padding:16px 18px 18px;border-top:1px solid var(--line)}
+.why2 p{margin:8px 0 0;font-size:13.5px;line-height:1.6;color:var(--ink-2);max-width:60ch}
+.calc2{margin-top:12px;padding:10px 12px;background:var(--paper-2);font-size:12.5px}
+.refs{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:12px}
+.refs>.mono{color:var(--ink-3);margin-right:4px}
+.ref{display:inline-flex;align-items:baseline;gap:6px;height:26px;padding:0 9px;border:1px solid var(--line-2);background:transparent;font-size:12px;cursor:pointer;transition:border-color .15s,background .15s}
+.ref small{font:.58rem/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.ref:hover{border-color:var(--ink);background:var(--card)}
+/* kommunikation */
+.comm{margin:22px 22px 0}
+.comm-h{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line)}
+.comm-h>.mono{color:var(--ink-3)}
+.ctabs{display:flex}
+.ctab{position:relative;height:38px;padding:0 12px;border:0;background:transparent;color:var(--ink-3);display:inline-flex;align-items:center;gap:7px;font:.66rem/1 var(--mono);letter-spacing:.07em;text-transform:uppercase;cursor:pointer;transition:color .15s}
+.ctab::after{content:"";position:absolute;left:10px;right:10px;bottom:-1px;height:2px;background:var(--ink);transform:scaleX(0);transition:transform .3s var(--ease)}
+.ctab:hover{color:var(--ink)}
+.ctab.on{color:var(--ink)}
+.ctab.on::after{transform:scaleX(1)}
+.ctab .dn{background:var(--paper-3);color:var(--ink-2)}
+.ctab.on .dn{background:var(--ink);color:var(--paper)}
+.comm .panel{padding:16px 0 28px}
+.feed{list-style:none;margin:0;padding:0;display:grid;gap:0}
+.feed li{display:grid;grid-template-columns:26px minmax(0,1fr);gap:12px;position:relative;padding-bottom:16px}
+.feed li:not(:last-child)::before{content:"";position:absolute;left:12.5px;top:30px;bottom:4px;width:1px;background:var(--line)}
+.feed .av{width:26px;height:26px;font-size:10px}
+.fh{display:flex;align-items:baseline;gap:8px;font-size:12.5px}
+.fh b{font-weight:500}
+.fh span{font:.6rem/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.fb p{margin:4px 0 0;line-height:1.55;color:var(--ink-2)}
+.composer{display:flex;align-items:center;border:1px solid var(--line-2);margin-top:6px;transition:border-color .15s,box-shadow .15s}
+.composer:focus-within{border-color:var(--ink);box-shadow:3px 3px 0 var(--signal)}
+.composer label{flex:1;display:flex}
+.composer input{all:unset;flex:1;height:38px;padding:0 12px;font-size:13px}
+.composer button{width:38px;height:38px;border:0;border-left:1px solid var(--line);background:transparent;display:grid;place-items:center;cursor:pointer;transition:background .15s,color .15s}
+.composer button:hover{background:var(--ink);color:var(--paper)}
+.xc{display:flex;align-items:center;gap:12px;padding:12px;background:var(--paper-2)}
+.xc b{display:block;font-weight:500;font-size:13.5px}
+.xc small{display:block;font-size:12px;color:var(--ink-3);margin-top:2px}
+.xi{flex:none;width:32px;height:32px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center}
+.xs{font:.6rem/1 var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--warn);white-space:nowrap}
+.msgs{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:14px}
+.msgs li{padding-left:14px;border-left:2px solid var(--line-2)}
+.msgs li.out{border-left-color:var(--signal)}
+.msgs .mk{font:.6rem/1 var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
+.msgs li.out .mk{color:var(--signal)}
+.msgs p{margin:5px 0 0;line-height:1.55}
+.msgs small{display:block;margin-top:4px;font-size:11.5px;color:var(--ink-3)}
+.xact{display:flex;gap:8px;margin-top:16px}
 </style>
 </head>
 <body>
@@ -733,6 +795,7 @@ function qty(n) { return n % 1 === 0 ? fmt(n, 0) : fmt(n, 1); }
 function rk(r) { return r >= 70 ? 'hi' : r >= 40 ? 'mid' : 'lo'; }
 function pct(d) { return (d >= 0 ? '+' : '−') + fmt(Math.abs(d), Math.abs(d) < 10 ? 1 : 0) + ' %'; }
 var IC = {
+  pen: '<svg class="i" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4"/></svg>',
   search: '<svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
   tick: '<svg class="i" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>',
   tickRaw: '<svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>',
@@ -943,7 +1006,6 @@ function vRow(r, d) {
     '<span role="cell" class="num c2" style="font-size:13px">' + qty(r.menge) + ' ' + r.einheit + '</span>' +
     '<span role="cell" class="c2" style="display:flex;flex-direction:column;align-items:flex-end;gap:5px"><span style="font-size:13px;font-weight:500">' + eur(r.ep) + '</span>' + chip + '</span>' +
     '<span role="cell" class="num c2"><span style="font-size:14px;font-weight:500">' + eur(r.gp) + '</span><span class="gpbar" title="' + fmt(r.gp / d.tot * 100, 1) + ' % des Volumens"><i style="width:' + Math.max(4, Math.round(r.gp / d.maxGp * 100)) + '%;background:' + (d.driver[r.oz] ? 'var(--signal)' : 'var(--ink-3)') + '"></i></span></span>' +
-    '<span role="cell" style="display:flex;justify-content:center">' + (m ? '<button class="av av-btn" style="background:' + m.color + '" data-act="ownerFilter" data-v="' + ow + '" title="' + esc(m.name) + ' · nur diese Person anzeigen">' + m.ini + '</button>' : '<span class="av none" title="Niemand zugewiesen">+</span>') + '</span>' +
     '<span role="cell"><button class="okbtn' + (ok ? ' is-ok' : '') + (fresh && ok ? ' fx' : '') + '" data-act="toggleOk" data-oz="' + r.oz + '" aria-pressed="' + ok + '" aria-label="' + (ok ? 'Bestätigung zurücknehmen' : 'Preis bestätigen') + '" title="' + (ok ? 'Bestätigung zurücknehmen' : 'Preis bestätigen') + '">' + IC.tickRaw + (fresh && ok && S.justOk[r.oz] === 0 ? particles('conf', 10, 34) : '') + '</button></span>' +
   '</div>';
 }
@@ -978,7 +1040,6 @@ function vTable(d) {
       return '<button class="pill' + (on ? ' on' : '') + '" aria-pressed="' + on + '" data-act="filter" data-v="' + x[0] + '">' + x[1] + '<span class="cnt">' + d.base.filter(d.fdef[x[0]]).length + '</span></button>';
     }).join('') +
       (S.gewerk ? '<span class="ftag" data-k="fg">Gewerk: ' + esc(S.gewerk) + '<button data-act="gewerk" data-v="" aria-label="Gewerk-Filter entfernen">×</button></span>' : '') +
-      (S.owner ? '<span class="ftag" data-k="fo">Zuständig: ' + esc(T[S.owner].name) + '<button data-act="ownerFilter" data-v="" aria-label="Personen-Filter entfernen">×</button></span>' : '') +
     '</div><div class="tools"><label class="search">' + IC.search + '<span class="sr">Positionen filtern</span><input type="search" data-in="q" value="' + esc(S.q) + '" placeholder="OZ, Text oder Gewerk…"></label>' +
         '<span class="vsep" aria-hidden="true"></span>' +
         '<div class="seg" role="group" aria-label="Darstellung"><button class="' + (S.density === 'compact' ? 'on' : '') + '" data-act="density" data-v="compact" aria-pressed="' + (S.density === 'compact') + '">Kompakt</button><button class="' + (S.density === 'details' ? 'on' : '') + '" data-act="density" data-v="details" aria-pressed="' + (S.density === 'details') + '">Langtext</button></div>' +
@@ -986,7 +1047,7 @@ function vTable(d) {
         '<button class="btn btn-quiet" data-act="csv" title="CSV kopieren">' + IC.copy + 'CSV</button></div></div>' +
     '<div class="tbl"><div style="min-width:1030px" role="table" aria-label="Positionen des Leistungsverzeichnisses">' +
       '<div class="lv-grid th mono" role="row"><span role="columnheader"><input type="checkbox" class="cb"' + (allPicked ? ' checked' : '') + ' data-act="pickAll" aria-label="Alle angezeigten Positionen auswählen"></span>' +
-        th('risk') + th('oz') + th('kurz') + th('menge', 1) + th('ep', 1) + th('gp', 1) + '<span role="columnheader" style="text-align:center">Zust.</span><span role="columnheader" style="text-align:center">OK</span></div>' +
+        th('risk') + th('oz') + th('kurz') + th('menge', 1) + th('ep', 1) + th('gp', 1) + '<span role="columnheader" style="text-align:center">OK</span></div>' +
       body +
       (body ? '' : '<div class="empty">Keine Position passt zu diesen Filtern. <button class="lnk" data-act="resetFilters">Filter zurücksetzen</button></div>') +
       '<div class="foot"><span class="muted">Summe angezeigt: <b style="color:var(--ink);font-weight:500">' + eur(sum) + '</b> · ' + okN + ' von ' + d.all.length + ' Preisen bestätigt</span><span>Gesamt LV (KI-Kalkulation): <b style="font-weight:500">' + eur(Math.round(d.tot)) + '</b></span></div>' +
@@ -998,7 +1059,6 @@ function vDock(d) {
   if (!pr.length) return '';
   return '<div class="dock" role="region" aria-label="Mehrfachauswahl" data-k="dock">' +
     '<span class="n">' + pr.length + '</span><span class="mono" style="opacity:.7">ausgewählt · Σ ' + eur(pr.reduce(function (a, r) { return a + r.gp; }, 0)) + '</span>' +
-    '<div class="mw" data-k="mw-bulk"><button class="btn" data-act="menu" data-v="bulk" aria-haspopup="menu" aria-expanded="' + (S.menu === 'bulk') + '">Zuweisen an' + IC.up + '</button>' + vMenu('bulk', '', true) + '</div>' +
     '<button class="btn go" data-act="bulkOk">' + IC.tick + 'Preise bestätigen</button>' +
     '<button class="btn" data-act="bulkBundle"' + (pr.length < 2 ? ' disabled title="Mindestens 2 Positionen auswählen"' : '') + '>' + IC.layers + 'Bündeln</button>' +
     '<button class="btn" data-act="clearPicked" aria-label="Auswahl aufheben" style="width:34px;padding:0;justify-content:center">' + IC.x + '</button></div>';
@@ -1009,7 +1069,7 @@ function vKontext() {
     { tag: '[K1] Dokumente', title: 'Ausschreibungsunterlagen', sub: 'Vom Bauherrn, analysiert am 21.11.2026', items: [['LV_Kita_Sonnenhof.X83', '1.284 Pos.', 'var(--signal)'], ['Grundrisse EG–2. OG (A-101–A-103)', 'PDF · 3 Blätter', 'var(--signal)'], ['Schnitte & Ansichten', 'PDF · 6 Blätter', 'var(--signal)'], ['Statik Positionsplan (S-01–S-05)', 'PDF · 5 Blätter', 'var(--signal)']] },
     { tag: '[K2] Preisbasis', title: 'Eigene Alt-LVs mit Preisen', sub: 'Nur eigene Daten, keine Internetpreise', items: [['Grundschule Trudering 2024', '2.910 Pos.', 'var(--ok)'], ['Turnhalle Pasing 2025', '1.650 Pos.', 'var(--ok)'], ['Kita Freiham 2023', '1.120 Pos.', 'var(--ok)'], ['Baupreisindex Q3/2026', '+4,2 % ggü. 2024', 'var(--warn)']] },
     { tag: '[K3] Regeln', title: 'Kalkulationslogik', sub: 'Vom Team festgelegt, für jeden Vorschlag nachvollziehbar', items: [['Preis übernehmen bei Abweichung', '≤ ±10 %', 'var(--ink)'], ['Gleiche Texte bündeln', 'automatisch', 'var(--ink)'], ['Materialfaktor Edelstahl', '× 3,0 ggü. Stahl', 'var(--ink)'], ['Örtlicher Preis', 'Beton, Erdbau', 'var(--ink)']] },
-    { tag: '[K4] Team', title: 'Zuständigkeiten', sub: 'Jede Person hat eine eigene Farbe', items: TEAM.map(function (k) { return [T[k].name, T[k].role, T[k].color]; }) }
+    { tag: '[K4] Team', title: 'Team', sub: 'Wer am Angebot mitarbeitet', items: TEAM.map(function (k) { return [T[k].name, T[k].role, T[k].color]; }) }
   ];
   return '<div class="ctx">' + ctx.map(function (g, i) {
     return '<section class="card rise" style="--d:' + (i * 70) + 'ms"><div class="mono faint">' + g.tag + '</div><h2>' + g.title + '</h2><p class="muted" style="margin:0 0 12px;font-size:13px">' + g.sub + '</p>' +
@@ -1050,26 +1110,12 @@ function vDrawer(d) {
   var p = d.all.find(function (x) { return x.oz === S.sel; });
   if (!p) return '';
   var R = D.rich[p.oz] || {}, k = rk(p.risk), nav = navInfo(d), ok = !!S.confirmed[p.oz], fresh = S.justOk[p.oz] !== undefined;
-  var ow = ownerOf(p), om = T[ow];
   var C = candidates(p, R);
-  var selIdx = S.sugg[p.oz] !== undefined ? S.sugg[p.oz] : (p.manual ? -1 : 0);
-  var isManual = p.manual && selIdx < 0;
   var md = (p.ep - p.aiEp) / p.aiEp * 100;
   var dv = parseFloat(String(S.epDraft).replace(',', '.'));
   var dd = isFinite(dv) && dv > 0 ? (dv - p.aiEp) / p.aiEp * 100 : null;
   var devWarn = S.editEp ? (dd !== null && Math.abs(dd) > 10) : Math.abs(md) > 10;
   var nextOpen = nav.list.slice(nav.idx + 1).find(function (r) { return !S.confirmed[r.oz]; });
-
-  var opts = C.cands.map(function (c, i) {
-    var on = i === selIdx && !S.editEp, dev = (c.ep - p.aiEp) / p.aiEp * 100;
-    return '<div class="opt' + (on ? ' on' : '') + '" data-k="o' + i + '"><button role="radio" aria-checked="' + on + '" class="opt-b" data-act="pickSugg" data-i="' + i + '" data-ep="' + c.ep + '">' +
-      '<span class="rd"></span><span style="min-width:0"><span class="opt-t">' + esc(c.label) + '</span><span class="opt-w">' + esc(c.why) + '</span></span>' +
-      '<span class="opt-r"><span class="opt-p">' + eur(c.ep) + '</span><span class="opt-d">' + (i === 0 ? p.conf + ' % sicher' : pct(dev) + ' zur Empf.') + '</span></span></button>' +
-      (on ? '<div class="calc">' + c.steps.map(function (s, j) { return '<div class="cs' + (j === c.steps.length - 1 ? ' last' : '') + '"><span>' + esc(s[0]) + '</span><span>' + esc(s[1]) + '</span></div>'; }).join('') + (c.pv ? '<button class="lnk" style="font-size:12px;margin-top:6px" data-act="preview" data-key="' + c.pv + '">Originalposition ansehen</button>' : '') + '</div>' : '') + '</div>';
-  }).join('');
-  var cust = S.editEp
-    ? '<div class="opt on" data-k="oc-edit"><div class="opt-b" style="cursor:default"><span class="rd"></span><span style="min-width:0"><span class="opt-t">Eigener Preis</span><span class="opt-w">Enter übernimmt · Esc bricht ab</span></span><span class="opt-r"><label class="epin"><span class="sr">Eigener Einheitspreis in Euro</span><input id="epin" type="number" step="0.01" min="0" data-in="epDraft" data-enter="saveEp" value="' + esc(S.epDraft) + '"><span>€</span></label><span class="opt-d" style="color:' + (dd !== null && Math.abs(dd) > 10 ? 'var(--warn)' : 'var(--ink-3)') + '">' + (dd === null ? '' : Math.abs(dd) < 0.05 ? 'empfohlen' : pct(dd)) + '</span></span></div></div>'
-    : '<div class="opt' + (isManual ? ' on' : '') + '" data-k="oc"><button role="radio" aria-checked="' + isManual + '" class="opt-b" data-act="startEdit"><span class="rd"></span><span style="min-width:0"><span class="opt-t">Eigener Preis</span><span class="opt-w">' + (isManual ? 'Von dir gesetzt' : 'Wenn du es besser weißt, z. B. aus einem aktuellen Angebot') + '</span></span><span class="opt-r"><span class="opt-p">' + (isManual ? eur(p.ep) : 'eingeben') + '</span><span class="opt-d">' + (isManual ? pct(md) + ' zur Empf.' : '') + '</span></span></button></div>';
 
   var cta = ok
     ? '<div class="okline' + (fresh ? ' fx' : '') + '" data-k="okl">' + IC.tick + (p.manual ? 'Eigener Preis bestätigt' : 'KI-Preis bestätigt') +
@@ -1081,13 +1127,6 @@ function vDrawer(d) {
         '<span class="cl"><b>' + (S.confirming ? 'Bestätigt' : devWarn ? 'Gedrückt halten' : 'Preis bestätigen') + '</b><small>' + (devWarn ? 'Mehr als 10 % neben der Empfehlung' : nextOpen ? 'und weiter zu ' + nextOpen.oz : 'letzte offene Position') + '</small></span>' +
         '<span class="ca"><small>GP</small><b>' + eur(S.editEp && dd !== null ? Math.round(dv * 100) / 100 * p.menge : p.gp) + '</b></span>' + (devWarn ? '' : IC.arrow) + '</button>';
 
-  var acts = (R.actions || []).map(function (a, i) {
-    var key = p.oz + ':a' + i, done = !!S.accepted[key];
-    return '<div class="step' + (done ? ' done' : '') + '" data-k="' + key + '"><span class="sic' + (done ? ' done' : '') + '" data-k="' + (done ? 'd' : 'n') + '">' + (done ? IC.tickRaw : '') + '</span>' +
-      '<span style="min-width:0"><span class="opt-t">' + esc(a.title) + '</span><span class="opt-w">' + esc(done ? a.done : a.sub) + '</span></span>' +
-      (done ? '<span class="oks">Erledigt</span>' : '<button class="btn btn-sm btn-quiet" data-act="accept" data-i="' + i + '">' + esc(a.cta) + '</button>') + '</div>';
-  }).join('');
-
   var cm = (R.comments || []).concat(S.comments[p.oz] || []);
   var ext = R.ext, seq = S.seqs[p.oz];
   var thread = ext ? ext.thread.slice() : [];
@@ -1095,30 +1134,28 @@ function vDrawer(d) {
   var notes = (ext ? ext.notes : []).concat(S.notes[p.oz] || []);
   var subName = p.oz.indexOf('04') === 0 ? 'Elektro Lindner GmbH' : 'Lieferant (Vorschlag)';
   var chat = S.chats[p.oz] || [];
-  var tabs = [['why', 'Herleitung', 0], ['team', 'Team', cm.length], ['ext', 'Extern', thread.length + notes.length], ['agent', 'Agent', chat.length]];
+  var tabs = [['team', 'Team', cm.length], ['ext', 'Extern', thread.length + notes.length], ['agent', 'Agent', chat.length]];
+  var dt = S.dtab || 'team';
   var panel = '';
-  if (S.dtab === 'why') {
-    panel = '<p style="margin:0;line-height:1.65">' + segs(C.segs) + '</p>';
-  } else if (S.dtab === 'team') {
-    panel = (cm.length ? '' : '<p class="pempty" style="margin-bottom:12px">Noch keine Kommentare. Erwähne Kolleg:innen mit @.</p>') +
-      '<div style="display:grid;gap:12px">' + cm.map(function (c, i) { var m = T[c.by]; return '<div style="display:flex;gap:10px" data-k="c' + i + '"><span class="av" style="background:' + m.color + '">' + m.ini + '</span><div style="min-width:0;flex:1"><div style="font-size:12px"><b style="font-weight:500">' + m.name + '</b> <span class="faint">· ' + esc(c.time) + '</span></div><div class="bub" style="margin-top:3px">' + esc(c.t) + '</div></div></div>'; }).join('') + '</div>' +
-      '<div style="display:flex;gap:8px;margin-top:14px"><label style="flex:1;display:flex"><span class="sr">Kommentar</span><input class="fld" data-in="cmt" data-enter="sendCmt" value="' + esc(S.cmt) + '" placeholder="Kommentar ans Team… @Lena"></label><button class="btn btn-sm" style="height:36px" data-act="sendCmt">Senden</button></div>';
-  } else if (S.dtab === 'ext') {
+  if (dt === 'team') {
+    panel = (cm.length ? '<ol class="feed">' + cm.map(function (c, i) { var m = T[c.by]; return '<li data-k="c' + i + '"><span class="av" style="background:' + m.color + '">' + m.ini + '</span><div class="fb"><div class="fh"><b>' + m.name + '</b><span>' + esc(c.time) + '</span></div><p>' + esc(c.t) + '</p></div></li>'; }).join('') + '</ol>' : '<p class="pempty">Noch nichts besprochen. Erwähne Kolleg:innen mit @.</p>') +
+      '<div class="composer"><label><span class="sr">Kommentar</span><input data-in="cmt" data-enter="sendCmt" value="' + esc(S.cmt) + '" placeholder="Ans Team schreiben… @Lena"></label><button data-act="sendCmt" aria-label="Kommentar senden">' + IC.arrow + '</button></div>';
+  } else if (dt === 'ext') {
     var sub2 = ext || { name: subName, contact: 'via Outlook', status: 'Sequenz läuft' };
-    panel = (ext || seq ? '<div style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--line)"><span style="flex:none;width:32px;height:32px;background:var(--paper-2);display:flex;align-items:center;justify-content:center">' + IC.building + '</span><span style="flex:1;min-width:0"><b style="display:block;font-weight:500">' + esc(sub2.name) + '</b><span class="faint" style="font-size:12px">' + esc(sub2.contact) + '</span></span><span class="chip unsicher">' + esc(sub2.status) + '</span></div>' +
-      '<div style="display:grid;gap:8px;margin-top:10px">' + thread.map(function (m, i) { return '<div data-k="t' + i + '" style="display:flex;flex-direction:column;align-items:' + (m.out ? 'flex-end' : 'flex-start') + '"><div class="bub' + (m.out ? ' out' : '') + '" style="max-width:85%">' + esc(m.t) + '</div><span class="faint" style="font-size:11px;margin-top:3px">' + esc(m.meta) + '</span></div>'; }).join('') + '</div>'
+    panel = (ext || seq ? '<div class="xc"><span class="xi">' + IC.building + '</span><span style="flex:1;min-width:0"><b>' + esc(sub2.name) + '</b><small>' + esc(sub2.contact) + '</small></span><span class="xs">' + esc(sub2.status) + '</span></div>' +
+      '<ol class="msgs">' + thread.map(function (m, i) { return '<li class="' + (m.out ? 'out' : 'in') + '" data-k="t' + i + '"><span class="mk">' + (m.out ? 'Gesendet' : 'Antwort') + '</span><p>' + esc(m.t) + '</p><small>' + esc(m.meta) + '</small></li>'; }).join('') + '</ol>'
       : '<p class="pempty">Noch kein Subunternehmer oder Lieferant angefragt.</p>') +
       notes.map(function (n, i) { return '<div class="note" data-k="n' + i + '"><b style="font-weight:500">Notiz · ' + esc(n.by) + ':</b> ' + esc(n.t) + '</div>'; }).join('') +
       (S.compose === 'note' ? '<div style="margin-top:12px;animation:rise .35s var(--ease)" data-k="cn"><label class="mono faint" for="noteField">Neue Notiz</label><textarea id="noteField" class="fld" rows="3" data-in="noteDraft" placeholder="z. B. Preis vor Abgabe mit Lieferant bestätigen" style="margin-top:6px"></textarea><div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-sm btn-primary" data-act="saveNote">Notiz speichern</button><button class="btn btn-sm btn-quiet" data-act="cancelCompose">Abbrechen</button></div></div>' : '') +
       (S.compose === 'seq' ? '<div class="seqbox" data-k="cs"><div style="font-weight:500">Outlook-Sequenz an ' + esc(ext ? ext.name : subName) + '</div>' +
         [['Tag 0', 'Anfrage mit LV-Auszug ' + p.oz, 'Menge ' + qty(p.menge) + ' ' + p.einheit + ', Plan-Ausschnitt im Anhang'], ['Tag 3', 'Freundliche Erinnerung', 'Nur wenn keine Antwort eingegangen ist'], ['Tag 7', 'Nachfassen + Frist', 'Angebot bis 2 Tage vor Abgabefrist']].map(function (q) { return '<div class="seqrow"><span class="mono">' + q[0] + '</span><span><b style="font-weight:500">' + esc(q[1]) + '</b><br><span class="muted">' + esc(q[2]) + '</span></span></div>'; }).join('') +
         '<div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-sm btn-primary" data-act="startSeq">Sequenz starten' + IC.arrow + '</button><button class="btn btn-sm btn-quiet" data-act="cancelCompose">Abbrechen</button></div></div>' : '') +
-      (!S.compose ? '<div style="display:flex;gap:8px;margin-top:14px"><button class="btn btn-sm btn-quiet" data-act="compose" data-v="seq">Anfrage per Outlook</button><button class="btn btn-sm btn-quiet" data-act="compose" data-v="note">Notiz hinzufügen</button></div>' : '');
-  } else if (S.dtab === 'agent') {
-    panel = (chat.length || S.thinking ? '' : '<p class="pempty">Frag den Agenten zu dieser Position, z. B. nach der Herleitung, einer Bieterfrage oder einem Was-wäre-wenn.</p><div class="chips">' +
+      (!S.compose ? '<div class="xact"><button class="btn btn-sm" data-act="compose" data-v="seq">' + IC.arrow + 'Anfrage per Outlook</button><button class="btn btn-sm btn-quiet" data-act="compose" data-v="note">Notiz</button></div>' : '');
+  } else if (dt === 'agent') {
+    panel = (chat.length || S.thinking ? '' : '<p class="pempty">Frag den Agenten zu dieser Position, z. B. nach dem Preis, einer Bieterfrage oder einem Was-wäre-wenn.</p><div class="chips">' +
       [['Preis erklären', 'Wie kommst du auf den Preis?'], ['Bieterfrage formulieren', 'Formuliere eine Bieterfrage'], ['Material +15 %?', 'Was-wäre-wenn: Material +15 %'], ['Subunternehmer anfragen', 'An Subunternehmer anfragen']].map(function (c) { return '<button class="qchip" data-act="ask" data-v="' + esc(c[1]) + '">' + c[0] + '</button>'; }).join('') + '</div>') +
       '<div style="display:grid;gap:10px">' + chat.map(function (m, i) { return '<div data-k="m' + i + '" style="display:flex;gap:8px;justify-content:' + (m.role === 'user' ? 'flex-end' : 'flex-start') + ';animation:rise .35s var(--ease)">' + (m.role === 'agent' ? '<span class="agent-ic">' + IC.star + '</span>' : '') + '<div class="bub' + (m.role === 'user' ? ' me' : '') + '" style="max-width:86%;white-space:pre-line">' + esc(m.t) + '</div></div>'; }).join('') +
-      (S.thinking ? '<div style="display:flex;gap:8px;align-items:center" data-k="th"><span class="agent-ic">' + IC.star + '</span><div class="bub thinking" style="display:flex;align-items:center;gap:5px"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="faint" style="font-size:12px;margin-left:6px">liest Herleitung, Referenzen &amp; LV…</span></div></div>' : '') + '</div>';
+      (S.thinking ? '<div style="display:flex;gap:8px;align-items:center" data-k="th"><span class="agent-ic">' + IC.star + '</span><div class="bub thinking" style="display:flex;align-items:center;gap:5px"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="faint" style="font-size:12px;margin-left:6px">liest Begründung, Quellen &amp; LV…</span></div></div>' : '') + '</div>';
   }
 
   return '<aside class="dw" aria-label="Positionsdetails ' + p.oz + '" tabindex="-1" data-k="dw">' +
@@ -1128,17 +1165,28 @@ function vDrawer(d) {
       '<button class="ic" data-act="nav" data-v="1"' + (nav.idx >= nav.list.length - 1 ? ' disabled' : '') + ' aria-label="Nächste Position" title="Nächste (↓)">' + IC.chev + '</button>' +
       '<button class="ic" data-act="close" aria-label="Panel schließen" title="Schließen (Esc)">' + IC.x + '</button></div>' +
       '<div class="dw-swap ' + (S.leaving ? 'leaving' : S.swapDir) + '" data-k="h' + p.oz + '"><h2 class="dw-title">' + esc(p.kurz) + '</h2>' +
-      '<div class="dw-tags"><span class="risk ' + k + '">R ' + p.risk + '</span><span class="chip ' + p.mode + '">' + p.mode + '</span><span style="flex:1"></span>' +
-        '<div class="mw" data-k="mw-owner"><button class="own" data-act="menu" data-v="owner" aria-haspopup="menu" aria-expanded="' + (S.menu === 'owner') + '" title="Zuständig: ' + (om ? esc(om.name) : 'niemand') + '"><span class="av' + (om ? '' : ' none') + '" style="' + (om ? 'background:' + om.color : '') + ';width:24px;height:24px">' + (om ? om.ini : '+') + '</span><span>' + (om ? om.name.split(' ')[0] : 'Zuweisen') + '</span>' + IC.chev + '</button>' + vMenu('owner', ow) + '</div></div>' +
+      '<div class="dw-tags"><span class="risk ' + k + '">R ' + p.risk + '</span><span class="chip ' + p.mode + '">' + p.mode + '</span>' +
+        '</div>' +
       (p.risk >= 40 ? '<div class="rl ' + k + '">' + IC.warn + '<span>' + esc(p.why) + '</span></div>' : '') + '</div></header>' +
     '<div class="dw-body"><div class="dw-swap ' + (S.leaving ? 'leaving' : S.swapDir) + '" data-k="b' + p.oz + '">' +
-      '<section class="price' + (ok ? ' is-ok' : '') + '" aria-label="Preis"><div class="mono lab">Einheitspreis</div><div class="prow"><span class="ep' + (S.flashEp ? ' flash' : '') + '" data-k="ep' + p.ep + '">' + eur(p.ep) + '</span><span class="muted">je ' + p.einheit + '</span></div>' +
-        '<div class="sub">GP <b>' + eur(p.gp) + '</b> · ' + fmt(p.gp / TOTAL * 100, 2) + ' % des LV · ' + qty(p.menge) + ' ' + p.einheit + '</div>' +
-        (ok ? '<div class="stamp' + (fresh ? ' fx' : '') + '" data-k="st"><span class="sq">' + IC.tickRaw + '</span><span><b>Bestätigt</b><small>' + (p.manual ? 'Eigener Preis' : 'KI-Preis') + ' · T. Berger</small></span></div>' : '') + '</section>' +
-      '<div class="mono shead">Preis wählen</div><div class="opts" role="radiogroup" aria-label="Einheitspreis wählen">' + opts + cust + '</div>' +
-      (acts ? '<div class="mono shead">Nächste Schritte</div><div class="steps">' + acts + '</div>' : '') +
-      '<div class="dpills" role="group" aria-label="Details einblenden">' + tabs.map(function (t) { var on = S.dtab === t[0]; return '<button class="dpill' + (on ? ' on' : '') + '" aria-expanded="' + on + '" data-act="dtab" data-v="' + t[0] + '">' + t[1] + (t[2] ? '<span class="dn">' + t[2] + '</span>' : '') + '</button>'; }).join('') + '</div>' +
-      (S.dtab ? '<div class="panel" data-k="p' + S.dtab + '">' + panel + '</div>' : '') +
+      '<section class="price' + (ok ? ' is-ok' : '') + (S.editEp ? ' is-edit' : '') + '" aria-label="Preis">' +
+        '<div class="mono lab">' + (p.manual ? 'Eigener Preis · ' + pct(md) + ' zum KI-Vorschlag' : 'KI-Preisvorschlag · ' + p.conf + ' % sicher') + '</div>' +
+        '<div class="prow">' + (S.editEp
+          ? '<label class="epedit"><span class="sr">Einheitspreis in Euro</span><input id="epin" inputmode="decimal" autocomplete="off" data-in="epDraft" data-enter="saveEp" value="' + esc(S.epDraft) + '"><span class="cur">€</span></label>'
+          : '<button class="ep' + (S.flashEp ? ' flash' : '') + '" data-k="ep' + p.ep + '" data-act="startEdit" title="Preis bearbeiten" aria-label="Einheitspreis ' + eur(p.ep) + ', bearbeiten">' + eur(p.ep) + '<span class="pen">' + IC.pen + '</span></button>') +
+          '<span class="muted">je ' + p.einheit + '</span></div>' +
+        (S.editEp
+          ? '<div class="sub edhint"><span>' + (dd === null ? 'Gültigen Preis eingeben' : Math.abs(dd) < 0.05 ? 'entspricht dem KI-Vorschlag' : '<b style="color:' + (Math.abs(dd) > 10 ? 'var(--warn)' : 'var(--ink)') + '">' + pct(dd) + '</b> zum KI-Vorschlag · GP ' + eur(Math.round(dv * 100) / 100 * p.menge)) + '</span><span class="keys"><kbd>Enter</kbd> übernehmen <kbd>Esc</kbd> verwerfen</span></div>'
+          : '<div class="sub">GP <b>' + eur(p.gp) + '</b> · ' + fmt(p.gp / TOTAL * 100, 2) + ' % des LV · ' + qty(p.menge) + ' ' + p.einheit +
+            (p.manual ? ' · <button class="lnk" data-act="resetEp">KI-Vorschlag ' + eur(p.aiEp) + ' wiederherstellen</button>' : '') + '</div>') +
+        (ok ? '<div class="stamp' + (fresh ? ' fx' : '') + '" data-k="st"><span class="sq">' + IC.tickRaw + '</span><span><b>Bestätigt</b><small>' + (p.manual ? 'Eigener Preis' : 'KI-Preis') + ' · T. Berger</small></span></div>' : '') +
+        '<div class="why2"><div class="mono lab">Begründung</div><p>' + esc(C.cands[0].why) + '</p>' +
+          '<div class="calc2">' + C.steps.map(function (s, j) { return '<div class="cs' + (j === C.steps.length - 1 ? ' last' : '') + '"><span>' + esc(s[0]) + '</span><span>' + esc(s[1]) + '</span></div>'; }).join('') + '</div>' +
+          ((R.similar || []).length ? '<div class="refs"><span class="mono">Quellen</span>' + R.similar.map(function (x) { var e = D.extra[x[0]]; return e ? '<button class="ref" data-act="preview" data-key="' + x[0] + '">' + esc(e.proj) + '<small>' + esc(x[1]) + '</small></button>' : ''; }).join('') + '</div>' : '') +
+        '</div></section>' +
+      '<section class="comm" aria-label="Kommunikation"><div class="comm-h"><span class="mono">Kommunikation</span>' +
+        '<div class="ctabs" role="tablist">' + tabs.map(function (t) { var on = dt === t[0]; return '<button role="tab" class="ctab' + (on ? ' on' : '') + '" aria-selected="' + on + '" data-act="dtab" data-v="' + t[0] + '">' + t[1] + (t[2] ? '<span class="dn">' + t[2] + '</span>' : '') + '</button>'; }).join('') + '</div></div>' +
+        '<div class="panel" data-k="p' + dt + '">' + panel + '</div></section>' +
     '</div></div>' +
     '<div class="dw-cta" data-k="cta-bar">' + (devWarn && !ok ? '<p class="hint" data-k="hint">' + IC.warn + '<span>Mehr als 10 % neben der Empfehlung. Gedrückt halten und kurz im Team begründen.</span></p>' : '') + cta + '</div>' +
     '<footer class="ask"><div class="askin"><span style="color:var(--signal);display:flex">' + IC.star + '</span><label style="flex:1;display:flex"><span class="sr">Frage an den Agenten</span><input data-in="draft" data-enter="sendDraft" value="' + esc(S.draft) + '" placeholder="Agent fragen zu ' + p.oz + '…"></label><button class="send" data-act="sendDraft" aria-label="Senden">' + IC.arrow + '</button></div></footer>' +
@@ -1254,7 +1302,7 @@ function reply(p, text) {
   if (t.indexOf('preis') >= 0 || t.indexOf('wie kommst') >= 0) {
     var r = D.rich[p.oz] || {};
     var st = r.steps ? r.steps.map(function (s) { return s[0] + ': ' + s[1]; }).join('\n') : 'Basis: textgleiche Position in der Preisbasis\nEP: ' + eur(p.ep);
-    return 'So komme ich auf ' + eur(p.ep) + ' je ' + p.einheit + ':\n' + st + '\nKonfidenz ' + p.conf + ' %. Quellen unter „Herleitung“.';
+    return 'So komme ich auf ' + eur(p.ep) + ' je ' + p.einheit + ':\n' + st + '\nKonfidenz ' + p.conf + ' %. Quellen stehen unter der Begründung.';
   }
   if (t.indexOf('bieterfrage') >= 0) return 'Entwurf Bieterfrage zu ' + p.oz + ':\n„Zur Position ' + p.oz + ' (' + p.kurz + ') bitten wir um Klärung: ' + p.why + '. Bitte bestätigen Sie Menge und Ausführungsqualität.“\nSoll ich das als Entwurf in Outlook ablegen?';
   if (t.indexOf('+15') >= 0 || t.indexOf('wenn') >= 0) {
@@ -1449,7 +1497,8 @@ var A = {
     if (a.cta === 'Sequenz vorbereiten') { st.compose = 'seq'; st.dtab = 'ext'; }
     set(st); toast(a.done);
   },
-  dtab: function (ds) { set({ dtab: S.dtab === ds.v ? '' : ds.v }); },
+  dtab: function (ds) { set({ dtab: ds.v }); },
+  resetEp: function () { var p = cur(), e = Object.assign({}, S.eps), g = Object.assign({}, S.sugg), c = Object.assign({}, S.confirmed); delete e[p.oz]; delete g[p.oz]; delete c[p.oz]; set({ eps: e, sugg: g, confirmed: c, editEp: false, flashEp: 1 }); S.flashEp = 0; toast('KI-Vorschlag für ' + p.oz + ' wiederhergestellt'); },
   sendCmt: addComment,
   compose: function (ds) { set({ compose: ds.v, dtab: 'ext' }); },
   cancelCompose: function () { set({ compose: null }); },
