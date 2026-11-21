@@ -27,7 +27,7 @@ Test command for every task: `.venv\Scripts\python.exe -m pytest`
   - Depends on: 1.
   - Files: `lv/extract.py`, `lv/__main__.py`, `tests/test_extract_xml.py`.
 
-- [ ] **Task 3: GAEB 90 reader** (medium, highest risk)
+- [x] **Task 3: GAEB 90 reader** (medium, highest risk)
   - Does: reads `.D83`, `.D84` and `.D86` files into the same table, including unit and total prices, and makes
     `lv ingest` write `data/library/<project>.json`.
   - Acceptance:
@@ -37,6 +37,14 @@ Test command for every task: `.venv\Scripts\python.exe -m pytest`
       states the rule that keeps or drops them.
   - Found in task 2: P2's `.X83` writes item numbers without leading zeros (`1.1.2`). Check how the `.D86` writes
     the same item before matching the two files by item number.
+  - Found in task 3:
+    - The extra item records are change orders (section "Nachträge"): 38 in P1 (unit price, but no quantity, unit
+      or total) and 1 in P2. They are kept. P2's `.D86` writes item numbers as `01.01.0002`.
+    - P2's item 08.01.0003 appears as `TE.L0.0009` in the `.D86`: the dataset's anonymiser replaced its number.
+    - The anonymiser hid different words in each file format (`PER000115-Rohr` in GAEB 90 is `Edelstahl-Rohr` or
+      `[PERSON_115]-Rohr` in XML). Texts of the same LV are therefore not letter-identical across formats.
+    - `Std` without a dot is "piece x day" in P2 (its own unit list says so), not hours. Only `Std.` becomes `h`.
+    - P3's `.D84` is read too (274 items with prices, texts missing). P2's `.D84` has prices only and is refused.
   - Verify: tests pass; run `lv ingest` on P1 and P2 and open one library file.
   - Depends on: 2.
   - Files: `lv/extract.py`, `lv/__main__.py`, `tests/test_extract_gaeb90.py`.

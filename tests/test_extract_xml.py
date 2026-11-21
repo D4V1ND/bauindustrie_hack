@@ -47,14 +47,14 @@ def test_only_p4_has_optional_items(lvs):
 def test_units_come_out_in_one_spelling(lvs):
     units = {p: Counter(item.unit for item in lv.items) for p, lv in lvs.items()}
 
-    assert not {"Stk", "Stk.", "Std", "Std.", "m³", "m²", "to"} & set().union(*units.values())
+    assert not {"Stk", "Stk.", "Std.", "m³", "m²", "to"} & set().union(*units.values())
     assert (units["P5"]["St"], units["P5"]["h"], units["P5"]["t"]) == (10, 7, 2)
     assert units["P4"]["St"] == 132  # 127 written "St" and 5 written "Stk"
     assert units["P1"]["m3"] == 2  # written "m³"
 
 
 @pytest.mark.parametrize("written, cleaned", [
-    ("Stk.", "St"), ("Stück", "St"), ("Std", "h"), ("m²", "m2"), ("m³", "m3"), ("to", "t"),
+    ("Stk.", "St"), ("Stück", "St"), ("Std.", "h"), ("Std", "Std"), ("m²", "m2"), ("m³", "m3"), ("to", "t"),
     ("psch", "psch"), ("StWo", "StWo"), (" m ", "m"),
 ])
 def test_unit_is_cleaned_to_one_spelling(written, cleaned):
