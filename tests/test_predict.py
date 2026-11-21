@@ -561,6 +561,11 @@ def test_price_command_asks_the_judge_and_writes_what_code_made_of_the_verdicts(
     assert [call["call"] for call in log] == [1, 2, 3, 4] and all(call["thinking"] == "thinking" for call in log)
     assert len(log[0]["items"]) == 15 and log[0]["answer"]["items"][0]["reason"] == "First candidate matches."
     result, library = load(tmp_path / "out" / "P5.json"), load(tmp_path / "library" / "P2.json")
+    for i in result.items:  # every judged item points at the last judge call that asked about it
+        judged = i.prediction.judged_item or i.id
+        calls = [call["call"] for call in log if judged in call["items"]]
+        assert i.prediction.judge_call == (calls[-1] if calls else None), i.id
+    assert sum(1 for i in result.items if i.prediction.judge_call in (3, 4)) == 2  # the 2 items asked again alone
     price = {i.id: i.unit_price for i in library.items}
     methods = result.summary.methods
     # step 2 put all items under one type: 28 items with candidates go out in 2 packs (15 + 13). Each pack comes

@@ -8,7 +8,7 @@ import pytest
 from lv import ai, plan
 from lv.categorise import Assigned, Assignments, Proposal, ProposedType
 from lv.__main__ import main
-from lv.model import LV, LineItem
+from lv.model import LV, LineItem, load
 
 RAW = Path(__file__).resolve().parent.parent / "data" / "raw" / "Challenge A Dataset"
 P5_NEW = "GAEB-[PROJEKT_004].X83"
@@ -100,6 +100,8 @@ def test_the_plan_check_runs_in_its_own_thread_and_writes_its_own_file(tmp_path,
     written = json.loads((tmp_path / "out" / "P5_plan.json").read_text(encoding="utf-8"))
     assert len(written["positionen"]) == 50 and (tmp_path / "out" / "P5.json").exists()
     assert "plan check: started in parallel" in capsys.readouterr().out
+    merged = load(tmp_path / "out" / "P5.json")  # the one structured result holds the plan check
+    assert merged.plan.raw_file == "P5_plan.json" and all(i.plan.status == "not_checked" for i in merged.items)
 
 
 def test_a_failing_plan_check_keeps_the_lv_result(tmp_path, monkeypatch):
@@ -154,3 +156,31 @@ def test_the_overview_writes_a_plan_image_and_an_excel_file(tmp_path):
 
     assert (png.name, xlsx.name) == ("P9__EG_uebersicht.png", "P9__EG_uebersicht.xlsx")
     assert png.stat().st_size > 0 and xlsx.stat().st_size > 0
+
+
+def test_the_plan_check_is_merged_into_the_lv_result_in_english_keys(tmp_path):
+    plan._on_path()
+    import compare
+    from lv.model import load, save
+
+    lv = an_lv(item("03.01.0010", "Fenster F1", 2), item("03.01.0020", "Tür T1", 3), item("03.01.0030", "Estrich", 80, "m2"))
+    reading = [{"kategorie": "Fenster", "typ_bezeichnung": "F1", "bezeichnung": "Fenster", "anzahl": 2,
+                "marker": [{"seite": 1, "x": 0.2, "y": 0.3}]},
+               {"kategorie": "Tür", "typ_bezeichnung": "T1", "bezeichnung": "Tür", "anzahl": 4,
+                "marker": [{"seite": 1, "x": 0.6, "y": 0.4}]},
+               {"kategorie": "Sanitär", "typ_bezeichnung": "WB", "bezeichnung": "Waschbecken", "anzahl": 1,
+                "marker": [{"seite": 1, "x": 0.9, "y": 0.1}]}]
+    result = compare.build_result(plan.positions(lv), [reading] * 3,
+                                  {"id": "EG", "datei": "EG.png", "breite_px": 1000, "hoehe_px": 800})
+
+    plan.merge(lv, result, "P9_plan.json", ["P9__EG_uebersicht.png", "P9__EG_uebersicht.xlsx"])
+    lv = load(save(lv, tmp_path))  # the merged shape survives the file
+
+    window, door, screed = (i.plan for i in lv.items)
+    assert (window.status, door.status, screed.status) == ("ok", "differs", "not_checked")
+    assert (door.quantity, door.matched_by, door.markers[0].x, door.markers[0].shape) == (4, "plan_code", 0.6, "point")
+    finding = next(f for f in lv.plan.findings if f.id == door.findings[0])
+    assert (finding.kind, finding.severity, finding.lv_quantity, finding.plan_quantity) == ("quantity_differs", "error", 3, 4)
+    extra = [f for f in lv.plan.findings if f.oz is None]
+    assert [(f.kind, f.plan_quantity, f.markers[0].x) for f in extra] == [("missing_in_lv", 1, 0.9)]  # the basin
+    assert (lv.plan.file, lv.plan.width_px, lv.plan.raw_file) == ("EG.png", 1000, "P9_plan.json")

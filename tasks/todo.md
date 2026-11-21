@@ -444,6 +444,19 @@ Built before tasks 6 and 7: step 3 does not need trades or item types.
     match; seats (240) and podium stairs (2) are now matched. 4 findings: aisle steps not counted, the podium in m2
     against 1 piece, and one pair that is a single thing: the plan's 3 exit signs (NA) against the LV's exit-sign item.
 
+- [x] **Task 22: One structured result: judge_call link, and the plan check merged into <project>.json** (small)
+  - `prediction.judge_call`: the `call` number in `<project>_judge.json` that decided the item, the last call that
+    asked about it. Set by `lv price` from the judge log.
+  - With `--plan`, `lv/plan.py` `merge` writes the plan check into the LV in English keys: `plan` on each item (status,
+    plan quantity, how matched, rooms, markers, finding ids) and `plan` on the LV (plan file and size, all findings
+    including those no item covers, raw file and overview names). The LV file is saved again after the merge;
+    `<project>_plan.json` stays as the raw record.
+  - Existing files filled in without AI calls: H1 (judge_call on 52 of 52 items, plan on all 52, 4 findings), P5 (50
+    of 50), P4 (264 of 296; the other 32 were copied or had no candidates).
+  - Tests: judge_call points at the last call that asked about the item, the retried items at their own call; the
+    merge (ok, differs with its finding and marker, an m2 item not checked, a plan component no item covers); the
+    command writes the merged file.
+
 ### Checkpoint: step 3
 - [x] All tests pass without network and without a key.
 - [x] `lv price --copy-only` on P2's own `.X83` copies only correct prices.

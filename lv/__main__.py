@@ -81,6 +81,7 @@ def main(argv: list[str] | None = None, data: Path = DATA) -> None:
                       else "search: by words only (no VOYAGE_API_KEY in .env)")
             judge = None if args.copy_only else lambda questions: ask_judge(questions, judge_log)
             predict(lv, library, judge=judge, embed=embed)  # step 3
+            link_judge_calls(lv, judge_log)
             assess(lv, None if args.copy_only else ask_descriptions)  # step 4
         except (ai.MissingKey, RuntimeError) as stop:  # RuntimeError: every call of one kind failed
             raise SystemExit(str(stop))
@@ -109,6 +110,10 @@ def main(argv: list[str] | None = None, data: Path = DATA) -> None:
         except Exception as error:
             raise SystemExit(f"The plan overview failed; both result files above are saved. {type(error).__name__}: {error}")
         print(f"  overview -> {png.name}, {xlsx.name}")
+        plan.merge(lv, result, out.name, [png.name, xlsx.name])
+        save(lv, path.parent)  # the one structured result: the LV with its plan check merged in
+        print(f"plan check merged into {path.name}: {sum(1 for item in lv.items if item.plan)} items, "
+              f"{len(lv.plan.findings)} findings")
 
 
 def _ask(job: str, model: str, effort: str, rules: str, questions: list[str], shape: type,
@@ -146,6 +151,19 @@ def print_overview(lv: LV) -> None:
     optional = sum(1 for item in lv.items if item.kind == "optional")
     if optional:
         print(f"  ({optional} optional items are not in the overview)")
+
+
+def link_judge_calls(lv: LV, judge_log: list[dict]) -> None:
+    """Points each item's prediction at the judge call that decided it: the last call that asked about the item (an
+    item whose part of a pack answer did not fit is asked again on its own, and that later call counts). A copy of
+    an identical item points at the call of the item that was judged."""
+    calls: dict[str, int] = {}
+    for call in judge_log:
+        for id in call["items"]:
+            calls[id] = call["call"]  # later calls overwrite earlier ones
+    for item in lv.items:
+        if item.prediction:
+            item.prediction.judge_call = calls.get(item.prediction.judged_item or item.id)
 
 
 def ask_judge(questions: list[str], log: list[dict] | None = None) -> list[JudgeAnswer | None]:
