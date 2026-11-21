@@ -859,6 +859,8 @@ NEW: Flansch DN 150, PN 10 — Glatter Flansch, Edelstahl, als Zulage zur Rohrle
           <tr><th scope="row">The item's score</th><td data-l="What we decided">0.6 × price risk + 0.4 × description risk. A place on a scale from 0 to 100, not a probability.</td><td class="w" data-l="Who"><span class="who code">Code</span></td></tr>
           <tr><th scope="row">How much an item counts</th><td data-l="What we decided">By its value: the found price × quantity. Without a price: the middle price of its related past items × quantity. With nothing: the value of a typical item of this LV. The value is a weight and is never shown as a price.</td><td class="w" data-l="Who"><span class="who code">Code</span></td></tr>
           <tr><th scope="row">The LV's score</th><td data-l="What we decided">The items' scores weighted by value, over the normal items. Saved with it: how many values rest on a price, on related items, or on an assumption.</td><td class="w" data-l="Who"><span class="who code">Code</span></td></tr>
+          <tr><th scope="row">Confidence</th><td data-l="What we decided">The other side of the score, for the screen: 100 − risk score when the item has a price (found, or entered by the estimator), 0 when it has none. The LV's confidence is weighted by value like its score.</td><td class="w" data-l="Who"><span class="who code">Code</span></td></tr>
+          <tr><th scope="row">The estimator's comments</th><td data-l="What we decided"><code>lv comment &lt;project&gt; &lt;item&gt; --price … --text …</code> saves a comment on an item and recalculates every score at once, with no AI call. An own price gives the item confidence 100; <code>--doubt</code> marks a found price as not fitting. Comments are kept on the item, oldest first.</td><td class="w" data-l="Who"><span class="who code">Code</span></td></tr>
           <tr><th scope="row">The AI does not rate importance</th><td data-l="What we decided">Asking the model how big an item is would be a price guess, which the rules forbid.</td><td class="w" data-l="Who"><span class="who rule">Decision</span></td></tr>
         </tbody>
       </table>
@@ -919,6 +921,7 @@ Answer for every item id, each once:
           <tr><th scope="row">Descriptions</th><td data-l="P5, 50 items">30 complete · 20 with gaps · 0 vague</td><td data-l="P4, 296 items">172 complete · 115 with gaps · 9 vague</td></tr>
           <tr><th scope="row">Value basis</th><td data-l="P5, 50 items">5 by price · 33 by related items · 12 assumed</td><td data-l="P4, 296 items">9 by price · 109 by related items · 154 assumed</td></tr>
           <tr class="sum"><th scope="row">The LV's score</th><td data-l="P5, 50 items">51 of 100</td><td data-l="P4, 296 items">52 of 100</td></tr>
+          <tr><th scope="row">The LV's confidence</th><td data-l="P5, 50 items">5 of 100 (5 items priced)</td><td data-l="P4, 296 items">3 of 100 (10 items priced)</td></tr>
         </tbody>
       </table>
     </div>
