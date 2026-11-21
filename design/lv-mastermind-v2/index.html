@@ -700,6 +700,53 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .lv-r.picked:not(.sel){box-shadow:inset 2px 0 0 var(--ink)}
 @media (max-width:760px){.lv-stats{gap:18px}.lv-stat{min-width:0;text-align:left}.lv-bar .tools{width:100%}}
 .lv-r>[role=cell]:last-child{display:flex;justify-content:center}
+
+/* ---- table v3 ---- */
+.rsk{display:inline-flex;flex-direction:column;gap:5px;width:38px}
+.rsk b{font:500 13px/1 var(--mono);letter-spacing:.02em}
+.rsk.hi b{color:var(--bad)}.rsk.mid b{color:var(--warn)}.rsk.lo b{color:var(--ink-3)}
+.rbar{display:block;height:2px;background:var(--line);position:relative}
+.rbar>i{position:absolute;left:0;top:0;bottom:0}
+.rsk.hi .rbar>i{background:var(--bad)}.rsk.mid .rbar>i{background:var(--warn)}.rsk.lo .rbar>i{background:var(--ink-3)}
+.mtag{display:inline-flex;align-items:center;gap:6px;font:.6rem/1 var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
+.mtag>i{width:6px;height:6px;flex:none;background:var(--ink-3)}
+.mtag.unsicher>i{background:var(--warn)}.mtag.unsicher{color:var(--warn)}
+.mtag.adaptiert>i{background:var(--signal)}
+.mtag.ok>i{background:var(--ok)}.mtag.ok{color:var(--ok)}
+.lv-r{min-height:64px;padding-top:14px;padding-bottom:14px}
+.lv-r .c2{padding-top:1px}
+.lv-r .kurz{font-size:14.5px}
+.gw{background:transparent;padding:0;margin:0;color:var(--ink-3)}
+.gw:hover{background:transparent;color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+.rmeta{gap:4px 14px;margin-top:6px}
+.rmeta>.gw+.why::before{content:"";width:1px;height:10px;background:var(--line-2);margin-right:9px}
+.gpbar{height:2px;width:64px;background:var(--line)}
+.gpbar i{height:2px}
+.okbtn{width:30px;height:30px}
+.th>span:first-child{display:flex}
+/* ---- drawer header v3 ---- */
+.dw-top{padding:14px 18px 16px 22px;border-bottom:1px solid var(--line)}
+.dw-bar{gap:10px}
+.ozt{font:500 .72rem/1 var(--mono);letter-spacing:.06em;color:var(--paper);background:var(--ink);padding:6px 8px}
+.gwt{font:.64rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.navg{display:flex;align-items:center;border:1px solid var(--line-2)}
+.navg .ic{width:28px;height:28px}
+.navg .ic svg{width:14px;height:14px}
+.navc{font:.64rem/1 var(--mono);letter-spacing:.06em;color:var(--ink-3);padding:0 6px;min-width:52px;text-align:center}
+.navc b{color:var(--ink);font-weight:500}
+.xbtn{border:1px solid transparent}
+.xbtn:hover{border-color:var(--line-2)}
+.dw-title{margin:16px 0 14px;font-size:26px;line-height:1.12}
+.dmeta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.dmeta>div{padding:10px 12px 11px 0}
+.dmeta>div+div{padding-left:12px;border-left:1px solid var(--line)}
+.dmeta dt{font:.58rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.dmeta dd{margin:8px 0 0;font-size:13.5px;min-height:15px;display:flex;align-items:center}
+.dmeta dd.rsk{display:flex;flex-direction:row;align-items:center;gap:10px;width:auto}
+.dmeta dd.rsk .rbar{flex:1;max-width:70px}
+.rl{margin-top:12px;padding:9px 12px;border-left:2px solid currentColor;font-size:13px}
+.rl.hi{background:var(--bad-bg)}.rl.mid{background:var(--warn-bg)}
+.rl svg.i{flex:none;width:15px;height:15px}
 </style>
 </head>
 <body>
@@ -1036,10 +1083,10 @@ function vSummary(d) {
 
 function vRow(r, d) {
   var ow = ownerOf(r), m = ow ? T[ow] : null, ok = !!S.confirmed[r.oz], pk = !!S.picked[r.oz], fresh = S.justOk[r.oz] !== undefined, n = cmtN(r.oz), k = rk(r.risk);
-  var chip = ok ? '<span class="chip ok">✓ ' + (r.manual ? 'manuell' : 'bestätigt') + '</span>' : '<span class="chip ' + r.mode + '">' + r.mode + ' · ' + r.conf + ' %</span>';
+  var chip = ok ? '<span class="mtag ok"><i></i>' + (r.manual ? 'manuell' : 'bestätigt') + '</span>' : '<span class="mtag ' + r.mode + '"><i></i>' + r.mode + ' · ' + r.conf + ' %</span>';
   return '<div class="lv-grid lv-r' + (pk ? ' picked' : '') + (r.oz === S.sel ? ' sel' : '') + (ok ? ' is-ok' : '') + (fresh ? ' fx-ok' : '') + '" style="--i:' + (fresh ? S.justOk[r.oz] : 0) + '" role="row" data-k="r' + r.oz + '" data-act="open" data-oz="' + r.oz + '">' +
     '<span role="cell" class="c2"><input type="checkbox" class="cb"' + (pk ? ' checked' : '') + ' data-act="pick" data-oz="' + r.oz + '" aria-label="Position ' + r.oz + ' auswählen"></span>' +
-    '<span role="cell"><span class="risk ' + k + '" title="Risiko ' + r.risk + ' von 100 · ' + esc(r.why) + '">' + r.risk + (ok ? '<i class="seal">' + IC.tickRaw + '</i>' : '') + '</span></span>' +
+    '<span role="cell"><span class="rsk ' + k + '" title="Risiko ' + r.risk + ' von 100 · ' + esc(r.why) + '"><b>' + r.risk + '</b><i class="rbar"><i style="width:' + r.risk + '%"></i></i></span></span>' +
     '<span role="cell" class="mono c2" style="font-size:11.5px;letter-spacing:.02em">' + r.oz + '</span>' +
     '<span role="cell" style="min-width:0"><button class="kurz" data-act="open" data-oz="' + r.oz + '">' + esc(r.kurz) + '</button>' +
       (S.density === 'details' ? '<span class="lang">' + esc(r.lang) + '</span>' : '') +
@@ -1204,14 +1251,15 @@ function vDrawer(d) {
   }
 
   return '<aside class="dw" aria-label="Positionsdetails ' + p.oz + '" tabindex="-1" data-k="dw">' +
-    '<header class="dw-top"><div class="dw-bar"><span class="mono' + (S.swapDir === 'next' ? ' ozflash' : '') + '" style="color:var(--ink);padding:0 2px" data-k="oz' + p.oz + '">' + p.oz + '</span><span class="mono">· ' + esc(p.gewerk) + '</span><span style="flex:1"></span>' +
-      '<span class="mono" title="Mit ↑ / ↓ blättern">' + (nav.idx + 1) + ' / ' + nav.list.length + '</span>' +
-      '<button class="ic" data-act="nav" data-v="-1"' + (nav.idx <= 0 ? ' disabled' : '') + ' aria-label="Vorherige Position" title="Vorherige (↑)">' + IC.up + '</button>' +
-      '<button class="ic" data-act="nav" data-v="1"' + (nav.idx >= nav.list.length - 1 ? ' disabled' : '') + ' aria-label="Nächste Position" title="Nächste (↓)">' + IC.chev + '</button>' +
-      '<button class="ic" data-act="close" aria-label="Panel schließen" title="Schließen (Esc)">' + IC.x + '</button></div>' +
+    '<header class="dw-top"><div class="dw-bar"><span class="ozt' + (S.swapDir === 'next' ? ' ozflash' : '') + '" data-k="oz' + p.oz + '">' + p.oz + '</span><span class="gwt">' + esc(p.gewerk) + '</span><span style="flex:1"></span>' +
+      '<div class="navg"><button class="ic" data-act="nav" data-v="-1"' + (nav.idx <= 0 ? ' disabled' : '') + ' aria-label="Vorherige Position" title="Vorherige (↑)">' + IC.up + '</button>' +
+      '<span class="navc" title="Mit ↑ / ↓ blättern"><b>' + (nav.idx + 1) + '</b> / ' + nav.list.length + '</span>' +
+      '<button class="ic" data-act="nav" data-v="1"' + (nav.idx >= nav.list.length - 1 ? ' disabled' : '') + ' aria-label="Nächste Position" title="Nächste (↓)">' + IC.chev + '</button></div>' +
+      '<button class="ic xbtn" data-act="close" aria-label="Panel schließen" title="Schließen (Esc)">' + IC.x + '</button></div>' +
       '<div class="dw-swap ' + (S.leaving ? 'leaving' : S.swapDir) + '" data-k="h' + p.oz + '"><h2 class="dw-title">' + esc(p.kurz) + '</h2>' +
-      '<div class="dw-tags"><span class="risk ' + k + '">R ' + p.risk + '</span><span class="chip ' + p.mode + '">' + p.mode + '</span>' +
-        '</div>' +
+      '<dl class="dmeta"><div><dt>Risiko</dt><dd class="rsk ' + k + '"><b>' + p.risk + '</b><i class="rbar"><i style="width:' + p.risk + '%"></i></i></dd></div>' +
+        '<div><dt>Grundlage</dt><dd><span class="mtag ' + p.mode + '"><i></i>' + p.mode + '</span></dd></div>' +
+        '<div><dt>Menge</dt><dd>' + qty(p.menge) + ' ' + p.einheit + '</dd></div></dl>' +
       (p.risk >= 40 ? '<div class="rl ' + k + '">' + IC.warn + '<span>' + esc(p.why) + '</span></div>' : '') + '</div></header>' +
     '<div class="dw-body"><div class="dw-swap ' + (S.leaving ? 'leaving' : S.swapDir) + '" data-k="b' + p.oz + '">' +
       '<section class="price' + (ok ? ' is-ok' : '') + (S.editEp ? ' is-edit' : '') + '" aria-label="Preis">' +
