@@ -909,6 +909,75 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .dw.ai-open .confirm .ca b{font-size:14px}
 .dw.ai-open .okline{min-height:38px;padding:6px 14px}
 .price>.mini,.gwsec>.mini{height:32px}
+
+/* ---- [04] split: Bauplan + table ---- */
+.lv-split{display:grid;grid-template-columns:minmax(380px,43fr) minmax(0,57fr);gap:16px;align-items:start}
+.lv-main{min-width:0}
+.plan{position:sticky;top:76px;border:1px solid var(--line);background:var(--card);display:flex;flex-direction:column}
+.plan-h{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 12px 0 16px;min-height:52px;border-bottom:1px solid var(--line)}
+.plan-h .mono{display:block;color:var(--ink-3);font-size:.58rem}
+.plan-h b{display:block;font-weight:500;font-size:13px;margin-top:4px}
+.plan-h .seg{height:30px;padding:2px}.plan-h .seg button{height:24px}
+.plan-c{position:relative;padding:10px;background:repeating-linear-gradient(0deg,transparent 0 19px,color-mix(in srgb,var(--line) 55%,transparent) 19px 20px),repeating-linear-gradient(90deg,transparent 0 19px,color-mix(in srgb,var(--line) 55%,transparent) 19px 20px)}
+.plan-svg{display:block;width:100%;height:auto;overflow:visible}
+.plan-svg .axl{stroke:var(--line-2);stroke-width:.8;stroke-dasharray:6 6}
+.plan-svg .axc{fill:var(--card);stroke:var(--ink-3);stroke-width:1}
+.plan-svg .axt{font:500 11px var(--mono);fill:var(--ink-2);text-anchor:middle}
+.plan-svg .pit{fill:none;stroke:var(--warn);stroke-width:1.2;stroke-dasharray:10 6;opacity:.7}
+.plan-svg .pitl{font:9px var(--mono);letter-spacing:.12em;fill:var(--warn)}
+.plan-svg .slab{fill:color-mix(in srgb,var(--paper-2) 70%,transparent)}
+.plan-svg .wall{fill:none;stroke:var(--ink);stroke-width:7;stroke-linejoin:miter}
+.plan-svg .wall.in{stroke-width:3}
+.plan-svg .stair{stroke:var(--ink-3);stroke-width:1}
+.plan-svg .door{fill:var(--paper-2)}
+.plan-svg .win{fill:var(--card);stroke:var(--ink);stroke-width:1.2}
+.plan-svg .rl2{font:9.5px var(--mono);letter-spacing:.1em;fill:var(--ink-3);text-anchor:middle}
+.plan-svg .dim{fill:none;stroke:var(--ink-3);stroke-width:1}
+.plan-svg .dimt{font:10px var(--mono);fill:var(--ink-2);text-anchor:middle}
+.plan-svg .xh line{stroke:var(--signal);stroke-width:1;stroke-dasharray:3 4;opacity:0;transition:opacity .2s}
+.plan-svg.xh-on .xh line{opacity:.9}
+.mk{cursor:pointer;outline:none}
+.mk-b{stroke:var(--card);stroke-width:2;transition:transform .25s var(--spring)}
+.mk-t{font:600 12px var(--mono);fill:#fff;text-anchor:middle;pointer-events:none}
+.mk.hi .mk-b{fill:var(--bad)}.mk.mid .mk-b{fill:var(--warn)}.mk.lo .mk-b{fill:var(--ink-2)}.mk.ok .mk-b{fill:var(--ok)}
+.mk-ring{fill:none;stroke:var(--signal);stroke-width:2;opacity:0;transform:scale(.6);transition:opacity .2s,transform .3s var(--ease)}
+.mk:hover .mk-b,.mk.hot .mk-b,.mk:focus-visible .mk-b{transform:scale(1.25)}
+.mk.hot .mk-ring,.mk:focus-visible .mk-ring{opacity:1;transform:none}
+.mk.sel .mk-ring{opacity:1;transform:none;stroke:var(--ink);animation:mkpulse 1.8s var(--ease) infinite}
+@keyframes mkpulse{50%{transform:scale(1.25);opacity:.35}}
+.mk.dim{opacity:.18}
+.mk.off .mk-b{fill:var(--card)!important;stroke:var(--ink-3);stroke-dasharray:3 2}
+.mk.off .mk-t{fill:var(--ink-3)}
+.plan-tip{position:absolute;z-index:3;min-width:190px;max-width:240px;padding:9px 11px;background:var(--ink);color:var(--paper);font-size:12px;line-height:1.35;display:flex;flex-direction:column;gap:3px;pointer-events:none;opacity:0;transform:translate(14px,-50%) scale(.96);transform-origin:left center;transition:opacity .15s,transform .2s var(--ease)}
+.plan-tip.flip{transform:translate(calc(-100% - 14px),-50%) scale(.96)}
+.plan-tip.on{opacity:1;transform:translate(14px,-50%)}
+.plan-tip.flip.on{transform:translate(calc(-100% - 14px),-50%)}
+.plan-tip .mono{font-size:.56rem;opacity:.6}
+.plan-tip b{font-weight:500;font-size:12.5px}
+.plan-f{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;border-top:1px solid var(--line)}
+.plan-f .mono{color:var(--ink-3);font-size:.58rem}
+.plan-lg{display:flex;align-items:center;gap:5px;font:.56rem/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.plan-lg i{width:8px;height:8px;margin-left:6px}
+.plan-lg i.hi{background:var(--bad)}.plan-lg i.mid{background:var(--warn)}.plan-lg i.lo{background:var(--ink-2)}.plan-lg i.ok{background:var(--ok)}
+/* narrower table */
+.lv-split .lv-bar{flex-direction:column;align-items:stretch;gap:0;padding:0}
+.lv-split .lv-bar .filters{padding:0 6px;border-bottom:1px solid var(--line);overflow-x:auto;flex-wrap:nowrap}
+.lv-split .lv-bar .pill{min-height:46px;padding:0 10px;white-space:nowrap}
+.lv-split .lv-bar .tools{padding:8px 10px;justify-content:space-between;flex-wrap:nowrap}
+.lv-split .lv-bar .search{flex:1;width:auto;min-width:120px}
+.lv-split .lv-bar .vsep{display:none}
+.lv-split .lv-grid{grid-template-columns:22px 40px minmax(0,1fr) 118px 96px 32px;gap:10px;padding:0 12px}
+.lv-split .lv-r{padding-top:12px;padding-bottom:12px}
+.lv-split .lv-r.hot{background:var(--signal-bg)}
+.thl{display:flex;align-items:center;gap:6px}.thl i{font-style:normal;color:var(--line-2)}
+.ozl{display:flex;align-items:center;gap:8px;font-size:.62rem;letter-spacing:.04em;color:var(--ink-3);margin-bottom:3px}
+.ploc{display:inline-flex;align-items:center;gap:3px;color:var(--signal)}
+.ploc svg{width:11px;height:11px}
+.qty{font-size:11.5px;color:var(--ink-3)}
+.lv-split .lv-r .kurz{font-size:14px}
+.lv-split .gpbar{width:56px}
+.lv-split .foot{flex-direction:column;align-items:flex-start;gap:6px}
+@media (max-width:1100px){.lv-split{grid-template-columns:1fr}.plan{position:relative;top:0}}
 </style>
 </head>
 <body>
@@ -1048,6 +1117,7 @@ function qty(n) { return n % 1 === 0 ? fmt(n, 0) : fmt(n, 1); }
 function rk(r) { return r >= 70 ? 'hi' : r >= 40 ? 'mid' : 'lo'; }
 function pct(d) { return (d >= 0 ? '+' : '−') + fmt(Math.abs(d), Math.abs(d) < 10 ? 1 : 0) + ' %'; }
 var IC = {
+  pin: '<svg class="i" viewBox="0 0 24 24"><path d="M12 21s-6-5.6-6-11a6 6 0 1 1 12 0c0 5.4-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></svg>',
   pen: '<svg class="i" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4"/></svg>',
   search: '<svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
   tick: '<svg class="i" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>',
@@ -1253,22 +1323,75 @@ function vRow(r, d) {
   return '<div class="lv-grid lv-r' + (pk ? ' picked' : '') + (r.oz === S.sel ? ' sel' : '') + (ok ? ' is-ok' : '') + (fresh ? ' fx-ok' : '') + '" style="--i:' + (fresh ? S.justOk[r.oz] : 0) + '" role="row" data-k="r' + r.oz + '" data-act="open" data-oz="' + r.oz + '">' +
     '<span role="cell" class="c2"><input type="checkbox" class="cb"' + (pk ? ' checked' : '') + ' data-act="pick" data-oz="' + r.oz + '" aria-label="Position ' + r.oz + ' auswählen"></span>' +
     '<span role="cell"><span class="rsk ' + k + '" title="Risiko ' + r.risk + ' von 100 · ' + esc(r.why) + '"><b>' + r.risk + '</b><i class="rbar"><i style="width:' + r.risk + '%"></i></i></span></span>' +
-    '<span role="cell" class="mono c2" style="font-size:11.5px;letter-spacing:.02em">' + r.oz + '</span>' +
-    '<span role="cell" style="min-width:0"><button class="kurz" data-act="open" data-oz="' + r.oz + '">' + esc(r.kurz) + '</button>' +
+    '<span role="cell" style="min-width:0"><span class="ozl mono">' + r.oz + (PLAN[r.oz] ? '<span class="ploc" title="' + pm(PLAN[r.oz]) + '">' + IC.pin + PLAN[r.oz][2] + '</span>' : '') + '</span><button class="kurz" data-act="open" data-oz="' + r.oz + '">' + esc(r.kurz) + '</button>' +
       (S.density === 'details' ? '<span class="lang">' + esc(r.lang) + '</span>' : '') +
       '<span class="rmeta"><button class="gw" data-act="gewerk" data-v="' + esc(r.gewerk) + '" title="Nur ' + esc(r.gewerk) + ' anzeigen">' + esc(r.gewerk) + '</button>' +
       '<span class="why ' + k + '">' + IC.warn + esc(r.why) + '</span>' +
       (S.bundled[r.oz] ? '<span class="chip bundle">Bündel · ' + esc(S.bundled[r.oz]) + '</span>' : '') +
       (n ? '<span class="why lo" title="Kommentare">' + IC.chat + n + '</span>' : '') + '</span></span>' +
-    '<span role="cell" class="num c2" style="font-size:13px">' + qty(r.menge) + ' ' + r.einheit + '</span>' +
-    '<span role="cell" class="c2" style="display:flex;flex-direction:column;align-items:flex-end;gap:5px"><span style="font-size:13px;font-weight:500">' + eur(r.ep) + '</span>' + chip + '</span>' +
+    '<span role="cell" class="c2" style="display:flex;flex-direction:column;align-items:flex-end;gap:5px"><span style="font-size:13px;font-weight:500">' + eur(r.ep) + '</span><span class="qty">' + qty(r.menge) + ' ' + r.einheit + '</span>' + chip + '</span>' +
     '<span role="cell" class="num c2"><span style="font-size:14px;font-weight:500">' + eur(r.gp) + '</span><span class="gpbar" title="' + fmt(r.gp / d.tot * 100, 1) + ' % des Volumens"><i style="width:' + Math.max(4, Math.round(r.gp / d.maxGp * 100)) + '%;background:' + (d.driver[r.oz] ? 'var(--signal)' : 'var(--ink-3)') + '"></i></span></span>' +
     '<span role="cell"><button class="okbtn' + (ok ? ' is-ok' : '') + (fresh && ok ? ' fx' : '') + '" data-act="toggleOk" data-oz="' + r.oz + '" aria-pressed="' + ok + '" aria-label="' + (ok ? 'Bestätigung zurücknehmen' : 'Preis bestätigen') + '" title="' + (ok ? 'Bestätigung zurücknehmen' : 'Preis bestätigen') + '">' + IC.tickRaw + (fresh && ok && S.justOk[r.oz] === 0 ? particles('conf', 10, 34) : '') + '</button></span>' +
   '</div>';
 }
 
+
+// ---- Bauplan: every position sits on an x/y point of sheet A-102 ----
+var PLAN = {
+  '04.05.0030': [800, 500, 'EG'], '01.04.0010': [96, 604, 'EG'], '03.02.0100': [962, 96, 'EG'], '02.01.0010': [232, 620, 'EG'],
+  '01.02.0020': [610, 400, 'EG'], '02.03.0010': [480, 214, 'EG'], '01.02.0010': [330, 360, 'EG'], '05.03.0010': [170, 216, 'EG'],
+  '01.03.0040': [700, 300, 'EG'], '01.03.0041': [700, 196, '1.OG'], '05.01.0020': [384, 516, 'EG'], '06.01.0051': [536, 506, 'EG'], '06.01.0050': [160, 498, 'EG']
+};
+function pm(xy) { return 'X ' + fmt((xy[0] - 80) / 20, 1) + ' m · Y ' + fmt((620 - xy[1]) / 20, 1) + ' m'; }
+function vPlan(d) {
+  var shown = {}; d.rows.forEach(function (r) { shown[r.oz] = true; });
+  var fl = S.floor || 'EG';
+  var o = '<svg class="plan-svg" viewBox="0 0 1000 700" role="img" aria-label="Grundriss Erdgeschoss mit Positionen">';
+  o += '<defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="8" class="hl"/></pattern></defs>';
+  // axes
+  var ax = [80, 260, 420, 540, 700, 920], al = 'ABCDEF';
+  ax.forEach(function (x, i) { o += '<line class="axl" x1="' + x + '" y1="58" x2="' + x + '" y2="660"/><circle class="axc" cx="' + x + '" cy="42" r="11"/><text class="axt" x="' + x + '" y="46">' + al[i] + '</text>'; });
+  [120, 320, 400, 620].forEach(function (y, i) { o += '<line class="axl" x1="58" y1="' + y + '" x2="960" y2="' + y + '"/><circle class="axc" cx="38" cy="' + y + '" r="11"/><text class="axt" x="38" y="' + (y + 4) + '">' + (i + 1) + '</text>'; });
+  // excavation
+  o += '<rect class="pit" x="56" y="78" width="904" height="574"/><text class="pitl" x="948" y="70" text-anchor="end">BAUGRUBE</text>';
+  // slab + walls
+  o += '<rect class="slab" x="80" y="120" width="840" height="500"/>';
+  o += '<path class="wall" d="M80 120H920V620H80Z"/>';
+  o += '<path class="wall in" d="M80 320H920M80 400H920M260 120V320M420 120V320M540 120V320M700 120V320M230 400V620M380 400V620M530 400V620M680 400V620"/>';
+  // stair
+  for (var y = 140; y < 300; y += 16) o += '<line class="stair" x1="430" y1="' + y + '" x2="530" y2="' + y + '"/>';
+  o += '<path class="wall in" d="M480 140V300"/>';
+  // doors (gaps)
+  [[150, 320], [330, 320], [600, 320], [800, 320], [150, 400], [300, 400], [450, 400], [600, 400], [800, 400]].forEach(function (p) { o += '<rect class="door" x="' + (p[0] - 18) + '" y="' + (p[1] - 4) + '" width="36" height="8"/>'; });
+  // windows
+  [110, 170, 290, 340, 450, 500, 600, 650, 730, 780, 860].forEach(function (x) { o += '<rect class="win" x="' + (x - 16) + '" y="616" width="32" height="8"/>'; });
+  [150, 200, 300, 360, 590, 640, 760, 830].forEach(function (x) { o += '<rect class="win" x="' + (x - 16) + '" y="116" width="32" height="8"/>'; });
+  // room labels
+  [['SANITÄR', 170, 180], ['KÜCHE', 340, 180], ['TREPPE', 480, 312], ['PERSONAL', 620, 180], ['EINGANG · GARDEROBE', 810, 180], ['FLUR', 500, 366],
+   ['GRUPPE 1', 155, 450], ['GRUPPE 2', 305, 450], ['GRUPPE 3', 455, 450], ['GRUPPE 4', 605, 450], ['MEHRZWECKRAUM', 800, 450]].forEach(function (r) { o += '<text class="rl2" x="' + r[1] + '" y="' + r[2] + '">' + r[0] + '</text>'; });
+  // dimension
+  o += '<path class="dim" d="M80 678H920M80 670V686M920 670V686"/><text class="dimt" x="500" y="694">42,00 m</text>';
+  // crosshair
+  o += '<g class="xh" aria-hidden="true"><line class="xh-x" x1="0" y1="0" x2="1000" y2="0"/><line class="xh-y" x1="0" y1="0" x2="0" y2="700"/></g>';
+  // markers
+  d.all.forEach(function (r) {
+    var p = PLAN[r.oz]; if (!p) return;
+    var k = S.confirmed[r.oz] ? 'ok' : rk(r.risk), off = p[2] !== fl;
+    o += '<g class="mk ' + k + (off ? ' off' : '') + (shown[r.oz] ? '' : ' dim') + (r.oz === S.sel ? ' sel' : '') + '" data-act="open" data-oz="' + r.oz + '" transform="translate(' + p[0] + ' ' + p[1] + ')" tabindex="0" role="button" aria-label="' + esc(r.oz + ' ' + r.kurz) + '">' +
+      '<circle class="mk-ring" r="24"/><rect class="mk-b" x="-14" y="-14" width="28" height="28"/><text class="mk-t" y="4.5">' + (S.confirmed[r.oz] ? '✓' : r.risk) + '</text></g>';
+  });
+  o += '</svg>';
+  var hi = d.all.filter(function (r) { return PLAN[r.oz] && shown[r.oz]; }).length;
+  return '<aside class="plan" aria-label="Bauplan">' +
+    '<div class="plan-h"><div><span class="mono">Bauplan</span><b>A-102 · Grundriss</b></div>' +
+      '<div class="seg" role="group" aria-label="Geschoss">' + ['EG', '1.OG'].map(function (g) { return '<button class="' + (fl === g ? 'on' : '') + '" data-act="floor" data-v="' + g + '" aria-pressed="' + (fl === g) + '">' + g + '</button>'; }).join('') + '</div></div>' +
+    '<div class="plan-c">' + o + '<div class="plan-tip" aria-hidden="true"></div></div>' +
+    '<div class="plan-f"><span class="mono plan-xy">' + hi + ' Positionen verortet · M 1:100</span><span class="plan-lg"><i class="hi"></i>hoch<i class="mid"></i>mittel<i class="lo"></i>niedrig<i class="ok"></i>bestätigt</span></div>' +
+  '</aside>';
+}
+
 function vTable(d) {
-  var sortDef = { risk: 'Risiko', oz: 'OZ', kurz: 'Leistung', menge: 'Menge', ep: 'EP (KI)', gp: 'GP' };
+  var sortDef = { risk: 'Risiko', oz: 'OZ', kurz: 'Leistung', menge: 'Menge', ep: 'EP · Menge', gp: 'GP' };
   var th = function (k, right) {
     var on = S.sort.k === k;
     return '<span role="columnheader" aria-sort="' + (on ? (S.sort.d < 0 ? 'descending' : 'ascending') : 'none') + '"' + (right ? ' style="text-align:right"' : '') + '><button class="sort' + (on ? ' on' : '') + '" data-act="sort" data-v="' + k + '">' + sortDef[k] + (on ? ' <b>' + (S.sort.d < 0 ? '↓' : '↑') + '</b>' : '') + '</button></span>';
@@ -1293,7 +1416,7 @@ function vTable(d) {
     '<div class="lv-head"><div><div class="mono faint"><span style="color:var(--ink)">[04]</span> Leistungsverzeichnis</div><div class="lv-title">' + d.rows.length + ' von 1.284 Positionen <small>· sortiert nach ' + sortDef[S.sort.k] + (S.sort.d < 0 ? ' ↓' : ' ↑') + '</small></div></div>' +
       '<div class="lv-stats"><div class="lv-stat"><span class="mono">Bestätigt</span><b>' + okN + '<small> / ' + d.all.length + '</small></b><i class="lv-meter"><i style="width:' + (okN / d.all.length * 100) + '%"></i></i></div>' +
         '<div class="lv-stat"><span class="mono">Summe angezeigt</span><b>' + eur(sum) + '</b><i class="lv-meter"><i style="width:' + Math.min(100, sum / d.tot * 100) + '%;background:var(--ink)"></i></i></div></div></div>' +
-    '<div class="lv-bar"><div class="filters" role="group" aria-label="Filter">' + filters.map(function (x) {
+    '<div class="lv-split">' + vPlan(d) + '<div class="lv-main"><div class="lv-bar"><div class="filters" role="group" aria-label="Filter">' + filters.map(function (x) {
       var on = d.f === x[0];
       return '<button class="pill' + (on ? ' on' : '') + '" aria-pressed="' + on + '" data-act="filter" data-v="' + x[0] + '">' + x[1] + '<span class="cnt">' + d.base.filter(d.fdef[x[0]]).length + '</span></button>';
     }).join('') +
@@ -1303,13 +1426,13 @@ function vTable(d) {
         '<div class="seg" role="group" aria-label="Darstellung"><button class="' + (S.density === 'compact' ? 'on' : '') + '" data-act="density" data-v="compact" aria-pressed="' + (S.density === 'compact') + '">Kompakt</button><button class="' + (S.density === 'details' ? 'on' : '') + '" data-act="density" data-v="details" aria-pressed="' + (S.density === 'details') + '">Langtext</button></div>' +
         '<button class="btn btn-quiet' + (S.group ? ' on' : '') + '" data-act="group" aria-pressed="' + S.group + '">' + IC.layers + 'Nach Gewerk</button>' +
         '<button class="btn btn-quiet" data-act="csv" title="CSV kopieren">' + IC.copy + 'CSV</button></div></div>' +
-    '<div class="tbl"><div style="min-width:1030px" role="table" aria-label="Positionen des Leistungsverzeichnisses">' +
+    '<div class="tbl"><div role="table" aria-label="Positionen des Leistungsverzeichnisses">' +
       '<div class="lv-grid th mono" role="row"><span role="columnheader"><input type="checkbox" class="cb' + (!allPicked && d.rows.some(function (r) { return S.picked[r.oz]; }) ? ' some' : '') + '"' + (allPicked ? ' checked' : '') + ' data-act="pickAll" aria-label="Alle angezeigten Positionen auswählen"></span>' +
-        th('risk') + th('oz') + th('kurz') + th('menge', 1) + th('ep', 1) + th('gp', 1) + '<span role="columnheader" style="text-align:center">OK</span></div>' +
+        th('risk') + '<span role="columnheader" class="thl">' + th('oz').replace(/^<span[^>]*>|<\/span>$/g, '') + '<i>/</i>' + th('kurz').replace(/^<span[^>]*>|<\/span>$/g, '') + '</span>' + th('ep', 1) + th('gp', 1) + '<span role="columnheader" style="text-align:center">OK</span></div>' +
       body +
       (body ? '' : '<div class="empty">Keine Position passt zu diesen Filtern. <button class="lnk" data-act="resetFilters">Filter zurücksetzen</button></div>') +
       '<div class="foot"><span class="mono">' + d.rows.length + ' Positionen angezeigt · ' + okN + ' von ' + d.all.length + ' bestätigt</span><span class="ft-r"><span class="mono">Gesamt LV · KI-Kalkulation</span><b>' + eur(Math.round(d.tot)) + '</b></span></div>' +
-    '</div></div></section>';
+    '</div></div></div></div></section>';
 }
 
 function vDock(d) {
@@ -1651,6 +1774,32 @@ function aiMaybeClose() {
     aiShut();
   }, 700);
 }
+var hotOz = null;
+function planHot(oz) {
+  if (oz === hotOz) return; hotOz = oz;
+  document.querySelectorAll('.mk.hot,.lv-r.hot').forEach(function (n) { n.classList.remove('hot'); });
+  var svg = document.querySelector('.plan-svg'), tip = document.querySelector('.plan-tip'), xy = document.querySelector('.plan-xy');
+  if (!svg) return;
+  if (!oz || !PLAN[oz]) { svg.classList.remove('xh-on'); if (tip) tip.classList.remove('on'); return; }
+  var p = PLAN[oz], r = derive().all.find(function (x) { return x.oz === oz; });
+  var mk = svg.querySelector('.mk[data-oz="' + oz + '"]'); if (mk) { mk.classList.add('hot'); mk.parentNode.appendChild(mk); }
+  var row = document.querySelector('.lv-r[data-oz="' + oz + '"]'); if (row) row.classList.add('hot');
+  svg.querySelector('.xh-x').setAttribute('y1', p[1]); svg.querySelector('.xh-x').setAttribute('y2', p[1]);
+  svg.querySelector('.xh-y').setAttribute('x1', p[0]); svg.querySelector('.xh-y').setAttribute('x2', p[0]);
+  svg.classList.add('xh-on');
+  if (tip && r) {
+    tip.innerHTML = '<span class="mono">' + oz + ' · ' + p[2] + '</span><b>' + esc(r.kurz) + '</b><span class="mono">' + pm(p) + '</span><span>' + eur(r.ep) + ' je ' + r.einheit + ' · GP ' + eur(r.gp) + '</span>';
+    tip.style.left = (p[0] / 10) + '%'; tip.style.top = (p[1] / 7) + '%';
+    tip.classList.toggle('flip', p[0] > 620); tip.classList.toggle('up', p[1] > 420);
+    tip.classList.add('on');
+  }
+}
+document.addEventListener('mouseover', function (e) {
+  if (!e.target.closest) return;
+  var t = e.target.closest('.mk[data-oz], .lv-r[data-oz]');
+  planHot(t ? t.getAttribute('data-oz') : (e.target.closest('.plan, .tbl') ? hotOz : null));
+});
+document.addEventListener('mouseleave', function () { planHot(null); });
 document.addEventListener('mouseover', function (e) { if (e.target.closest && e.target.closest('.ask, .aichat')) { if (e.target.closest('.ask')) aiOpenNow(); else clearTimeout(aiT); } });
 document.addEventListener('mouseout', function (e) { var t = e.target.closest && e.target.closest('.ask, .aichat'); if (t && !(e.relatedTarget && t.contains(e.relatedTarget))) aiMaybeClose(); });
 document.addEventListener('focusin', function (e) { if (e.target.closest && e.target.closest('.ask')) aiOpenNow(); });
@@ -1798,6 +1947,7 @@ var A = {
     set(st); toast(a.done);
   },
   aiClose: function () { clearTimeout(aiT); var a = document.activeElement; if (a && a.blur) a.blur(); if (S.aiOpen) aiShut(); },
+  floor: function (ds) { set({ floor: ds.v }); },
   whyToggle: function () { set({ whyOpen: !S.whyOpen }); },
   dtab: function (ds) { set({ dtab: ds.v }); },
   resetEp: function () { var p = cur(), e = Object.assign({}, S.eps), g = Object.assign({}, S.sugg), c = Object.assign({}, S.confirmed); delete e[p.oz]; delete g[p.oz]; delete c[p.oz]; set({ eps: e, sugg: g, confirmed: c, editEp: false, flashEp: 1 }); S.flashEp = 0; toast('KI-Vorschlag für ' + p.oz + ' wiederhergestellt'); },
