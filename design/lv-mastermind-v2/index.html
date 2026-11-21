@@ -822,6 +822,9 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .gwr{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
 .gwr b{font-weight:500;font-size:13px}
 .gwall{margin-top:12px;font-size:12.5px}
+.gwsec .comm-h{height:39px}
+.gwsec .comm-h b{color:var(--ink);font-weight:400}
+.gwsec .panel{padding:8px 0 4px}
 </style>
 </head>
 <body>
@@ -1306,16 +1309,19 @@ function vDrawer(d) {
   var subName = p.oz.indexOf('04') === 0 ? 'Elektro Lindner GmbH' : 'Lieferant (Vorschlag)';
   var chat = S.chats[p.oz] || [];
   var same = d.all.filter(function (r) { return r.gewerk === p.gewerk && r.oz !== p.oz; });
-  var tabs = [['team', 'Team', cm.length], ['ext', 'Extern', thread.length + notes.length], ['agent', 'Agent', chat.length], ['gw', 'Gewerk', same.length]];
-  var dt = S.dtab || 'team';
+  var tabs = [['team', 'Team', cm.length], ['ext', 'Extern', thread.length + notes.length], ['agent', 'Agent', chat.length]];
+  var dt = S.dtab && S.dtab !== 'gw' ? S.dtab : 'team';
   var panel = '';
-  if (dt === 'gw') {
+  var gwPanel = '';
+  {
     var gsum = same.reduce(function (a, r) { return a + r.gp; }, p.gp);
-    panel = '<div class="gwh"><b>' + esc(p.gewerk) + '</b><span class="mono">' + (same.length + 1) + ' Positionen · Σ ' + eur(gsum) + '</span></div>' +
+    gwPanel = 
       (same.length ? '<ol class="gwl">' + same.map(function (r) { var ok2 = !!S.confirmed[r.oz]; return '<li data-k="g' + r.oz + '"><button data-act="open" data-oz="' + r.oz + '"><span class="rsk ' + rk(r.risk) + '"><b>' + r.risk + '</b><i class="rbar"><i style="width:' + r.risk + '%"></i></i></span><span class="gwm"><span class="mono">' + r.oz + '</span><span class="gwk">' + esc(r.kurz) + '</span></span><span class="gwr"><b>' + eur(r.gp) + '</b>' + (ok2 ? '<span class="mtag ok"><i></i>bestätigt</span>' : '<span class="mtag ' + r.mode + '"><i></i>' + r.conf + ' %</span>') + '</span>' + IC.arrow + '</button></li>'; }).join('') + '</ol>' +
         '<button class="lnk gwall" data-act="gewerk" data-v="' + esc(p.gewerk) + '">Alle im LV filtern</button>'
       : '<p class="pempty">Keine weiteren Positionen in diesem Gewerk.</p>');
-  } else if (dt === 'team') {
+    gwPanel = '<section class="comm gwsec" aria-label="Gewerk"><div class="comm-h"><span class="mono">Gewerk · <b>' + esc(p.gewerk) + '</b></span><span class="mono">' + (same.length + 1) + ' Pos. · Σ ' + eur(gsum) + '</span></div><div class="panel">' + gwPanel + '</div></section>';
+  }
+  if (dt === 'team') {
     panel = (cm.length ? '<ol class="feed">' + cm.map(function (c, i) { var m = T[c.by]; return '<li data-k="c' + i + '"><span class="av" style="background:' + m.color + '">' + m.ini + '</span><div class="fb"><div class="fh"><b>' + m.name + '</b><span>' + esc(c.time) + '</span></div><p>' + esc(c.t) + '</p></div></li>'; }).join('') + '</ol>' : '<p class="pempty">Noch nichts besprochen. Erwähne Kolleg:innen mit @.</p>') +
       '<div class="composer"><label><span class="sr">Kommentar</span><input data-in="cmt" data-enter="sendCmt" value="' + esc(S.cmt) + '" placeholder="Ans Team schreiben… @Lena"></label><button data-act="sendCmt" aria-label="Kommentar senden">' + IC.arrow + '</button></div>';
   } else if (dt === 'ext') {
@@ -1364,7 +1370,7 @@ function vDrawer(d) {
           '<div class="calc2">' + C.steps.map(function (s, j) { return '<div class="cs' + (j === C.steps.length - 1 ? ' last' : '') + '"><span>' + esc(s[0]) + '</span><span>' + esc(s[1]) + '</span></div>'; }).join('') + '</div>' +
           ((R.similar || []).length ? '<div class="refs"><span class="mono">Quellen</span>' + R.similar.map(function (x) { var e = D.extra[x[0]]; return e ? '<button class="ref" data-act="preview" data-key="' + x[0] + '">' + esc(e.proj) + '<small>' + esc(x[1]) + '</small></button>' : ''; }).join('') + '</div>' : '') +
         '</div></section>' +
-      '<section class="comm" aria-label="Kommunikation"><div class="comm-h"><span class="mono">Kommunikation</span>' +
+      gwPanel + '<section class="comm" aria-label="Kommunikation"><div class="comm-h"><span class="mono">Kommunikation</span>' +
         '<div class="ctabs" role="tablist">' + tabs.map(function (t) { var on = dt === t[0]; return '<button role="tab" class="ctab' + (on ? ' on' : '') + '" aria-selected="' + on + '" data-act="dtab" data-v="' + t[0] + '">' + t[1] + (t[2] ? '<span class="dn">' + t[2] + '</span>' : '') + '</button>'; }).join('') + '</div></div>' +
         '<div class="panel" data-k="p' + dt + '">' + panel + '</div></section>' +
     '</div></div>' +
