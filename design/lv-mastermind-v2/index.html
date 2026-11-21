@@ -679,7 +679,8 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .lv-bar .tools{padding:9px 0}
 .lv-bar .search{background:var(--paper)}
 .lv-bar .btn-quiet{border-color:transparent}
-.lv-bar .btn-quiet:hover,.lv-bar .btn-quiet.on{border-color:var(--line-2);background:var(--paper-2)}
+.lv-bar .btn-quiet:hover{border-color:var(--line-2);background:var(--paper-2)}
+.lv-bar .btn-quiet.on,.lv-bar .btn-quiet.on:hover{border-color:var(--ink);background:var(--ink);color:var(--paper)}
 .tbl{border-top:0}
 .th{height:40px;background:transparent;border-bottom:1px solid var(--ink);font-size:.6rem}
 .foot{align-items:center;padding:14px 16px;background:transparent;border-top:1px solid var(--ink)}
@@ -1025,7 +1026,7 @@ function vHeader() {
   return '<header class="top"><div class="top-in">' +
     '<div class="brand"><span class="mark" aria-hidden="true"></span><b>LV Mastermind</b><span class="crumb">/ <a href="#">Projekte</a> /</span><span>Kita Sonnenhof</span></div>' +
     '<div class="top-r">' +
-      '<label class="search">' + IC.search + '<span class="sr">Positionen durchsuchen</span><input id="q-top" type="search" data-in="q" value="' + esc(S.q) + '" placeholder="Position, OZ oder Gewerk…"><span class="kbd">/</span></label>' +
+      '<label class="search">' + IC.search + '<span class="sr">Positionen durchsuchen</span><input id="q-top" type="search" data-in="q" value="' + esc(S.q) + '" placeholder="Position, OZ oder Kategorie…"><span class="kbd">/</span></label>' +
       '<div class="team" aria-label="Team: 4 Personen">' + TEAM.map(function (k) { return '<span class="av" title="' + esc(T[k].name) + '" style="background:' + T[k].color + '">' + k + '</span>'; }).join('') + '</div>' +
       '<button class="theme-btn" data-act="theme" aria-label="Farbschema wechseln"><span class="theme-icon"></span>' + (isDark() ? 'Hell' : 'Dunkel') + '</button>' +
       '<button class="bell" aria-label="Benachrichtigungen">' + IC.bell + '</button>' +
@@ -1051,7 +1052,7 @@ function vHero(d) {
     '</div>' +
     '<dl class="meta rise" style="--d:140ms">' + [
       ['Bauherr', 'Kommune (anonymisiert)', 'Öffentlicher Auftraggeber'], ['Vergabe', 'Öffentlich, VOB/A', 'Einheitspreisvertrag'],
-      ['Abgabefrist', '12.12.2026, 11:00', 'noch 21 Tage'], ['Leistungsverzeichnis', 'GAEB X83', '1.284 Positionen · 11 Gewerke'],
+      ['Abgabefrist', '12.12.2026, 11:00', 'noch 21 Tage'], ['Leistungsverzeichnis', 'GAEB X83', '1.284 Positionen · 11 Kategorien'],
       ['Pläne', '14 Blätter', 'Grundrisse, Schnitte, Statik'], ['Verantwortlich', 'Thomas Berger', 'Oberkalkulation']
     ].map(function (m) { return '<div><dt class="mono">' + m[0] + '</dt><dd>' + m[1] + '</dd><dd>' + m[2] + '</dd></div>'; }).join('') + '</dl>' +
     '<nav class="tabs" aria-label="Projektbereiche">' +
@@ -1124,7 +1125,7 @@ function vBid() {
 }
 
 function vSummary(d) {
-  var parts = [['Neubau einer 4-gruppigen Kita in Massivbauweise, drei Geschosse, ca. 1.900 m² BGF. Das LV hat 1.284 Positionen in 11 Gewerken, aber nur 20 Positionen machen 80 % des Volumens aus. Kostentreiber sind die '],
+  var parts = [['Neubau einer 4-gruppigen Kita in Massivbauweise, drei Geschosse, ca. 1.900 m² BGF. Das LV hat 1.284 Positionen in 11 Kategorien, aber nur 20 Positionen machen 80 % des Volumens aus. Kostentreiber sind die '],
     ['Holz-Alu-Fenster', '02.01.0010'], [', der '], ['Betonstahl', '01.02.0020'], [' und die '], ['Stahlbetonwände', '01.03.0040'],
     ['. Das größte Risiko liegt in der pauschal ausgeschriebenen '], ['Beschallungsanlage', '04.05.0030'], [' ohne Spezifikation, im '], ['Fundamentbeton', '01.04.0010'],
     [', der der Statik widerspricht, und in der unklaren Bodenklasse beim '], ['Erdaushub', '03.02.0100'], ['. Im Plan sind 71 Fenster eingezeichnet, im LV 64: Nachtragspotenzial.']];
@@ -1191,11 +1192,11 @@ function vTable(d) {
       var on = d.f === x[0];
       return '<button class="pill' + (on ? ' on' : '') + '" aria-pressed="' + on + '" data-act="filter" data-v="' + x[0] + '">' + x[1] + '<span class="cnt">' + d.base.filter(d.fdef[x[0]]).length + '</span></button>';
     }).join('') +
-      (S.gewerk ? '<span class="ftag" data-k="fg">Gewerk: ' + esc(S.gewerk) + '<button data-act="gewerk" data-v="" aria-label="Gewerk-Filter entfernen">×</button></span>' : '') +
-    '</div><div class="tools"><label class="search">' + IC.search + '<span class="sr">Positionen filtern</span><input type="search" data-in="q" value="' + esc(S.q) + '" placeholder="OZ, Text oder Gewerk…"></label>' +
+      (S.gewerk ? '<span class="ftag" data-k="fg">Kategorie: ' + esc(S.gewerk) + '<button data-act="gewerk" data-v="" aria-label="Kategorie-Filter entfernen">×</button></span>' : '') +
+    '</div><div class="tools"><label class="search">' + IC.search + '<span class="sr">Positionen filtern</span><input type="search" data-in="q" value="' + esc(S.q) + '" placeholder="OZ, Text oder Kategorie…"></label>' +
         '<span class="vsep" aria-hidden="true"></span>' +
         '<div class="seg" role="group" aria-label="Darstellung"><button class="' + (S.density === 'compact' ? 'on' : '') + '" data-act="density" data-v="compact" aria-pressed="' + (S.density === 'compact') + '">Kompakt</button><button class="' + (S.density === 'details' ? 'on' : '') + '" data-act="density" data-v="details" aria-pressed="' + (S.density === 'details') + '">Langtext</button></div>' +
-        '<button class="btn btn-quiet' + (S.group ? ' on' : '') + '" data-act="group" aria-pressed="' + S.group + '">' + IC.layers + 'Nach Gewerk</button>' +
+        '<button class="btn btn-quiet' + (S.group ? ' on' : '') + '" data-act="group" aria-pressed="' + S.group + '">' + IC.layers + 'Nach Kategorie</button>' +
         '<button class="btn btn-quiet" data-act="csv" title="CSV kopieren">' + IC.copy + 'CSV</button></div></div>' +
     '<div class="tbl"><div style="min-width:1030px" role="table" aria-label="Positionen des Leistungsverzeichnisses">' +
       '<div class="lv-grid th mono" role="row"><span role="columnheader"><input type="checkbox" class="cb' + (!allPicked && d.rows.some(function (r) { return S.picked[r.oz]; }) ? ' some' : '') + '"' + (allPicked ? ' checked' : '') + ' data-act="pickAll" aria-label="Alle angezeigten Positionen auswählen"></span>' +
@@ -1246,7 +1247,7 @@ function candidates(p, R) {
   }).sort(function (a, b) { return b.score - a.score; }).forEach(add);
   [['Grundschule Trudering 2024', 0.95, 'Ähnliche Position, einfachere Ausführung'], ['Turnhalle Pasing 2025', 1.06, 'Ähnliche Position, aufwendigere Ausführung'], ['Kita Freiham 2023', 0.92, 'Ähnliche Position, kleinerer Umfang']].forEach(function (x) {
     var ep = rnd(aiEp * x[1]);
-    add({ ep: ep, proj: x[0], label: shortP(x[0]), pv: null, why: x[2] + ' im Gewerk ' + p.gewerk, steps: [['EP ' + x[0], eur(Math.round(ep / 1.042 * 100) / 100)], ['Baupreisindex bis Q3/2026', '+4,2 %'], ['EP heute', eur(ep)]] });
+    add({ ep: ep, proj: x[0], label: shortP(x[0]), pv: null, why: x[2] + ' in der Kategorie ' + p.gewerk, steps: [['EP ' + x[0], eur(Math.round(ep / 1.042 * 100) / 100)], ['Baupreisindex bis Q3/2026', '+4,2 %'], ['EP heute', eur(ep)]] });
   });
   return { cands: cands, src: src, steps: steps, segs: R.segs || [[p.mode === 'übernommen' ? '1:1 übernommen aus der textgleichen Position in »' + src + '«.' : 'Adaptiert aus »' + src + '«, indexiert mit dem Baupreisindex. Hinweis: ' + p.why + '.']] };
 }
@@ -1586,7 +1587,7 @@ var A = {
   collapse: function (ds) { var c = Object.assign({}, S.collapsed); c[ds.v] = !c[ds.v]; set({ collapsed: c }); },
   csv: function () {
     var rows = derive().rows, q = function (t) { return '"' + String(t).replace(/"/g, '""') + '"'; };
-    var lines = ['OZ;Kurztext;Gewerk;Menge;Einheit;EP;GP;Risiko;Status'].concat(rows.map(function (r) { return [r.oz, q(r.kurz), q(r.gewerk), fmt(r.menge, r.menge % 1 ? 1 : 0), r.einheit, fmt(r.ep, 2), fmt(r.gp, 2), r.risk, S.confirmed[r.oz] ? 'bestätigt' : r.mode].join(';'); }));
+    var lines = ['OZ;Kurztext;Kategorie;Menge;Einheit;EP;GP;Risiko;Status'].concat(rows.map(function (r) { return [r.oz, q(r.kurz), q(r.gewerk), fmt(r.menge, r.menge % 1 ? 1 : 0), r.einheit, fmt(r.ep, 2), fmt(r.gp, 2), r.risk, S.confirmed[r.oz] ? 'bestätigt' : r.mode].join(';'); }));
     try { navigator.clipboard.writeText(lines.join('\n')).then(function () { toast(rows.length + ' Zeilen als CSV kopiert'); }, function () { toast('Kopieren nicht möglich'); }); } catch (e) { toast('Kopieren nicht möglich'); }
   },
   bulkOk: function () {
