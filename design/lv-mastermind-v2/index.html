@@ -1174,6 +1174,20 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .start{max-width:720px;margin:0 auto;padding-top:40px;text-align:center}
 .st-lead{max-width:600px;margin:12px auto 0;line-height:1.55}
 .start .st-up{margin-top:32px;text-align:left}
+.st-up .dropz{padding-bottom:0}
+.dz-parts{display:grid;grid-template-columns:1fr 1fr;align-self:stretch;margin:22px -24px 0;border-top:1px dashed var(--line-2);text-align:left}
+.dz-part{display:flex;align-items:center;gap:10px;min-width:0;padding:14px 16px}
+.dz-part+.dz-part{border-left:1px dashed var(--line-2)}
+.dz-part-i{flex:none;display:grid;place-items:center;width:28px;height:28px;color:var(--ink-3)}
+.dz-part.has .dz-part-i{background:var(--ink);color:var(--paper)}
+.dz-part-t{flex:1;min-width:0}
+.dz-part-t .mono{display:block;font-size:.6rem;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dz-part-t i{font-style:normal;color:var(--ink-3)}.dz-part-t i.need{color:var(--signal)}
+.dz-part-t b{display:block;margin-top:3px;font-weight:400;font-size:12px;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dz-part.has .dz-part-t b{font-weight:500;font-size:13px;color:var(--ink)}
+.dz-part .ic{flex:none;width:26px;height:26px}
+.up-hint{margin:10px 0 0;text-align:center;font-size:12px}
+@media (max-width:560px){.dz-parts{grid-template-columns:1fr}.dz-part+.dz-part{border-left:0;border-top:1px dashed var(--line-2)}}
 /* start page: motion that follows the cursor (startMotion() in the script) */
 .orb{position:fixed;left:0;top:0;width:640px;height:640px;margin:-320px 0 0 -320px;border-radius:50%;z-index:-1;pointer-events:none;opacity:0;transition:opacity .9s var(--ease);will-change:transform;
  background:radial-gradient(closest-side,color-mix(in srgb,var(--signal) 29%,transparent),transparent)}
@@ -2683,9 +2697,12 @@ function takeFiles(files) {
 // ================= start page: one drop zone for the LV and an optional plan =================
 var LV_EXT = /\.(x83|d83|d84|d86|xlsx|pdf)$/i, PLAN_EXT = /\.(png|jpe?g)$/i;
 function freshUp() { return { phase: 'form', lv: null, plan: null, copy: false, err: '' }; }
-function upRow(kind, f) {
-  return '<li data-k="uf' + kind + '"><span class="uf-i">' + IC.doc + '</span><span class="uf-n">' + esc(f.name) + '</span><span class="uf-t mono">' + (kind === 'lv' ? 'BoQ' : 'Plan') + '</span><span class="uf-s mono">' + fmt(Math.max(1, f.size / 1024)) + ' KB</span>' +
-    '<button class="ic" data-act="upRemove" data-v="' + kind + '" aria-label="Remove ' + esc(f.name) + '">' + IC.x + '</button></li>';
+// One half of the drop zone's footer: what the file is, whether it is needed, and once chosen its name with x to remove.
+function upPart(kind, f, name, formats) {
+  var need = kind === 'lv';
+  return '<span class="dz-part' + (f ? ' has' : '') + '" data-k="dp' + kind + '"><span class="dz-part-i">' + (f ? IC.tick : need ? IC.doc : IC.plus) + '</span>' +
+    '<span class="dz-part-t"><span class="mono">' + name + ' · <i' + (need ? ' class="need"' : '') + '>' + (need ? 'required' : 'optional') + '</i></span><b>' + (f ? esc(f.name) : formats) + '</b></span>' +
+    (f ? '<button class="ic" data-act="upRemove" data-v="' + kind + '" aria-label="Remove ' + esc(f.name) + '">' + IC.x + '</button>' : '') + '</span>';
 }
 function vStart() {
   var U = S.up || (S.up = freshUp());
@@ -2693,12 +2710,14 @@ function vStart() {
     '<h1 aria-label="New project">' + 'New project'.split('').map(function (c) { return '<span aria-hidden="true">' + c + '</span>'; }).join('') + '</h1><p class="st-lead muted">Upload a bill of quantities. Every item gets a price from your past BoQs, a confidence score and a source. A construction plan also checks the quantities.</p>' +
     '<section class="card st-up" aria-label="Upload project">' +
       '<label class="dropz' + (U.lv || U.plan ? ' has' : '') + '" data-drop="any" data-k="dropz"><input type="file" class="sr" multiple accept=".x83,.d83,.d84,.d86,.xlsx,.pdf,.X83,.D83,.D84,.D86,.XLSX,.PDF,.png,.jpg,.jpeg" data-file="any">' +
-        '<span class="dropz-i">' + IC.down + '</span><b>Upload your project</b><span class="muted">Drag files here or click</span>' +
-        '<span class="dropz-f mono"><span>BoQ · GAEB .X83 / .D83 / .D84 / .D86 · Excel .XLSX · PDF</span><span>Plan · PNG / JPG (optional)</span></span>' +
+        '<span class="dropz-i">' + IC.down + '</span><b>Upload your project</b><span class="muted">Drag the BoQ here, and the construction plan if you have one. Or click</span>' +
+        // still one box: its footer names the two files it takes, and fills in as they are chosen
+        '<span class="dz-parts">' + upPart('lv', U.lv, 'Bill of quantities', 'GAEB .X83 / .D83 / .D84 / .D86 · Excel · PDF') +
+          upPart('plan', U.plan, 'Construction plan (Bauplan)', 'PNG / JPG · adds a check of the quantities') + '</span>' +
       '</label>' +
-      (U.lv || U.plan ? '<ul class="uf">' + (U.lv ? upRow('lv', U.lv) : '') + (U.plan ? upRow('plan', U.plan) : '') + '</ul>' : '') +
       (U.err ? '<div class="up-err">' + IC.warn + '<span>' + esc(U.err) + '</span></div>' : '') +
-      '<div class="up-btns"><button class="btn btn-primary" data-act="upGo"' + (U.lv ? '' : ' disabled') + '>Start analysis' + IC.arrow + '</button></div>' +
+      '<div class="up-btns"><button class="btn btn-primary" data-act="upGo"' + (U.lv ? '' : ' disabled') + '>' + (U.plan ? 'Start analysis with plan check' : 'Start analysis') + IC.arrow + '</button></div>' +
+      (U.lv && !U.plan ? '<p class="up-hint faint">No plan added: prices and risk only, no plan check.</p>' : '') +
     '</section>' + vLib() + '</div>';
 }
 
