@@ -57,8 +57,8 @@ flowchart LR
   `<image>` of the plan), add `?passcode=<passcode>` to the address. Not set (on your own computer), the API is open.
   The dashboard and the chat panel ask for it once and keep it in the browser. `/docs`, `/openapi.json` and the chat
   panel page `/assistant` hold no data and stay open.
-- **Price library:** the past LVs must already be in `data/library/` (`python -m lv ingest …`). Adding to the library
-  has no endpoint.
+- **Price library:** the past LVs live in `data/library/`. Add one with `POST /library` (the dashboard's start page
+  has an upload for it) or with `python -m lv ingest …`. A project already in the library is never replaced.
 
 ### Endpoints
 
@@ -72,8 +72,16 @@ flowchart LR
 | `GET` | `/projects/{project}/judge/{call}` | One judge call (an item's `prediction.judge_call` names it) | [JudgeCall](#judgecall) |
 | `GET` | `/projects/{project}/files/{name}` | A plan file named in the result: `plan.file` (the plan image), `plan.raw_file`, `plan.overview_files` | the file |
 | `POST` | `/projects/{project}/items/{oz}/comments` | Save the estimator's comment on one item | [Commented](#commented) |
+| `POST` | `/library` | Add a past LV with prices to the price library (`lv ingest`) | `202` + [LibraryProject](#libraryproject) |
+| `GET` | `/library` | The price library's projects, A to Z, with the ones being added or that failed | list of [LibraryProject](#libraryproject) |
 
 `{project}` is the short project ID (e.g. `H1`). `{oz}` is the item number (e.g. `04.0050`).
+
+**Adding to the library** is a multipart form: `project` (a new ID, e.g. `P4`), `lv` (a priced LV: `.x83`, `.d83`,
+`.d84`, `.d86`, `.xlsx` or `.pdf`) and optionally one or more `texts` (PDF prints of the same LV, for a priced file
+that holds prices without texts, like P3). Poll `GET /library` until the project is no longer `running`: reading
+takes seconds, building its assistant index with Voyage can take minutes. A file without prices ends as `failed`
+with the reason in `error`. Later runs price from the new project; runs already going do not.
 
 ### A typical session
 
@@ -163,6 +171,23 @@ whole result again.
  {"project": "P5", "status": "done", "items": 50, "total": 10952.0, "confidence": 5, "plan_findings": null}]
 ```
 
+#### LibraryProject
+
+| Field | Type | Meaning |
+|---|---|---|
+| `project` | string | the past project's ID |
+| `status` | `running`, `done`, `failed` | `done`: in the price library |
+| `name`, `date` | string, string or null | the LV's name and date (how old its prices are), when `done` |
+| `items`, `priced` | integer or null | line items, and those with a unit price, when `done` |
+| `error` | string | when `failed`: the ingest's last line, e.g. "… has no prices, so it cannot go into the price library." |
+| `log` | list of strings | while `running` or `failed`: the ingest's last 40 printed lines |
+
+```json
+[{"project": "P1", "status": "done", "name": "…", "date": "2024-02-27", "items": 159, "priced": 159, "error": "", "log": []},
+ {"project": "P4", "status": "failed", "name": "", "date": null, "items": null, "priced": null,
+  "error": "LV.x83 has no prices, so it cannot go into the price library.", "log": ["…"]}]
+```
+
 #### Comment (the request body)
 
 | Field | Type | Meaning |
@@ -203,7 +228,7 @@ Every error answer is JSON with a `detail` field, e.g. `{"detail": "No project H
 |---|---|
 | `401` | `LV_PASSCODE` is set on the server and the passcode is missing or wrong: ask for it, then call again |
 | `404` | unknown project, item, judge call or file; a project without a result yet |
-| `409` | the project is running: a second upload, or a comment during the run |
+| `409` | the project is running: a second upload, or a comment during the run. For `POST /library`: the ID is already in the library, is a tender's ID, or is being added |
 | `422` | a bad project ID, a wrong file type, a plan together with `copy_only`, a comment with no text, price or doubt, a price of 0 or less. For a malformed request, `detail` is a list of what is wrong |
 
 A run that stops shows `status: "failed"` with the reason in `error`. If only the plan check fails, the LV result

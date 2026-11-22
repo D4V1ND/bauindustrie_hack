@@ -16,6 +16,7 @@ P5_NEW = RAW / "GAEB-[PROJEKT_004].X83"
 def client(tmp_path, monkeypatch):
     monkeypatch.setattr(api, "DATA", tmp_path)
     monkeypatch.setattr(api, "runs", {})
+    monkeypatch.setattr(api, "ingests", {})
     return TestClient(api.app)
 
 
@@ -53,6 +54,35 @@ def test_bad_uploads_and_unknown_projects_are_refused_before_anything_runs(clien
     assert client.get("/projects/H9/status").status_code == 404
     assert client.get("/projects/H9").status_code == 404
     assert client.post("/projects/H9/items/01.0010/comments", json={}).status_code == 422
+
+
+def test_the_library_lists_past_projects_and_never_overwrites_one(client, tmp_path):
+    def lv(project: str, price: float | None) -> LV:
+        return LV(project=project, name=f"{project} project", date=None, source_file=f"{project}.x83",
+                  items=[LineItem(id=f"{project}/01.0010", oz="01.0010", section=[], short_text="Baustelle",
+                                  long_text="", quantity=1, unit="psch", unit_price=price)])
+    save(lv("P1", 5700.0), tmp_path / "library")
+    save(lv("H1", None), tmp_path / "out")
+    assert client.get("/library").json() == [{"project": "P1", "status": "done", "name": "P1 project", "date": None,
+                                              "items": 1, "priced": 1, "error": "", "log": []}]
+    upload = {"lv": ("old.x83", b"<GAEB/>")}
+    assert client.post("/library", data={"project": "P1"}, files=upload).status_code == 409  # P1 stays as it is
+    assert client.post("/library", data={"project": "H1"}, files=upload).status_code == 409  # a tender's ID
+    assert client.post("/library", data={"project": "P_4"}, files=upload).status_code == 422
+    assert client.post("/library", data={"project": "P4"}, files={"lv": ("old.docx", b"PK")}).status_code == 422
+    assert client.post("/library", data={"project": "P4"},
+                       files={**upload, "texts": ("print.png", b"png")}).status_code == 422
+    assert not api.ingests
+
+
+@pytest.mark.skipif(not P5_NEW.exists(), reason="needs the challenge dataset in data/raw")
+def test_a_library_upload_without_prices_fails_with_the_reason(client):
+    started = client.post("/library", data={"project": "P9"}, files={"lv": (P5_NEW.name, P5_NEW.read_bytes())})
+    assert started.status_code == 202 and started.json()["status"] == "running"
+    deadline = time.monotonic() + 120
+    while (entry := client.get("/library").json()[0])["status"] == "running" and time.monotonic() < deadline:
+        time.sleep(0.5)
+    assert entry["status"] == "failed" and "has no prices" in entry["error"], entry  # stops before any AI call
 
 
 def test_with_a_passcode_set_every_call_needs_it(client, monkeypatch):
