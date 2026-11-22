@@ -1,28 +1,65 @@
-# bauindustrie_hack
+# bauindustrie_hack: Needle
+
+Needle prices a new LV (Leistungsverzeichnis: the bill of quantities of a tender) from the company's past LVs,
+scores how unsure each price is and, with a construction plan, checks the LV's quantities against the plan. An
+assistant answers questions about the tender in a chat.
+
+| Part | Where | What it is |
+|---|---|---|
+| Dashboard | `design/lv-mastermind-v2/` | one `index.html`, no build step: upload, result, comments, chat |
+| Backend | `lv/` | the pipeline (steps 0–4), the API (`lv/api.py`) and the assistant |
+| Plan check | `vlm/` | reads a construction plan with an OpenAI vision model |
+| Data | `data/` | the dataset, the price library and the results: company data, kept local ([data/README.md](data/README.md)) |
+| Specs | [SPEC.md](SPEC.md), [CONTEXT.md](CONTEXT.md), `docs/` | how each step works, the words we use, the result format |
 
 ## The 3 features
 
-| Feature | What it does | Merges old # | Client priority |
-|---|---|---|---|
-| **A. Quantity summary** | Groups matching line items in the new LV and adds them up per unit ("40 chairs, 1,200 m² floor"). Exports the groups per trade or supplier ("4 chairs from you"). | 1, 2, 3 | **First.** "Summarising is totally important." |
-| **B. Price estimate** | Gives each line item a price from the old LVs: copy it, interpolate by size (10 cm → 20 cm), or adjust by material (stainless steel ≈ 3× steel). From those it builds the **project total**, the **top ~20 cost drivers** and a **go/no-go** against the company's size limits. | 4, 6, 7 | End goal ("Mastermind") |
-| **C. Plan check** | Compares LV quantities with what the 2D plan shows and flags mismatches (10 windows vs 20). | 5 | Wanted, but hardest. For the demo, plan data can be made up. |
+| Feature | What it does | Merges old # | Client priority | In the code |
+|---|---|---|---|---|
+| **A. Quantity summary** | Groups matching line items in the new LV and adds them up per unit ("40 chairs, 1,200 m² floor"). Exports the groups per trade or supplier ("4 chairs from you"). | 1, 2, 3 | **First.** "Summarising is totally important." | steps 1 and 2: `lv/match.py`, `lv/categorise.py` |
+| **B. Price estimate** | Gives each line item a price from the old LVs: copy it, interpolate by size (10 cm → 20 cm), or adjust by material (stainless steel ≈ 3× steel). From those it builds the **project total**, the **top ~20 cost drivers** and a **go/no-go** against the company's size limits. | 4, 6, 7 | End goal ("Mastermind") | steps 3 and 4: `lv/predict.py`, `lv/risk.py`; the go/no-go is the assistant's [brief](#the-brief-in-the-result) |
+| **C. Plan check** | Compares LV quantities with what the 2D plan shows and flags mismatches (10 windows vs 20). | 5 | Wanted, but hardest. | `lv/plan.py`, `vlm/` |
 
 ## Backend API
 
-The frontend talks to one small HTTP API, `lv/api.py`, built with FastAPI. It uploads an LV (and optionally a
-construction plan), follows the run, reads the result, and saves the estimator's comments.
+The dashboard talks to one small HTTP API, `lv/api.py`, built with FastAPI. It uploads an LV (and optionally a
+construction plan), follows the run, reads the result, saves the estimator's comments, adds past LVs to the price
+library and chats with the assistant.
 
 ### Architecture
 
 ```mermaid
-flowchart LR
-    FE[Frontend] -- "HTTP: JSON and file uploads" --> API["API<br/>lv/api.py (FastAPI)"]
-    API -- "1 saves the uploads" --> UP[("data/uploads/(project)/<br/>LV file, plan")]
-    API -- "2 starts one process per run" --> RUN["lv price<br/>steps 0–4, plan check in parallel"]
-    RUN -- "asks" --> AI["Claude: item types, judge, descriptions<br/>Voyage: search by meaning<br/>OpenAI: plan reading"]
-    RUN -- "3 writes" --> OUT[("data/out/<br/>(project).json · _judge.json · _plan.json<br/>overview PNG/XLSX · .log")]
-    API -- "4 reads, saves comments" --> OUT
+flowchart TD
+    FE["Dashboard"] -- "HTTP" --> API["API<br/>lv/api.py (FastAPI)"]
+    API --> RUN["Price run<br/>lv price, own process"]
+    API --> ING["Library ingest<br/>lv ingest, own process"]
+    API --> AS["Assistant chat<br/>inside the API"]
+    RUN & ING & AS --> DATA[("data/<br/>uploads · library · out · index · assistant")]
+    RUN & ING & AS --> AI["AI<br/>Claude · Voyage · OpenAI"]
+```
+
+**One price run, in order.** Solid arrows run one after another; the dotted plan check runs alongside steps 1–4.
+The dashboard shows `running` the whole time and opens the project only at the end.
+
+```mermaid
+flowchart TD
+    UP["Upload: POST /projects<br/>API saves the files, starts lv price, answers 202"]
+    S0["Step 0: read the LV"]
+    subgraph seq ["One after another"]
+        S1["Step 1: group equal items"] --> S2["Step 2: trades and item types<br/>Claude, up to 4 calls at once"]
+        S2 --> S3["Step 3: prices from past LVs<br/>Voyage search, Claude judge"]
+        S3 --> S4["Step 4: risk per item<br/>Claude, up to 4 calls at once"]
+        S4 --> SAVE["Save (project).json<br/>not shown yet"]
+    end
+    subgraph par ["Alongside steps 1–4"]
+        PL["Plan check: OpenAI reads the plan<br/>3 times, one after another"] --> CMP["Compare with the LV"]
+    end
+    UP --> S0 --> S1
+    S0 -.->|only with a plan| PL
+    SAVE --> MERGE["Wait for the plan check, merge it in"]
+    CMP -.-> MERGE
+    MERGE --> IDX["Assistant index: Voyage"] --> BRIEF["Brief: 2 questions to Claude"]
+    BRIEF --> DONE(["Status done: the dashboard opens the project, the chat unlocks"])
 ```
 
 - **One run is one process.** `POST /projects` saves the files, starts `python -m lv price …` (the same command as
@@ -31,9 +68,12 @@ flowchart LR
 - **The files are the database.** The result is `data/out/<project>.json` (format:
   [docs/result-format.md](docs/result-format.md), JSON Schema: [docs/result.schema.json](docs/result.schema.json)).
   There is no database server.
-- **With a plan,** the plan check runs beside steps 0–4 and is merged into the same `<project>.json` at the end
+- **With a plan,** the plan check starts after step 0, runs beside steps 1–4 and is merged into the same `<project>.json` at the end
   (`plan` on each item and on the LV).
 - **Comments need no AI.** A comment is saved into `<project>.json` and every confidence is recalculated at once.
+- **Adding a past LV** (`POST /library`) works like a run: one `lv ingest …` process, polled with `GET /library`.
+- **The assistant** runs inside the API, not as its own process. It answers from `data/index/`, which every run
+  and ingest builds as its last step ([Assistant](#assistant)).
 
 ### Run it
 
@@ -45,12 +85,23 @@ flowchart LR
 .venv\Scripts\python -m uvicorn lv.api:app --port 8000
 ```
 
+The dashboard is static files, served by any web server:
+
+```powershell
+.venv\Scripts\python -m http.server 8080 --bind 127.0.0.1 --directory design/lv-mastermind-v2
+```
+
+- **Dashboard:** http://localhost:8080. Which backend it calls is decided in this order: `?api=<address>` in the
+  page address (remembered in the browser), then `window.LV_API` in `design/lv-mastermind-v2/config.js` (set to the
+  hosted backend), then `http://localhost:8000` on your own computer. So for your local backend, open
+  http://localhost:8080/?api=http://localhost:8000 once.
 - **Try it in the browser:** http://localhost:8000/docs lists every endpoint, with a "Try it out" button.
 - **Generate frontend types:** the machine-readable description is at http://localhost:8000/openapi.json, e.g.
   `npx openapi-typescript http://localhost:8000/openapi.json -o api.d.ts`.
 - **Keys** go in the root `.env`:
-  - `ANTHROPIC_API_KEY`: steps 2–4;
-  - `VOYAGE_API_KEY`: optional, search by meaning;
+  - `ANTHROPIC_API_KEY`: steps 2–4, the assistant and the brief;
+  - `VOYAGE_API_KEY`: optional, search by meaning in step 3 and in the assistant (`VOYAGE_RPM`, `VOYAGE_TPM`: its
+    rate limits, see [When it is indexed](#when-it-is-indexed));
   - `OPENAI_API_KEY` and `OPENAI_MODEL`: only for the plan check.
 - **Passcode:** on the server, set the environment variable `LV_PASSCODE`. Every call then needs it as the header
   `X-Passcode: <passcode>`; without it the answer is `401`. Where a header cannot be sent (an `<img>` or SVG
@@ -90,7 +141,7 @@ with the reason in `error`. Later runs price from the new project; runs already 
 | Field | Required | What |
 |---|---|---|
 | `project` | yes | short ID: letters, digits and `-`, at most 40 (e.g. `H1`) |
-| `lv` | yes | the new LV: `.x83` (GAEB XML) or `.d83`, `.d84`, `.d86` (GAEB 90) |
+| `lv` | yes | the new LV: `.x83` (GAEB XML), `.d83`, `.d84`, `.d86` (GAEB 90), `.xlsx` (Excel) or `.pdf` |
 | `plan` | no | construction plan: `.png`, `.jpg`, `.jpeg` or `.pdf` |
 | `copy_only` | no | `true`: only copy exact matches. No AI, no cost, a few seconds, no plan allowed. For trying out the frontend |
 
@@ -108,7 +159,8 @@ A full run asks AI models, so it takes minutes, not seconds: a few minutes for t
 a plan.
 
 **3. Load the result:** `GET /projects/H1`. One JSON with everything. The fields are described in
-[docs/result-format.md](docs/result-format.md) and on the page "LV Result File".
+[docs/result-format.md](docs/result-format.md) and on the page "LV Result File"
+(`data/views/result_file_guide.html`).
 
 **4. Show the judge's reasoning** for an item: read `item.prediction.judge_call` (e.g. `7`), then
 `GET /projects/H1/judge/7`. It returns the question, the judge's thinking and its answer. `null` means no judge
@@ -228,8 +280,10 @@ Every error answer is JSON with a `detail` field, e.g. `{"detail": "No project H
 |---|---|
 | `401` | `LV_PASSCODE` is set on the server and the passcode is missing or wrong: ask for it, then call again |
 | `404` | unknown project, item, judge call or file; a project without a result yet |
-| `409` | the project is running: a second upload, or a comment during the run. For `POST /library`: the ID is already in the library, is a tender's ID, or is being added |
+| `409` | the project is running: a second upload, or a comment during the run. For `POST /library`: the ID is already in the library, is a tender's ID, or is being added. For the assistant: the tab is still answering the last message |
 | `422` | a bad project ID, a wrong file type, a plan together with `copy_only`, a comment with no text, price or doubt, a price of 0 or less. For a malformed request, `detail` is a list of what is wrong |
+| `502` | the assistant was asked and the Claude API failed (down, or a wrong key) |
+| `503` | the assistant was asked and `ANTHROPIC_API_KEY` is missing |
 
 A run that stops shows `status: "failed"` with the reason in `error`. If only the plan check fails, the LV result
 of steps 0–4 is already saved, so `has_result` is `true`.
@@ -244,6 +298,7 @@ of steps 0–4 is already saved, so `has_result` is `true`.
 - **One shared passcode, no personal logins,** and every origin may call the API (CORS). Fine for the hackathon:
   without the passcode nobody can read results (they hold the company's past prices) or start paid runs. Beyond the
   hackathon, add a login per person.
+
 ## Assistant
 
 A chat assistant for the right-hand panel. It answers questions about the open tender and the past projects from
@@ -324,3 +379,36 @@ cents to a run; without a key, or when Claude fails, it is skipped and the run s
 `state` of an answer: `answered`, `waiting` (the tender is still extracting or indexing), `refused` or `error`.
 `actions` lists what the assistant changed (e.g. "Comment saved on 03.0040"), so the view can reload that
 item; `positions` lists the cards it looked at.
+
+## Command line
+
+Everything the API starts can also be run by hand. The full list with examples is in [SPEC.md](SPEC.md).
+
+| Command | What it does |
+|---|---|
+| `python -m lv ingest <priced LV> --project P4 [--texts <print.pdf> …]` | add a past LV with prices to the price library |
+| `python -m lv price <new LV> --project H1 [--plan <plan>] [--copy-only]` | a run: steps 0–4, with `--plan` also the plan check |
+| `python -m lv comment H1 04.0050 --price 48 --text "…"` | save the estimator's comment and recalculate the confidence |
+| `python -m lv index [P1 H1 …]` | build the assistant's search index again |
+| `python -m lv brief H1` | ask the two brief questions for an existing result |
+| `python -m lv.ai` | one real AI call, to check the key |
+
+**Tests:** `.venv\Scripts\python -m pytest`. They need no network and no key (the judge is replaced by a fake), but
+they read the real dataset in `data/raw/`, which is not in git ([data/README.md](data/README.md)).
+
+## Hosting
+
+- **Dashboard:** Vercel serves `design/lv-mastermind-v2/` as static files (`vercel.json`; `.vercelignore` keeps
+  everything else out). `config.js` in that folder names the backend's address.
+- **Backend:** a Docker image (`Dockerfile`), at the moment on Railway. The build fills the price library with
+  P1, P2 and P3 from `data/raw/Challenge A Dataset` (720 priced items); `deploy/start.sh` copies them into an empty
+  library and starts the API on `$PORT`.
+- **`data/raw/` is not in git**, so build the image from a checkout that has the dataset. A host that builds
+  straight from GitHub fails at the step that copies it.
+- **Set on the host:** the keys from [Run it](#run-it), and
+
+| Variable | What it does |
+|---|---|
+| `LV_PASSCODE` | the shared passcode; without it anyone with the address can read results and start paid runs |
+| `LV_DATA` | where the library, results, uploads and indexes live. Point it at a persistent volume (e.g. `/data`), or a redeploy loses them |
+| `LV_REMOVE` | comma-separated project IDs whose results and uploads are deleted at startup (a one-off cleanup) |
