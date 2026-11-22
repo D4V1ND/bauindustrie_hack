@@ -1174,6 +1174,16 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .start{max-width:720px;margin:0 auto;padding-top:40px;text-align:center}
 .st-lead{max-width:600px;margin:12px auto 0;line-height:1.55}
 .start .st-up{margin-top:32px;text-align:left}
+/* start page: motion that follows the cursor (startMotion() in the script) */
+.orb{position:fixed;left:0;top:0;width:640px;height:640px;margin:-320px 0 0 -320px;border-radius:50%;z-index:-1;pointer-events:none;opacity:0;transition:opacity .9s var(--ease);will-change:transform;
+ background:radial-gradient(closest-side,color-mix(in srgb,var(--signal) 29%,transparent),transparent)}
+body.sm .orb{opacity:1}
+.start h1{white-space:nowrap}
+.start h1 span{display:inline-block;white-space:pre;will-change:transform}
+.start .card{--sx:50%;--sy:50%;--so:0;will-change:transform}
+.start .card::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:var(--so);
+ background:radial-gradient(320px circle at var(--sx) var(--sy),color-mix(in srgb,var(--signal) 15%,transparent),transparent 70%)}
+.start .dropz-i{will-change:transform}
 .dropz{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:40px 24px 24px;border:1.5px dashed var(--line-2);cursor:pointer;transition:border-color .15s,background .15s}
 .dropz:hover{border-color:var(--ink);background:var(--paper-2)}
 .dropz-i{display:grid;place-items:center;width:44px;height:44px;border:1px solid var(--line-2);margin-bottom:6px}
@@ -2680,7 +2690,7 @@ function upRow(kind, f) {
 function vStart() {
   var U = S.up || (S.up = freshUp());
   return '<div class="start" data-k="start">' +
-    '<h1>New project</h1><p class="st-lead muted">Upload a bill of quantities. Every item gets a price from your past BoQs, a confidence score and a source. A construction plan also checks the quantities.</p>' +
+    '<h1 aria-label="New project">' + 'New project'.split('').map(function (c) { return '<span aria-hidden="true">' + c + '</span>'; }).join('') + '</h1><p class="st-lead muted">Upload a bill of quantities. Every item gets a price from your past BoQs, a confidence score and a source. A construction plan also checks the quantities.</p>' +
     '<section class="card st-up" aria-label="Upload project">' +
       '<label class="dropz' + (U.lv || U.plan ? ' has' : '') + '" data-drop="any" data-k="dropz"><input type="file" class="sr" multiple accept=".x83,.d83,.d84,.d86,.xlsx,.pdf,.X83,.D83,.D84,.D86,.XLSX,.PDF,.png,.jpg,.jpeg" data-file="any">' +
         '<span class="dropz-i">' + IC.down + '</span><b>Upload your project</b><span class="muted">Drag files here or click</span>' +
@@ -2878,6 +2888,60 @@ document.addEventListener('pointerout', function (e) {
 });
 
 try { localStorage.removeItem('lvm-theme'); } catch (e) {}
+// ================= start page: motion that follows the cursor =================
+// Four layers, each with its own lag, so the page answers in sequence instead of all at once: the drop icon and the
+// main buttons pull toward the cursor first, the headline's letters lift as it passes, the cards tilt and light up
+// under it, and a slow glow trails behind everything. Styles are written every frame, because render() rebuilds the
+// elements' attributes. Off for touch screens and for "reduce motion".
+(function startMotion() {
+  if (!matchMedia('(pointer:fine)').matches || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var mx = innerWidth / 2, my = innerHeight / 3, inside = false, on = false, last = 0, mem = new WeakMap();
+  var orb = document.createElement('div'), o = { x: mx, y: my };
+  orb.className = 'orb'; document.body.appendChild(orb);
+  function v(el) { var s = mem.get(el); if (!s) mem.set(el, s = { a: 0, b: 0, c: 0 }); return s; }
+  function frame(t) {
+    var page = document.querySelector('.start');
+    if (!page) { on = false; document.body.classList.remove('sm'); return; }
+    var dt = Math.min(50, last ? t - last : 16.7); last = t;
+    var k = function (speed) { return 1 - Math.pow(1 - speed, dt / 16.7); };  // the same feel at 60 and 144 Hz
+    // slowest: the glow
+    o.x += (mx - o.x) * k(.045); o.y += (my - o.y) * k(.045);
+    orb.style.transform = 'translate3d(' + o.x.toFixed(1) + 'px,' + o.y.toFixed(1) + 'px,0)';
+    // the cards: tilt toward the cursor, with a light under it
+    page.querySelectorAll('.card').forEach(function (c) {
+      var r = c.getBoundingClientRect(), s = v(c), over = inside && mx > r.left && mx < r.right && my > r.top && my < r.bottom;
+      s.a += ((over ? ((r.top + r.height / 2 - my) / r.height) * 3.5 : 0) - s.a) * k(.08);
+      s.b += ((over ? ((mx - r.left - r.width / 2) / r.width) * 3.5 : 0) - s.b) * k(.08);
+      s.c += ((over ? 1 : 0) - s.c) * k(.1);
+      c.style.transform = 'perspective(1200px) rotateX(' + s.a.toFixed(3) + 'deg) rotateY(' + s.b.toFixed(3) + 'deg)';
+      c.style.setProperty('--sx', (mx - r.left).toFixed(0) + 'px'); c.style.setProperty('--sy', (my - r.top).toFixed(0) + 'px');
+      c.style.setProperty('--so', s.c.toFixed(3));
+      var dz = c.querySelector('.dropz');  // depth: the drop zone slides a little further than its card tilts
+      if (dz) dz.style.transform = 'translate3d(' + (s.b * 2.4).toFixed(2) + 'px,' + (-s.a * 2.4).toFixed(2) + 'px,0)';
+    });
+    // the headline: letters near the cursor lift, lean away and take the signal colour
+    page.querySelectorAll('h1 span').forEach(function (l) {
+      var r = l.getBoundingClientRect(), s = v(l), cx = r.left + r.width / 2, cy = r.top + r.height / 2 - s.a;
+      var d = Math.hypot(mx - cx, my - cy), p = inside ? Math.exp(-d * d / 5000) : 0;  // falls off over about 50 px: a wave of 3 or 4 letters, not the whole word
+      s.a += (-20 * p - s.a) * k(.14); s.b += (Math.max(-1, Math.min(1, (cx - mx) / 50)) * 12 * p - s.b) * k(.14); s.c += (p - s.c) * k(.14);
+      l.style.transform = 'translateY(' + s.a.toFixed(2) + 'px) rotate(' + s.b.toFixed(2) + 'deg) scale(' + (1 + s.c * .14).toFixed(3) + ')';
+      l.style.color = s.c > .02 ? 'color-mix(in srgb,var(--signal) ' + Math.round(s.c * 100) + '%,var(--ink))' : '';
+    });
+    // fastest: the drop icon and the main buttons are pulled toward a cursor within 140 px
+    page.querySelectorAll('.dropz-i, .btn-primary:not([disabled])').forEach(function (m) {
+      var r = m.getBoundingClientRect(), s = v(m), dx = mx - (r.left + r.width / 2 - s.a), dy = my - (r.top + r.height / 2 - s.b);
+      var pull = inside ? Math.max(0, 1 - Math.hypot(dx, dy) / 140) * .46 : 0;
+      s.a += (dx * pull - s.a) * k(.2); s.b += (dy * pull - s.b) * k(.2);
+      m.style.transform = 'translate3d(' + s.a.toFixed(2) + 'px,' + s.b.toFixed(2) + 'px,0)';
+    });
+    requestAnimationFrame(frame);
+  }
+  document.addEventListener('pointermove', function (e) {
+    mx = e.clientX; my = e.clientY; inside = true;
+    if (!on && document.querySelector('.start')) { on = true; last = 0; document.body.classList.add('sm'); requestAnimationFrame(frame); }
+  });
+  document.documentElement.addEventListener('pointerleave', function () { inside = false; });
+})();
 ['dragover', 'drop'].forEach(function (ev) {
   document.addEventListener(ev, function (e) {
     var z = e.target.closest && e.target.closest('[data-drop]');
