@@ -888,6 +888,10 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .cp-m{display:flex;gap:8px;animation:rise .35s var(--ease)}
 .cp-m.user{justify-content:flex-end}
 .cp-m .bub{max-width:86%;white-space:pre-line}
+.bub.md{white-space:normal!important;overflow-x:auto}
+.bub.md>:first-child{margin-top:0}.bub.md>:last-child{margin-bottom:0}
+.bub.md p,.bub.md ul,.bub.md ol{margin:0 0 8px}.bub.md ul,.bub.md ol{padding-left:18px}
+.bub.md table{border-collapse:collapse;font-size:12px;margin:0 0 8px}.bub.md th,.bub.md td{border:1px solid var(--line);padding:3px 6px;text-align:left}
 .cp-m .thinking{display:flex;align-items:center;gap:5px}
 
 /* boxed lower sections + agent reveal */
@@ -932,6 +936,8 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .dw.ai-open .aichat{flex:1;min-height:0;margin:10px 22px 0;animation:chatup .5s var(--ease)}
 @keyframes chatup{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
 .aichat .cp-log{min-height:0}
+.pchat .aichat{flex:1;min-height:0;margin:16px;animation:chatup .5s var(--ease)}
+.pchat .ask{padding:10px 12px 12px}
 /* header compresses */
 .dw-title,.dmeta,.rl{transition:font-size .45s var(--ease),margin .45s var(--ease),max-height .45s var(--ease),opacity .3s,padding .45s var(--ease)}
 .dmeta,.rl{max-height:120px}
@@ -1184,6 +1190,13 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .uf .ic{width:28px;height:28px;flex:none}
 .st-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:20px;margin-top:28px;align-items:start}
 .st-up .up-err{margin-top:14px}
+.start .st-lib{margin-top:20px;text-align:left}
+.st-lib-lead{margin:8px 0 0;font-size:13px}
+.st-lib .uf-n b{font-weight:600}
+.lib-add{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:16px}
+.lib-add .btn{max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.lib-id{display:inline-flex;align-items:center;gap:6px}
+.lib-id input{width:84px;height:30px;padding:0 8px;border:1px solid var(--line-2);background:transparent;color:var(--ink);font:inherit;font-size:13px}
 .st-up .up-btns{justify-content:center}
 .st-up .up-grid{margin-top:18px}
 .smp{list-style:none;margin:6px -26px -24px;padding:0}
@@ -1227,6 +1240,9 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 <div class="glow" aria-hidden="true"></div>
 <div id="app"></div>
 <script src="config.js"></script>
+<!-- the live agent answers in Markdown: rendered like lv/static/assistant.html does -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
 <script>
 (function () {
 'use strict';
@@ -1622,6 +1638,7 @@ function vHero(d) {
     '<div style="min-width:0">' +
     '<h1>' + esc(P.name) + '</h1></div>' +
     '<div class="hero-actions">' +
+      (P.live ? '<button class="btn" data-act="pchatOpen">' + IC.star + 'Ask the agent</button>' : '') +
       '<button class="btn btn-primary btn-export" data-act="export">' + IC.down + 'Export GAEB X84<span class="xsep"></span><span class="xamt">' + eur(Math.round(d.tot)) + '</span>' + IC.arrow + '</button>' +
     '</div></div>';
 }
@@ -1964,11 +1981,11 @@ function vDrawer(d) {
   } else if (dt === 'agent') {
     panel = (chat.length || S.thinking ? '' : '<p class="pempty">Frag den Agenten zu dieser Position, z. B. nach dem Preis, einer Bieterfrage oder einem Was-wäre-wenn.</p><div class="chips">' +
       [['Explain price', 'How did you get this price?'], ['Draft bidder query', 'Draft a bidder query'], ['Material +15%?', 'What if material costs rise 15%?'], ['Ask subcontractor', 'Send a request to a subcontractor']].map(function (c) { return '<button class="qchip" data-act="ask" data-v="' + esc(c[1]) + '">' + c[0] + '</button>'; }).join('') + '</div>') +
-      '<div style="display:grid;gap:10px">' + chat.map(function (m, i) { return '<div data-k="m' + i + '" style="display:flex;gap:8px;justify-content:' + (m.role === 'user' ? 'flex-end' : 'flex-start') + ';animation:rise .35s var(--ease)">' + (m.role === 'agent' ? '<span class="agent-ic">' + IC.star + '</span>' : '') + '<div class="bub' + (m.role === 'user' ? ' me' : '') + '" style="max-width:86%;white-space:pre-line">' + esc(m.t) + '</div></div>'; }).join('') +
+      '<div style="display:grid;gap:10px">' + chat.map(function (m, i) { return '<div data-k="m' + i + '" style="display:flex;gap:8px;justify-content:' + (m.role === 'user' ? 'flex-end' : 'flex-start') + ';animation:rise .35s var(--ease)">' + (m.role === 'agent' ? '<span class="agent-ic">' + IC.star + '</span>' : '') + '<div class="bub' + (m.role === 'user' ? ' me' : '') + (m.md ? ' md' : '') + '" style="max-width:86%;white-space:pre-line">' + bubText(m) + '</div></div>'; }).join('') +
       (S.thinking ? '<div style="display:flex;gap:8px;align-items:center" data-k="th"><span class="agent-ic">' + IC.star + '</span><div class="bub thinking" style="display:flex;align-items:center;gap:5px"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="faint" style="font-size:12px;margin-left:6px">liest Begründung, Quellen &amp; LV…</span></div></div>' : '') + '</div>';
   }
 
-  return '<aside class="dw' + (S.aiOpen || S.thinking ? ' ai-open' : '') + '" aria-label="Item details ' + p.oz + '" tabindex="-1" data-k="dw">' +
+  return '<aside class="dw' + (S.aiOpen || S.thinking === p.oz ? ' ai-open' : '') + '" aria-label="Item details ' + p.oz + '" tabindex="-1" data-k="dw">' +
     '<header class="dw-top"><div class="dw-bar"><span class="ozt' + (S.swapDir === 'next' ? ' ozflash' : '') + '" data-k="oz' + p.oz + '">' + p.oz + '</span><span class="gwt" title="' + esc(p.gewerk) + '">' + esc(p.gewerk) + '</span><span style="flex:1"></span>' +
       '<div class="navg"><button class="ic" data-act="nav" data-v="-1"' + (nav.idx <= 0 ? ' disabled' : '') + ' aria-label="Previous item" title="Previous (↑)">' + IC.up + '</button>' +
       '<span class="navc" title="Browse with ↑ / ↓"><b>' + (nav.idx + 1) + '</b> / ' + nav.list.length + '</span>' +
@@ -2013,16 +2030,34 @@ function vDrawer(d) {
       '<div class="aiwrap"><div class="aiin"><section class="aichat" role="region" aria-label="Chat with the agent about ' + p.oz + '">' +
       '<div class="cp-h"><span class="agent-ic">' + IC.star + '</span><span><b>Agent</b><small>' + p.oz + ' · ' + esc(p.kurz) + '</small></span><button class="ic" data-act="aiClose" aria-label="Close chat">' + IC.x + '</button></div>' +
       '<div class="cp-log" data-k="cplog' + p.oz + '">' +
-        (chat.length || S.thinking ? '' : '<p class="pempty">Ask me about this item: price, bidder query or what-if.</p><div class="chips">' +
+        (chat.length || S.thinking === p.oz ? '' : '<p class="pempty">Ask me about this item: price, bidder query or what-if.</p><div class="chips">' +
           [['Explain price', 'How did you get this price?'], ['Draft bidder query', 'Draft a bidder query'], ['Material +15%?', 'What if material costs rise 15%?'], ['Ask subcontractor', 'Send a request to a subcontractor']].map(function (c) { return '<button class="qchip" data-act="ask" data-v="' + esc(c[1]) + '">' + c[0] + '</button>'; }).join('') + '</div>') +
-        chat.map(function (m, i) { return '<div class="cp-m ' + m.role + '" data-k="cm' + i + '">' + (m.role === 'agent' ? '<span class="agent-ic">' + IC.star + '</span>' : '') + '<div class="bub' + (m.role === 'user' ? ' me' : '') + '">' + esc(m.t) + '</div></div>'; }).join('') +
-        (S.thinking ? '<div class="cp-m agent" data-k="cth"><span class="agent-ic">' + IC.star + '</span><div class="bub thinking"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>' : '') +
+        vMsgs(chat, S.thinking === p.oz, 'cm') +
       '</div></section></div></div>' +
     '</div></div>' +
     '<div class="dw-cta" data-k="cta-bar">' + (devWarn && !ok && !p.gen && !noAi ? '<p class="hint" data-k="hint">' + IC.warn + '<span>More than 10% off the recommendation. Hold the button to confirm your own price.</span></p>' : '') + cta + '</div>' +
     '<footer class="ask">' +
       '<div class="askin"><span style="color:var(--signal);display:flex">' + IC.star + '</span><label style="flex:1;display:flex"><span class="sr">Question for the agent</span><input data-in="draft" data-enter="sendDraft" value="' + esc(S.draft) + '" placeholder="Ask the agent about ' + p.oz + '…"></label><button class="send" data-act="sendDraft" aria-label="Send">' + IC.arrow + '</button></div></footer>' +
   '</aside>';
+}
+function vMsgs(chat, th, k) {
+  return chat.map(function (m, i) { return '<div class="cp-m ' + m.role + '" data-k="' + k + i + '">' + (m.role === 'agent' ? '<span class="agent-ic">' + IC.star + '</span>' : '') + '<div class="bub' + (m.role === 'user' ? ' me' : '') + (m.md ? ' md' : '') + '">' + bubText(m) + '</div></div>'; }).join('') +
+    (th ? '<div class="cp-m agent" data-k="' + k + 'th"><span class="agent-ic">' + IC.star + '</span><div class="bub thinking"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>' : '');
+}
+// The whole-project chat: the same backend assistant as the item chat, in one tab per project ("Project <id>").
+// Its messages are S.chats['*']; an open item drawer takes its place until it is closed.
+function vProjectChat() {
+  if (!S.pchat || S.sel || !P.live) return '';
+  var chat = S.chats['*'] || [], th = S.thinking === '*';
+  return '<aside class="dw pchat" aria-label="Chat with the agent about the whole project" data-k="pchat"><section class="aichat">' +
+    '<div class="cp-h"><span class="agent-ic">' + IC.star + '</span><span><b>Agent</b><small>' + esc(P.id) + ' · whole project and past BoQs</small></span><button class="ic" data-act="pchatClose" aria-label="Close chat">' + IC.x + '</button></div>' +
+    '<div class="cp-log" data-k="pclog">' +
+      (chat.length || th ? '' : '<p class="pempty">Ask about the whole project: risks, missing prices, past projects, bidder questions.</p><div class="chips">' +
+        [['Biggest risks', 'Which 5 items carry the biggest risk, and why?'], ['Missing prices', 'Which expensive items have no price yet, and what would help?'], ['Bid or not?', 'Should we bid on this project? Give the main reasons.'], ['Similar past jobs', 'Which past project is most like this one?']].map(function (c) { return '<button class="qchip" data-act="pask" data-v="' + esc(c[1]) + '">' + c[0] + '</button>'; }).join('') + '</div>') +
+      vMsgs(chat, th, 'pm') +
+    '</div>' +
+    '<footer class="ask"><div class="askin"><span style="color:var(--signal);display:flex">' + IC.star + '</span><label style="flex:1;display:flex"><span class="sr">Question for the agent</span><input data-in="pdraft" data-enter="sendPdraft" value="' + esc(S.pdraft || '') + '" placeholder="Ask the agent about ' + esc(P.id) + '…"></label><button class="send" data-act="sendPdraft" aria-label="Send">' + IC.arrow + '</button></div></footer>' +
+  '</section></aside>';
 }
 
 function vPreview(d) {
@@ -2064,7 +2099,7 @@ function view() {
   var d = derive();
   return vHeader() + '<main>' + vHero(d) +
     '<div class="grid2">' + vCost() + '</div><div class="grid2 row2">' + vSummary(d) + '</div>' + vTable(d) +
-    '</main>' + vDock(d) + (S.planFull ? '<div class="planfs" data-k="planfs"><div class="planfs-bg" data-act="planFull" data-v="0"></div>' + vPlan(d, true) + '</div>' : '') + vDrawer(d) + vPreview(d) + vFx() + vUpload() + vToast();
+    '</main>' + vDock(d) + (S.planFull ? '<div class="planfs" data-k="planfs"><div class="planfs-bg" data-act="planFull" data-v="0"></div>' + vPlan(d, true) + '</div>' : '') + vDrawer(d) + vProjectChat() + vPreview(d) + vFx() + vUpload() + vToast();
 }
 
 // ================= tiny DOM morph (keeps nodes, so CSS animations only play on real changes) =================
@@ -2335,15 +2370,47 @@ document.addEventListener('mouseover', function (e) {
   var m = e.target.closest('.mk[data-oz]'), t = m || e.target.closest('.lv-r[data-oz]');
   planHot(t ? t.getAttribute('data-oz') : null, m);
 });
-document.addEventListener('mouseover', function (e) { if (e.target.closest && e.target.closest('.ask, .aichat')) { if (e.target.closest('.ask')) aiOpenNow(); else clearTimeout(aiT); } });
-document.addEventListener('mouseout', function (e) { var t = e.target.closest && e.target.closest('.ask, .aichat'); if (t && !(e.relatedTarget && t.contains(e.relatedTarget))) aiMaybeClose(); });
-document.addEventListener('focusin', function (e) { if (e.target.closest && e.target.closest('.ask')) aiOpenNow(); });
-document.addEventListener('focusout', function (e) { if (e.target.closest && e.target.closest('.ask, .aichat')) aiMaybeClose(); });
-function send(text) {
-  var p = cur(); if (!p || !text || !text.trim()) return;
-  var oz = p.oz, ch = Object.assign({}, S.chats); ch[oz] = (ch[oz] || []).concat([{ role: 'user', t: text }]);
-  set({ chats: ch, draft: '', thinking: true });
-  setTimeout(function () { var c2 = Object.assign({}, S.chats); c2[oz] = (c2[oz] || []).concat([{ role: 'agent', t: reply(p, text) }]); set({ chats: c2, thinking: false }); }, 1500);
+// the item drawer's chat opens on hover and focus; the project chat (.pchat) stays open until it is closed
+var ASK = '.dw:not(.pchat) .ask', AIC = ASK + ', .dw:not(.pchat) .aichat';
+document.addEventListener('mouseover', function (e) { if (e.target.closest && e.target.closest(AIC)) { if (e.target.closest(ASK)) aiOpenNow(); else clearTimeout(aiT); } });
+document.addEventListener('mouseout', function (e) { var t = e.target.closest && e.target.closest(AIC); if (t && !(e.relatedTarget && t.contains(e.relatedTarget))) aiMaybeClose(); });
+document.addEventListener('focusin', function (e) { if (e.target.closest && e.target.closest(ASK)) aiOpenNow(); });
+document.addEventListener('focusout', function (e) { if (e.target.closest && e.target.closest(AIC)) aiMaybeClose(); });
+// A live project asks the backend assistant (lv/assistant.py): one chat tab per item, titled "Item <oz>", and one for
+// the whole project (key '*'), titled "Project <id>". So a tab is found again after a reload and also shows in the
+// /assistant panel. The demo keeps the canned reply().
+var aiTabs = {};
+function bubText(m) { return m.md ? DOMPurify.sanitize(marked.parse(m.t)) : esc(m.t); }
+function aiTab(pid, oz) {
+  var k = pid + ' ' + oz, title = oz === '*' ? 'Project ' + pid : 'Item ' + oz, json = { 'Content-Type': 'application/json' };
+  return aiTabs[k] || (aiTabs[k] = api('/assistant/tabs?project=' + encodeURIComponent(pid)).then(function (tabs) {
+    return tabs.filter(function (t) { return t.title === title; })[0] ||
+      api('/assistant/tabs', { method: 'POST', headers: json, body: JSON.stringify({ project: pid, title: title }) });
+  }).then(function (t) { return t.id; }, function (err) { delete aiTabs[k]; throw err; }));
+}
+function send(text, whole) {
+  var p = whole ? null : cur(); if ((!p && !whole) || !text || !text.trim()) return;
+  if (S.thinking) { toast('The agent is still answering the last question.'); return; }
+  var oz = p ? p.oz : '*', pid = P.id, ch = Object.assign({}, S.chats); ch[oz] = (ch[oz] || []).concat([{ role: 'user', t: text }]);
+  var next = { chats: ch, thinking: oz }; next[whole ? 'pdraft' : 'draft'] = ''; set(next);
+  var answer = function (t, md) {
+    if (P.id !== pid) return set({ thinking: false }); // another project was opened meanwhile
+    var c2 = Object.assign({}, S.chats); c2[oz] = (c2[oz] || []).concat([{ role: 'agent', t: t, md: md && !!(window.marked && window.DOMPurify) }]); set({ chats: c2, thinking: false });
+  };
+  if (!P.live) { setTimeout(function () { answer(reply(p, text)); }, 1500); return; }
+  aiTab(pid, oz).then(function (tab) {
+    return api('/assistant/tabs/' + tab + '/messages', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: p ? 'Item ' + oz + ' (' + p.kurz + '): ' + text : text }) });
+  }).then(function (r) {
+    answer(r.text + (r.actions.length ? '\n\n' + r.actions.map(function (a) { return '- ✓ ' + a; }).join('\n') : ''), true);
+    // The assistant may have saved or changed comments: reload just those items, so other unsaved edits stay.
+    var ozs = r.actions.map(function (a) { var m = /^Comment .*?on (\S+)/.exec(a); return m && m[1]; }).filter(Boolean);
+    if (ozs.length) api('/projects/' + encodeURIComponent(pid)).then(function (lv) {
+      if (P.id !== pid) return;
+      (lv.items || []).forEach(function (it) { if (ozs.indexOf(it.oz) >= 0) itemPatched(it, lv.risk_summary); });
+      render();
+    });
+  }, function (err) { answer('The agent could not answer: ' + err.message); });
 }
 function cmtList(p) {
   if (P.live) return (p.cmts || []).map(function (c) { return { t: c.text, tag: c.price != null ? 'Price ' + eur(c.price) : '' }; });
@@ -2508,7 +2575,11 @@ var A = {
   saveNote: function () { var v = S.noteDraft.trim(); if (!v) return; var n = Object.assign({}, S.notes); n[S.sel] = (n[S.sel] || []).concat([{ by: 'Thomas', t: v }]); set({ notes: n, noteDraft: '', compose: null }); },
   startSeq: function () { var q = Object.assign({}, S.seqs); q[S.sel] = true; set({ seqs: q, compose: null }); toast('Outlook sequence scheduled · day 0, 3, 7'); },
   ask: function (ds) { send(ds.v); },
-  sendDraft: function () { send(S.draft); }
+  sendDraft: function () { send(S.draft); },
+  pask: function (ds) { send(ds.v, true); },
+  sendPdraft: function () { send(S.pdraft, true); },
+  pchatOpen: function () { set({ pchat: true, sel: null }); var i = document.querySelector('[data-in="pdraft"]'); if (i) i.focus(); },
+  pchatClose: function () { set({ pchat: false }); }
 };
 
 // ================= projects, upload, backend sync =================
@@ -2548,7 +2619,7 @@ function pingApi() { return api('/projects').then(function (l) { S.apiOk = true;
 function resetView() {
   cancelAdvance();
   Object.assign(S, { planShow: P.live ? store('lvm-plan-' + P.id) : null, sel: null, picked: {}, confirmed: P.live ? (store('lvm-ok-' + P.id) || {}) : {}, bundled: {}, eps: {}, mg: {}, sugg: {}, justOk: {}, chats: {},
-    scope: 'key', lvLimit: 60, filter: 'all', gewerk: '', q: '', floor: FLOORS[0], planFull: false, report: false, projOpen: false, tab: 'home', home: false });
+    pchat: false, scope: 'key', lvLimit: 60, filter: 'all', gewerk: '', q: '', floor: FLOORS[0], planFull: false, report: false, projOpen: false, tab: 'home', home: false });
   first = true;
 }
 function loadProject(id) {
@@ -2617,15 +2688,71 @@ function vStart() {
       (U.lv || U.plan ? '<ul class="uf">' + (U.lv ? upRow('lv', U.lv) : '') + (U.plan ? upRow('plan', U.plan) : '') + '</ul>' : '') +
       (U.err ? '<div class="up-err">' + IC.warn + '<span>' + esc(U.err) + '</span></div>' : '') +
       '<div class="up-btns"><button class="btn btn-primary" data-act="upGo"' + (U.lv ? '' : ' disabled') + '>Start analysis' + IC.arrow + '</button></div>' +
-    '</section></div>';
+    '</section>' + vLib() + '</div>';
 }
+
+// ================= price library: past BoQs with prices (GET/POST /library) =================
+var libT = null;
+function loadLib() {
+  clearTimeout(libT);
+  return api('/library').then(function (l) {
+    var w = S.libWatch && l.filter(function (p) { return p.project === S.libWatch && p.status !== 'running'; })[0];
+    if (w) { S.libWatch = ''; if (w.status === 'done') toast(w.project + ' added to the price library · ' + w.items + ' items'); }
+    S.libList = l; render();
+    if (l.some(function (p) { return p.status === 'running'; })) libT = setTimeout(loadLib, 3000);
+  }, function () { S.libList = false; render(); });
+}
+function nextLibId() {
+  var n = 0; (S.libList || []).forEach(function (p) { var m = /^P(\d+)$/.exec(p.project); if (m) n = Math.max(n, +m[1]); });
+  return 'P' + (n + 1);
+}
+function vLib() {
+  var L = S.libList, f = S.libLv, texts = S.libTexts || [];
+  if (L === false) return '';  // no backend: the demo has no library to show
+  var row = function (p) {
+    var what = p.status === 'done' ? esc(p.name || '') : p.status === 'running' ? '<span class="faint">' + esc((p.log || []).slice(-1)[0] || 'Reading…') + '</span>' : '<span class="faint">Not added</span>';
+    var tag = p.status === 'done' ? (p.date ? esc(p.date.slice(0, 7)) : 'no date') : p.status === 'running' ? 'Adding…' : 'Failed';
+    return '<li data-k="lib' + esc(p.project) + '"><span class="uf-i">' + IC.doc + '</span><span class="uf-n" title="' + esc(p.name || p.error || '') + '"><b>' + esc(p.project) + '</b> · ' + what + '</span>' +
+      '<span class="uf-t mono">' + tag + '</span><span class="uf-s mono">' + (p.status === 'done' ? fmt(p.priced) + ' prices' : '') + '</span></li>';
+  };
+  var failed = (L || []).filter(function (p) { return p.status === 'failed'; });
+  return '<section class="card st-lib" aria-label="Price library" data-k="stlib">' +
+    '<div class="card-h"><span class="mono"><b>Price library</b></span><span class="mono">' + (L ? L.filter(function (p) { return p.status === 'done'; }).length + ' past BoQs' : 'loading…') + '</span></div>' +
+    '<p class="muted st-lib-lead">New projects are priced from these past BoQs. Add one with its prices.</p>' +
+    (L && L.length ? '<ul class="uf">' + L.map(row).join('') + '</ul>' : '') +
+    failed.map(function (p) { return '<div class="up-err">' + IC.warn + '<span><b>' + esc(p.project) + ':</b> ' + esc(p.error) + '</span></div>'; }).join('') +
+    '<div class="lib-add">' +
+      '<label class="btn btn-sm"><input type="file" class="sr" accept=".x83,.d83,.d84,.d86,.xlsx,.pdf,.X83,.D83,.D84,.D86,.XLSX,.PDF" data-file="lib">' + IC.doc + (f ? esc(f.name) : 'Choose priced BoQ') + '</label>' +
+      '<label class="btn btn-sm btn-quiet" title="PDF prints of the same BoQ, when the priced file holds prices without texts"><input type="file" class="sr" multiple accept=".pdf,.PDF" data-file="libtexts">' + (texts.length ? texts.length + ' text PDF' + (texts.length > 1 ? 's' : '') : 'Text PDFs (optional)') + '</label>' +
+      '<label class="lib-id"><span class="mono faint">ID</span><input data-in="libId" value="' + esc(S.libId || nextLibId()) + '" maxlength="40" aria-label="ID for the past project"></label>' +
+      '<button class="btn btn-sm btn-primary" data-act="libAdd"' + (f && !S.libBusy ? '' : ' disabled') + '>' + (S.libBusy ? 'Uploading…' : 'Add to library') + '</button>' +
+    '</div>' +
+    (S.libErr ? '<div class="up-err">' + IC.warn + '<span>' + esc(S.libErr) + '</span></div>' : '') +
+  '</section>';
+}
+function takeLib(kind, files) {
+  var list = Array.prototype.slice.call(files || []);
+  if (kind === 'lib') { S.libLv = list[0] && LV_EXT.test(list[0].name) ? list[0] : null; S.libErr = S.libLv || !list.length ? '' : 'Not supported: ' + list[0].name + '. Allowed: GAEB .X83/.D83/.D84/.D86, Excel .XLSX, PDF.'; }
+  else S.libTexts = list.filter(function (t) { return /\.pdf$/i.test(t.name); });
+  render();
+}
+A.libAdd = function () {
+  var id = String(S.libId || nextLibId()).trim(), fd = new FormData();
+  if (!S.libLv) return;
+  fd.append('project', id); fd.append('lv', S.libLv);
+  (S.libTexts || []).forEach(function (t) { fd.append('texts', t); });
+  Object.assign(S, { libErr: '', libBusy: id }); render();
+  api('/library', { method: 'POST', body: fd }).then(function () {
+    Object.assign(S, { libLv: null, libTexts: [], libId: '', libBusy: '', libWatch: id }); loadLib();
+  }, function (e) { Object.assign(S, { libBusy: '', libErr: e.message }); render(); });
+};
 var STARTA = {
   home: function () {
     cancelAdvance(); clearTimeout(upT);
     Object.assign(S, { projOpen: false, sel: null, report: false, planFull: false, home: true, upId: '', upName: '', upDeadline: '', upIdTouched: false });
     if (!S.up || S.up.phase !== 'run') S.up = freshUp();
     try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
-    render(); window.scrollTo({ top: 0 }); pingApi();
+    render(); window.scrollTo({ top: 0 }); pingApi(); loadLib();
   },
   upRemove: function (ds, e) { if (e) e.preventDefault(); if (S.up) { S.up[ds.v] = null; S.up.err = ''; render(); } }
 };
@@ -2675,7 +2802,8 @@ document.addEventListener('input', function (e) {
   if (k === 'q' || k === 'epDraft') render();
 });
 document.addEventListener('change', function (e) {
-  if (e.target.getAttribute && e.target.getAttribute('data-file')) { takeFiles(e.target.files); e.target.value = ''; return; }
+  var fk = e.target.getAttribute && e.target.getAttribute('data-file');
+  if (fk) { if (/^lib/.test(fk)) takeLib(fk, e.target.files); else takeFiles(e.target.files); e.target.value = ''; return; }
   var k = e.target.getAttribute && e.target.getAttribute('data-change');
   if (!k) return;
   var v = e.target.value;
@@ -2687,7 +2815,7 @@ document.addEventListener('change', function (e) {
 });
 document.addEventListener('keydown', function (e) {
   var tg = e.target.tagName, inField = tg === 'INPUT' || tg === 'TEXTAREA' || tg === 'SELECT';
-  if (e.key === 'Enter' && inField && e.target.getAttribute('data-enter')) { e.preventDefault(); var n = e.target.getAttribute('data-enter'); if (n === 'saveEp') saveEp(); else if (n === 'sendCmt') addComment(); else if (n === 'sendDraft') send(S.draft); return; }
+  if (e.key === 'Enter' && inField && e.target.getAttribute('data-enter')) { e.preventDefault(); var n = e.target.getAttribute('data-enter'); if (n === 'saveEp') saveEp(); else if (n === 'sendCmt') addComment(); else if (n === 'sendDraft') send(S.draft); else if (n === 'sendPdraft') send(S.pdraft, true); return; }
   if ((e.key === 'Enter' || e.key === ' ') && e.target.hasAttribute && e.target.hasAttribute('data-hold')) { e.preventDefault(); confirmCurrent(); return; }
   if (S.menu && (e.key === 'ArrowDown' || e.key === 'ArrowUp') && e.target.classList && e.target.classList.contains('mi')) {
     e.preventDefault(); var sib = e.key === 'ArrowDown' ? e.target.nextElementSibling : e.target.previousElementSibling;
@@ -2699,6 +2827,7 @@ document.addEventListener('keydown', function (e) {
     if (S.menu) { var mt = document.querySelector('[data-act="menu"][data-v="' + S.menu + '"]'); set({ menu: null }); if (mt) mt.focus(); return; }
     if (S.adv) { cancelAdvance(); render(); return; }
     if (S.aiOpen) { A.aiClose(); return; }
+    if (S.pchat && !S.sel) { A.pchatClose(); return; }
     if (S.planFull && !S.sel) { set({ planFull: false }); return; }
     if (S.fx && S.fx.phase !== 'run') set({ fx: null });
     else if (S.preview) set({ preview: null });
