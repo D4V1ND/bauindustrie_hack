@@ -888,6 +888,10 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .cp-m{display:flex;gap:8px;animation:rise .35s var(--ease)}
 .cp-m.user{justify-content:flex-end}
 .cp-m .bub{max-width:86%;white-space:pre-line}
+.bub.md{white-space:normal!important;overflow-x:auto}
+.bub.md>:first-child{margin-top:0}.bub.md>:last-child{margin-bottom:0}
+.bub.md p,.bub.md ul,.bub.md ol{margin:0 0 8px}.bub.md ul,.bub.md ol{padding-left:18px}
+.bub.md table{border-collapse:collapse;font-size:12px;margin:0 0 8px}.bub.md th,.bub.md td{border:1px solid var(--line);padding:3px 6px;text-align:left}
 .cp-m .thinking{display:flex;align-items:center;gap:5px}
 
 /* boxed lower sections + agent reveal */
@@ -1227,6 +1231,9 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 <div class="glow" aria-hidden="true"></div>
 <div id="app"></div>
 <script src="config.js"></script>
+<!-- the live agent answers in Markdown: rendered like lv/static/assistant.html does -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
 <script>
 (function () {
 'use strict';
@@ -1964,7 +1971,7 @@ function vDrawer(d) {
   } else if (dt === 'agent') {
     panel = (chat.length || S.thinking ? '' : '<p class="pempty">Frag den Agenten zu dieser Position, z. B. nach dem Preis, einer Bieterfrage oder einem Was-wäre-wenn.</p><div class="chips">' +
       [['Explain price', 'How did you get this price?'], ['Draft bidder query', 'Draft a bidder query'], ['Material +15%?', 'What if material costs rise 15%?'], ['Ask subcontractor', 'Send a request to a subcontractor']].map(function (c) { return '<button class="qchip" data-act="ask" data-v="' + esc(c[1]) + '">' + c[0] + '</button>'; }).join('') + '</div>') +
-      '<div style="display:grid;gap:10px">' + chat.map(function (m, i) { return '<div data-k="m' + i + '" style="display:flex;gap:8px;justify-content:' + (m.role === 'user' ? 'flex-end' : 'flex-start') + ';animation:rise .35s var(--ease)">' + (m.role === 'agent' ? '<span class="agent-ic">' + IC.star + '</span>' : '') + '<div class="bub' + (m.role === 'user' ? ' me' : '') + '" style="max-width:86%;white-space:pre-line">' + esc(m.t) + '</div></div>'; }).join('') +
+      '<div style="display:grid;gap:10px">' + chat.map(function (m, i) { return '<div data-k="m' + i + '" style="display:flex;gap:8px;justify-content:' + (m.role === 'user' ? 'flex-end' : 'flex-start') + ';animation:rise .35s var(--ease)">' + (m.role === 'agent' ? '<span class="agent-ic">' + IC.star + '</span>' : '') + '<div class="bub' + (m.role === 'user' ? ' me' : '') + (m.md ? ' md' : '') + '" style="max-width:86%;white-space:pre-line">' + bubText(m) + '</div></div>'; }).join('') +
       (S.thinking ? '<div style="display:flex;gap:8px;align-items:center" data-k="th"><span class="agent-ic">' + IC.star + '</span><div class="bub thinking" style="display:flex;align-items:center;gap:5px"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="faint" style="font-size:12px;margin-left:6px">liest Begründung, Quellen &amp; LV…</span></div></div>' : '') + '</div>';
   }
 
@@ -2015,7 +2022,7 @@ function vDrawer(d) {
       '<div class="cp-log" data-k="cplog' + p.oz + '">' +
         (chat.length || S.thinking ? '' : '<p class="pempty">Ask me about this item: price, bidder query or what-if.</p><div class="chips">' +
           [['Explain price', 'How did you get this price?'], ['Draft bidder query', 'Draft a bidder query'], ['Material +15%?', 'What if material costs rise 15%?'], ['Ask subcontractor', 'Send a request to a subcontractor']].map(function (c) { return '<button class="qchip" data-act="ask" data-v="' + esc(c[1]) + '">' + c[0] + '</button>'; }).join('') + '</div>') +
-        chat.map(function (m, i) { return '<div class="cp-m ' + m.role + '" data-k="cm' + i + '">' + (m.role === 'agent' ? '<span class="agent-ic">' + IC.star + '</span>' : '') + '<div class="bub' + (m.role === 'user' ? ' me' : '') + '">' + esc(m.t) + '</div></div>'; }).join('') +
+        chat.map(function (m, i) { return '<div class="cp-m ' + m.role + '" data-k="cm' + i + '">' + (m.role === 'agent' ? '<span class="agent-ic">' + IC.star + '</span>' : '') + '<div class="bub' + (m.role === 'user' ? ' me' : '') + (m.md ? ' md' : '') + '">' + bubText(m) + '</div></div>'; }).join('') +
         (S.thinking ? '<div class="cp-m agent" data-k="cth"><span class="agent-ic">' + IC.star + '</span><div class="bub thinking"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>' : '') +
       '</div></section></div></div>' +
     '</div></div>' +
@@ -2339,11 +2346,39 @@ document.addEventListener('mouseover', function (e) { if (e.target.closest && e.
 document.addEventListener('mouseout', function (e) { var t = e.target.closest && e.target.closest('.ask, .aichat'); if (t && !(e.relatedTarget && t.contains(e.relatedTarget))) aiMaybeClose(); });
 document.addEventListener('focusin', function (e) { if (e.target.closest && e.target.closest('.ask')) aiOpenNow(); });
 document.addEventListener('focusout', function (e) { if (e.target.closest && e.target.closest('.ask, .aichat')) aiMaybeClose(); });
+// A live project asks the backend assistant (lv/assistant.py) in one chat tab per item, titled "Item <oz>", so the
+// tab is found again after a reload and also shows in the /assistant panel. The demo keeps the canned reply().
+var aiTabs = {};
+function bubText(m) { return m.md ? DOMPurify.sanitize(marked.parse(m.t)) : esc(m.t); }
+function aiTab(pid, oz) {
+  var k = pid + ' ' + oz, title = 'Item ' + oz, json = { 'Content-Type': 'application/json' };
+  return aiTabs[k] || (aiTabs[k] = api('/assistant/tabs?project=' + encodeURIComponent(pid)).then(function (tabs) {
+    return tabs.filter(function (t) { return t.title === title; })[0] ||
+      api('/assistant/tabs', { method: 'POST', headers: json, body: JSON.stringify({ project: pid, title: title }) });
+  }).then(function (t) { return t.id; }, function (err) { delete aiTabs[k]; throw err; }));
+}
 function send(text) {
   var p = cur(); if (!p || !text || !text.trim()) return;
-  var oz = p.oz, ch = Object.assign({}, S.chats); ch[oz] = (ch[oz] || []).concat([{ role: 'user', t: text }]);
+  var oz = p.oz, pid = P.id, ch = Object.assign({}, S.chats); ch[oz] = (ch[oz] || []).concat([{ role: 'user', t: text }]);
   set({ chats: ch, draft: '', thinking: true });
-  setTimeout(function () { var c2 = Object.assign({}, S.chats); c2[oz] = (c2[oz] || []).concat([{ role: 'agent', t: reply(p, text) }]); set({ chats: c2, thinking: false }); }, 1500);
+  var answer = function (t, md) {
+    if (P.id !== pid) return set({ thinking: false }); // another project was opened meanwhile
+    var c2 = Object.assign({}, S.chats); c2[oz] = (c2[oz] || []).concat([{ role: 'agent', t: t, md: md && !!(window.marked && window.DOMPurify) }]); set({ chats: c2, thinking: false });
+  };
+  if (!P.live) { setTimeout(function () { answer(reply(p, text)); }, 1500); return; }
+  aiTab(pid, oz).then(function (tab) {
+    return api('/assistant/tabs/' + tab + '/messages', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: 'Item ' + oz + ' (' + p.kurz + '): ' + text }) });
+  }).then(function (r) {
+    answer(r.text + (r.actions.length ? '\n\n' + r.actions.map(function (a) { return '- ✓ ' + a; }).join('\n') : ''), true);
+    // The assistant may have saved or changed comments: reload just those items, so other unsaved edits stay.
+    var ozs = r.actions.map(function (a) { var m = /^Comment .*?on (\S+)/.exec(a); return m && m[1]; }).filter(Boolean);
+    if (ozs.length) api('/projects/' + encodeURIComponent(pid)).then(function (lv) {
+      if (P.id !== pid) return;
+      (lv.items || []).forEach(function (it) { if (ozs.indexOf(it.oz) >= 0) itemPatched(it, lv.risk_summary); });
+      render();
+    });
+  }, function (err) { answer('The agent could not answer: ' + err.message); });
 }
 function cmtList(p) {
   if (P.live) return (p.cmts || []).map(function (c) { return { t: c.text, tag: c.price != null ? 'Price ' + eur(c.price) : '' }; });
