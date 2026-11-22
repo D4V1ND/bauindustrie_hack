@@ -86,7 +86,7 @@ def test_the_assistant_searches_then_comments_only_on_its_own_tender(data):
     assert reply.actions == ["Comment saved on 01.0010"] and "P1/06.01.4" in reply.positions
     results = sent[2][-1]["content"]
     assert results[0].get("is_error") is None and results[1]["is_error"]  # the library cannot be changed
-    saved = json.loads((data / "out" / "H1.json").read_text())["items"][0]["comments"][0]
+    saved = json.loads((data / "out" / "H1.json").read_text(encoding="utf-8"))["items"][0]["comments"][0]
     assert saved["author"] == "assistant" and saved["text"] == "Preis wie P1 06.01.4 prüfen"
     again = assistant.get_tab(data, tab.id)
     assert [m.role for m in again.shown] == ["user", "assistant"] and len(again.messages) == 6
