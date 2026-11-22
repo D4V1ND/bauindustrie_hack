@@ -1997,7 +1997,7 @@ function vDrawer(d) {
             '</div>') +
         (ok ? '<div class="stamp' + (fresh ? ' fx' : '') + '" data-k="st"><span class="sq">' + IC.tickRaw + '</span><span><b>Confirmed</b><small>' + (p.manual ? 'Own price' : 'AI price') + '</small></span></div>' : '') + '</div>' +
         '<div class="pconf"><span class="mono">Confidence</span><span class="conf-v ' + confLvl(p.conf) + '"><b>' + p.conf + '%</b>' + confWord(p.conf) + '</span>' + cmeter(p.conf, 10) + '</div></div>' +
-        (noAi ? '<div class="why2"><div class="mono lab">Why no price</div><p>' + esc(P.live && R.brief ? R.brief : p.why) + '. Your past BoQs have no comparable item. Price it yourself or get a supplier quote.</p></div></section>' :
+        (noAi ? '<div class="why2"><div class="mono lab">Why no price</div><p>' + esc((P.live && R.brief ? R.brief : p.why).replace(/[.\s]+$/, '')) + '. Your past BoQs have no comparable item. Price it yourself or get a supplier quote.</p></div></section>' :
         '<div class="why2' + (S.whyOpen ? ' open' : '') + '"><div class="mono lab">Reasoning</div><p>' + esc(C.cands[0].why) + '</p>' +
           '<div class="whymore" aria-hidden="' + !S.whyOpen + '"><div class="whyin"><div class="calc2">' + C.steps.map(function (s, j) { return '<div class="cs' + (j === C.steps.length - 1 ? ' last' : '') + '"><span>' + esc(s[0]) + '</span><span>' + esc(s[1]) + '</span></div>'; }).join('') + '</div>' +
           ((R.similar || []).length ? '<div class="refs"><span class="mono">Sources</span>' + R.similar.map(function (x) { var e = D.extra[x[0]]; return e ? '<button class="ref" data-act="preview" data-key="' + x[0] + '">' + esc(e.proj) + '<small>' + esc(x[1]) + '</small></button>' : ''; }).join('') + '</div>' : '') +
