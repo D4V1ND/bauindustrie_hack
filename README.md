@@ -33,9 +33,9 @@ flowchart TD
     FE["Dashboard"] -- "HTTP" --> API["API<br/>lv/api.py (FastAPI)"]
     API --> RUN["Price run<br/>lv price, own process"]
     API --> ING["Library ingest<br/>lv ingest, own process"]
-    API --> AS["Assistant chat<br/>inside the API"]
+    API --> AS["AI agent: the chat<br/>inside the API"]
     RUN & ING & AS --> DATA[("data/<br/>uploads · library · out · index · assistant")]
-    RUN & ING & AS --> AI["AI<br/>Claude · Voyage · OpenAI"]
+    RUN & ING & AS --> AI["AI models<br/>LLMs · search by meaning · vision"]
 ```
 
 **One price run, in order.** Solid arrows run one after another; the dotted plan check runs alongside steps 1–4.
@@ -44,22 +44,22 @@ The dashboard shows `running` the whole time and opens the project only at the e
 ```mermaid
 flowchart TD
     UP["Upload: POST /projects<br/>API saves the files, starts lv price, answers 202"]
-    S0["Step 0: read the LV"]
+    S0["Step 0: read the LV<br/>deterministic"]
     subgraph seq ["One after another"]
-        S1["Step 1: group equal items"] --> S2["Step 2: trades and item types<br/>Claude, up to 4 calls at once"]
-        S2 --> S3["Step 3: prices from past LVs<br/>Voyage search, Claude judge"]
-        S3 --> S4["Step 4: risk per item<br/>Claude, up to 4 calls at once"]
+        S1["Step 1: group equal items<br/>deterministic"] --> S2["Step 2: trade (category) and item type (sub-category)<br/>an LLM proposes the item types,<br/>a second LLM gives each item its trade and type"]
+        S2 --> S3["Step 3: prices from past LVs<br/>search by words and by meaning finds candidates,<br/>an LLM judges if the texts match,<br/>the price itself is deterministic"]
+        S3 --> S4["Step 4: risk per item<br/>an LLM checks if each text is complete,<br/>the risk score is deterministic"]
         S4 --> SAVE["Save (project).json<br/>not shown yet"]
     end
     subgraph par ["Alongside steps 1–4"]
-        PL["Plan check: OpenAI reads the plan<br/>3 times, one after another"] --> CMP["Compare with the LV"]
+        PL["Plan check<br/>a vision model counts what the plan shows,<br/>3 times, one after another"] --> CMP["Match the counts to the LV"]
     end
     UP --> S0 --> S1
     S0 -.->|only with a plan| PL
     SAVE --> MERGE["Wait for the plan check, merge it in"]
     CMP -.-> MERGE
-    MERGE --> IDX["Assistant index: Voyage"] --> BRIEF["Brief: 2 questions to Claude"]
-    BRIEF --> DONE(["Status done: the dashboard opens the project, the chat unlocks"])
+    MERGE --> CHAT["Search index for the chat,<br/>then the AI agent writes the brief"]
+    CHAT --> DONE(["Status done: the dashboard opens the project, the chat unlocks"])
 ```
 
 - **One run is one process.** `POST /projects` saves the files, starts `python -m lv price …` (the same command as
