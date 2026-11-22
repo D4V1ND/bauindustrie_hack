@@ -48,6 +48,17 @@ Steps 2 and 3 do not depend on each other. Step 2 runs on the new LV only; past 
 Reads one file and returns the line item table. It copies the file faithfully: one row per item, in file order,
 nothing compared, nothing merged.
 
+**A new LV in several files** (`lv price a.pdf b.pdf …`, or the `lv` upload field sent once per file), e.g. P6's
+27 PDFs, one per trade: each file is read as above, in name order, into one LV and one result file. Every item keeps
+the name of its file (`source_file`). An item is already read when an earlier file has the same item number, unit
+and quantity (texts are not compared: they differ between formats):
+
+- a file whose items are all already read is skipped, with a line in the log: the same LV in another format (P1's
+  `.X83` and `.D83`), or an excerpt of another file (P6's 6 stairs items, also in the shell works file);
+- a file with half or more already read is refused, naming both files: it is most likely the same LV with changes;
+- otherwise its items are added. When an item number is in more than one file (P6: 91 numbers such as `1.1.10`),
+  every item number gets its file's place in front, `F01-` to `F26-`, so each stays unique.
+
 | Format | How | `read_by` | Order |
 |---|---|---|---|
 | GAEB XML (`.X83`) | code | `gaeb` | first |

@@ -94,7 +94,7 @@ class JudgeCall(BaseModel):
 
 @app.post("/projects", status_code=202, response_model=Status)
 def start(project: str = Form(..., description="short project ID, e.g. H1: letters, digits and '-'"),
-          lv: UploadFile = File(..., description="the new LV: GAEB XML (.x83), GAEB 90 (.d83, .d84, .d86), Excel (.xlsx) or PDF (.pdf)"),
+          lv: list[UploadFile] = File(..., description="the new LV: GAEB XML (.x83), GAEB 90 (.d83, .d84, .d86), Excel (.xlsx) or PDF (.pdf). An LV that comes as several files (e.g. one per trade): send this field once per file"),
           plan: UploadFile | None = File(None, description="optional construction plan: PNG, JPG or PDF"),
           copy_only: bool = Form(False, description="only copy exact matches: no AI, no cost, no plan check")) -> Status:
     """Starts a run: steps 0 to 4 on the LV and, with a plan, the plan check beside them. Answers at once; poll
@@ -108,7 +108,10 @@ def start(project: str = Form(..., description="short project ID, e.g. H1: lette
         raise HTTPException(422, "The plan check asks AI models, so it cannot run with copy_only.")
     folder = DATA / "uploads" / project
     folder.mkdir(parents=True, exist_ok=True)
-    args = ["price", str(_store(lv, folder, set(READERS))), "--project", project]
+    files = [_store(upload, folder, set(READERS)) for upload in lv]
+    if len(set(files)) < len(files):
+        raise HTTPException(422, "Two LV files have the same name. Rename one, or leave it out if it is the same file.")
+    args = ["price", *map(str, files), "--project", project]
     if has_plan:
         args += ["--plan", str(_store(plan, folder, PLAN_SUFFIXES))]
     if copy_only:

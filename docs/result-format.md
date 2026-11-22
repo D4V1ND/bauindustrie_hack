@@ -17,7 +17,7 @@ Regenerate both schemas after a change to `lv/model.py` or the judge's answer sh
 | Field | Type | Meaning |
 |---|---|---|
 | `project` | string | short project ID, e.g. `"P5"` |
-| `name`, `date`, `source_file` | string, date or null, string | from the GAEB file |
+| `name`, `date`, `source_file` | string, date or null, string | from the LV file. An LV read from several files: the first name and date found, and every file's name in reading order, joined by `", "` |
 | `items` | array of line items | in LV order |
 | `item_types` | array of `{name, trade, description}` | step 2: the LV's own list of item types |
 | `summary` | object | step 3: items and money per method, and the project total (see below) |
@@ -31,7 +31,8 @@ Regenerate both schemas after a change to `lv/model.py` or the judge's answer sh
 | Field | Type | Meaning |
 |---|---|---|
 | `id` | string | project + `/` + item number, unique everywhere, e.g. `"P5/04.0004"` |
-| `oz` | string | item number (Ordnungszahl) as printed in the LV |
+| `oz` | string | item number (Ordnungszahl) as printed in the LV. An LV read from several files whose item numbers repeat across them: the file's place in `source_file` in front, e.g. `"F02-1.1.10"` |
+| `source_file` | string | the file this item was read from; `""` in results from before Nov 2026 |
 | `section` | array of strings | section titles, outermost first |
 | `short_text`, `long_text` | string | the item's texts. Some may contain anonymiser tokens such as `[PERSON_020]` |
 | `quantity`, `unit` | number or null, string | e.g. `5`, `"h"` |

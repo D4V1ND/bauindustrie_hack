@@ -1261,6 +1261,7 @@ body.sm .orb{opacity:1}
 .uf-t{flex:none;font-size:.6rem;padding:2px 7px;border:1px solid var(--line-2);color:var(--ink-2)}
 .uf-s{color:var(--ink-3);font-size:.62rem;flex:none;min-width:52px;text-align:right}
 .uf .ic{width:28px;height:28px;flex:none}
+.uf-many{max-height:248px;overflow-y:auto}
 .st-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:20px;margin-top:28px;align-items:start}
 .st-up .up-err{margin-top:14px}
 .start .st-lib{margin-top:20px;text-align:left}
@@ -2924,17 +2925,24 @@ function pollRun(id) {
 function suggestId(name) { return String(name || '').replace(/\.[^.]+$/, '').replace(/[^A-Za-z0-9-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'LV-1'; }
 function takeFiles(files) {
   if (!S.up || !files || !files.length) return;
-  var bad = [];
-  Array.prototype.forEach.call(files, function (f) {
-    if (LV_EXT.test(f.name)) S.up.lv = f; else if (PLAN_EXT.test(f.name)) S.up.plan = f; else bad.push(f.name);
+  var bad = [], L = S.up.lvs || (S.up.lvs = []);
+  Array.prototype.forEach.call(files, function (f) {  // an LV may come as several files (e.g. one per trade): each is kept
+    if (LV_EXT.test(f.name)) { if (!L.some(function (g) { return g.name === f.name; })) L.push(f); }
+    else if (PLAN_EXT.test(f.name)) S.up.plan = f; else bad.push(f.name);
   });
+  L.sort(function (a, b) { var x = a.name.toLowerCase(), y = b.name.toLowerCase(); return x < y ? -1 : x > y ? 1 : 0; });  // the order the backend reads them in
   S.up.err = bad.length ? 'Not supported: ' + bad.join(', ') + '. Allowed: GAEB .X83/.D83/.D84/.D86, Excel .XLSX, PDF and PNG/JPG.' : '';
   render();
 }
 
 // ================= start page: one drop zone for the LV and an optional plan =================
 var LV_EXT = /\.(x83|d83|d84|d86|xlsx|pdf)$/i, PLAN_EXT = /\.(png|jpe?g)$/i;
-function freshUp() { return { phase: 'form', lv: null, plan: null, copy: false, err: '' }; }
+function freshUp() { return { phase: 'form', lvs: [], plan: null, copy: false, err: '' }; }
+// One LV file in the list under the drop zone, shown when the LV comes as several files.
+function upFile(i, f) {
+  return '<li data-k="uf' + i + '"><span class="uf-i">' + IC.doc + '</span><span class="uf-n">' + esc(f.name) + '</span><span class="uf-s mono">' + fmt(Math.max(1, f.size / 1024)) + ' KB</span>' +
+    '<button class="ic" data-act="upRemove" data-v="lv:' + i + '" aria-label="Remove ' + esc(f.name) + '">' + IC.x + '</button></li>';
+}
 // One half of the drop zone's footer: what the file is, whether it is needed, and once chosen its name with x to remove.
 function upPart(kind, f, name, formats) {
   var need = kind === 'lv';
@@ -2943,19 +2951,20 @@ function upPart(kind, f, name, formats) {
     (f ? '<button class="ic" data-act="upRemove" data-v="' + kind + '" aria-label="Remove ' + esc(f.name) + '">' + IC.x + '</button>' : '') + '</span>';
 }
 function vStart() {
-  var U = S.up || (S.up = freshUp());
+  var U = S.up || (S.up = freshUp()), L = U.lvs || (U.lvs = []);
   return '<div class="start" data-k="start">' +
     '<h1 aria-label="New project">' + 'New project'.split('').map(function (c) { return '<span aria-hidden="true">' + c + '</span>'; }).join('') + '</h1><p class="st-lead muted">Upload a bill of quantities. Every item gets a price from your past BoQs, a confidence score and a source. A construction plan also checks the quantities.</p>' +
     '<section class="card st-up" aria-label="Upload project">' +
-      '<label class="dropz' + (U.lv || U.plan ? ' has' : '') + '" data-drop="any" data-k="dropz"><input type="file" class="sr" multiple accept=".x83,.d83,.d84,.d86,.xlsx,.pdf,.X83,.D83,.D84,.D86,.XLSX,.PDF,.png,.jpg,.jpeg" data-file="any">' +
-        '<span class="dropz-i">' + IC.down + '</span><b>Upload your project</b><span class="muted">Drag the BoQ here, and the construction plan if you have one. Or click</span>' +
-        // still one box: its footer names the two files it takes, and fills in as they are chosen
-        '<span class="dz-parts">' + upPart('lv', U.lv, 'Bill of quantities', 'GAEB .X83 / .D83 / .D84 / .D86 · Excel · PDF') +
+      '<label class="dropz' + (L.length || U.plan ? ' has' : '') + '" data-drop="any" data-k="dropz"><input type="file" class="sr" multiple accept=".x83,.d83,.d84,.d86,.xlsx,.pdf,.X83,.D83,.D84,.D86,.XLSX,.PDF,.png,.jpg,.jpeg" data-file="any">' +
+        '<span class="dropz-i">' + IC.down + '</span><b>Upload your project</b><span class="muted">Drag the BoQ here (one file, or all of its files), and the construction plan if you have one. Or click</span>' +
+        // still one box: its footer names the two things it takes, and fills in as they are chosen
+        '<span class="dz-parts">' + upPart('lv', L.length > 1 ? { name: L.length + ' files, read as one BoQ' } : L[0], 'Bill of quantities', 'GAEB .X83 / .D83 / .D84 / .D86 · Excel · PDF · one or more files') +
           upPart('plan', U.plan, 'Construction plan (Bauplan)', 'PNG / JPG · adds a check of the quantities') + '</span>' +
       '</label>' +
+      (L.length > 1 ? '<ul class="uf uf-many" aria-label="BoQ files">' + L.map(function (f, i) { return upFile(i, f); }).join('') + '</ul>' : '') +
       (U.err ? '<div class="up-err">' + IC.warn + '<span>' + esc(U.err) + '</span></div>' : '') +
-      '<div class="up-btns"><button class="btn btn-primary" data-act="upGo"' + (U.lv ? '' : ' disabled') + '>' + (U.plan ? 'Start analysis with plan check' : 'Start analysis') + IC.arrow + '</button></div>' +
-      (U.lv && !U.plan ? '<p class="up-hint faint">No plan added: prices and risk only, no plan check.</p>' : '') +
+      '<div class="up-btns"><button class="btn btn-primary" data-act="upGo"' + (L.length ? '' : ' disabled') + '>' + (U.plan ? 'Start analysis with plan check' : 'Start analysis') + IC.arrow + '</button></div>' +
+      (L.length && !U.plan ? '<p class="up-hint faint">No plan added: prices and risk only, no plan check.</p>' : '') +
     '</section>' + vLib() + '</div>';
 }
 
@@ -3042,7 +3051,13 @@ var STARTA = {
     try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
     render(); window.scrollTo({ top: 0 }); pingApi(); loadLib();
   },
-  upRemove: function (ds, e) { if (e) e.preventDefault(); if (S.up) { S.up[ds.v] = null; S.up.err = ''; render(); } }
+  upRemove: function (ds, e) {  // "plan", "lv" (every LV file) or "lv:<n>" (one of several)
+    if (e) e.preventDefault();
+    if (!S.up) return;
+    if (ds.v === 'plan') S.up.plan = null;
+    else S.up.lvs = ds.v === 'lv' ? [] : (S.up.lvs || []).filter(function (_, i) { return 'lv:' + i !== ds.v; });
+    S.up.err = ''; render();
+  }
 };
 var LIVEA = {
   projects: function () { var o = !S.projOpen; set({ projOpen: o, projList: o ? null : S.projList }); if (o) pingApi(); },
@@ -3055,14 +3070,15 @@ var LIVEA = {
   upClose: function () { clearTimeout(upT); if (S.home && S.up) { S.up.phase = 'form'; render(); } else set({ up: null }); },
   upBack: function () { S.up.phase = 'form'; S.up.err = ''; render(); },
   upGo: function () {
-    var U = S.up;
-    if (!U.lv) { U.err = 'Please upload a BoQ.'; render(); return; }
-    // the project id comes from the LV file name plus a short suffix, so a new upload never overwrites an old run
-    var id = suggestId(U.lv.name).slice(0, 33) + '-' + Date.now().toString(36).slice(-6).toUpperCase();
-    var fd = new FormData(); fd.append('project', id); fd.append('lv', U.lv);
+    var U = S.up, L = U.lvs || [], one = L.length === 1;
+    if (!L.length) { U.err = 'Please upload a BoQ.'; render(); return; }
+    // the project id comes from the LV file name plus a short suffix, so a new upload never overwrites an old run;
+    // several files have no one name: the id is "LV-…" and the project shows the LV's own name from the files
+    var id = suggestId(one ? L[0].name : 'LV').slice(0, 33) + '-' + Date.now().toString(36).slice(-6).toUpperCase();
+    var fd = new FormData(); fd.append('project', id); L.forEach(function (f) { fd.append('lv', f); });
     if (U.plan) fd.append('plan', U.plan);
-    store('lvm-meta-' + id, { name: U.lv.name.replace(/\.[^.]+$/, '') });
-    Object.assign(U, { phase: 'run', id: id, lvName: U.lv.name, planName: U.plan ? U.plan.name : '', log: [], t0: Date.now(), t1: 0, err: '' });
+    if (one) store('lvm-meta-' + id, { name: L[0].name.replace(/\.[^.]+$/, '') });
+    Object.assign(U, { phase: 'run', id: id, lvName: one ? L[0].name : L.length + ' BoQ files', planName: U.plan ? U.plan.name : '', log: [], t0: Date.now(), t1: 0, err: '' });
     render();
     api('/projects', { method: 'POST', body: fd }).then(function (st) { U.log = st.log || []; render(); upT = setTimeout(function () { pollRun(id); }, 1200); },
       function (e) { U.phase = 'form'; U.err = e.message === 'Failed to fetch' ? 'The upload did not work. Please try again in a moment.' : e.message; render(); });

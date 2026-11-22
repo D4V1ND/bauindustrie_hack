@@ -144,6 +144,7 @@ class LineItem(BaseModel):
     total_price: float | None = None
     kind: Literal["normal", "optional"] = "normal"
     read_by: Literal["gaeb", "pdf", "excel", "ai"] = "gaeb"  # "pdf"/"excel": read by code from that file; "ai": not built
+    source_file: str = ""  # the file this item was read from; "" in results from before Nov 2026
     group: str = ""  # step 1: the same label for every exact match, inside one LV and across the price library
     item_type: str = ""  # step 2: one type from the LV's list, or "Sonstiges"
     trade: str = ""  # step 2: the trade of that item type
@@ -165,7 +166,7 @@ class LV(BaseModel):
     project: str
     name: str
     date: date | None
-    source_file: str
+    source_file: str  # an LV read from several files: every file's name, joined by ", " in reading order
     items: list[LineItem]
     item_types: list[ItemType] = []  # step 2: the LV's own list of item types
     summary: Summary | None = None  # step 3: items and sums per method, and the project total

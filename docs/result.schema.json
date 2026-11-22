@@ -255,6 +255,11 @@
      "title": "Read By",
      "type": "string"
     },
+    "source_file": {
+     "default": "",
+     "title": "Source File",
+     "type": "string"
+    },
     "group": {
      "default": "",
      "title": "Group",

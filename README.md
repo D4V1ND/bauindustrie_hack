@@ -44,7 +44,7 @@ The dashboard shows `running` the whole time and opens the project only at the e
 ```mermaid
 flowchart TD
     UP["Upload: POST /projects<br/>API saves the files, starts lv price, answers 202"]
-    S0["Step 0: read the LV<br/>deterministic"]
+    S0["Step 0: read the LV, one or more files<br/>deterministic"]
     subgraph seq ["One after another"]
         S1["Step 1: group equal items<br/>deterministic"] --> S2["Step 2: trade (category) and item type (sub-category)<br/>an LLM proposes the item types,<br/>a second LLM gives each item its trade and type"]
         S2 --> S3["Step 3: prices from past LVs<br/>search by words and by meaning finds candidates,<br/>an LLM judges if the texts match,<br/>the price itself is deterministic"]
@@ -141,18 +141,23 @@ with the reason in `error`. Later runs price from the new project; runs already 
 | Field | Required | What |
 |---|---|---|
 | `project` | yes | short ID: letters, digits and `-`, at most 40 (e.g. `H1`) |
-| `lv` | yes | the new LV: `.x83` (GAEB XML), `.d83`, `.d84`, `.d86` (GAEB 90), `.xlsx` (Excel) or `.pdf` |
+| `lv` | yes | the new LV: `.x83` (GAEB XML), `.d83`, `.d84`, `.d86` (GAEB 90), `.xlsx` (Excel) or `.pdf`. An LV that comes as several files (e.g. one per trade, any mix of formats): send `lv` once per file, see below |
 | `plan` | no | construction plan: `.png`, `.jpg`, `.jpeg` or `.pdf` |
 | `copy_only` | no | `true`: only copy exact matches. No AI, no cost, a few seconds, no plan allowed. For trying out the frontend |
 
 ```js
 const form = new FormData();
 form.append("project", "H1");
-form.append("lv", lvFile);
+form.append("lv", lvFile); // several files of one LV: append "lv" once per file
 form.append("plan", planFile); // optional
 const started = await fetch("http://localhost:8000/projects", { method: "POST", body: form });
 // 202 {"project": "H1", "status": "running", "has_result": false, "error": "", "log": []}
 ```
+
+**Several files, one result.** The files are read in name order into one `<project>.json`; each item keeps its file
+in `source_file`. A file whose items are all in an earlier one (the same LV in another format, or an excerpt) is
+skipped with a line in the log; one with half or more of them is refused. When item numbers repeat across files,
+each gets its file's place in front, e.g. `F02-1.1.10`. Details: [SPEC.md](SPEC.md), step 0.
 
 **2. Poll** `GET /projects/H1/status` every 2–3 seconds while `status` is `running`, and show `log` as progress.
 A full run asks AI models, so it takes minutes, not seconds: a few minutes for the 52 items of the Hörsaal H1 with
@@ -387,7 +392,7 @@ Everything the API starts can also be run by hand. The full list with examples i
 | Command | What it does |
 |---|---|
 | `python -m lv ingest <priced LV> --project P4 [--texts <print.pdf> …]` | add a past LV with prices to the price library |
-| `python -m lv price <new LV> --project H1 [--plan <plan>] [--copy-only]` | a run: steps 0–4, with `--plan` also the plan check |
+| `python -m lv price <new LV> [<more files of it> …] --project H1 [--plan <plan>] [--copy-only]` | a run: steps 0–4, with `--plan` also the plan check |
 | `python -m lv comment H1 04.0050 --price 48 --text "…"` | save the estimator's comment and recalculate the confidence |
 | `python -m lv index [P1 H1 …]` | build the assistant's search index again |
 | `python -m lv brief H1` | ask the two brief questions for an existing result |
