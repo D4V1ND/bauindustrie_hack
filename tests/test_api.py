@@ -54,6 +54,32 @@ def test_bad_uploads_and_unknown_projects_are_refused_before_anything_runs(clien
     assert client.get("/projects/H9/status").status_code == 404
     assert client.get("/projects/H9").status_code == 404
     assert client.post("/projects/H9/items/01.0010/comments", json={}).status_code == 422
+    twice = [("lv", ("new.x83", b"<GAEB/>")), ("lv", ("new.x83", b"<GAEB/>"))]
+    assert client.post("/projects", data={"project": "H1"}, files=twice).status_code == 422  # one name, two files
+    assert not api.runs
+
+
+P6_FILES = ["LV_00_Roh_und_Erdauarbeiten.pdf", "LV_01_Fertigteiltreppen.pdf", "LV_10_Stahlbetonfertigeile_Stuetzen_Binder.pdf"]
+
+
+@pytest.mark.skipif(not (RAW / P6_FILES[0]).exists(), reason="needs the challenge dataset in data/raw")
+def test_an_lv_in_several_files_is_uploaded_and_read_into_one_result(client, tmp_path):
+    files = [("lv", (name, (RAW / name).read_bytes())) for name in P6_FILES]  # three of P6's trade files, unpriced
+    assert client.post("/projects", data={"project": "P6", "copy_only": "true"}, files=files).status_code == 202
+    deadline = time.monotonic() + 120
+    while (state := client.get("/projects/P6/status").json())["status"] == "running" and time.monotonic() < deadline:
+        time.sleep(0.5)
+    assert state["status"] == "done", state
+    log = (tmp_path / "out" / "P6.log").read_text(encoding="utf-8")
+    assert "step 0: LV_01_Fertigteiltreppen.pdf: skipped, all 6 of its items are already in" in log
+
+    lv = client.get("/projects/P6").json()
+    assert lv["source_file"] == "LV_00_Roh_und_Erdauarbeiten.pdf, LV_10_Stahlbetonfertigeile_Stuetzen_Binder.pdf"
+    assert len({item["id"] for item in lv["items"]}) == len(lv["items"])  # both files start at 1.1.10
+    last = lv["items"][-1]
+    assert last["oz"].startswith("F02-") and last["source_file"] == P6_FILES[2]
+    answer = client.post(f"/projects/P6/items/{last['oz']}/comments", json={"text": "check the drawing"})
+    assert answer.status_code == 200 and answer.json()["item"]["comments"][0]["text"] == "check the drawing"
 
 
 def test_the_library_lists_past_projects_and_never_overwrites_one(client, tmp_path):

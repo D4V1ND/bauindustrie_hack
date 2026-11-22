@@ -11,7 +11,7 @@ from pathlib import Path
 
 from lv import ai, assistant, index, plan
 from lv.categorise import Assignments, Proposal, assign, overview, propose
-from lv.extract import add_texts, read
+from lv.extract import add_texts, read_all
 from lv.match import group_label
 from lv.model import LV, load, save
 from lv.predict import NO_ANSWER, JudgeAnswer, predict
@@ -27,7 +27,11 @@ def main(argv: list[str] | None = None, data: Path = DATA) -> None:
     for name, text in (("ingest", "add a priced LV to the price library"),
                        ("price", "read a new LV, look up its prices and write the result file")):
         command = commands.add_parser(name, help=text)
-        command.add_argument("file", type=Path, help="the LV file")
+        if name == "price":
+            command.add_argument("file", type=Path, nargs="+",
+                                 help="the LV file, or every file of an LV that comes as several (e.g. one per trade)")
+        else:
+            command.add_argument("file", type=Path, help="the LV file")
         command.add_argument("--project", required=True, help="short project ID, e.g. P4")
         if name == "ingest":
             command.add_argument("--texts", type=Path, nargs="+", default=[], metavar="PDF",
@@ -95,10 +99,12 @@ def main(argv: list[str] | None = None, data: Path = DATA) -> None:
         plan_ai = plan.client()
 
     try:
-        lv = read(args.file, args.project)
+        lv, read_notes = read_all(args.file if args.command == "price" else [args.file], args.project)
         notes = add_texts(lv, args.texts) if args.command == "ingest" and args.texts else []
     except (ValueError, OSError) as error:
         raise SystemExit(str(error))
+    for note in read_notes:
+        print(f"step 0: {note}", flush=True)
     plan_job = None
     if plan_ai:  # needs only step 0's items, so it runs beside steps 1 to 4
         print(f"plan check: started in parallel, {args.plan.name} with {plan_ai[1]}, read {plan.RUNS} times", flush=True)

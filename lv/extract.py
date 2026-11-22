@@ -40,6 +40,64 @@ def read(path: Path, project: str) -> LV:
     return reader(path, project)
 
 
+# ponytail: one fixed share. P6's trade files share at most 27% of their items; the same LV in another format or an
+# excerpt shares 100%. A file in between is most likely the same LV with changes, and the tool cannot tell which to keep.
+SAME_LV = 0.5
+
+
+def read_all(paths: list[Path], project: str) -> tuple[LV, list[str]]:
+    """Step 0 for an LV that comes as several files, e.g. one per trade (P6): reads them in name order into one LV.
+    Returns the LV and lines for the run's log. An item is already read when an earlier file has the same item number,
+    unit and quantity (texts are not compared: they differ between formats, as in P1's GAEB XML and GAEB 90 files).
+    - A file whose items are all already read is skipped: the same LV again, or an excerpt of one. Its short and long
+      texts still fill the matching items whose text is empty (one file has quantities, the other the long texts).
+    - A file with SAME_LV or more of them is refused, with both files named.
+    - Otherwise its items are added. When an item number is in more than one file, every number gets its file's place
+      in front, e.g. "F02-1.1.10", so each stays unique and the comments and the dashboard still find it."""
+    lvs: list[LV] = []
+    notes: list[str] = []
+    seen: dict[tuple, LineItem] = {}  # (item number, unit, quantity) -> the item first read with it
+    for path in sorted(paths, key=lambda p: p.name.lower()):
+        lv = read(path, project)
+        keys = [(item.oz, item.unit.lower(), item.quantity) for item in lv.items]
+        known = sorted({seen[key].source_file for key in keys if key in seen})
+        repeated = sum(1 for key in keys if key in seen)
+        if keys and repeated == len(keys):
+            filled = 0
+            for item, key in zip(lv.items, keys):
+                for field in ("short_text", "long_text"):
+                    if not getattr(seen[key], field).strip() and getattr(item, field).strip():
+                        setattr(seen[key], field, getattr(item, field))
+                        filled += 1
+            notes.append(f"{path.name}: skipped, all {len(keys)} of its items are already in {', '.join(known)}"
+                         + (f"; took {filled} missing text{'s' if filled > 1 else ''} from it" if filled else ""))
+            continue
+        if keys and repeated >= SAME_LV * len(keys):
+            raise ValueError(f"{path.name}: {repeated} of its {len(keys)} items are already in {', '.join(known)} "
+                             f"(same item number, unit and quantity). Is it the same LV twice? Leave one of them out.")
+        for item, key in zip(lv.items, keys):
+            item.source_file = path.name
+            seen.setdefault(key, item)
+        lvs.append(lv)
+    if len(lvs) == 1:
+        return lvs[0], notes
+    files_per_number: dict[str, int] = {}
+    for lv in lvs:
+        for oz in {item.oz for item in lv.items}:
+            files_per_number[oz] = files_per_number.get(oz, 0) + 1
+    if any(count > 1 for count in files_per_number.values()):
+        for place, lv in enumerate(lvs, 1):
+            for item in lv.items:
+                item.oz = f"F{place:02}-{item.oz}"
+                item.id = f"{project}/{item.oz}"
+        notes.append(f"item numbers repeat across files: each now starts with its file's place, F01- to "
+                     f"F{len(lvs):02}- (the order of source_file)")
+    return LV(project=project, name=next((lv.name for lv in lvs if lv.name), ""),
+              date=next((lv.date for lv in lvs if lv.date), None),
+              source_file=", ".join(lv.source_file for lv in lvs),
+              items=[item for lv in lvs for item in lv.items]), notes
+
+
 # --- GAEB XML (.X83) -------------------------------------------------------------------------------------------
 
 def read_x83(path: Path, project: str) -> LV:

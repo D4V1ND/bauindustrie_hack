@@ -6,7 +6,7 @@ assistant answers questions about the tender in a chat.
 
 | Part | Where | What it is |
 |---|---|---|
-| Dashboard | `design/lv-mastermind-v2/` | one `index.html`, no build step: upload, result, comments, chat |
+| Dashboard | `design/lv-mastermind-v2/` | one `index.html`, no build step: upload (one or more BoQ files), result, comments, chat |
 | Backend | `lv/` | the pipeline (steps 0–4), the API (`lv/api.py`) and the assistant |
 | Plan check | `vlm/` | reads a construction plan with an OpenAI vision model |
 | Data | `data/` | the dataset, the price library and the results: company data, kept local ([data/README.md](data/README.md)) |
@@ -22,8 +22,8 @@ assistant answers questions about the tender in a chat.
 
 ## Backend API
 
-The dashboard talks to one small HTTP API, `lv/api.py`, built with FastAPI. It uploads an LV (and optionally a
-construction plan), follows the run, reads the result, saves the estimator's comments, adds past LVs to the price
+The dashboard talks to one small HTTP API, `lv/api.py`, built with FastAPI. It uploads an LV (one file or
+several) and optionally a construction plan, follows the run, reads the result, saves the estimator's comments, adds past LVs to the price
 library and chats with the assistant.
 
 ### Architecture
@@ -44,7 +44,7 @@ The dashboard shows `running` the whole time and opens the project only at the e
 ```mermaid
 flowchart TD
     UP["Upload: POST /projects<br/>API saves the files, starts lv price, answers 202"]
-    S0["Step 0: read the LV<br/>deterministic"]
+    S0["Step 0: read the LV, one or more files<br/>deterministic"]
     subgraph seq ["One after another"]
         S1["Step 1: group equal items<br/>deterministic"] --> S2["Step 2: trade (category) and item type (sub-category)<br/>an LLM proposes the item types,<br/>a second LLM gives each item its trade and type"]
         S2 --> S3["Step 3: prices from past LVs<br/>search by words and by meaning finds candidates,<br/>an LLM judges if the texts match,<br/>the price itself is deterministic"]
@@ -115,7 +115,7 @@ The dashboard is static files, served by any web server:
 
 | Method | Path | What it does | Answer |
 |---|---|---|---|
-| `POST` | `/projects` | Upload an LV (and a plan) and start a run | `202` + [Status](#status) |
+| `POST` | `/projects` | Upload an LV, in one or more files (and a plan), and start a run | `202` + [Status](#status) |
 | `GET` | `/projects` | All projects, A to Z, with their key numbers | list of [Project](#project) |
 | `GET` | `/projects/{project}/status` | Is the run done? Its last log lines | [Status](#status) |
 | `GET` | `/projects/{project}` | **The result**: every line item with prediction, risk, comments and plan check | the LV ([docs/result-format.md](docs/result-format.md)) |
@@ -141,18 +141,20 @@ with the reason in `error`. Later runs price from the new project; runs already 
 | Field | Required | What |
 |---|---|---|
 | `project` | yes | short ID: letters, digits and `-`, at most 40 (e.g. `H1`) |
-| `lv` | yes | the new LV: `.x83` (GAEB XML), `.d83`, `.d84`, `.d86` (GAEB 90), `.xlsx` (Excel) or `.pdf` |
+| `lv` | yes | the new LV: `.x83` (GAEB XML), `.d83`, `.d84`, `.d86` (GAEB 90), `.xlsx` (Excel) or `.pdf`. An LV that comes as several files (e.g. one per trade, any mix of formats): send `lv` once per file, see below |
 | `plan` | no | construction plan: `.png`, `.jpg`, `.jpeg` or `.pdf` |
 | `copy_only` | no | `true`: only copy exact matches. No AI, no cost, a few seconds, no plan allowed. For trying out the frontend |
 
 ```js
 const form = new FormData();
 form.append("project", "H1");
-form.append("lv", lvFile);
+form.append("lv", lvFile); // several files of one LV: append "lv" once per file
 form.append("plan", planFile); // optional
 const started = await fetch("http://localhost:8000/projects", { method: "POST", body: form });
 // 202 {"project": "H1", "status": "running", "has_result": false, "error": "", "log": []}
 ```
+
+**Several files of one LV:** see [One LV in several files](#one-lv-in-several-files).
 
 **2. Poll** `GET /projects/H1/status` every 2–3 seconds while `status` is `running`, and show `log` as progress.
 A full run asks AI models, so it takes minutes, not seconds: a few minutes for the 52 items of the Hörsaal H1 with
@@ -185,6 +187,35 @@ await fetch("http://localhost:8000/projects/H1/items/04.0050/comments", {
 
 The answer holds the updated item and the LV's new `risk_summary`, so the view can update without loading the
 whole result again.
+
+### One LV in several files
+
+A tender can come as several files, e.g. one per trade (P6 in the dataset: 27 PDFs). Upload them together: all at
+once in the dashboard's drop zone, the `lv` field once per file, or `lv price a.pdf b.pdf …`. They become **one result
+file**, and each line item keeps the file it came from in `source_file`. The files are read in name order, whatever
+order they were uploaded in. Two items count as **the same** when they have the same item number, unit and quantity.
+Their texts are not compared, because the same LV in two formats words them differently.
+
+| Case | What happens | Example |
+|---|---|---|
+| Different items, each file with its own item numbers | combined, item numbers unchanged | P6's PVC floor (`14.1.…`) and painting (`15.1.…`) |
+| Different items that reuse an item number | combined; every item number gets its file's place in front: `F01-1.1.10`, `F02-1.1.10`, … | 91 numbers in P6, such as `1.1.10` |
+| The same LV twice, in another format | the later file (by name) is skipped, with a line in the log | P1's `.X83` and `.D83`, 159 items each |
+| One file is an excerpt of another | skipped, with a line in the log | P6's stairs file: all 6 of its items are in the shell works file |
+| The same items, one file without long texts, the other with them | the second file is skipped, but its short and long texts fill the items whose text is empty | a GAEB file and its print |
+| Both files have a text for the same item, and they differ | the text of the file read first is kept; the other is not used | |
+| Prices in the files | the kept item keeps its own price; a skipped file's prices are not taken. A run never uses a tender's own prices anyway: every price comes from the price library | |
+| Half or more of a file's items are already read, but not all | the run stops (`failed`) and names both files: most likely the same LV with changes. Leave one out | an older and a revised version |
+| Fewer than half shared | combined, so **the shared items are in the result twice**, each with its `F..-` prefix. The tool cannot tell work done twice from work listed twice | P6's PVC and rubber floor files share 3 preparation items |
+| The same items with other quantities | counted as different items, so they are added, not skipped | a revision that changed most quantities ends up twice |
+| A file with texts but no quantities | its items match nothing, so every item is added twice | |
+| Two files with the same name | API: `422`. Dashboard: a file dropped twice is kept once | |
+| A file that cannot be read | a wrong type (e.g. `.docx`): `422` before the run. A PDF in another layout: the run stops with the reader's message | |
+| The files name different LVs or dates | the first name and the first date found are used | |
+| A construction plan | one per project, checked against the combined LV | |
+| Comments | work on prefixed items too: `POST /projects/P6/items/F02-1.1.10/comments` | |
+
+Details and the reasons: [SPEC.md](SPEC.md), step 0.
 
 ### Shapes
 
@@ -281,17 +312,19 @@ Every error answer is JSON with a `detail` field, e.g. `{"detail": "No project H
 | `401` | `LV_PASSCODE` is set on the server and the passcode is missing or wrong: ask for it, then call again |
 | `404` | unknown project, item, judge call or file; a project without a result yet |
 | `409` | the project is running: a second upload, or a comment during the run. For `POST /library`: the ID is already in the library, is a tender's ID, or is being added. For the assistant: the tab is still answering the last message |
-| `422` | a bad project ID, a wrong file type, a plan together with `copy_only`, a comment with no text, price or doubt, a price of 0 or less. For a malformed request, `detail` is a list of what is wrong |
+| `422` | a bad project ID, a wrong file type, two LV files with the same name, a plan together with `copy_only`, a comment with no text, price or doubt, a price of 0 or less. For a malformed request, `detail` is a list of what is wrong |
 | `502` | the assistant was asked and the Claude API failed (down, or a wrong key) |
 | `503` | the assistant was asked and `ANTHROPIC_API_KEY` is missing |
 
-A run that stops shows `status: "failed"` with the reason in `error`. If only the plan check fails, the LV result
+A run that stops shows `status: "failed"` with the reason in `error`, e.g. two files that are mostly the same LV. If only the plan check fails, the LV result
 of steps 0–4 is already saved, so `has_result` is `true`.
 
 ### Good to know
 
 - **Cost:** each full run pays for AI calls (Claude, Voyage, OpenAI), roughly $1–2 for the Hörsaal H1 with a plan.
-  Use `copy_only` while building the frontend.
+  Use `copy_only` while building the frontend. A cheap real test of several files: P6's three smallest,
+  `LV_05_[FIRMA_096].pdf`, `LV_15_Abdichtung_Aussenwaende.pdf` and `LV_15a_Abdichtung_Bodenplatte_Buero.pdf`
+  (6 items together).
 - **A re-run replaces the result.** Until it finishes, `GET /projects/{project}` returns the previous result.
 - **Runs are tracked in the server's memory.** Restart the server only when no run is going. After a restart, a
   project with a result file shows `done`.
@@ -387,7 +420,7 @@ Everything the API starts can also be run by hand. The full list with examples i
 | Command | What it does |
 |---|---|
 | `python -m lv ingest <priced LV> --project P4 [--texts <print.pdf> …]` | add a past LV with prices to the price library |
-| `python -m lv price <new LV> --project H1 [--plan <plan>] [--copy-only]` | a run: steps 0–4, with `--plan` also the plan check |
+| `python -m lv price <new LV> [<more files of it> …] --project H1 [--plan <plan>] [--copy-only]` | a run: steps 0–4, with `--plan` also the plan check |
 | `python -m lv comment H1 04.0050 --price 48 --text "…"` | save the estimator's comment and recalculate the confidence |
 | `python -m lv index [P1 H1 …]` | build the assistant's search index again |
 | `python -m lv brief H1` | ask the two brief questions for an existing result |
