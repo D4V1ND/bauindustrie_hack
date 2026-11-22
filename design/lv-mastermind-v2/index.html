@@ -1193,8 +1193,9 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .start .st-lib{margin-top:20px;text-align:left}
 .st-lib-lead{margin:8px 0 0;font-size:13px}
 .st-lib .uf-n b{font-weight:600}
-.lib-add{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:16px}
-.lib-add .btn{max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.st-lib .lib-drop{margin-top:16px;padding:22px 16px 18px}
+.lib-drop>b{font-size:16px}
+.lib-add{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-end;margin-top:14px}
 .lib-id{display:inline-flex;align-items:center;gap:6px}
 .lib-id input{width:84px;height:30px;padding:0 8px;border:1px solid var(--line-2);background:transparent;color:var(--ink);font:inherit;font-size:13px}
 .st-up .up-btns{justify-content:center}
@@ -2721,21 +2722,41 @@ function vLib() {
     '<p class="muted st-lib-lead">New projects are priced from these past BoQs. Add one with its prices.</p>' +
     (L && L.length ? '<ul class="uf">' + L.map(row).join('') + '</ul>' : '') +
     failed.map(function (p) { return '<div class="up-err">' + IC.warn + '<span><b>' + esc(p.project) + ':</b> ' + esc(p.error) + '</span></div>'; }).join('') +
+    // one drop zone: the GAEB or Excel file is the priced BoQ, PDFs are optional prints that only add texts
+    '<label class="dropz lib-drop' + (f || texts.length ? ' has' : '') + '" data-drop="lib" data-k="libdrop"><input type="file" class="sr" multiple accept=".x83,.d83,.d84,.d86,.xlsx,.pdf,.X83,.D83,.D84,.D86,.XLSX,.PDF" data-file="lib">' +
+      '<span class="dropz-i">' + IC.down + '</span><b>Add a past BoQ with prices</b>' +
+      '<span class="muted">Only BoQs whose unit prices are filled in. Drag files here or click</span>' +
+      '<span class="dropz-f mono"><span>Priced BoQ · GAEB .D84 / .D86 / .D83 / .X83 · Excel .XLSX</span><span>+ PDF prints (optional) · only add texts, never prices</span></span>' +
+    '</label>' +
+    (f || texts.length ? '<ul class="uf">' + (f ? libFile('lv', f) : '') + texts.map(function (t, i) { return libFile(i, t); }).join('') + '</ul>' : '') +
+    (!f && texts.length ? '<div class="up-err">' + IC.warn + '<span>Add the priced BoQ too (GAEB or Excel). A PDF only adds texts, never prices.</span></div>' : '') +
     '<div class="lib-add">' +
-      '<label class="btn btn-sm"><input type="file" class="sr" accept=".x83,.d83,.d84,.d86,.xlsx,.pdf,.X83,.D83,.D84,.D86,.XLSX,.PDF" data-file="lib">' + IC.doc + (f ? esc(f.name) : 'Choose priced BoQ') + '</label>' +
-      '<label class="btn btn-sm btn-quiet" title="PDF prints of the same BoQ, when the priced file holds prices without texts"><input type="file" class="sr" multiple accept=".pdf,.PDF" data-file="libtexts">' + (texts.length ? texts.length + ' text PDF' + (texts.length > 1 ? 's' : '') : 'Text PDFs (optional)') + '</label>' +
       '<label class="lib-id"><span class="mono faint">ID</span><input data-in="libId" value="' + esc(S.libId || nextLibId()) + '" maxlength="40" aria-label="ID for the past project"></label>' +
       '<button class="btn btn-sm btn-primary" data-act="libAdd"' + (f && !S.libBusy ? '' : ' disabled') + '>' + (S.libBusy ? 'Uploading…' : 'Add to library') + '</button>' +
     '</div>' +
     (S.libErr ? '<div class="up-err">' + IC.warn + '<span>' + esc(S.libErr) + '</span></div>' : '') +
   '</section>';
 }
-function takeLib(kind, files) {
-  var list = Array.prototype.slice.call(files || []);
-  if (kind === 'lib') { S.libLv = list[0] && LV_EXT.test(list[0].name) ? list[0] : null; S.libErr = S.libLv || !list.length ? '' : 'Not supported: ' + list[0].name + '. Allowed: GAEB .X83/.D83/.D84/.D86, Excel .XLSX, PDF.'; }
-  else S.libTexts = list.filter(function (t) { return /\.pdf$/i.test(t.name); });
+function libFile(k, f) {
+  return '<li data-k="lf' + k + '"><span class="uf-i">' + IC.doc + '</span><span class="uf-n">' + esc(f.name) + '</span><span class="uf-t mono">' + (k === 'lv' ? 'Priced BoQ' : 'Text PDF') + '</span><span class="uf-s mono">' + fmt(Math.max(1, f.size / 1024)) + ' KB</span>' +
+    '<button class="ic" data-act="libRemove" data-v="' + k + '" aria-label="Remove ' + esc(f.name) + '">' + IC.x + '</button></li>';
+}
+function takeLib(files) {
+  var texts = (S.libTexts || []).slice(), bad = [];
+  Array.prototype.forEach.call(files || [], function (f) {
+    if (/\.pdf$/i.test(f.name)) { if (!texts.some(function (t) { return t.name === f.name; })) texts.push(f); }
+    else if (LV_EXT.test(f.name)) S.libLv = f;  // one priced BoQ: a second one replaces it
+    else bad.push(f.name);
+  });
+  S.libTexts = texts;
+  S.libErr = bad.length ? 'Not supported: ' + bad.join(', ') + '. Allowed: GAEB .D84/.D86/.D83/.X83 or Excel .XLSX with prices, plus PDF prints.' : '';
   render();
 }
+A.libRemove = function (ds, e) {
+  if (e) e.preventDefault();
+  if (ds.v === 'lv') S.libLv = null; else S.libTexts = S.libTexts.filter(function (_, i) { return String(i) !== ds.v; });
+  S.libErr = ''; render();
+};
 A.libAdd = function () {
   var id = String(S.libId || nextLibId()).trim(), fd = new FormData();
   if (!S.libLv) return;
@@ -2803,7 +2824,7 @@ document.addEventListener('input', function (e) {
 });
 document.addEventListener('change', function (e) {
   var fk = e.target.getAttribute && e.target.getAttribute('data-file');
-  if (fk) { if (/^lib/.test(fk)) takeLib(fk, e.target.files); else takeFiles(e.target.files); e.target.value = ''; return; }
+  if (fk) { if (fk === 'lib') takeLib(e.target.files); else takeFiles(e.target.files); e.target.value = ''; return; }
   var k = e.target.getAttribute && e.target.getAttribute('data-change');
   if (!k) return;
   var v = e.target.value;
@@ -2862,7 +2883,7 @@ try { localStorage.removeItem('lvm-theme'); } catch (e) {}
     var z = e.target.closest && e.target.closest('[data-drop]');
     if (!z && !S.up) return;
     e.preventDefault();
-    if (ev === 'drop' && z) takeFiles(e.dataTransfer.files);
+    if (ev === 'drop' && z) (z.getAttribute('data-drop') === 'lib' ? takeLib : takeFiles)(e.dataTransfer.files);
   });
 });
 DEMO = { D: D, LVX: LVX, TOTAL: TOTAL, PLAN: PLAN, P: P, FLOORS: FLOORS, PLAN_VH: PLAN_VH };
