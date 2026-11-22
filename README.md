@@ -6,7 +6,7 @@ assistant answers questions about the tender in a chat.
 
 | Part | Where | What it is |
 |---|---|---|
-| Dashboard | `design/lv-mastermind-v2/` | one `index.html`, no build step: upload, result, comments, chat |
+| Dashboard | `design/lv-mastermind-v2/` | one `index.html`, no build step: upload (one or more BoQ files), result, comments, chat |
 | Backend | `lv/` | the pipeline (steps 0–4), the API (`lv/api.py`) and the assistant |
 | Plan check | `vlm/` | reads a construction plan with an OpenAI vision model |
 | Data | `data/` | the dataset, the price library and the results: company data, kept local ([data/README.md](data/README.md)) |
@@ -22,8 +22,8 @@ assistant answers questions about the tender in a chat.
 
 ## Backend API
 
-The dashboard talks to one small HTTP API, `lv/api.py`, built with FastAPI. It uploads an LV (and optionally a
-construction plan), follows the run, reads the result, saves the estimator's comments, adds past LVs to the price
+The dashboard talks to one small HTTP API, `lv/api.py`, built with FastAPI. It uploads an LV (one file or
+several) and optionally a construction plan, follows the run, reads the result, saves the estimator's comments, adds past LVs to the price
 library and chats with the assistant.
 
 ### Architecture
@@ -115,7 +115,7 @@ The dashboard is static files, served by any web server:
 
 | Method | Path | What it does | Answer |
 |---|---|---|---|
-| `POST` | `/projects` | Upload an LV (and a plan) and start a run | `202` + [Status](#status) |
+| `POST` | `/projects` | Upload an LV, in one or more files (and a plan), and start a run | `202` + [Status](#status) |
 | `GET` | `/projects` | All projects, A to Z, with their key numbers | list of [Project](#project) |
 | `GET` | `/projects/{project}/status` | Is the run done? Its last log lines | [Status](#status) |
 | `GET` | `/projects/{project}` | **The result**: every line item with prediction, risk, comments and plan check | the LV ([docs/result-format.md](docs/result-format.md)) |
@@ -154,11 +154,7 @@ const started = await fetch("http://localhost:8000/projects", { method: "POST", 
 // 202 {"project": "H1", "status": "running", "has_result": false, "error": "", "log": []}
 ```
 
-**Several files, one result.** The files are read in name order into one `<project>.json`; each item keeps its file
-in `source_file`. A file whose items are all in an earlier one (the same LV in another format, or an excerpt) is
-skipped with a line in the log, but its texts fill the items whose text is empty; one with half or more of them is
-refused. When item numbers repeat across files,
-each gets its file's place in front, e.g. `F02-1.1.10`. Details: [SPEC.md](SPEC.md), step 0.
+**Several files of one LV:** see [One LV in several files](#one-lv-in-several-files).
 
 **2. Poll** `GET /projects/H1/status` every 2–3 seconds while `status` is `running`, and show `log` as progress.
 A full run asks AI models, so it takes minutes, not seconds: a few minutes for the 52 items of the Hörsaal H1 with
@@ -191,6 +187,35 @@ await fetch("http://localhost:8000/projects/H1/items/04.0050/comments", {
 
 The answer holds the updated item and the LV's new `risk_summary`, so the view can update without loading the
 whole result again.
+
+### One LV in several files
+
+A tender can come as several files, e.g. one per trade (P6 in the dataset: 27 PDFs). Upload them together: all at
+once in the dashboard's drop zone, the `lv` field once per file, or `lv price a.pdf b.pdf …`. They become **one result
+file**, and each line item keeps the file it came from in `source_file`. The files are read in name order, whatever
+order they were uploaded in. Two items count as **the same** when they have the same item number, unit and quantity.
+Their texts are not compared, because the same LV in two formats words them differently.
+
+| Case | What happens | Example |
+|---|---|---|
+| Different items, each file with its own item numbers | combined, item numbers unchanged | P6's PVC floor (`14.1.…`) and painting (`15.1.…`) |
+| Different items that reuse an item number | combined; every item number gets its file's place in front: `F01-1.1.10`, `F02-1.1.10`, … | 91 numbers in P6, such as `1.1.10` |
+| The same LV twice, in another format | the later file (by name) is skipped, with a line in the log | P1's `.X83` and `.D83`, 159 items each |
+| One file is an excerpt of another | skipped, with a line in the log | P6's stairs file: all 6 of its items are in the shell works file |
+| The same items, one file without long texts, the other with them | the second file is skipped, but its short and long texts fill the items whose text is empty | a GAEB file and its print |
+| Both files have a text for the same item, and they differ | the text of the file read first is kept; the other is not used | |
+| Prices in the files | the kept item keeps its own price; a skipped file's prices are not taken. A run never uses a tender's own prices anyway: every price comes from the price library | |
+| Half or more of a file's items are already read, but not all | the run stops (`failed`) and names both files: most likely the same LV with changes. Leave one out | an older and a revised version |
+| Fewer than half shared | combined, so **the shared items are in the result twice**, each with its `F..-` prefix. The tool cannot tell work done twice from work listed twice | P6's PVC and rubber floor files share 3 preparation items |
+| The same items with other quantities | counted as different items, so they are added, not skipped | a revision that changed most quantities ends up twice |
+| A file with texts but no quantities | its items match nothing, so every item is added twice | |
+| Two files with the same name | API: `422`. Dashboard: a file dropped twice is kept once | |
+| A file that cannot be read | a wrong type (e.g. `.docx`): `422` before the run. A PDF in another layout: the run stops with the reader's message | |
+| The files name different LVs or dates | the first name and the first date found are used | |
+| A construction plan | one per project, checked against the combined LV | |
+| Comments | work on prefixed items too: `POST /projects/P6/items/F02-1.1.10/comments` | |
+
+Details and the reasons: [SPEC.md](SPEC.md), step 0.
 
 ### Shapes
 
@@ -287,17 +312,19 @@ Every error answer is JSON with a `detail` field, e.g. `{"detail": "No project H
 | `401` | `LV_PASSCODE` is set on the server and the passcode is missing or wrong: ask for it, then call again |
 | `404` | unknown project, item, judge call or file; a project without a result yet |
 | `409` | the project is running: a second upload, or a comment during the run. For `POST /library`: the ID is already in the library, is a tender's ID, or is being added. For the assistant: the tab is still answering the last message |
-| `422` | a bad project ID, a wrong file type, a plan together with `copy_only`, a comment with no text, price or doubt, a price of 0 or less. For a malformed request, `detail` is a list of what is wrong |
+| `422` | a bad project ID, a wrong file type, two LV files with the same name, a plan together with `copy_only`, a comment with no text, price or doubt, a price of 0 or less. For a malformed request, `detail` is a list of what is wrong |
 | `502` | the assistant was asked and the Claude API failed (down, or a wrong key) |
 | `503` | the assistant was asked and `ANTHROPIC_API_KEY` is missing |
 
-A run that stops shows `status: "failed"` with the reason in `error`. If only the plan check fails, the LV result
+A run that stops shows `status: "failed"` with the reason in `error`, e.g. two files that are mostly the same LV. If only the plan check fails, the LV result
 of steps 0–4 is already saved, so `has_result` is `true`.
 
 ### Good to know
 
 - **Cost:** each full run pays for AI calls (Claude, Voyage, OpenAI), roughly $1–2 for the Hörsaal H1 with a plan.
-  Use `copy_only` while building the frontend.
+  Use `copy_only` while building the frontend. A cheap real test of several files: P6's three smallest,
+  `LV_05_[FIRMA_096].pdf`, `LV_15_Abdichtung_Aussenwaende.pdf` and `LV_15a_Abdichtung_Bodenplatte_Buero.pdf`
+  (6 items together).
 - **A re-run replaces the result.** Until it finishes, `GET /projects/{project}` returns the previous result.
 - **Runs are tracked in the server's memory.** Restart the server only when no run is going. After a restart, a
   project with a result file shows `done`.
