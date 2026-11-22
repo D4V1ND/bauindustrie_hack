@@ -1,5 +1,5 @@
 """Web API for the frontend (README.md, "Backend API"): upload an LV and an optional plan, follow the run, read the
-result, the judge log and the plan files, and save the estimator's comments.
+result, the judge log and the plan files, save the estimator's comments, and add past LVs to the price library.
 
 A run is the command line's `lv price` in its own process, so the API adds no second pipeline: its printed lines are
 the run's log. Start it with:  python -m uvicorn lv.api:app --port 8000
@@ -115,10 +115,7 @@ def start(project: str = Form(..., description="short project ID, e.g. H1: lette
         args.append("--copy-only")
     out = DATA / "out"
     out.mkdir(parents=True, exist_ok=True)
-    with open(out / f"{project}.log", "w", encoding="utf-8") as log:
-        runs[project] = subprocess.Popen(
-            [sys.executable, "-u", "-m", "lv", *args], cwd=ROOT, stdout=log, stderr=subprocess.STDOUT,
-            env={**os.environ, "LV_DATA": str(DATA), "PYTHONIOENCODING": "utf-8"})
+    runs[project] = _spawn(args, out / f"{project}.log")
     return _status(project)
 
 
@@ -201,6 +198,74 @@ def add_comment(project: str, item: str, new: NewComment) -> Commented:
         save(lv, DATA / "out")
     index.refresh(lv, DATA, "tender")  # the assistant finds the new comment at once
     return Commented(item=commented, risk_summary=lv.risk_summary)
+
+
+# --- price library: past LVs with prices, added by `lv ingest` -----------------------------------------------------
+
+ingests: dict[str, subprocess.Popen] = {}  # library project -> its latest `lv ingest` started by this server
+
+
+class LibraryProject(BaseModel):
+    project: str
+    status: Literal["running", "done", "failed"]  # done: in the price library
+    name: str = ""
+    date: str | None = None  # the LV's date: how old its prices are
+    items: int | None = None
+    priced: int | None = None  # items with a unit price
+    error: str = ""  # failed: the ingest's last line, e.g. "... has no prices, so it cannot go into the price library."
+    log: list[str] = []  # while running or failed: the ingest's last printed lines
+
+
+@app.post("/library", status_code=202, response_model=LibraryProject)
+def add_to_library(project: str = Form(..., description="short ID for the past project, e.g. P4: letters, digits and '-'"),
+                   lv: UploadFile = File(..., description="the priced LV: GAEB XML (.x83), GAEB 90 (.d83, .d84, .d86), Excel (.xlsx) or PDF (.pdf)"),
+                   texts: list[UploadFile] | None = File(None, description="optional PDF prints of the same LV, when the priced file holds prices without texts")) -> LibraryProject:
+    """Adds a past LV with prices to the price library, so later runs take prices from it. Answers at once; poll
+    GET /library until the project is no longer running. Never replaces a project already in the library."""
+    if not PROJECT.fullmatch(project):
+        raise HTTPException(422, "The project ID may only hold letters, digits and '-', at most 40.")
+    if (DATA / "library" / f"{project}.json").exists():
+        raise HTTPException(409, f"{project} is already in the price library.")
+    if (DATA / "out" / f"{project}.json").exists() or project in runs:  # one assistant index per ID: data/index/<ID>.json
+        raise HTTPException(409, f"{project} is already the ID of a tender. Pick another one.")
+    if (run := ingests.get(project)) is not None and run.poll() is None:
+        raise HTTPException(409, f"{project} is already being added.")
+    folder = DATA / "uploads" / "_library" / project  # "_" is not allowed in an ID: never a tender's upload folder
+    folder.mkdir(parents=True, exist_ok=True)
+    args = ["ingest", str(_store(lv, folder, set(READERS))), "--project", project]
+    pdfs = [_store(pdf, folder, {".pdf"}) for pdf in texts or [] if pdf.filename]
+    if pdfs:
+        args += ["--texts", *map(str, pdfs)]
+    ingests[project] = _spawn(args, folder / "ingest.log")
+    return _library_entry(project)
+
+
+@app.get("/library", response_model=list[LibraryProject])
+def library() -> list[LibraryProject]:
+    """The past projects of the price library, A to Z, with the ones being added or that failed to be added."""
+    names = {path.stem for path in (DATA / "library").glob("*.json")} | set(ingests)
+    return [_library_entry(name) for name in sorted(names)]
+
+
+def _library_entry(project: str) -> LibraryProject:
+    run, path = ingests.get(project), DATA / "library" / f"{project}.json"
+    log = DATA / "uploads" / "_library" / project / "ingest.log"
+    lines = log.read_text(encoding="utf-8", errors="replace").splitlines()[-LOG_LINES:] if run and log.exists() else []
+    if run is not None and run.poll() is None:  # the library file is saved before the assistant index is built
+        return LibraryProject(project=project, status="running", log=lines)
+    if path.exists():
+        lv = load(path)
+        return LibraryProject(project=project, status="done", name=lv.name, date=str(lv.date) if lv.date else None,
+                              items=len(lv.items), priced=sum(1 for item in lv.items if item.unit_price is not None))
+    return LibraryProject(project=project, status="failed", log=lines,
+                          error=next((line for line in reversed(lines) if line.strip()), "The ingest stopped."))
+
+
+def _spawn(args: list[str], log: Path) -> subprocess.Popen:
+    """`python -m lv <args>` in its own process; its printed lines go to the log, without terminal colour codes."""
+    with open(log, "w", encoding="utf-8") as out:
+        return subprocess.Popen([sys.executable, "-u", "-m", "lv", *args], cwd=ROOT, stdout=out, stderr=subprocess.STDOUT,
+                                env={**os.environ, "LV_DATA": str(DATA), "PYTHONIOENCODING": "utf-8", "PYTHON_COLORS": "0"})
 
 
 def _store(upload: UploadFile, folder: Path, suffixes: set[str]) -> Path:
