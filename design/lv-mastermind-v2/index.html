@@ -54,7 +54,7 @@ svg.i{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-widt
 @keyframes wmtwitch{0%,88%,100%{transform:rotate(0)}92%{transform:rotate(-9deg)}96%{transform:rotate(5deg)}}
 .brand-b:hover .wm-n{animation:wmswing .9s var(--spring)}
 @media (prefers-reduced-motion:reduce){.wm-n{animation:none!important}}
-.brand .wm{font-weight:600;letter-spacing:-.03em;font-size:21px}
+.brand .wm{font-weight:600;letter-spacing:-.03em;font-size:26px}
 .crumb{color:var(--ink-3)}
 .crumb a{color:var(--ink-2);text-decoration:none}.crumb a:hover{color:var(--signal)}
 .top-r{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
@@ -523,7 +523,9 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 /* ---------- modal + fx overlay ---------- */
 .scrim{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:20px;background:color-mix(in srgb,var(--paper) 55%,transparent);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:fade .25s ease}
 @keyframes fade{from{opacity:0}}
-.modal{width:min(540px,100%);background:var(--paper);border:1px solid var(--ink);padding:24px 26px;box-shadow:var(--shadow);animation:pop .4s var(--spring)}
+.modal h3,.modal p,.dw-title,.kurz,.lang,.sum-p,.rl span,.why2 p{overflow-wrap:anywhere}
+.modal h3.long{font-size:17px!important;line-height:1.35}
+.modal{width:min(540px,100%);max-height:calc(100vh - 48px);overflow-y:auto;background:var(--paper);border:1px solid var(--ink);padding:24px 26px;box-shadow:var(--shadow);animation:pop .4s var(--spring)}
 @keyframes pop{from{opacity:0;transform:translateY(12px) scale(.97)}}
 .kv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin-top:16px}
 .kv>div{background:var(--card);padding:10px 12px}
@@ -881,8 +883,6 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .cp-h b{display:block;font-weight:500;font-size:13px}
 .cp-h small{display:block;font-size:11.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:300px}
 .cp-h>span:nth-child(2){flex:1;min-width:0}
-.cp-live{display:inline-flex;align-items:center;gap:6px;font:.58rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ok)}
-.cp-live i{width:6px;height:6px;background:var(--ok);animation:pulse 1.6s infinite}
 @keyframes pulse{50%{opacity:.3}}
 .cp-log{flex:1;overflow-y:auto;padding:12px;display:grid;gap:10px;align-content:start;font-size:13px;min-height:120px}
 .cp-m{display:flex;gap:8px;animation:rise .35s var(--ease)}
@@ -2011,7 +2011,7 @@ function vDrawer(d) {
           '</div></section>';
       })() + gwPanel + '</div></div>' +
       '<div class="aiwrap"><div class="aiin"><section class="aichat" role="region" aria-label="Chat with the agent about ' + p.oz + '">' +
-      '<div class="cp-h"><span class="agent-ic">' + IC.star + '</span><span><b>Agent</b><small>' + p.oz + ' · ' + esc(p.kurz) + '</small></span><span class="cp-live"><i></i>online</span><button class="ic" data-act="aiClose" aria-label="Close chat">' + IC.x + '</button></div>' +
+      '<div class="cp-h"><span class="agent-ic">' + IC.star + '</span><span><b>Agent</b><small>' + p.oz + ' · ' + esc(p.kurz) + '</small></span><button class="ic" data-act="aiClose" aria-label="Close chat">' + IC.x + '</button></div>' +
       '<div class="cp-log" data-k="cplog' + p.oz + '">' +
         (chat.length || S.thinking ? '' : '<p class="pempty">Ask me about this item: price, bidder query or what-if.</p><div class="chips">' +
           [['Explain price', 'How did you get this price?'], ['Draft bidder query', 'Draft a bidder query'], ['Material +15%?', 'What if material costs rise 15%?'], ['Ask subcontractor', 'Send a request to a subcontractor']].map(function (c) { return '<button class="qchip" data-act="ask" data-v="' + esc(c[1]) + '">' + c[0] + '</button>'; }).join('') + '</div>') +
@@ -2030,8 +2030,8 @@ function vPreview(d) {
   var lp = lookup(S.preview, d) || {};
   return '<div class="scrim" data-act="closePreview" data-k="pv"><div class="modal" role="dialog" aria-modal="true" aria-label="Item preview" data-stop="1">' +
     '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span class="mono faint">' + esc(lp.oz) + ' · ' + esc(lp.proj) + '</span><button class="ic" data-act="closePreview" aria-label="Close preview">' + IC.x + '</button></div>' +
-    '<h3 style="margin:8px 0 6px;font-size:22px;font-weight:300;letter-spacing:-.03em">' + esc(lp.kurz) + '</h3><p class="muted" style="margin:0;font-size:13px;line-height:1.6">' + esc(lp.lang) + '</p>' +
-    '<div class="kv"><div><div class="mono">Qty</div><b style="font-weight:500">' + qty(lp.menge || 0) + ' ' + esc(lp.einheit) + '</b></div><div><div class="mono">Unit price</div><b style="font-weight:500">' + (lp.ep ? eur(lp.ep) : '–') + '</b></div><div><div class="mono">Total</div><b style="font-weight:500">' + (lp.ep ? eur(lp.ep * lp.menge) : '–') + '</b></div></div>' +
+    '<h3' + (String(lp.kurz || '').length > 90 ? ' class="long"' : '') + ' style="margin:8px 0 6px;font-size:22px;font-weight:300;letter-spacing:-.03em">' + esc(lp.kurz) + '</h3><p class="muted" style="margin:0;font-size:13px;line-height:1.6">' + esc(lp.lang) + '</p>' +
+    '<div class="kv"><div><div class="mono">Qty</div><b style="font-weight:500">' + (lp.menge ? qty(lp.menge) + ' ' + esc(lp.einheit) : '–') + '</b></div><div><div class="mono">Unit price</div><b style="font-weight:500">' + (lp.ep ? eur(lp.ep) : '–') + '</b></div><div><div class="mono">Total</div><b style="font-weight:500">' + (lp.ep && lp.menge ? eur(lp.ep * lp.menge) : '–') + '</b></div></div>' +
     '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:18px"><button class="btn btn-quiet" data-act="closePreview">Close</button>' + (lp.inTable && lp.oz !== S.sel ? '<button class="btn btn-primary" data-act="open" data-oz="' + lp.oz + '">Open item' + IC.arrow + '</button>' : '') + '</div></div></div>';
 }
 
