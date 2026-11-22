@@ -305,6 +305,7 @@ def test_long_texts_are_cut_before_they_go_to_the_judge():
 def test_the_rules_the_judge_gets_are_the_estimators_rules():
     assert "You never state, estimate or guess a\nprice." in JUDGE_RULES
     assert "When in doubt between two verdicts, pick the\nstricter one." in JUDGE_RULES
+    assert "Think and write in English, even though the texts are German." in JUDGE_RULES
     assert set(Judged.model_fields) == {"cand", "verdict", "dimension", "cand_size", "target_size", "difference", "why"}
     assert set(Verdicts.model_fields) == {"id", "judged", "reason"}  # the shape named in the rules' "Output" part
 
