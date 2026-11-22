@@ -881,8 +881,6 @@ textarea.fld{height:auto;padding:8px 10px;resize:vertical;display:block;width:10
 .cp-h b{display:block;font-weight:500;font-size:13px}
 .cp-h small{display:block;font-size:11.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:300px}
 .cp-h>span:nth-child(2){flex:1;min-width:0}
-.cp-live{display:inline-flex;align-items:center;gap:6px;font:.58rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ok)}
-.cp-live i{width:6px;height:6px;background:var(--ok);animation:pulse 1.6s infinite}
 @keyframes pulse{50%{opacity:.3}}
 .cp-log{flex:1;overflow-y:auto;padding:12px;display:grid;gap:10px;align-content:start;font-size:13px;min-height:120px}
 .cp-m{display:flex;gap:8px;animation:rise .35s var(--ease)}
@@ -2011,7 +2009,7 @@ function vDrawer(d) {
           '</div></section>';
       })() + gwPanel + '</div></div>' +
       '<div class="aiwrap"><div class="aiin"><section class="aichat" role="region" aria-label="Chat with the agent about ' + p.oz + '">' +
-      '<div class="cp-h"><span class="agent-ic">' + IC.star + '</span><span><b>Agent</b><small>' + p.oz + ' · ' + esc(p.kurz) + '</small></span><span class="cp-live"><i></i>online</span><button class="ic" data-act="aiClose" aria-label="Close chat">' + IC.x + '</button></div>' +
+      '<div class="cp-h"><span class="agent-ic">' + IC.star + '</span><span><b>Agent</b><small>' + p.oz + ' · ' + esc(p.kurz) + '</small></span><button class="ic" data-act="aiClose" aria-label="Close chat">' + IC.x + '</button></div>' +
       '<div class="cp-log" data-k="cplog' + p.oz + '">' +
         (chat.length || S.thinking ? '' : '<p class="pempty">Ask me about this item: price, bidder query or what-if.</p><div class="chips">' +
           [['Explain price', 'How did you get this price?'], ['Draft bidder query', 'Draft a bidder query'], ['Material +15%?', 'What if material costs rise 15%?'], ['Ask subcontractor', 'Send a request to a subcontractor']].map(function (c) { return '<button class="qchip" data-act="ask" data-v="' + esc(c[1]) + '">' + c[0] + '</button>'; }).join('') + '</div>') +
