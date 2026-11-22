@@ -8,7 +8,8 @@
 __pycache__/
 .pytest_cache/
 
-# LV pipeline: price library, results, saved vectors, API uploads, assistant index, tabs and memory (company data)
+# LV pipeline: raw dataset, price library, results, saved vectors, API uploads, assistant index, tabs and memory (company data)
+data/raw/
 data/library/
 data/out/
 data/embeddings/

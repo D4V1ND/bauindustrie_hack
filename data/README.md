@@ -4,7 +4,8 @@
 - **Original:** Google Drive folder "Challenge A Dataset", shared by the hackathon organisers ("makeathon"):
   https://drive.google.com/drive/folders/1wS4UMVghBL8T5opmZ2UBmBu0kr6U8zIB
 - **Local copy:** `data/raw/Challenge A Dataset/`, 44 files, 25.7 MB, downloaded as a zip on 2026-11-20 and unzipped unchanged.
-- **In git:** the 44 dataset files in `data/raw/Challenge A Dataset/` are committed (the tests read them).
+- **Not in git:** `data/raw/` is gitignored and stays local. Tests that need it skip or fail without it, and the
+  `Dockerfile` copies it in, so build the image from a checkout that has it.
 - **Generated test LVs:** `data/raw/generated/`, written by `python -m lv.samples` from the GAEB files of P1, P2,
   P4 and P5: `<project>_a.xlsx` (columns OZ, Kurztext, Langtext, Menge, Einheit, EP, GP, Art),
   `<project>_b.xlsx` (Pos., Bezeichnung, Menge, ME, Einheitspreis, Gesamtpreis, Positionsart; long text in the row
