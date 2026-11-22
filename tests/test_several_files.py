@@ -42,16 +42,34 @@ def test_the_same_unpriced_lv_in_two_formats_is_read_once():
                      "8209.003_Leistungsverzeichnis_leer.D83"]
 
 
-def test_a_file_with_half_its_items_already_read_is_refused_and_less_is_combined(monkeypatch, tmp_path):
-    def item(oz: str, quantity: float) -> LineItem:
-        return LineItem(id=f"X/{oz}", oz=oz, section=[], short_text=oz, long_text="", quantity=quantity, unit="St")
+def item(oz: str, quantity: float, long_text: str = "") -> LineItem:
+    return LineItem(id=f"X/{oz}", oz=oz, section=[], short_text=oz, long_text=long_text, quantity=quantity, unit="St")
 
-    files = {"a.x83": [item("1", 1), item("2", 2), item("3", 3), item("4", 4)],
-             "b.x83": [item("1", 1), item("2", 2), item("3", 9), item("5", 5)],  # 2 of 4 known: the same LV, changed
-             "c.x83": [item("1", 1), item("6", 6), item("7", 7), item("8", 8)]}  # 1 of 4: another part of the LV
+
+@pytest.fixture
+def files(monkeypatch):
+    """File name -> its items: read_all reads these instead of real files."""
+    found: dict[str, list[LineItem]] = {}
     monkeypatch.setattr(extract, "read", lambda path, project: LV(
-        project=project, name="", date=None, source_file=path.name, items=[i.model_copy() for i in files[path.name]]))
+        project=project, name="", date=None, source_file=path.name, items=[i.model_copy() for i in found[path.name]]))
+    return found
+
+
+def test_a_file_with_half_its_items_already_read_is_refused_and_less_is_combined(files, tmp_path):
+    files |= {"a.x83": [item("1", 1), item("2", 2), item("3", 3), item("4", 4)],
+              "b.x83": [item("1", 1), item("2", 2), item("3", 9), item("5", 5)],  # 2 of 4 known: the same LV, changed
+              "c.x83": [item("1", 1), item("6", 6), item("7", 7), item("8", 8)]}  # 1 of 4: another part of the LV
     with pytest.raises(ValueError, match=r"b\.x83: 2 of its 4 items are already in a\.x83"):
         read_all([tmp_path / "b.x83", tmp_path / "a.x83"], "X")
     lv, _ = read_all([tmp_path / "c.x83", tmp_path / "a.x83"], "X")
     assert [i.oz for i in lv.items] == ["F01-1", "F01-2", "F01-3", "F01-4", "F02-1", "F02-6", "F02-7", "F02-8"]
+
+
+def test_a_skipped_file_still_gives_the_texts_the_kept_items_lack(files, tmp_path):
+    files |= {"lv.d83": [item("01.0010", 5), item("01.0020", 2, "Sockelleiste, Eiche")],  # quantities, one text
+              "lv_print.pdf": [item("01.0010", 5, "Feinsteinzeug 30x60 cm, grau, im Dünnbett"),
+                               item("01.0020", 2, "anderer Text")]}  # the same LV, printed with long texts
+    lv, notes = read_all([tmp_path / "lv_print.pdf", tmp_path / "lv.d83"], "X")
+    assert [i.long_text for i in lv.items] == ["Feinsteinzeug 30x60 cm, grau, im Dünnbett", "Sockelleiste, Eiche"]
+    assert lv.source_file == "lv.d83"  # a text already there is kept
+    assert notes == ["lv_print.pdf: skipped, all 2 of its items are already in lv.d83; took 1 missing text from it"]

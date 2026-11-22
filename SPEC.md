@@ -54,10 +54,14 @@ the name of its file (`source_file`). An item is already read when an earlier fi
 and quantity (texts are not compared: they differ between formats):
 
 - a file whose items are all already read is skipped, with a line in the log: the same LV in another format (P1's
-  `.X83` and `.D83`), or an excerpt of another file (P6's 6 stairs items, also in the shell works file);
+  `.X83` and `.D83`), or an excerpt of another file (P6's 6 stairs items, also in the shell works file). Its short
+  and long texts still fill the matching items whose text is empty: one file can hold the quantities, the other
+  the long texts;
 - a file with half or more already read is refused, naming both files: it is most likely the same LV with changes;
 - otherwise its items are added. When an item number is in more than one file (P6: 91 numbers such as `1.1.10`),
-  every item number gets its file's place in front, `F01-` to `F26-`, so each stays unique.
+  every item number gets its file's place in front, `F01-` to `F26-`, so each stays unique. Items shared by such
+  files are kept in both: P6's PVC and rubber floor files both hold the same 3 preparation items (screed moisture,
+  cracks, cover), and only the estimator knows whether they are the same work or work in other rooms.
 
 | Format | How | `read_by` | Order |
 |---|---|---|---|

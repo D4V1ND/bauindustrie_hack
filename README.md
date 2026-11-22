@@ -156,7 +156,8 @@ const started = await fetch("http://localhost:8000/projects", { method: "POST", 
 
 **Several files, one result.** The files are read in name order into one `<project>.json`; each item keeps its file
 in `source_file`. A file whose items are all in an earlier one (the same LV in another format, or an excerpt) is
-skipped with a line in the log; one with half or more of them is refused. When item numbers repeat across files,
+skipped with a line in the log, but its texts fill the items whose text is empty; one with half or more of them is
+refused. When item numbers repeat across files,
 each gets its file's place in front, e.g. `F02-1.1.10`. Details: [SPEC.md](SPEC.md), step 0.
 
 **2. Poll** `GET /projects/H1/status` every 2–3 seconds while `status` is `running`, and show `log` as progress.

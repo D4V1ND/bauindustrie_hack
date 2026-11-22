@@ -49,27 +49,35 @@ def read_all(paths: list[Path], project: str) -> tuple[LV, list[str]]:
     """Step 0 for an LV that comes as several files, e.g. one per trade (P6): reads them in name order into one LV.
     Returns the LV and lines for the run's log. An item is already read when an earlier file has the same item number,
     unit and quantity (texts are not compared: they differ between formats, as in P1's GAEB XML and GAEB 90 files).
-    - A file whose items are all already read adds nothing and is skipped: the same LV again, or an excerpt of one.
+    - A file whose items are all already read is skipped: the same LV again, or an excerpt of one. Its short and long
+      texts still fill the matching items whose text is empty (one file has quantities, the other the long texts).
     - A file with SAME_LV or more of them is refused, with both files named.
     - Otherwise its items are added. When an item number is in more than one file, every number gets its file's place
       in front, e.g. "F02-1.1.10", so each stays unique and the comments and the dashboard still find it."""
     lvs: list[LV] = []
     notes: list[str] = []
-    seen: dict[tuple, str] = {}  # (item number, unit, quantity) -> the file it was first read from
+    seen: dict[tuple, LineItem] = {}  # (item number, unit, quantity) -> the item first read with it
     for path in sorted(paths, key=lambda p: p.name.lower()):
         lv = read(path, project)
         keys = [(item.oz, item.unit.lower(), item.quantity) for item in lv.items]
-        known = sorted({seen[key] for key in keys if key in seen})
+        known = sorted({seen[key].source_file for key in keys if key in seen})
         repeated = sum(1 for key in keys if key in seen)
         if keys and repeated == len(keys):
-            notes.append(f"{path.name}: skipped, all {len(keys)} of its items are already in {', '.join(known)}")
+            filled = 0
+            for item, key in zip(lv.items, keys):
+                for field in ("short_text", "long_text"):
+                    if not getattr(seen[key], field).strip() and getattr(item, field).strip():
+                        setattr(seen[key], field, getattr(item, field))
+                        filled += 1
+            notes.append(f"{path.name}: skipped, all {len(keys)} of its items are already in {', '.join(known)}"
+                         + (f"; took {filled} missing text{'s' if filled > 1 else ''} from it" if filled else ""))
             continue
         if keys and repeated >= SAME_LV * len(keys):
             raise ValueError(f"{path.name}: {repeated} of its {len(keys)} items are already in {', '.join(known)} "
                              f"(same item number, unit and quantity). Is it the same LV twice? Leave one of them out.")
         for item, key in zip(lv.items, keys):
             item.source_file = path.name
-            seen.setdefault(key, path.name)
+            seen.setdefault(key, item)
         lvs.append(lv)
     if len(lvs) == 1:
         return lvs[0], notes
